@@ -17,7 +17,6 @@ with warnings.catch_warnings():
 def coxph(values,
           isdead,
           nbdays,
-          f_name='test',
           isfactor=False):
     """
     input:

@@ -30,8 +30,36 @@ TSV_TEST = 'rna_test_dummy.tsv'
 SURVIVAL_TSV_TEST = 'survival_test_dummy.tsv'
 # name of the data type of the test set
 DATA_TYPE_TEST = 'RNA'
+PATH_MODEL = './simdeep/data/models/'
 ########################################################
 
+
+##################### Autoencoder Variable ##############
+# Dimensions of the intermediate layers before and after the middle hidden layer
+# if LEVEL_DIMS == [500, 250] then there will be two hidden layers with 500 and 250 nodes
+# before and after the hidden middle layer (5 hidden layers)
+# if LEVEL_DIMS = [], then the autoencoder will have only one hidden layer
+LEVEL_DIMS = [500]
+# Number of nodes in the middle hidden layer
+# (i.e. the new dimensions of the transformed data)
+NEW_DIM = 100
+# Percentage of edges being dropout at each training iteration (None for no dropout)
+DROPOUT = 0.5
+# L2 Regularization constant on the node activity
+ACT_REG = 0.0001
+# L1 Regularization constant on the weight
+W_REG = 0.001
+# Fraction of the dataset to be used as test set when building the autoencoder
+DATA_SPLIT = 0.2
+# activation function
+ACTIVATION = 'tanh'
+# Number of epoch
+NB_EPOCH = 10
+# Loss function to minimize
+LOSS = 'binary_crossentropy'
+# Optimizer (sgd for Stochastic Gradient Descent)
+OPTIMIZER = 'sgd'
+########################################################
 
 ################## CLASSIFIER ##########################
 # Variables used to perform the supervized classification procedure

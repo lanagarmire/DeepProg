@@ -20,22 +20,15 @@ from simdeep.extract_data import LoadData
 
 from time import time
 
-
-############ Variable ################
-LEVEL_DIMS = [500, 500, 500]
-LEVEL_DNN = [500]
-NEW_DIM = 100
-DROPOUT = 0.5
-ACT_REG = 0.0001
-W_REG = 0.001
-DATA_SPLIT = 0.2
-ACTIVATION = 'tanh' # The activation function of the autoencoder
-
-NB_EPOCH = 10
-LOSS = 'binary_crossentropy'
-# LOSS = 'categorical_crossentropy'
-OPTIMIZER = 'sgd'
-######################################
+from simdeep.config import NB_EPOCH
+from simdeep.config import LEVEL_DIMS
+from simdeep.config import NEW_DIM
+from simdeep.config import LOSS
+from simdeep.config import OPTIMIZER
+from simdeep.config import ACT_REG
+from simdeep.config import W_REG
+from simdeep.config import DROPOUT
+from simdeep.config import ACTIVATION
 
 
 def main():
@@ -67,7 +60,6 @@ class DeepBase():
             f_matrix_test_out=None
 
             level_dims = [500]
-            level_dnn = [500]
             new_dim = 100
             dropout = 0.5
             act_reg = 0.0001
@@ -212,6 +204,12 @@ class DeepBase():
                 break
 
         self.encoder = Model(inp, encoder)
+
+    def save_model(self):
+        """
+        Save a keras model in the self.path_model directory
+        """
+
 
 
 if __name__ == "__main__":
