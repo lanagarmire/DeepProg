@@ -3,7 +3,7 @@ import sys, os
 
 VERSION = '0.0.1'
 
-setup(name='garmire_survivalDL',
+setup(name='garmire_simdeep',
       version=VERSION,
       description="Deep-Learning framework for multi-omic and survival data integration",
       long_description="""""",
@@ -16,5 +16,9 @@ setup(name='garmire_survivalDL',
       packages=find_packages(exclude=['examples', 'tests']),
       include_package_data=True,
       zip_safe=False,
-      install_requires=[],
+      install_requires=[
+          'numpy',
+          'scipy',
+          'scikit-learn>=0.18',
+      ],
       )
