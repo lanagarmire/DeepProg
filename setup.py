@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 import sys, os
 
-VERSION = '0.0.1'
+VERSION = '0.0.0'
 
 setup(name='garmire_simdeep',
       version=VERSION,
@@ -20,5 +20,8 @@ setup(name='garmire_simdeep',
           'numpy',
           'scipy',
           'scikit-learn>=0.18',
+          'rpy2',
+          'theano',
+          'keras'
       ],
       )
