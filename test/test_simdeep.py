@@ -59,6 +59,17 @@ class TestPackage(unittest.TestCase):
             x=Xmat,
             y=Ymat)
 
+    def test_5_simdeep_load_full_model(self):
+        """
+        test if simdeep can load the full model
+        """
+        from simdeep.simdeep_analysis import SimDeep
+
+        simDeep = SimDeep(path_model='./data/models/')
+        simDeep.load_encoder('encoder_seed_s0_full.h5')
+
+        self.assertTrue(not isinstance(simDeep.encoder, type(None)))
+
 
 if __name__ == "__main__":
     unittest.main()

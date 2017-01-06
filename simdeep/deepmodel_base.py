@@ -29,6 +29,9 @@ from simdeep.config import ACT_REG
 from simdeep.config import W_REG
 from simdeep.config import DROPOUT
 from simdeep.config import ACTIVATION
+from simdeep.config import PATH_MODEL
+
+from os.path import isfile
 
 
 def main():
@@ -50,25 +53,22 @@ class DeepBase():
                  act_reg=ACT_REG,
                  w_reg=W_REG,
                  dropout=DROPOUT,
-                 activation=ACTIVATION):
+                 activation=ACTIVATION,
+                 path_model=PATH_MODEL):
         """
         ### DEFAULT PARAMETER ###:
             dataset=None      ExtractData instance (load the dataset),
-            f_matrix_train=None
-            f_matrix_test=None
-            f_matrix_train_out=None
-            f_matrix_test_out=None
-
             level_dims = [500]
             new_dim = 100
             dropout = 0.5
             act_reg = 0.0001
             w_reg = 0.001
             data_split = 0.2
-            activation_enc = 'tanh'
+            activation = 'tanh'
             nb_epoch = 10
             loss = 'binary_crossentropy'
             optimizer = 'sgd'
+            path_model where to save/load the models
         """
         self.dataset = dataset
 
@@ -80,7 +80,7 @@ class DeepBase():
         self.loss = loss
         self.optimizer = optimizer
         self.dropout = dropout
-
+        self.path_model = path_model
         self.activation = activation
 
         self.W_l1_constant = w_reg
@@ -205,11 +205,26 @@ class DeepBase():
 
         self.encoder = Model(inp, encoder)
 
-    def save_model(self):
+    def save_encoder(self, fname='encoder.h5'):
         """
         Save a keras model in the self.path_model directory
+        :fname: str    the name of the file to save the model
         """
+        self.encoder.save(self.path_model + fname)
+        print 'model saved!'
 
+    def load_encoder(self, fname='encoder.h5'):
+        """
+        Load a keras model from the self.path_model directory
+        :fname: str    the name of the file to load
+        """
+        if not isfile(self.path_model + fname):
+            print 'no encoder model found! in '
+            return
+        print 'loading encoder...'
+        t = time()
+        self.encoder = load_model(self.path_model + fname)
+        print 'model loaded in {0} s!'.format(time() - t)
 
 
 if __name__ == "__main__":

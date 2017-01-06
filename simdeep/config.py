@@ -30,9 +30,9 @@ TSV_TEST = 'rna_test_dummy.tsv'
 SURVIVAL_TSV_TEST = 'survival_test_dummy.tsv'
 # name of the data type of the test set
 DATA_TYPE_TEST = 'RNA'
+# Path where to save load the Keras models
 PATH_MODEL = './simdeep/data/models/'
 ########################################################
-
 
 ##################### Autoencoder Variable ##############
 # Dimensions of the intermediate layers before and after the middle hidden layer
