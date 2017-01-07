@@ -31,6 +31,7 @@ pip install -r requirements.txt --user
 
 ## usage
 * test if simdeep is functional (all the software are correctly installed):
+
 ```bash
   python test/test_ssrge.py -v # OR
   nosetests test -v # Improved version of python unit testing
@@ -109,7 +110,7 @@ gzip -d *.gz
 
 * Then it is very easy to build a new model or to load the already compiled model:
 
-```
+```python
 from simdeep.simdeep_analysis import SimDeep
 from simdeep.extract_data import LoadData # class to load and define the datasets
 from collections import OrderedDict
