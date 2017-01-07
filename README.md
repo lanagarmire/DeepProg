@@ -1,4 +1,4 @@
-# Survival Integration of Multi-ocs using Deep-Learning (SimDeep)
+# Survival Integration of Multi-omics using Deep-Learning (SimDeep)
 
 This package allows to combine multi-omics data together with survival. Using autoencoder, the pipeline creates new features and identify those linked with survival, using CoxPH regression. Then, using K-means it clusters the samples. Finally, using the labels inferred, the pipeline create a supervised model to label samples from a new omic dataset. The original study of this package is "Deep Learning based multi-omics integration robustly predicts survivals in liver cancer" from K. Chaudhary, O. Poirion, Lianqun Liu, and L. X. Garmire.
 The omic data used in the original study are RNA-Seq, MiR and Methylation. However, this approach can beextended to any combination of omic data.
@@ -24,8 +24,8 @@ install.package("survival")
 ## installation (local)
 
 ```bash
-git clone https://github.com/lanagarmire/simdeep.git
-cd simdeep
+git clone https://github.com/lanagarmire/SimDeep.git
+cd SimDeep
 pip install -r requirements.txt --user
 ```
 
