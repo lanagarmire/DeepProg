@@ -125,8 +125,13 @@ class DeepBase():
 
         X_shape = self.matrix_train.shape
 
+        nb_hidden = 0
+
         for dim in self.level_dims:
-            self._add_dense_layer(dim, self.activation)
+            nb_hidden += 1
+            self._add_dense_layer(dim,
+                                  self.activation,
+                                  name='hidden layer nb:{0}'.format(nb_hidden))
 
             if self.dropout:
                 self.model.add(Dropout(self.dropout))
@@ -139,12 +144,15 @@ class DeepBase():
             self.model.add(Dropout(self.dropout))
 
         for dim in reversed(self.level_dims):
-            self._add_dense_layer(dim, self.activation)
+            nb_hidden += 1
+            self._add_dense_layer(dim,
+                                  self.activation,
+                                  name='hidden layer nb:{0}'.format(nb_hidden))
 
             if self.dropout:
                 self.model.add(Dropout(self.dropout))
 
-        self._add_dense_layer(X_shape[1], self.activation)
+        self._add_dense_layer(X_shape[1], self.activation, name='final layer')
 
         print 'model created in {0}s !'.format(time() - t)
 
@@ -218,10 +226,8 @@ class DeepBase():
         Load a keras model from the self.path_model directory
         :fname: str    the name of the file to load
         """
-        if not isfile(self.path_model + fname):
-            print 'no encoder model found! in '
-            return
-        print 'loading encoder...'
+        assert(isfile(self.path_model + fname))
+
         t = time()
         self.encoder = load_model(self.path_model + fname)
         print 'model loaded in {0} s!'.format(time() - t)
