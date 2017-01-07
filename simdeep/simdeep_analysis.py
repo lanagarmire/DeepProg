@@ -176,7 +176,7 @@ class SimDeep(DeepBase):
         clustering = KMeans(n_clusters=self.nb_clusters, n_init=100)
 
         if not self.activities.any():
-            raise Exception('No components linked to survial!'\
+            raise Exception('No components linked to survival!'\
                             ' cannot perform clustering')
 
         clustering.fit(self.activities)
@@ -189,6 +189,10 @@ class SimDeep(DeepBase):
             print 'cluster label: {0}\t number of samples:{1}'.format(key, value)
 
         print '\n'
+
+        nbdays, isdead = self.dataset.survival.T.tolist()
+        pvalue = coxph(self.labels, isdead, nbdays)
+        print 'Cox-PH p-value (Log-Rank) for the cluster labels: {0}'.format(pvalue)
 
         return self.labels
 

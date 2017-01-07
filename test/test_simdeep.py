@@ -65,8 +65,11 @@ class TestPackage(unittest.TestCase):
         """
         from simdeep.simdeep_analysis import SimDeep
 
-        simDeep = SimDeep(path_model='./data/models/')
-        simDeep.load_encoder('encoder_seed_s0_full.h5')
+        simDeep = SimDeep()
+
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            simDeep.load_encoder('encoder_seed_s0_full.h5')
 
         self.assertTrue(not isinstance(simDeep.encoder, type(None)))
 
