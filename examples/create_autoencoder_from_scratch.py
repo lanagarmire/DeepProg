@@ -34,6 +34,7 @@ def main():
     # survival file to be used
     survival_file = 'survival_dummy.tsv'
 
+    # class to load and prepare the data
     dataset = LoadData(path_data=path_data,
                        training_tsv=tsv_files,
                        survival_tsv=survival_file)

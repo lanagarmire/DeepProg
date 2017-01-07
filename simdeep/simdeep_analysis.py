@@ -29,9 +29,6 @@ def main():
     sim_deep = SimDeep()
     sim_deep.load_training_dataset()
     sim_deep.fit()
-    # sim_deep.load_encoder('encoder_seed_s0_full.h5')
-    # sim_deep.look_for_survival_nodes()
-    # sim_deep.predict_labels()
     sim_deep.load_test_dataset()
     sim_deep.predict_labels_on_test_dataset()
 
