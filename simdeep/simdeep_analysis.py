@@ -3,6 +3,8 @@ SimDeep main class
 """
 
 from sklearn.cluster import KMeans
+from sklearn.mixture import GaussianMixture
+from sklearn.mixture import BayesianGaussianMixture
 from sklearn.model_selection import cross_val_score
 
 from simdeep.deepmodel_base import DeepBase
@@ -85,10 +87,11 @@ class SimDeep(DeepBase):
     def predict_labels_on_test_dataset(
             self,
             return_proba=False,
-            mad_scale=True,
-            robust_scale=True,
+            mad_scale=False,
+            robust_scale=False,
             min_max_scale=False,
-            unit_norm=False):
+            unit_norm=False,
+            rank_scale=True):
         """
         predict labels of the test set
 
@@ -111,7 +114,9 @@ class SimDeep(DeepBase):
             mad_scale=mad_scale,
             robust_scale=robust_scale,
             min_max_scale=min_max_scale,
-            unit_norm=unit_norm)
+            unit_norm=unit_norm,
+            rank_scale=rank_scale,
+        )
 
         data_type = self.dataset.data_type_test
         nbdays, isdead = self.dataset.survival_test.T.tolist()
@@ -129,6 +134,40 @@ class SimDeep(DeepBase):
         print 'Cox-PH p-value (Log-Rank) for inferred labels: {0}'.format(pvalue)
 
         labels = self.test_labels_proba if return_proba else self.test_labels
+
+        return labels, pvalue
+
+    def predict_labels_on_test_dataset_v2(self):
+        """
+        """
+        test_matrix = self.dataset.matrix_test
+        ref_matrix = self.dataset.matrix_ref
+
+        data_type = self.dataset.data_type_test
+        nbdays, isdead = self.dataset.survival_test.T.tolist()
+        nbdays_ref, isdead_ref = self.dataset.survival.T.tolist()
+
+        activities = self.encoder.predict(test_matrix).T[self.valid_node_ids].T
+        activities_ref = self.encoder.predict(ref_matrix).T[self.valid_node_ids].T
+
+        ref_labels = self.clustering.predict(activities_ref)
+
+        self.test_labels = self.clustering.predict(activities)
+        self.test_labels_proba = self.clustering.predict_proba(activities)
+
+        print '#### report of assigned cluster:'
+        for key, value in Counter(self.test_labels).items():
+            print 'class: {0}, number of samples :{1}'.format(key, value)
+
+        pvalue = coxph(self.test_labels, isdead, nbdays)
+
+        print 'Cox-PH p-value (Log-Rank) for inferred labels: {0}'.format(pvalue)
+
+        pvalue_ref = coxph(ref_labels, isdead_ref, nbdays_ref)
+
+        print 'Cox-PH p-value (Log-Rank) for ref labels: {0}'.format(pvalue_ref)
+
+        labels = self.test_labels
 
         return labels, pvalue
 
@@ -173,14 +212,20 @@ class SimDeep(DeepBase):
         using K-Means algorithm on the node activities,
         using only nodes linked to survival
         """
-        clustering = KMeans(n_clusters=self.nb_clusters, n_init=100)
+        print 'performing clustering...'
+        # self.clustering = KMeans(n_clusters=self.nb_clusters, n_init=100)
+        self.clustering = GaussianMixture(
+            n_components=self.nb_clusters,
+            covariance_type='diag',
+            max_iter=10000,
+            n_init=50)
 
         if not self.activities.any():
             raise Exception('No components linked to survival!'\
                             ' cannot perform clustering')
 
-        clustering.fit(self.activities)
-        self.labels = clustering.labels_
+        self.clustering.fit(self.activities)
+        self.labels = self.clustering.predict(self.activities)
 
         self._order_labels_according_to_survival()
 

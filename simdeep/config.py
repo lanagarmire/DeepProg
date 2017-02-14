@@ -18,27 +18,25 @@ PVALUE_THRESHOLD = 0.05 # Threshold for survival significance to set a node as v
 
 #################### Paths to data file ################
 # path to the folder containing the data
-PATH_DATA = PATH_THIS_FILE + "/../examples/data/"
+PATH_DATA = "/home/opoirion/data/survival_analysis_multiple//"
 
 # name of the tsv file containing the survival data of the training set
-SURVIVAL_TSV = 'survival_dummy.tsv'
+SURVIVAL_TSV = 'survival_event_liri.txt'
 
 # dict('data type', 'name of the tsv file which are inside PATH_DATA')
 # These data will be stacked together to build the autoencoder
 TRAINING_TSV = OrderedDict([
-    ('MIR', 'mir_dummy.tsv'),
-    ('METH', 'meth_dummy.tsv'),
-    ('RNA', 'rna_dummy.tsv'),
+    ('RNA', 'rna_validation_liri.tsv'),
 ])
 
 # name of the file containing the test dataset
-TSV_TEST = 'rna_test_dummy.tsv'
+TSV_TEST = 'rna_validation_gse.tsv'
 # name of the tsv file containing the survival data of the test set
-SURVIVAL_TSV_TEST = 'survival_test_dummy.tsv'
+SURVIVAL_TSV_TEST = 'survival_event_gse.txt'
 # name of the data type of the test set
 DATA_TYPE_TEST = 'RNA'
-# Path where to save load the Keras models
-PATH_MODEL = PATH_THIS_FILE + '/../data/models/'
+# Path where to save and load the Keras models
+PATH_MODEL = PATH_DATA + '/models/'
 ########################################################
 
 ##################### Autoencoder Variable ##############
@@ -61,7 +59,7 @@ DATA_SPLIT = 0.2
 # activation function
 ACTIVATION = 'tanh'
 # Number of epoch
-NB_EPOCH = 10
+NB_EPOCH = 20
 # Loss function to minimize
 LOSS = 'binary_crossentropy'
 # Optimizer (sgd for Stochastic Gradient Descent)

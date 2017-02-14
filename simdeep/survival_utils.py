@@ -6,6 +6,8 @@ import  numpy as np
 
 from scipy.stats import rankdata
 
+from sklearn.metrics import pairwise_distances
+
 
 class MadScaler():
     def __init__(self):
@@ -20,6 +22,37 @@ class MadScaler():
             X[i] = (X[i] - med) / mad
 
         return np.matrix(X)
+
+class RankNorm():
+    def __init__(self):
+        pass
+    def fit_transform(self, X):
+        """ """
+        X = np.asarray(X)
+        shape = map(float, X.shape)
+
+        for i in xrange(len(X)):
+            X[i] = rankdata(X[i]) / shape[1]
+
+        return np.matrix(X)
+
+class CorrelationReducer():
+    def __init__(self):
+        self.dataset = None
+
+    def fit(self, dataset):
+        """ """
+        self.dataset = dataset
+
+    def transform(self, dataset):
+        """ """
+        return 1.0 - pairwise_distances(dataset,
+                                        self.dataset,
+                                        'correlation')
+    def fit_transform(self, dataset):
+        """ """
+        self.fit(dataset)
+        return self.transform(dataset)
 
 
 def load_survival_file(f_name, path_data=PATH_DATA, sep='\t'):

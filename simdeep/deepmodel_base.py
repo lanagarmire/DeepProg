@@ -114,6 +114,13 @@ class DeepBase():
         self.dataset.load_matrix_test()
         self.dataset.load_survival_test()
 
+    def load_test_dataset_v2(self):
+        """
+        load test dataset and test surival
+        """
+        self.dataset.load_matrix_test_v2()
+        self.dataset.load_survival_test()
+
     def create_autoencoder(self):
         """
         Instantiate the  autoencoder architecture

@@ -13,6 +13,8 @@ from simdeep.config import PATH_DATA
 from simdeep.survival_utils import load_data_from_tsv
 from simdeep.survival_utils import load_survival_file
 from simdeep.survival_utils import MadScaler
+from simdeep.survival_utils import RankNorm
+from simdeep.survival_utils import CorrelationReducer
 
 from time import time
 
@@ -27,7 +29,7 @@ def main():
     load_data.load_array()
     load_data.load_survival()
 
-    load_data.load_matrix_test()
+    load_data.load_matrix_test_v2()
     load_data.load_survival_test()
 
 class LoadData():
@@ -75,11 +77,13 @@ class LoadData():
         self.features_test = None
         self.survival_test = None
         self.sample_ids_test = None
+        self.do_feature_reduction = None
 
         self.normalizer = Normalizer()
         self.mad_scaler = MadScaler()
         self.robust_scaler = RobustScaler()
         self.min_max_scaler = MinMaxScaler()
+        self.dim_reducer = CorrelationReducer()
 
     def load_matrix_test(self):
         """ """
@@ -102,8 +106,40 @@ class LoadData():
         self.sample_ids_test = sample_ids
         self.features_test = common_features
 
-    def load_survival_test(self):
+    def load_matrix_test_v2(self):
         """ """
+        sample_ids, feature_ids, matrix = load_data_from_tsv(self.tsv_test,
+                                                             path_data=self.path_data)
+
+        feature_ids_ref = self.feature_array[self.data_type_test]
+        matrix_ref = self.matrix_array[self.data_type_test]
+
+        common_features = set(feature_ids).intersection(feature_ids_ref)
+
+        feature_ids_dict = {feat: i for i,feat in enumerate(feature_ids)}
+        feature_ids_ref_dict = {feat: i for i,feat in enumerate(feature_ids_ref)}
+
+        feature_index = [feature_ids_dict[feature] for feature in common_features]
+        feature_ref_index = [feature_ids_ref_dict[feature] for feature in common_features]
+
+        matrix = np.nan_to_num(matrix.T[feature_index].T)
+        matrix_ref = np.nan_to_num(matrix_ref.T[feature_ref_index].T)
+
+        matrix_ref, matrix = self.transform_matrices(
+            matrix_ref,
+            matrix,
+            mad_scale=False,
+            robust_scale=False,
+            min_max_scale=False,
+            unit_norm=False,
+            rank_scale=True,
+            feature_reduction=True
+        )
+
+        self.matrix_test = matrix
+        self.matrix_ref = matrix_ref
+
+        self.sample_ids_test = sample_ids
 
     def load_array(self):
         """ """
@@ -167,19 +203,53 @@ class LoadData():
 
         self.survival_test = np.asmatrix(matrix)
 
-    def normalize(self):
+    def normalize(self,
+                  do_norm_scale=False,
+                  do_rank_scale=True,
+                  do_dim_reduction=True):
         """ """
         print 'normalizing...'
-        self.matrix_stacked = self.normalizer.fit_transform(
-            self.matrix_stacked)
+
+        if do_rank_scale:
+            self.matrix_stacked = RankNorm().fit_transform(
+                self.matrix_stacked)
+
+        if do_dim_reduction:
+            print 'dim reduction...'
+            self.matrix_stacked = self.dim_reducer.fit_transform(
+                self.matrix_stacked)
+            self.do_feature_reduction = True
+
+            if do_rank_scale:
+                self.matrix_stacked = RankNorm().fit_transform(
+                    self.matrix_stacked)
+
+        if do_norm_scale:
+            self.matrix_stacked = self.normalizer.fit_transform(
+                self.matrix_stacked)
 
     def transform_matrices(self, matrix_ref, matrix,
-                           mad_scale=True,
-                           robust_scale=True,
+                           mad_scale=False,
+                           robust_scale=False,
                            min_max_scale=False,
-                           unit_norm=False):
+                           rank_scale=True,
+                           unit_norm=False,
+                           feature_reduction=True):
         """ """
         print 'Scaling/Normalising dataset...'
+        if rank_scale:
+            matrix_ref = RankNorm().fit_transform(matrix_ref)
+            matrix = RankNorm().fit_transform(matrix)
+
+        if feature_reduction:
+            reducer = CorrelationReducer()
+            matrix_ref = reducer.fit_transform(matrix_ref)
+            matrix = reducer.transform(matrix)
+
+            if rank_scale:
+                matrix_ref = RankNorm().fit_transform(matrix_ref)
+                matrix = RankNorm().fit_transform(matrix)
+
         if mad_scale:
             matrix_ref = self.mad_scaler.fit_transform(matrix_ref.T).T
             matrix = self.mad_scaler.fit_transform(matrix.T).T
