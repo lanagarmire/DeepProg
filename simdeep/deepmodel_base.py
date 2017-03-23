@@ -30,6 +30,7 @@ from simdeep.config import W_REG
 from simdeep.config import DROPOUT
 from simdeep.config import ACTIVATION
 from simdeep.config import PATH_MODEL
+from simdeep.config import DATA_SPLIT
 
 from os.path import isfile
 
@@ -53,6 +54,7 @@ class DeepBase():
                  act_reg=ACT_REG,
                  w_reg=W_REG,
                  dropout=DROPOUT,
+                 data_split=DATA_SPLIT,
                  activation=ACTIVATION,
                  path_model=PATH_MODEL):
         """
@@ -82,6 +84,7 @@ class DeepBase():
         self.dropout = dropout
         self.path_model = path_model
         self.activation = activation
+        self.data_split = data_split
 
         self.W_l1_constant = w_reg
         self.A_l2_constant = act_reg
@@ -200,6 +203,7 @@ class DeepBase():
                        y=self.matrix_train,
                        verbose=2,
                        nb_epoch=self.nb_epoch,
+                       validation_split=self.data_split,
                        shuffle=True)
         print 'fitting done!'
 

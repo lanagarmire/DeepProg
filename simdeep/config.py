@@ -13,6 +13,7 @@ PATH_THIS_FILE = pathsplit(abspath(__file__))[0]
 
 #################### SimDeep variable ##################
 NB_CLUSTERS = 2 # Number of clusters
+CLUSTER_ARRAY = [2, 3, 4, 5, 6, 7]
 PVALUE_THRESHOLD = 0.05 # Threshold for survival significance to set a node as valid
 ########################################################
 
@@ -21,18 +22,18 @@ PVALUE_THRESHOLD = 0.05 # Threshold for survival significance to set a node as v
 PATH_DATA = "/home/opoirion/data/survival_analysis_multiple//"
 
 # name of the tsv file containing the survival data of the training set
-SURVIVAL_TSV = 'survival_event_liri.txt'
+SURVIVAL_TSV = 'survival_event_360.txt'
 
 # dict('data type', 'name of the tsv file which are inside PATH_DATA')
 # These data will be stacked together to build the autoencoder
 TRAINING_TSV = OrderedDict([
-    ('RNA', 'rna_validation_liri.tsv'),
+    ('RNA', 'rna_validation_360.tsv'),
 ])
 
 # name of the file containing the test dataset
-TSV_TEST = 'rna_validation_gse.tsv'
+TSV_TEST = 'rna_validation_liri.tsv'
 # name of the tsv file containing the survival data of the test set
-SURVIVAL_TSV_TEST = 'survival_event_gse.txt'
+SURVIVAL_TSV_TEST = 'survival_event_liri.txt'
 # name of the data type of the test set
 DATA_TYPE_TEST = 'RNA'
 # Path where to save and load the Keras models
@@ -55,11 +56,11 @@ ACT_REG = 0.0001
 # L1 Regularization constant on the weight
 W_REG = 0.001
 # Fraction of the dataset to be used as test set when building the autoencoder
-DATA_SPLIT = 0.2
+DATA_SPLIT = None
 # activation function
 ACTIVATION = 'tanh'
 # Number of epoch
-NB_EPOCH = 20
+NB_EPOCH = 50
 # Loss function to minimize
 LOSS = 'binary_crossentropy'
 # Optimizer (sgd for Stochastic Gradient Descent)

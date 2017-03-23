@@ -128,12 +128,6 @@ class LoadData():
         matrix_ref, matrix = self.transform_matrices(
             matrix_ref,
             matrix,
-            mad_scale=False,
-            robust_scale=False,
-            min_max_scale=False,
-            unit_norm=False,
-            rank_scale=True,
-            feature_reduction=True
         )
 
         self.matrix_test = matrix
@@ -204,13 +198,18 @@ class LoadData():
         self.survival_test = np.asmatrix(matrix)
 
     def normalize(self,
+                  do_min_max=False,
                   do_norm_scale=False,
                   do_rank_scale=True,
                   do_dim_reduction=True):
         """ """
         print 'normalizing...'
 
-        if do_rank_scale:
+        if do_min_max:
+            self.matrix_stacked = MinMaxScaler().fit_transform(
+                self.matrix_stacked)
+
+        if do_rank_scale and not do_min_max:
             self.matrix_stacked = RankNorm().fit_transform(
                 self.matrix_stacked)
 
@@ -237,7 +236,11 @@ class LoadData():
                            feature_reduction=True):
         """ """
         print 'Scaling/Normalising dataset...'
-        if rank_scale:
+        if min_max_scale:
+            matrix_ref = self.min_max_scaler.fit_transform(matrix_ref)
+            matrix = self.min_max_scaler.fit_transform(matrix)
+
+        if rank_scale and not min_max_scale:
             matrix_ref = RankNorm().fit_transform(matrix_ref)
             matrix = RankNorm().fit_transform(matrix)
 
@@ -257,10 +260,6 @@ class LoadData():
         if robust_scale:
             matrix_ref = self.robust_scaler.fit_transform(matrix_ref)
             matrix = self.robust_scaler.transform(matrix)
-
-        if min_max_scale:
-            matrix_ref = self.min_max_scaler.fit_transform(matrix_ref)
-            matrix = self.min_max_scaler.fit_transform(matrix)
 
         if unit_norm:
             matrix_ref = self.normalizer.fit_transform(matrix_ref)

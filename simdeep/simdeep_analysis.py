@@ -10,6 +10,7 @@ from sklearn.model_selection import cross_val_score
 from simdeep.deepmodel_base import DeepBase
 
 from simdeep.config import NB_CLUSTERS
+from simdeep.config import CLUSTER_ARRAY
 from simdeep.config import PVALUE_THRESHOLD
 from simdeep.config import SELECT_FEATURES_METHOD
 from simdeep.config import CLASSIFIER
@@ -71,6 +72,7 @@ class SimDeep(DeepBase):
 
         self.test_labels = None
         self.test_labels_proba = None
+        self._label_ordered_dict = {}
 
         DeepBase.__init__(self, **kwargs)
 
@@ -152,7 +154,10 @@ class SimDeep(DeepBase):
 
         ref_labels = self.clustering.predict(activities_ref)
 
-        self.test_labels = self.clustering.predict(activities)
+        test_labels = self.clustering.predict(activities)
+        self.test_labels = [self._label_ordered_dict[label]
+                            for label in test_labels]
+
         self.test_labels_proba = self.clustering.predict_proba(activities)
 
         print '#### report of assigned cluster:'
@@ -206,6 +211,24 @@ class SimDeep(DeepBase):
 
         return self.encoder.predict(input_matrix).T[self.valid_node_ids].T
 
+    def _predict_best_k_for_cluster(self):
+        """ """
+        criterion = None
+        best_k = None
+
+        for k_cluster in CLUSTER_ARRAY:
+            self.clustering.set_params(n_components=k_cluster)
+            self.clustering.fit(self.activities)
+            bic = self.clustering.bic(self.activities)
+
+            print 'obtained bic: {0} for k = {1}'.format(bic, k_cluster)
+
+            if criterion == None or bic < criterion:
+                criterion, best_k = bic, k_cluster
+
+        print 'best k: {0}'.format(best_k)
+        self.clustering.set_params(n_components=best_k)
+
     def predict_labels(self):
         """
         predict labels from training set
@@ -216,13 +239,14 @@ class SimDeep(DeepBase):
         # self.clustering = KMeans(n_clusters=self.nb_clusters, n_init=100)
         self.clustering = GaussianMixture(
             n_components=self.nb_clusters,
-            covariance_type='diag',
+            covariance_type='full',
             max_iter=10000,
-            n_init=50)
+            n_init=100)
 
         if not self.activities.any():
             raise Exception('No components linked to survival!'\
                             ' cannot perform clustering')
+        self._predict_best_k_for_cluster()
 
         self.clustering.fit(self.activities)
         self.labels = self.clustering.predict(self.activities)
@@ -247,23 +271,23 @@ class SimDeep(DeepBase):
         """
         days, dead = np.asarray(self.dataset.survival).T
 
-        label_dict = {}
+        self._label_ordered_dict = {}
 
         for label in set(self.labels):
             mean = surv_mean(dead[self.labels == label],
                              days[self.labels == label])
-            label_dict[label] = mean
+            self._label_ordered_dict[label] = mean
 
         label_ordered = [label for label, mean in
-                         sorted(label_dict.items(), key=lambda x:x[1])]
+                         sorted(self._label_ordered_dict.items(), key=lambda x:x[1])]
 
-        label_dict = {old_label: new_label
+        self._label_ordered_dict = {old_label: new_label
                       for new_label, old_label in enumerate(label_ordered)}
 
         labels = self.labels.copy()
 
-        for old_label in label_dict:
-            labels[self.labels == old_label] = label_dict[old_label]
+        for old_label in self._label_ordered_dict:
+            labels[self.labels == old_label] = self._label_ordered_dict[old_label]
 
         self.labels = labels
 
