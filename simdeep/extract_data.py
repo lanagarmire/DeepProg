@@ -102,9 +102,6 @@ class LoadData():
         self.sample_ids_test = sample_ids
         self.features_test = common_features
 
-    def load_survival_test(self):
-        """ """
-
     def load_array(self):
         """ """
         print 'loading data...'
