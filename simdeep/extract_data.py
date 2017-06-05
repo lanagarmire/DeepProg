@@ -10,6 +10,11 @@ from simdeep.config import DATA_TYPE_TEST
 from simdeep.config import SURVIVAL_TSV_TEST
 from simdeep.config import PATH_DATA
 
+from simdeep.config import MAD_SCALE
+from simdeep.config import ROBUST_SCALE
+from simdeep.config import MIN_MAX_SCALE
+from simdeep.config import UNIT_NORM
+
 from simdeep.survival_utils import load_data_from_tsv
 from simdeep.survival_utils import load_survival_file
 from simdeep.survival_utils import MadScaler
@@ -171,10 +176,10 @@ class LoadData():
             self.matrix_stacked)
 
     def transform_matrices(self, matrix_ref, matrix,
-                           mad_scale=True,
-                           robust_scale=True,
-                           min_max_scale=False,
-                           unit_norm=False):
+                           mad_scale=MAD_SCALE,
+                           robust_scale=ROBUST_SCALE,
+                           min_max_scale=MIN_MAX_SCALE,
+                           unit_norm=UNIT_NORM):
         """ """
         print 'Scaling/Normalising dataset...'
         if mad_scale:
