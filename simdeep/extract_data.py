@@ -10,6 +10,13 @@ from simdeep.config import DATA_TYPE_TEST
 from simdeep.config import SURVIVAL_TSV_TEST
 from simdeep.config import PATH_DATA
 
+from simdeep.config import MAD_SCALE
+from simdeep.config import ROBUST_SCALE
+from simdeep.config import MIN_MAX_SCALE
+from simdeep.config import UNIT_NORM
+from simdeep.config import RANK_SCALE
+from simdeep.config import CORRELATION_REDUCER
+
 from simdeep.survival_utils import load_data_from_tsv
 from simdeep.survival_utils import load_survival_file
 from simdeep.survival_utils import MadScaler
@@ -135,9 +142,10 @@ class LoadData():
 
         self.sample_ids_test = sample_ids
 
+
     def load_array(self):
         """ """
-        print 'loading data...'
+        print('loading data...')
         t = time()
 
         self.feature_array = {}
@@ -148,7 +156,7 @@ class LoadData():
 
         self.sample_ids, feature_ids, matrix = load_data_from_tsv(f_name,
                                                                   path_data=self.path_data)
-        print '{0} loaded of dim:{1}'.format(f_name, matrix.shape)
+        print('{0} loaded of dim:{1}'.format(f_name, matrix.shape))
 
         self.feature_array[data] = feature_ids
         self.matrix_array[data] = matrix
@@ -162,10 +170,10 @@ class LoadData():
             self.feature_array[data] = feature_ids
             self.matrix_array[data] = matrix
 
-            print '{0} loaded of dim:{1}'.format(f_name, matrix.shape)
+            print('{0} loaded of dim:{1}'.format(f_name, matrix.shape))
 
         self._stack_matrices()
-        print 'data loaded in {0} s'.format(time() - t)
+        print('data loaded in {0} s'.format(time() - t))
 
     def _stack_matrices(self):
         """ """
@@ -203,7 +211,7 @@ class LoadData():
                   do_rank_scale=True,
                   do_dim_reduction=True):
         """ """
-        print 'normalizing...'
+        print('normalizing...')
 
         if do_min_max:
             self.matrix_stacked = MinMaxScaler().fit_transform(
@@ -214,7 +222,7 @@ class LoadData():
                 self.matrix_stacked)
 
         if do_dim_reduction:
-            print 'dim reduction...'
+            print('dim reduction...')
             self.matrix_stacked = self.dim_reducer.fit_transform(
                 self.matrix_stacked)
             self.do_feature_reduction = True
@@ -228,14 +236,14 @@ class LoadData():
                 self.matrix_stacked)
 
     def transform_matrices(self, matrix_ref, matrix,
-                           mad_scale=False,
-                           robust_scale=False,
-                           min_max_scale=False,
-                           rank_scale=True,
-                           unit_norm=False,
-                           feature_reduction=True):
+                           mad_scale=MAD_SCALE,
+                           robust_scale=ROBUST_SCALE,
+                           min_max_scale=MIN_MAX_SCALE,
+                           rank_scale=RANK_SCALE,
+                           correlation_reducer=CORRELATION_REDUCER,
+                           unit_norm=UNIT_NORM):
         """ """
-        print 'Scaling/Normalising dataset...'
+        print('Scaling/Normalising dataset...')
         if min_max_scale:
             matrix_ref = self.min_max_scaler.fit_transform(matrix_ref)
             matrix = self.min_max_scaler.fit_transform(matrix)
@@ -244,7 +252,7 @@ class LoadData():
             matrix_ref = RankNorm().fit_transform(matrix_ref)
             matrix = RankNorm().fit_transform(matrix)
 
-        if feature_reduction:
+        if correlation_reducer:
             reducer = CorrelationReducer()
             matrix_ref = reducer.fit_transform(matrix_ref)
             matrix = reducer.transform(matrix)

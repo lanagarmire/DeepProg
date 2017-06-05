@@ -4,7 +4,7 @@ from simdeep.config import PATH_DATA
 
 import  numpy as np
 
-from scipy.stats import rankdata
+# from scipy.stats import rankdata
 
 from sklearn.metrics import pairwise_distances
 
@@ -54,18 +54,6 @@ class CorrelationReducer():
         self.fit(dataset)
         return self.transform(dataset)
 
-
-def load_survival_file(f_name, path_data=PATH_DATA, sep='\t'):
-    """ """
-    survival = {}
-    f_surv = open(path_data + f_name, 'r')
-    f_surv.readline()
-
-    for line in f_surv:
-        ids, ndays, isdead = line.split(sep)[:3]
-        survival[ids] = (float(ndays), float(isdead))
-
-    return survival
 
 def load_survival_file(f_name, path_data=PATH_DATA, sep='\t'):
     """ """

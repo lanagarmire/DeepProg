@@ -19,26 +19,41 @@ PVALUE_THRESHOLD = 0.05 # Threshold for survival significance to set a node as v
 
 #################### Paths to data file ################
 # path to the folder containing the data
-PATH_DATA = "/home/opoirion/data/survival_analysis_multiple//"
+
+# PATH_DATA = PATH_THIS_FILE + "/../examples/data/"
+PATH_DATA = "/home/opoirion/data/survival_analysis_multiple/sijia/"
 
 # name of the tsv file containing the survival data of the training set
-SURVIVAL_TSV = 'survival_event_360.txt'
+SURVIVAL_TSV = '0601_raw_merged_survival.tsv'
 
 # dict('data type', 'name of the tsv file which are inside PATH_DATA')
 # These data will be stacked together to build the autoencoder
 TRAINING_TSV = OrderedDict([
-    ('RNA', 'rna_validation_360.tsv'),
+    # ('MIR', 'mir_dummy.tsv'),
+    # ('METH', 'meth_dummy.tsv'),
+    # ('RNA', 'rna_dummy.tsv'),
+    ('SIJIA', '0601_brca_raw_merged_matrix.tsv'),
+
 ])
 
 # name of the file containing the test dataset
-TSV_TEST = 'rna_validation_liri.tsv'
+TSV_TEST = '0601_brca_raw_merged_matrix.tsv'
 # name of the tsv file containing the survival data of the test set
-SURVIVAL_TSV_TEST = 'survival_event_liri.txt'
+SURVIVAL_TSV_TEST = '0601_raw_merged_survival.tsv'
 # name of the data type of the test set
-DATA_TYPE_TEST = 'RNA'
-# Path where to save and load the Keras models
-PATH_MODEL = PATH_DATA + '/models/'
+DATA_TYPE_TEST = 'SIJIA'
+# Path where to save load the Keras models
+PATH_MODEL = PATH_THIS_FILE + '/../data/models/'
 ########################################################
+
+##################### NORMALIZATION PROCEDURE ###########
+MAD_SCALE=False
+ROBUST_SCALE=False
+MIN_MAX_SCALE=False
+UNIT_NORM=False
+RANK_SCALE=False
+CORRELATION_REDUCER=False
+#########################################################
 
 ##################### Autoencoder Variable ##############
 # Dimensions of the intermediate layers before and after the middle hidden layer
