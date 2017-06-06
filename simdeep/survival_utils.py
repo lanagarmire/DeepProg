@@ -4,7 +4,7 @@ from simdeep.config import PATH_DATA
 
 import  numpy as np
 
-# from scipy.stats import rankdata
+from scipy.stats import rankdata
 
 from sklearn.metrics import pairwise_distances
 

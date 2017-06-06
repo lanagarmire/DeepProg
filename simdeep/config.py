@@ -13,7 +13,11 @@ PATH_THIS_FILE = pathsplit(abspath(__file__))[0]
 
 #################### SimDeep variable ##################
 NB_CLUSTERS = 2 # Number of clusters
-CLUSTER_ARRAY = [2, 3, 4, 5, 6, 7]
+CLUSTER_METHOD = 'mixture'
+CLUSTER_EVAL_METHOD = 'bic'
+CLUSTER_ARRAY = [2,
+                 # 3, 4, 5, 6, 7
+]
 PVALUE_THRESHOLD = 0.05 # Threshold for survival significance to set a node as valid
 ########################################################
 
@@ -47,12 +51,19 @@ PATH_MODEL = PATH_THIS_FILE + '/../data/models/'
 ########################################################
 
 ##################### NORMALIZATION PROCEDURE ###########
-MAD_SCALE=False
-ROBUST_SCALE=False
-MIN_MAX_SCALE=False
-UNIT_NORM=False
-RANK_SCALE=False
-CORRELATION_REDUCER=False
+## classification normalization
+MAD_SCALE = False
+ROBUST_SCALE = False
+MIN_MAX_SCALE = False
+UNIT_NORM = False
+RANK_SCALE = False
+CORRELATION_REDUCER = False
+
+## Normalize before the autoencoder construction ########
+TRAIN_MIN_MAX = False
+TRAIN_NORM_SCALE = False
+TRAIN_DIM_REDUCTION = False
+TRAIN_RANK_NORM = False
 #########################################################
 
 ##################### Autoencoder Variable ##############
@@ -67,19 +78,19 @@ NEW_DIM = 100
 # Percentage of edges being dropout at each training iteration (None for no dropout)
 DROPOUT = 0.5
 # L2 Regularization constant on the node activity
-ACT_REG = 0.0001
+ACT_REG = False
 # L1 Regularization constant on the weight
-W_REG = 0.001
+W_REG = False
 # Fraction of the dataset to be used as test set when building the autoencoder
 DATA_SPLIT = None
 # activation function
 ACTIVATION = 'tanh'
 # Number of epoch
-NB_EPOCH = 50
+NB_EPOCH = 10
 # Loss function to minimize
 LOSS = 'binary_crossentropy'
 # Optimizer (sgd for Stochastic Gradient Descent)
-OPTIMIZER = 'sgd'
+OPTIMIZER = 'adam'
 ########################################################
 
 ################## CLASSIFIER ##########################
@@ -92,6 +103,7 @@ NDIM_CLASSIF = {
     'RNA': 100,
     'MIR': 50,
     'METH': 50,
+    'SIJIA': 100,
 }
 
 

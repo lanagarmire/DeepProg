@@ -17,6 +17,11 @@ from simdeep.config import UNIT_NORM
 from simdeep.config import RANK_SCALE
 from simdeep.config import CORRELATION_REDUCER
 
+from simdeep.config import TRAIN_MIN_MAX
+from simdeep.config import TRAIN_NORM_SCALE
+from simdeep.config import TRAIN_DIM_REDUCTION
+from simdeep.config import TRAIN_RANK_NORM
+
 from simdeep.survival_utils import load_data_from_tsv
 from simdeep.survival_utils import load_survival_file
 from simdeep.survival_utils import MadScaler
@@ -34,9 +39,13 @@ def main():
     """ """
     load_data = LoadData()
     load_data.load_array()
+    load_data.normalize()
+
     load_data.load_survival()
 
-    load_data.load_matrix_test_v2()
+    load_data.load_matrix_test()
+    load_data.reorder_matrix_test()
+
     load_data.load_survival_test()
 
 class LoadData():
@@ -111,37 +120,24 @@ class LoadData():
         self.matrix_test = np.nan_to_num(matrix.T[feature_index].T)
         self.matrix_ref = np.nan_to_num(matrix_ref.T[feature_ref_index].T)
         self.sample_ids_test = sample_ids
-        self.features_test = common_features
+        self.features_test = list(common_features)
 
-    def load_matrix_test_v2(self):
-        """ """
-        sample_ids, feature_ids, matrix = load_data_from_tsv(self.tsv_test,
-                                                             path_data=self.path_data)
-
-        feature_ids_ref = self.feature_array[self.data_type_test]
-        matrix_ref = self.matrix_array[self.data_type_test]
-
-        common_features = set(feature_ids).intersection(feature_ids_ref)
-
-        feature_ids_dict = {feat: i for i,feat in enumerate(feature_ids)}
-        feature_ids_ref_dict = {feat: i for i,feat in enumerate(feature_ids_ref)}
-
-        feature_index = [feature_ids_dict[feature] for feature in common_features]
-        feature_ref_index = [feature_ids_ref_dict[feature] for feature in common_features]
-
-        matrix = np.nan_to_num(matrix.T[feature_index].T)
-        matrix_ref = np.nan_to_num(matrix_ref.T[feature_ref_index].T)
-
-        matrix_ref, matrix = self.transform_matrices(
-            matrix_ref,
-            matrix,
+        self.matrix_ref, self.matrix_test = self.transform_matrices(
+            self.matrix_ref,
+            self.matrix_test,
+            unit_norm=TRAIN_NORM_SCALE,
+            rank_scale=TRAIN_RANK_NORM,
+            min_max_scale=TRAIN_MIN_MAX,
         )
 
-        self.matrix_test = matrix
-        self.matrix_ref = matrix_ref
+    def reorder_matrix_test(self):
+        """ """
+        ref_dict = {feat: pos for pos, feat in enumerate(self.features_test)}
+        index = [ref_dict[feat] for feat in self.features_stacked]
 
-        self.sample_ids_test = sample_ids
-
+        self.features_test = self.features_stacked[:]
+        self.matrix_ref = self.matrix_ref.T[index].T
+        self.matrix_test = self.matrix_test.T[index].T
 
     def load_array(self):
         """ """
@@ -179,8 +175,7 @@ class LoadData():
         """ """
         self.matrix_stacked = hstack([self.matrix_array[data]
                                       for data in self.data_type])
-        self.features_stacked = []
-        self.stacked_features = [feat for data in self.data_type
+        self.features_stacked = [feat for data in self.data_type
                                  for feat in self.feature_array[data]]
 
     def load_survival(self):
@@ -206,10 +201,10 @@ class LoadData():
         self.survival_test = np.asmatrix(matrix)
 
     def normalize(self,
-                  do_min_max=False,
-                  do_norm_scale=False,
-                  do_rank_scale=True,
-                  do_dim_reduction=True):
+                  do_min_max=TRAIN_MIN_MAX,
+                  do_norm_scale=TRAIN_NORM_SCALE,
+                  do_rank_scale=TRAIN_RANK_NORM,
+                  do_dim_reduction=TRAIN_DIM_REDUCTION):
         """ """
         print('normalizing...')
 

@@ -4,7 +4,6 @@ SimDeep main class
 
 from sklearn.cluster import KMeans
 from sklearn.mixture import GaussianMixture
-from sklearn.mixture import BayesianGaussianMixture
 from sklearn.model_selection import cross_val_score
 
 from simdeep.deepmodel_base import DeepBase
@@ -15,12 +14,24 @@ from simdeep.config import PVALUE_THRESHOLD
 from simdeep.config import SELECT_FEATURES_METHOD
 from simdeep.config import CLASSIFIER
 
+from simdeep.config import MAD_SCALE
+from simdeep.config import ROBUST_SCALE
+from simdeep.config import MIN_MAX_SCALE
+from simdeep.config import UNIT_NORM
+from simdeep.config import RANK_SCALE
+
+from simdeep.config import CLUSTER_EVAL_METHOD
+from simdeep.config import CLUSTER_METHOD
+
 from simdeep.survival_utils import select_best_classif_params
 
 from coxph_from_r import coxph
 from coxph_from_r import surv_mean
 
 from collections import Counter
+
+from sklearn.metrics import silhouette_score
+from sklearn.metrics import calinski_harabaz_score
 
 import numpy as np
 
@@ -33,7 +44,8 @@ def main():
     sim_deep.load_training_dataset()
     sim_deep.fit()
     sim_deep.load_test_dataset()
-    sim_deep.predict_labels_on_test_dataset()
+    sim_deep.predict_labels_on_test_dataset_v2()
+    # sim_deep.predict_labels_on_test_dataset()
 
 
 class SimDeep(DeepBase):
@@ -41,6 +53,8 @@ class SimDeep(DeepBase):
     def __init__(self,
                  nb_clusters=NB_CLUSTERS,
                  pvalue_thres=PVALUE_THRESHOLD,
+                 cluster_method=CLUSTER_METHOD,
+                 cluster_eval_method=CLUSTER_EVAL_METHOD,
                  **kwargs):
         """
         ### AUTOENCODER PARAMETERS ###:
@@ -74,6 +88,9 @@ class SimDeep(DeepBase):
         self.test_labels_proba = None
         self._label_ordered_dict = {}
 
+        self.cluster_method = cluster_method
+        self.cluster_eval_method = cluster_eval_method
+
         DeepBase.__init__(self, **kwargs)
 
     def fit(self):
@@ -89,18 +106,18 @@ class SimDeep(DeepBase):
     def predict_labels_on_test_dataset(
             self,
             return_proba=False,
-            mad_scale=False,
-            robust_scale=False,
-            min_max_scale=False,
-            unit_norm=False,
-            rank_scale=True):
+            mad_scale=MAD_SCALE,
+            robust_scale=ROBUST_SCALE,
+            min_max_scale=MIN_MAX_SCALE,
+            unit_norm=UNIT_NORM,
+            rank_scale=RANK_SCALE):
         """
         predict labels of the test set
 
         argument:
             :return_proba: Bool    if true return class probabilities instead
-            :mad_scale: Bool (default True)    use the mad scaler normalisation
-            robust_scale: Bool (default True)    use the robust scale transformation
+            :mad_scale: Bool (default False)    use the mad scaler normalisation
+            robust_scale: Bool (default False)    use the robust scale transformation
             min_max_scale: Bool (default False)    use min max transformation
             unit_norm: Bool (default False)    use the unit norm normalization
 
@@ -123,7 +140,7 @@ class SimDeep(DeepBase):
         data_type = self.dataset.data_type_test
         nbdays, isdead = self.dataset.survival_test.T.tolist()
 
-        print 'feature selection...'
+        print('feature selection...')
         embbed = SELECT_FEATURES_METHOD[data_type]
 
         train_matrix = embbed.fit_transform(ref_matrix, self.labels)
@@ -133,19 +150,20 @@ class SimDeep(DeepBase):
 
         pvalue = coxph(self.test_labels, isdead, nbdays)
 
-        print 'Cox-PH p-value (Log-Rank) for inferred labels: {0}'.format(pvalue)
+        print('Cox-PH p-value (Log-Rank) for inferred labels: {0}'.format(pvalue))
 
         labels = self.test_labels_proba if return_proba else self.test_labels
 
         return labels, pvalue
 
-    def predict_labels_on_test_dataset_v2(self):
+    def predict_labels_on_test_dataset_v2(self, predict_proba=False):
         """
         """
+        self.dataset.reorder_matrix_test()
+
         test_matrix = self.dataset.matrix_test
         ref_matrix = self.dataset.matrix_ref
 
-        data_type = self.dataset.data_type_test
         nbdays, isdead = self.dataset.survival_test.T.tolist()
         nbdays_ref, isdead_ref = self.dataset.survival.T.tolist()
 
@@ -158,19 +176,20 @@ class SimDeep(DeepBase):
         self.test_labels = [self._label_ordered_dict[label]
                             for label in test_labels]
 
-        self.test_labels_proba = self.clustering.predict_proba(activities)
+        if predict_proba:
+            self.test_labels_proba = self.clustering.predict_proba(activities)
 
-        print '#### report of assigned cluster:'
+        print('#### report of assigned cluster:')
         for key, value in Counter(self.test_labels).items():
-            print 'class: {0}, number of samples :{1}'.format(key, value)
+            print('class: {0}, number of samples :{1}'.format(key, value))
 
         pvalue = coxph(self.test_labels, isdead, nbdays)
 
-        print 'Cox-PH p-value (Log-Rank) for inferred labels: {0}'.format(pvalue)
+        print('Cox-PH p-value (Log-Rank) for inferred labels: {0}'.format(pvalue))
 
         pvalue_ref = coxph(ref_labels, isdead_ref, nbdays_ref)
 
-        print 'Cox-PH p-value (Log-Rank) for ref labels: {0}'.format(pvalue_ref)
+        print('Cox-PH p-value (Log-Rank) for ref labels: {0}'.format(pvalue_ref))
 
         labels = self.test_labels
 
@@ -178,25 +197,25 @@ class SimDeep(DeepBase):
 
     def _do_classification(self, train_matrix, test_matrix, labels):
         """ """
-        print 'classification analysis...'
+        print('classification analysis...')
 
         self.classifier_grid.fit(train_matrix, labels)
         self.classifier, params = select_best_classif_params(self.classifier_grid)
-        print 'best params:', params
+        print('best params:', params)
 
         cvs = cross_val_score(self.classifier, train_matrix, labels, cv=5)
-        print 'cross val score: {0}'.format(np.mean(cvs))
+        print('cross val score: {0}'.format(np.mean(cvs)))
         self.classifier.set_params(probability=True)
         self.classifier.fit(train_matrix, labels)
 
-        print 'classification score:', self.classifier.score(train_matrix, labels)
+        print('classification score:', self.classifier.score(train_matrix, labels))
 
         self.test_labels = self.classifier.predict(test_matrix)
         self.test_labels_proba = self.classifier.predict_proba(test_matrix)
 
-        print '#### report of assigned cluster:'
+        print('#### report of assigned cluster:')
         for key, value in Counter(self.test_labels).items():
-            print 'class: {0}, number of samples :{1}'.format(key, value)
+            print('class: {0}, number of samples :{1}'.format(key, value))
 
     def predict_activities(self, input_matrix=None):
         """
@@ -217,17 +236,38 @@ class SimDeep(DeepBase):
         best_k = None
 
         for k_cluster in CLUSTER_ARRAY:
-            self.clustering.set_params(n_components=k_cluster)
+            if self.cluster_method == 'mixture':
+                self.clustering.set_params(n_components=k_cluster)
+            else:
+                self.clustering.set_params(n_clusters=k_cluster)
+
             self.clustering.fit(self.activities)
-            bic = self.clustering.bic(self.activities)
 
-            print 'obtained bic: {0} for k = {1}'.format(bic, k_cluster)
+            if self.cluster_eval_method == 'bic':
+                score = self.clustering.bic(self.activities)
+            elif self.cluster_eval_method:
+                score = calinski_harabaz_score(
+                    self.activities,
+                    self.clustering.predict(self.activities)
+                )
+            elif self.cluster_eval_method:
+                score = silhouette_score(
+                    self.activities,
+                    self.clustering.predict(self.activities)
+                )
 
-            if criterion == None or bic < criterion:
-                criterion, best_k = bic, k_cluster
+            print('obtained {2}: {0} for k = {1}'.format(score, k_cluster,
+                                                         self.cluster_eval_method))
 
-        print 'best k: {0}'.format(best_k)
-        self.clustering.set_params(n_components=best_k)
+            if criterion == None or score < criterion:
+                criterion, best_k = score, k_cluster
+
+        print('best k: {0}'.format(best_k))
+
+        if self.cluster_method == 'mixture':
+            self.clustering.set_params(n_components=best_k)
+        else:
+            self.clustering.set_params(n_clusters=best_k)
 
     def predict_labels(self):
         """
@@ -235,13 +275,17 @@ class SimDeep(DeepBase):
         using K-Means algorithm on the node activities,
         using only nodes linked to survival
         """
-        print 'performing clustering...'
-        # self.clustering = KMeans(n_clusters=self.nb_clusters, n_init=100)
-        self.clustering = GaussianMixture(
-            n_components=self.nb_clusters,
-            covariance_type='full',
-            max_iter=10000,
-            n_init=100)
+
+        print('performing clustering...')
+        if self.cluster_method == 'kmeans':
+            self.clustering = KMeans(n_clusters=self.nb_clusters, n_init=100)
+
+        elif self.cluster_method == 'mixture':
+            self.clustering = GaussianMixture(
+                n_components=self.nb_clusters,
+                covariance_type='spherical',
+                max_iter=10000,
+                n_init=100)
 
         if not self.activities.any():
             raise Exception('No components linked to survival!'\
@@ -253,15 +297,15 @@ class SimDeep(DeepBase):
 
         self._order_labels_according_to_survival()
 
-        print "clustering done, labels ordered according to survival:"
+        print("clustering done, labels ordered according to survival:")
         for key, value in Counter(self.labels).items():
-            print 'cluster label: {0}\t number of samples:{1}'.format(key, value)
+            print('cluster label: {0}\t number of samples:{1}'.format(key, value))
 
-        print '\n'
+        print('\n')
 
         nbdays, isdead = self.dataset.survival.T.tolist()
         pvalue = coxph(self.labels, isdead, nbdays)
-        print 'Cox-PH p-value (Log-Rank) for the cluster labels: {0}'.format(pvalue)
+        print('Cox-PH p-value (Log-Rank) for the cluster labels: {0}'.format(pvalue))
 
         return self.labels
 
@@ -317,7 +361,7 @@ class SimDeep(DeepBase):
         self.valid_node_ids = [node_id for node_id, pvalue in pvalue_list
                                if pvalue < self.pvalue_thres]
 
-        print 'number of components linked to survival found:', len(self.valid_node_ids)
+        print('number of components linked to survival found:', len(self.valid_node_ids))
 
         self.activities = self.activities.T[self.valid_node_ids].T
 
