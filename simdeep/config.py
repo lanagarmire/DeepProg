@@ -28,7 +28,7 @@ PVALUE_THRESHOLD = 0.05 # Threshold for survival significance to set a node as v
 PATH_DATA = "/home/opoirion/data/survival_analysis_multiple/sijia/"
 
 # name of the tsv file containing the survival data of the training set
-SURVIVAL_TSV = '0601_raw_merged_survival.tsv'
+SURVIVAL_TSV = '0601_pds_merged_survival.tsv'
 
 # dict('data type', 'name of the tsv file which are inside PATH_DATA')
 # These data will be stacked together to build the autoencoder
@@ -36,16 +36,16 @@ TRAINING_TSV = OrderedDict([
     # ('MIR', 'mir_dummy.tsv'),
     # ('METH', 'meth_dummy.tsv'),
     # ('RNA', 'rna_dummy.tsv'),
-    ('SIJIA', '0601_brca_raw_merged_matrix.tsv'),
-
+    ('SIJIA', '0601_brca_pds_merged_matrix.tsv'),
 ])
 
-# name of the file containing the test dataset
-TSV_TEST = '0601_brca_raw_merged_matrix.tsv'
+TEST_TSV = {
+    'SIJIA': '0601_brca_pds_merged_matrix.tsv',
+}
+
 # name of the tsv file containing the survival data of the test set
-SURVIVAL_TSV_TEST = '0601_raw_merged_survival.tsv'
-# name of the data type of the test set
-DATA_TYPE_TEST = 'SIJIA'
+SURVIVAL_TSV_TEST = '0601_pds_merged_survival.tsv'
+
 # Path where to save load the Keras models
 PATH_MODEL = PATH_THIS_FILE + '/../data/models/'
 ########################################################
@@ -71,7 +71,7 @@ TRAIN_RANK_NORM = False
 # if LEVEL_DIMS == [500, 250] then there will be two hidden layers with 500 and 250 nodes
 # before and after the hidden middle layer (5 hidden layers)
 # if LEVEL_DIMS = [], then the autoencoder will have only one hidden layer
-LEVEL_DIMS = [500]
+LEVEL_DIMS = [200]
 # Number of nodes in the middle hidden layer
 # (i.e. the new dimensions of the transformed data)
 NEW_DIM = 100
@@ -88,7 +88,7 @@ ACTIVATION = 'tanh'
 # Number of epoch
 NB_EPOCH = 10
 # Loss function to minimize
-LOSS = 'binary_crossentropy'
+LOSS = 'mse'
 # Optimizer (sgd for Stochastic Gradient Descent)
 OPTIMIZER = 'adam'
 ########################################################

@@ -4,9 +4,8 @@ from sklearn.preprocessing import RobustScaler
 from sklearn.preprocessing import MinMaxScaler
 
 from simdeep.config import TRAINING_TSV
+from simdeep.config import TEST_TSV
 from simdeep.config import SURVIVAL_TSV
-from simdeep.config import TSV_TEST
-from simdeep.config import DATA_TYPE_TEST
 from simdeep.config import SURVIVAL_TSV_TEST
 from simdeep.config import PATH_DATA
 
@@ -39,12 +38,12 @@ def main():
     """ """
     load_data = LoadData()
     load_data.load_array()
-    load_data.normalize()
+    load_data.normalize_training_array()
 
     load_data.load_survival()
 
     load_data.load_matrix_test()
-    load_data.reorder_matrix_test()
+    # load_data.reorder_test_matrix('SIJIA')
 
     load_data.load_survival_test()
 
@@ -53,10 +52,9 @@ class LoadData():
             self,
             path_data=PATH_DATA,
             training_tsv=TRAINING_TSV,
+            test_tsv=TEST_TSV,
             survival_tsv=SURVIVAL_TSV,
-            tsv_test=TSV_TEST,
-            survival_tsv_test=SURVIVAL_TSV_TEST,
-            data_type_test=DATA_TYPE_TEST):
+            survival_tsv_test=SURVIVAL_TSV_TEST):
         """
         class to extract data
         :training_matrices: dict(matrice_type, path to the tsv file)
@@ -77,6 +75,10 @@ class LoadData():
         self.training_tsv = training_tsv
         self.feature_array = {}
         self.matrix_array = {}
+
+        self.test_tsv = test_tsv
+        self.matrix_array_train = {}
+        self.matrix_array_reducer = {}
         self.sample_ids = []
         self.data_type = training_tsv.keys()
 
@@ -84,15 +86,14 @@ class LoadData():
         self.features_stacked = None
         self.survival = None
 
-        self.tsv_test = tsv_test
         self.survival_tsv_test = survival_tsv_test
-        self.data_type_test = data_type_test
 
-        self.matrix_test = None
-        self.matrix_ref = None
-        self.features_test = None
+        self.feature_test_array = {}
+        self.matrix_test_array = {}
+        self.matrix_ref_array = {}
         self.survival_test = None
         self.sample_ids_test = None
+
         self.do_feature_reduction = None
 
         self.normalizer = Normalizer()
@@ -103,41 +104,54 @@ class LoadData():
 
     def load_matrix_test(self):
         """ """
-        sample_ids, feature_ids, matrix = load_data_from_tsv(self.tsv_test,
+        for key in self.test_tsv:
+            sample_ids, feature_ids, matrix = load_data_from_tsv(self.test_tsv[key],
                                                              path_data=self.path_data)
 
-        feature_ids_ref = self.feature_array[self.data_type_test]
-        matrix_ref = self.matrix_array[self.data_type_test]
+            feature_ids_ref = self.feature_array[key]
+            matrix_ref = self.matrix_array[key]
 
-        common_features = set(feature_ids).intersection(feature_ids_ref)
+            common_features = set(feature_ids).intersection(feature_ids_ref)
 
-        feature_ids_dict = {feat: i for i,feat in enumerate(feature_ids)}
-        feature_ids_ref_dict = {feat: i for i,feat in enumerate(feature_ids_ref)}
+            feature_ids_dict = {feat: i for i,feat in enumerate(feature_ids)}
+            feature_ids_ref_dict = {feat: i for i,feat in enumerate(feature_ids_ref)}
 
-        feature_index = [feature_ids_dict[feature] for feature in common_features]
-        feature_ref_index = [feature_ids_ref_dict[feature] for feature in common_features]
+            feature_index = [feature_ids_dict[feature] for feature in common_features]
+            feature_ref_index = [feature_ids_ref_dict[feature] for feature in common_features]
 
-        self.matrix_test = np.nan_to_num(matrix.T[feature_index].T)
-        self.matrix_ref = np.nan_to_num(matrix_ref.T[feature_ref_index].T)
-        self.sample_ids_test = sample_ids
-        self.features_test = list(common_features)
+            matrix_test = np.nan_to_num(matrix.T[feature_index].T)
+            matrix_ref = np.nan_to_num(matrix_ref.T[feature_ref_index].T)
 
-        self.matrix_ref, self.matrix_test = self.transform_matrices(
-            self.matrix_ref,
-            self.matrix_test,
-            unit_norm=TRAIN_NORM_SCALE,
-            rank_scale=TRAIN_RANK_NORM,
-            min_max_scale=TRAIN_MIN_MAX,
-        )
+            self.feature_test_array[key] = list(common_features)
 
-    def reorder_matrix_test(self):
+            if not isinstance(self.sample_ids_test, type(None)):
+                assert(self.sample_ids_test == sample_ids)
+            else:
+                self.sample_ids_test = sample_ids
+
+            matrix_ref, matrix_test = self.transform_matrices(
+                matrix_ref,
+                matrix_test,
+                unit_norm=TRAIN_NORM_SCALE,
+                rank_scale=TRAIN_RANK_NORM,
+                min_max_scale=TRAIN_MIN_MAX,
+            )
+
+            self.matrix_test_array[key] = matrix_test
+            self.matrix_ref_array[key] = matrix_ref
+
+    def reorder_test_matrix(self, key):
         """ """
-        ref_dict = {feat: pos for pos, feat in enumerate(self.features_test)}
-        index = [ref_dict[feat] for feat in self.features_stacked]
+        features_test = self.feature_test_array[key]
+        features_ref = self.feature_array[key]
 
-        self.features_test = self.features_stacked[:]
-        self.matrix_ref = self.matrix_ref.T[index].T
-        self.matrix_test = self.matrix_test.T[index].T
+        ref_dict = {feat: pos for pos, feat in enumerate(features_test)}
+        index = [ref_dict[feat] for feat in features_ref]
+
+        self.feature_test_array[key] = features_ref[:]
+
+        self.matrix_test_array[key] = self.matrix_test_array[key].T[index].T
+        self.matrix_ref_array[key] = self.matrix_ref_array[key].T[index].T
 
     def load_array(self):
         """ """
@@ -200,35 +214,47 @@ class LoadData():
 
         self.survival_test = np.asmatrix(matrix)
 
-    def normalize(self,
-                  do_min_max=TRAIN_MIN_MAX,
-                  do_norm_scale=TRAIN_NORM_SCALE,
-                  do_rank_scale=TRAIN_RANK_NORM,
-                  do_dim_reduction=TRAIN_DIM_REDUCTION):
+    def normalize_training_array(self):
+        """ """
+        for key in self.matrix_array:
+            matrix = self.matrix_array[key]
+            matrix = self._normalize(matrix, key)
+            self.matrix_array_train[key] = matrix
+
+    def _normalize(self,
+                   matrix,
+                   key,
+                   do_min_max=TRAIN_MIN_MAX,
+                   do_norm_scale=TRAIN_NORM_SCALE,
+                   do_rank_scale=TRAIN_RANK_NORM,
+                   do_dim_reduction=TRAIN_DIM_REDUCTION):
         """ """
         print('normalizing...')
 
         if do_min_max:
-            self.matrix_stacked = MinMaxScaler().fit_transform(
-                self.matrix_stacked)
+            matrix = MinMaxScaler().fit_transform(
+                matrix)
 
         if do_rank_scale and not do_min_max:
-            self.matrix_stacked = RankNorm().fit_transform(
-                self.matrix_stacked)
+            matrix = RankNorm().fit_transform(
+                matrix)
 
         if do_dim_reduction:
             print('dim reduction...')
-            self.matrix_stacked = self.dim_reducer.fit_transform(
-                self.matrix_stacked)
-            self.do_feature_reduction = True
+            reducer = CorrelationReducer()
+            matrix = reducer.fit_transform(
+                matrix)
+            self.matrix_array_reducer[key] = reducer
 
             if do_rank_scale:
-                self.matrix_stacked = RankNorm().fit_transform(
-                    self.matrix_stacked)
+                matrix = RankNorm().fit_transform(
+                    matrix)
 
         if do_norm_scale:
-            self.matrix_stacked = self.normalizer.fit_transform(
-                self.matrix_stacked)
+            matrix = self.normalizer.fit_transform(
+                matrix)
+
+        return matrix
 
     def transform_matrices(self, matrix_ref, matrix,
                            mad_scale=MAD_SCALE,

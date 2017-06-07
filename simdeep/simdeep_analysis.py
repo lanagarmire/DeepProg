@@ -35,6 +35,8 @@ from sklearn.metrics import calinski_harabaz_score
 
 import numpy as np
 
+from numpy import hstack
+
 
 def main():
     """
@@ -81,11 +83,16 @@ class SimDeep(DeepBase):
         self.classifier_grid = CLASSIFIER
         self.classifier = None
 
-        self.valid_node_ids = None
-        self.activities = None
+        self.valid_node_ids_array = {}
+        self.activities_array = {}
+
+        self.activities_train = None
+        self.activities_test = None
 
         self.test_labels = None
         self.test_labels_proba = None
+        self.training_omic_list = []
+
         self._label_ordered_dict = {}
 
         self.cluster_method = cluster_method
@@ -99,9 +106,10 @@ class SimDeep(DeepBase):
         construct an autoencoder, predict nodes linked with survival
         and do clustering
         """
-        self.construct_autoencoder()
+        self.construct_autoencoders()
         self.look_for_survival_nodes()
-        self.predict_labels()
+        labels = self.predict_labels()
+        self.labels = labels
 
     def predict_labels_on_test_dataset(
             self,
@@ -159,25 +167,34 @@ class SimDeep(DeepBase):
     def predict_labels_on_test_dataset_v2(self, predict_proba=False):
         """
         """
-        self.dataset.reorder_matrix_test()
-
-        test_matrix = self.dataset.matrix_test
-        ref_matrix = self.dataset.matrix_ref
+        # self.dataset.reorder_matrix_test()
 
         nbdays, isdead = self.dataset.survival_test.T.tolist()
-        nbdays_ref, isdead_ref = self.dataset.survival.T.tolist()
 
-        activities = self.encoder.predict(test_matrix).T[self.valid_node_ids].T
-        activities_ref = self.encoder.predict(ref_matrix).T[self.valid_node_ids].T
+        if self.dataset.test_tsv.keys() != self.training_omic_list:
+            self.look_for_survival_nodes(self.dataset.test_tsv.keys())
+            labels = self.predict_labels()
 
-        ref_labels = self.clustering.predict(activities_ref)
+        activities_array = []
 
-        test_labels = self.clustering.predict(activities)
+        for key in self.training_omic_list:
+            self.dataset.reorder_test_matrix(key)
+
+            test_matrix = self.dataset.matrix_test_array[key]
+            encoder = self.encoder_array[key]
+            valid_node_ids = self.valid_node_ids_array[key]
+
+            activities_array.append(encoder.predict(test_matrix).T[valid_node_ids].T)
+
+        activities_stacked = hstack(activities_array)
+
+        test_labels = self.clustering.predict(activities_stacked)
+
         self.test_labels = [self._label_ordered_dict[label]
                             for label in test_labels]
 
         if predict_proba:
-            self.test_labels_proba = self.clustering.predict_proba(activities)
+            self.test_labels_proba = self.clustering.predict_proba(activities_stacked)
 
         print('#### report of assigned cluster:')
         for key, value in Counter(self.test_labels).items():
@@ -186,10 +203,6 @@ class SimDeep(DeepBase):
         pvalue = coxph(self.test_labels, isdead, nbdays)
 
         print('Cox-PH p-value (Log-Rank) for inferred labels: {0}'.format(pvalue))
-
-        pvalue_ref = coxph(ref_labels, isdead_ref, nbdays_ref)
-
-        print('Cox-PH p-value (Log-Rank) for ref labels: {0}'.format(pvalue_ref))
 
         labels = self.test_labels
 
@@ -217,19 +230,6 @@ class SimDeep(DeepBase):
         for key, value in Counter(self.test_labels).items():
             print('class: {0}, number of samples :{1}'.format(key, value))
 
-    def predict_activities(self, input_matrix=None):
-        """
-        predict activities of the nodes linked to survial
-        if an input matrix is given, the activities are computed
-        using this matrix instead of the train matrix
-
-            :input_matrix: numpy matrix (must have the same dim that the train matrix)
-        """
-        if not input_matrix:
-            input_matrix = self.matrix_train
-
-        return self.encoder.predict(input_matrix).T[self.valid_node_ids].T
-
     def _predict_best_k_for_cluster(self):
         """ """
         criterion = None
@@ -241,19 +241,19 @@ class SimDeep(DeepBase):
             else:
                 self.clustering.set_params(n_clusters=k_cluster)
 
-            self.clustering.fit(self.activities)
+            self.clustering.fit(self.activities_train)
 
             if self.cluster_eval_method == 'bic':
-                score = self.clustering.bic(self.activities)
+                score = self.clustering.bic(self.activities_train)
             elif self.cluster_eval_method:
                 score = calinski_harabaz_score(
-                    self.activities,
-                    self.clustering.predict(self.activities)
+                    self.activities_train,
+                    self.clustering.predict(self.activities_train)
                 )
             elif self.cluster_eval_method:
                 score = silhouette_score(
-                    self.activities,
-                    self.clustering.predict(self.activities)
+                    self.activities_train,
+                    self.clustering.predict(self.activities_train)
                 )
 
             print('obtained {2}: {0} for k = {1}'.format(score, k_cluster,
@@ -275,8 +275,9 @@ class SimDeep(DeepBase):
         using K-Means algorithm on the node activities,
         using only nodes linked to survival
         """
+        print('performing clustering on the omic model with the following key:{0}'.format(
+            self.training_omic_list))
 
-        print('performing clustering...')
         if self.cluster_method == 'kmeans':
             self.clustering = KMeans(n_clusters=self.nb_clusters, n_init=100)
 
@@ -287,39 +288,41 @@ class SimDeep(DeepBase):
                 max_iter=10000,
                 n_init=100)
 
-        if not self.activities.any():
+        if not self.activities_train.any():
             raise Exception('No components linked to survival!'\
                             ' cannot perform clustering')
         self._predict_best_k_for_cluster()
 
-        self.clustering.fit(self.activities)
-        self.labels = self.clustering.predict(self.activities)
+        self.clustering.fit(self.activities_train)
+        labels = self.clustering.predict(self.activities_train)
 
-        self._order_labels_according_to_survival()
+        labels = self._order_labels_according_to_survival(labels)
 
         print("clustering done, labels ordered according to survival:")
-        for key, value in Counter(self.labels).items():
+        for key, value in Counter(labels).items():
             print('cluster label: {0}\t number of samples:{1}'.format(key, value))
 
         print('\n')
 
         nbdays, isdead = self.dataset.survival.T.tolist()
-        pvalue = coxph(self.labels, isdead, nbdays)
+        pvalue = coxph(labels, isdead, nbdays)
         print('Cox-PH p-value (Log-Rank) for the cluster labels: {0}'.format(pvalue))
 
-        return self.labels
+        return labels
 
-    def _order_labels_according_to_survival(self):
+    def _order_labels_according_to_survival(self, labels):
         """
         Order cluster labels according to survival
         """
+        labels_old = labels.copy()
+
         days, dead = np.asarray(self.dataset.survival).T
 
         self._label_ordered_dict = {}
 
-        for label in set(self.labels):
-            mean = surv_mean(dead[self.labels == label],
-                             days[self.labels == label])
+        for label in set(labels_old):
+            mean = surv_mean(dead[labels_old == label],
+                             days[labels_old == label])
             self._label_ordered_dict[label] = mean
 
         label_ordered = [label for label, mean in
@@ -328,29 +331,47 @@ class SimDeep(DeepBase):
         self._label_ordered_dict = {old_label: new_label
                       for new_label, old_label in enumerate(label_ordered)}
 
-        labels = self.labels.copy()
-
         for old_label in self._label_ordered_dict:
-            labels[self.labels == old_label] = self._label_ordered_dict[old_label]
+            labels[labels_old == old_label] = self._label_ordered_dict[old_label]
 
-        self.labels = labels
+        return labels
 
-    def look_for_survival_nodes(self):
+    def look_for_survival_nodes(self, keys=None):
         """
         detect nodes from the autoencoder significantly
         linked with survival through coxph regression
         """
-        self.activities = self.encoder.predict(self.matrix_train)
+        self.training_omic_list = []
 
-        self._look_for_survival_nodes()
+        if not keys:
+            keys = self.encoder_array.keys()
 
-    def _look_for_survival_nodes(self):
+        for key in keys:
+            self.training_omic_list.append(key)
+
+            encoder = self.encoder_array[key]
+            matrix_train = self.matrix_array_train[key]
+
+            activities = encoder.predict(matrix_train)
+
+            valid_node_ids = self._look_for_survival_nodes(activities)
+            self.valid_node_ids_array[key] = valid_node_ids
+
+            print('number of components linked to survival found:{0} for key {1}'.format(
+                len(valid_node_ids), key))
+
+            self.activities_array[key] = activities.T[valid_node_ids].T
+
+        self.activities_train = hstack([self.activities_array[key]
+                                        for key in self.activities_array])
+
+    def _look_for_survival_nodes(self, activities):
         """
         """
         nbdays, isdead = self.dataset.survival.T.tolist()
         pvalue_list = []
 
-        for node_id, activity in enumerate(self.activities.T):
+        for node_id, activity in enumerate(activities.T):
             activity = activity.tolist()
             pvalue = coxph(activity, isdead, nbdays)
             pvalue_list.append((node_id, pvalue))
@@ -358,12 +379,9 @@ class SimDeep(DeepBase):
         pvalue_list = filter(lambda x: not np.isnan(x[1]), pvalue_list)
         pvalue_list.sort(key=lambda x:x[1], reverse=True)
 
-        self.valid_node_ids = [node_id for node_id, pvalue in pvalue_list
+        valid_node_ids = [node_id for node_id, pvalue in pvalue_list
                                if pvalue < self.pvalue_thres]
-
-        print('number of components linked to survival found:', len(self.valid_node_ids))
-
-        self.activities = self.activities.T[self.valid_node_ids].T
+        return valid_node_ids
 
 
 if __name__ == "__main__":

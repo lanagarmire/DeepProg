@@ -39,7 +39,7 @@ def main():
     """ """
     simdeep = DeepBase()
     simdeep.load_training_dataset()
-    simdeep.fit()
+    simdeep.construct_autoencoders()
 
 
 class DeepBase():
@@ -74,7 +74,7 @@ class DeepBase():
         """
         self.dataset = dataset
 
-        self.matrix_train = None
+        self.matrix_array_train = {}
 
         self.nb_epoch = nb_epoch
         self.level_dims = level_dims
@@ -89,16 +89,16 @@ class DeepBase():
         self.W_l1_constant = w_reg
         self.A_l2_constant = act_reg
 
-        self.encoder = None
-        self.model = None
+        self.encoder_array = {}
+        self.model_array = {}
 
-    def construct_autoencoder(self):
+    def construct_autoencoders(self):
         """
         main class to create the autoencoder
         """
-        self.create_autoencoder()
-        self.compile_model()
-        self.fit_autoencoder()
+        self.create_autoencoders()
+        self.compile_models()
+        self.fit_autoencoders()
 
     def load_training_dataset(self):
         """
@@ -106,9 +106,9 @@ class DeepBase():
         """
         self.dataset.load_array()
         self.dataset.load_survival()
-        self.dataset.normalize()
+        self.dataset.normalize_training_array()
 
-        self.matrix_train = self.dataset.matrix_stacked
+        self.matrix_array_train = self.dataset.matrix_array_train
 
     def load_test_dataset(self):
         """
@@ -117,124 +117,156 @@ class DeepBase():
         self.dataset.load_matrix_test()
         self.dataset.load_survival_test()
 
-    def create_autoencoder(self):
+    def create_autoencoders(self):
+        """ """
+        for key in self.matrix_array_train:
+            self._create_autoencoder(self.matrix_array_train[key], key)
+
+    def _create_autoencoder(self, matrix_train, key):
         """
         Instantiate the  autoencoder architecture
         """
-        print 'creating autoencoder...'
+        print('creating autoencoder...')
         t = time()
 
-        self.model = Sequential()
+        model = Sequential()
 
-        X_shape = self.matrix_train.shape
+        X_shape = matrix_train.shape
 
         nb_hidden = 0
 
         for dim in self.level_dims:
             nb_hidden += 1
-            self._add_dense_layer(dim,
-                                  self.activation,
-                                  name='hidden layer nb:{0}'.format(nb_hidden))
+            model = self._add_dense_layer(
+                model,
+                X_shape,
+                dim,
+                name='hidden layer nb:{0}'.format(nb_hidden))
 
             if self.dropout:
-                self.model.add(Dropout(self.dropout))
+                model.add(Dropout(self.dropout))
 
-        self._add_dense_layer(self.new_dim,
-                              self.activation,
-                              name='new dim')
+        model = self._add_dense_layer(
+                model,
+                X_shape,
+                dim,
+            name='new dim')
 
         if self.dropout:
-            self.model.add(Dropout(self.dropout))
+            model.add(Dropout(self.dropout))
 
         for dim in reversed(self.level_dims):
             nb_hidden += 1
-            self._add_dense_layer(dim,
-                                  self.activation,
-                                  name='hidden layer nb:{0}'.format(nb_hidden))
+            model = self._add_dense_layer(
+                model,
+                X_shape,
+                dim,
+                name='hidden layer nb:{0}'.format(nb_hidden))
 
             if self.dropout:
-                self.model.add(Dropout(self.dropout))
+                model.add(Dropout(self.dropout))
 
-        self._add_dense_layer(X_shape[1], self.activation, name='final layer')
+        model = self._add_dense_layer(
+            model,
+            X_shape,
+            X_shape[1],
+            name='final layer')
 
-        print 'model created in {0}s !'.format(time() - t)
+        self.model_array[key] = model
 
-    def _add_dense_layer(self, dim, activation, name=None):
+        print('model for {1} created in {0}s !'.format(time() - t, key))
+
+    def _add_dense_layer(self, model, shape, dim, name=None):
         """
         private function to add one layer
         """
         input_dim = None
 
-        if not self.model.layers:
-            X_shape = self.matrix_train.shape
-            input_dim = X_shape[1]
+        if not model.layers:
+            input_dim = shape[1]
 
-        self.model.add(Dense(dim,
+        model.add(Dense(dim,
                         activity_regularizer=ActivityRegularizer(
-                            l2=self.A_l2_constant),
-                             W_regularizer=WeightRegularizer(
-                                 l1=self.W_l1_constant),
-                             name=name,
-                             activation=activation,
-                             input_dim=input_dim))
+                        l2=self.A_l2_constant),
+                        W_regularizer=WeightRegularizer(
+                            l1=self.W_l1_constant),
+                        name=name,
+                        activation=self.activation,
+                        input_dim=input_dim))
+        return model
 
-    def compile_model(self):
+    def compile_models(self):
         """
         define the optimizer and the loss function
         compile the model and ready to fit the data!
         """
-        print 'compiling deep model...'
-        self.model.compile(optimizer=self.optimizer, loss=self.loss)
+        for key in self.model_array:
+            model = self.model_array[key]
+            print('compiling deep model...')
+            model.compile(optimizer=self.optimizer, loss=self.loss)
 
-        print 'compilation done!\n summary of the model:\n',self.model.summary()
+            print('compilation done for key {0}!'.format(key))
 
-    def fit_autoencoder(self):
+    def fit_autoencoders(self):
         """
         fit the autoencoder using the training matrix
         """
-        self.model.fit(x=self.matrix_train,
-                       y=self.matrix_train,
+        for key in self.model_array:
+            model = self.model_array[key]
+            matrix_train = self.matrix_array_train[key]
+
+            model.fit(x=matrix_train,
+                       y=matrix_train,
                        verbose=2,
                        nb_epoch=self.nb_epoch,
                        validation_split=self.data_split,
                        shuffle=True)
-        print 'fitting done!'
+            print('fitting done for model {0}!'.format(key))
 
-        self._define_encoder()
+        self._define_encoders()
 
-    def _define_encoder(self):
+    def _define_encoders(self):
         """ """
-        X_shape = self.matrix_train.shape
+        for key in self.model_array:
+            model = self.model_array[key]
+            matrix_train = self.matrix_array_train[key]
 
-        inp = Input(shape=(X_shape[1],))
+            X_shape = matrix_train.shape
 
-        encoder = self.model.layers[0](inp)
+            inp = Input(shape=(X_shape[1],))
 
-        for layer in self.model.layers[1:]:
-            encoder = layer(encoder)
-            if layer.name == 'new dim':
-                break
+            encoder = model.layers[0](inp)
 
-        self.encoder = Model(inp, encoder)
+            for layer in model.layers[1:]:
+                encoder = layer(encoder)
+                if layer.name == 'new dim':
+                    break
 
-    def save_encoder(self, fname='encoder.h5'):
+            encoder = Model(inp, encoder)
+            self.encoder_array[key] = encoder
+
+    def save_encoders(self, fname='encoder.h5'):
         """
         Save a keras model in the self.path_model directory
         :fname: str    the name of the file to save the model
         """
-        self.encoder.save(self.path_model + fname)
-        print 'model saved!'
+        for key in self.encoder_array:
+            encoder = self.encoder_array[key]
+            encoder.save('{0}/{1}_{2}'.format(self.path_model, key, fname))
+            print('model saved for key:{0}!'.format(key))
 
-    def load_encoder(self, fname='encoder.h5'):
+    def load_encoders(self, fname='encoder.h5'):
         """
         Load a keras model from the self.path_model directory
         :fname: str    the name of the file to load
         """
-        assert(isfile(self.path_model + fname))
-
-        t = time()
-        self.encoder = load_model(self.path_model + fname)
-        print 'model loaded in {0} s!'.format(time() - t)
+        for key in self.matrix_array_train:
+            file_path = '{0}/{1}_{2}'.format(self.path_model, key, fname)
+            assert(isfile(file_path))
+            t = time()
+            encoder = load_model(file_path)
+            print('model {1} loaded in {0} s!'.format(time() - t, key))
+            self.encoder_array[key] = encoder
 
 
 if __name__ == "__main__":
