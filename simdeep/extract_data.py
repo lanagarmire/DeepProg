@@ -79,6 +79,8 @@ class LoadData():
         self.test_tsv = test_tsv
         self.matrix_array_train = {}
         self.matrix_array_reducer = {}
+        self.matrix_array_reducer_test = {}
+
         self.sample_ids = []
         self.data_type = training_tsv.keys()
 
@@ -112,6 +114,7 @@ class LoadData():
             matrix_ref = self.matrix_array[key]
 
             common_features = set(feature_ids).intersection(feature_ids_ref)
+            import ipdb;ipdb.set_trace()
 
             feature_ids_dict = {feat: i for i,feat in enumerate(feature_ids)}
             feature_ids_ref_dict = {feat: i for i,feat in enumerate(feature_ids_ref)}
@@ -130,11 +133,11 @@ class LoadData():
                 self.sample_ids_test = sample_ids
 
             matrix_ref, matrix_test = self.transform_matrices(
-                matrix_ref,
-                matrix_test,
+                matrix_ref, matrix_test, key,
                 unit_norm=TRAIN_NORM_SCALE,
                 rank_scale=TRAIN_RANK_NORM,
                 min_max_scale=TRAIN_MIN_MAX,
+                correlation_reducer=CORRELATION_REDUCER,
             )
 
             self.matrix_test_array[key] = matrix_test
@@ -256,7 +259,8 @@ class LoadData():
 
         return matrix
 
-    def transform_matrices(self, matrix_ref, matrix,
+    def transform_matrices(self,
+                           matrix_ref, matrix, key,
                            mad_scale=MAD_SCALE,
                            robust_scale=ROBUST_SCALE,
                            min_max_scale=MIN_MAX_SCALE,
@@ -277,6 +281,8 @@ class LoadData():
             reducer = CorrelationReducer()
             matrix_ref = reducer.fit_transform(matrix_ref)
             matrix = reducer.transform(matrix)
+
+            self.matrix_array_reducer_test[key] = reducer
 
             if rank_scale:
                 matrix_ref = RankNorm().fit_transform(matrix_ref)

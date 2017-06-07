@@ -40,11 +40,11 @@ TRAINING_TSV = OrderedDict([
 ])
 
 TEST_TSV = {
-    'SIJIA': '0601_brca_pds_merged_matrix.tsv',
+    'SIJIA': '0606_brca_pds_testing_merged_matrix.tsv',
 }
 
 # name of the tsv file containing the survival data of the test set
-SURVIVAL_TSV_TEST = '0601_pds_merged_survival.tsv'
+SURVIVAL_TSV_TEST = '0606_pds_testing_merged_survival.tsv'
 
 # Path where to save load the Keras models
 PATH_MODEL = PATH_THIS_FILE + '/../data/models/'
