@@ -16,7 +16,8 @@ NB_CLUSTERS = 2 # Number of clusters
 CLUSTER_METHOD = 'mixture'
 CLUSTER_EVAL_METHOD = 'bic'
 CLUSTER_ARRAY = [2,
-                 # 3, 4, 5, 6, 7
+                 3,
+                 # 4, 5, 6, 7
 ]
 PVALUE_THRESHOLD = 0.05 # Threshold for survival significance to set a node as valid
 ########################################################
@@ -25,26 +26,26 @@ PVALUE_THRESHOLD = 0.05 # Threshold for survival significance to set a node as v
 # path to the folder containing the data
 
 # PATH_DATA = PATH_THIS_FILE + "/../examples/data/"
-PATH_DATA = "/home/opoirion/data/survival_analysis_multiple/sijia/"
+PATH_DATA = "/home/opoirion/data/survival_analysis_multiple/"
 
 # name of the tsv file containing the survival data of the training set
-SURVIVAL_TSV = '0601_pds_merged_survival.tsv'
+SURVIVAL_TSV = 'survival_event_liri.txt'
 
 # dict('data type', 'name of the tsv file which are inside PATH_DATA')
 # These data will be stacked together to build the autoencoder
 TRAINING_TSV = OrderedDict([
-    # ('MIR', 'mir_dummy.tsv'),
-    # ('METH', 'meth_dummy.tsv'),
-    # ('RNA', 'rna_dummy.tsv'),
-    ('SIJIA', '0601_brca_pds_merged_matrix.tsv'),
+    # ('MIR', 'mir_LUAD.tsv'),
+    # ('METH', 'meth_LUAD.tsv'),
+    # ('RNA', 'rna_LUAD.tsv'),
+    ('RNA', 'rna_validation_liri.tsv'),
 ])
 
 TEST_TSV = {
-    'SIJIA': '0606_brca_pds_testing_merged_matrix.tsv',
+    'RNA': 'rna_validation_360.tsv',
 }
 
 # name of the tsv file containing the survival data of the test set
-SURVIVAL_TSV_TEST = '0606_pds_testing_merged_survival.tsv'
+SURVIVAL_TSV_TEST = 'survival_event_360.txt'
 
 # Path where to save load the Keras models
 PATH_MODEL = PATH_THIS_FILE + '/../data/models/'
@@ -62,8 +63,8 @@ CORRELATION_REDUCER = False
 ## Normalize before the autoencoder construction ########
 TRAIN_MIN_MAX = False
 TRAIN_NORM_SCALE = False
-TRAIN_DIM_REDUCTION = False
-TRAIN_RANK_NORM = False
+TRAIN_DIM_REDUCTION = True
+TRAIN_RANK_NORM = True
 #########################################################
 
 ##################### Autoencoder Variable ##############
@@ -86,7 +87,7 @@ DATA_SPLIT = None
 # activation function
 ACTIVATION = 'tanh'
 # Number of epoch
-NB_EPOCH = 10
+NB_EPOCH = 50
 # Loss function to minimize
 LOSS = 'mse'
 # Optimizer (sgd for Stochastic Gradient Descent)
@@ -99,6 +100,13 @@ OPTIMIZER = 'adam'
 
 # Top K features retained by omic type.
 # If a new feature is added in the TRAINING_TSV variable this dict must be updated
+MIXTURE_PARAMS = {
+    'covariance_type': 'spherical',
+    'max_iter': 10000,
+    'n_init': 100
+    }
+
+
 NDIM_CLASSIF = {
     'RNA': 100,
     'MIR': 50,

@@ -13,6 +13,7 @@ from simdeep.config import CLUSTER_ARRAY
 from simdeep.config import PVALUE_THRESHOLD
 from simdeep.config import SELECT_FEATURES_METHOD
 from simdeep.config import CLASSIFIER
+from simdeep.config import MIXTURE_PARAMS
 
 from simdeep.config import MAD_SCALE
 from simdeep.config import ROBUST_SCALE
@@ -284,9 +285,8 @@ class SimDeep(DeepBase):
         elif self.cluster_method == 'mixture':
             self.clustering = GaussianMixture(
                 n_components=self.nb_clusters,
-                covariance_type='spherical',
-                max_iter=10000,
-                n_init=100)
+                **MIXTURE_PARAMS
+            )
 
         if not self.activities_train.any():
             raise Exception('No components linked to survival!'\
