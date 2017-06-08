@@ -149,7 +149,7 @@ class DeepBase():
         model = self._add_dense_layer(
                 model,
                 X_shape,
-                dim,
+            self.new_dim,
             name='new dim')
 
         if self.dropout:

@@ -9,17 +9,16 @@ from simdeep.config import SURVIVAL_TSV
 from simdeep.config import SURVIVAL_TSV_TEST
 from simdeep.config import PATH_DATA
 
-from simdeep.config import MAD_SCALE
-from simdeep.config import ROBUST_SCALE
-from simdeep.config import MIN_MAX_SCALE
-from simdeep.config import UNIT_NORM
-from simdeep.config import RANK_SCALE
-from simdeep.config import CORRELATION_REDUCER
-
 from simdeep.config import TRAIN_MIN_MAX
 from simdeep.config import TRAIN_NORM_SCALE
-from simdeep.config import TRAIN_DIM_REDUCTION
+from simdeep.config import TRAIN_CORR_REDUCTION
 from simdeep.config import TRAIN_RANK_NORM
+from simdeep.config import TRAIN_MAD_SCALE
+from simdeep.config import TRAIN_ROBUST_SCALE
+from simdeep.config import TRAIN_CORR_RANK_NORM
+
+from simdeep.config import CROSS_VALIDATION_INSTANCE
+from simdeep.config import TEST_FOLD
 
 from simdeep.survival_utils import load_data_from_tsv
 from simdeep.survival_utils import load_survival_file
@@ -29,8 +28,6 @@ from simdeep.survival_utils import CorrelationReducer
 
 from time import time
 
-from numpy import hstack
-
 import numpy as np
 
 
@@ -38,14 +35,16 @@ def main():
     """ """
     load_data = LoadData()
     load_data.load_array()
+    load_data.load_survival()
+    load_data.create_a_cv_split()
+
     load_data.normalize_training_array()
 
-    load_data.load_survival()
+    load_data.load_matrix_test_fold()
 
     load_data.load_matrix_test()
-    # load_data.reorder_test_matrix('SIJIA')
-
     load_data.load_survival_test()
+
 
 class LoadData():
     def __init__(
@@ -54,7 +53,10 @@ class LoadData():
             training_tsv=TRAINING_TSV,
             test_tsv=TEST_TSV,
             survival_tsv=SURVIVAL_TSV,
-            survival_tsv_test=SURVIVAL_TSV_TEST):
+            survival_tsv_test=SURVIVAL_TSV_TEST,
+            cross_validation_instance=CROSS_VALIDATION_INSTANCE,
+            test_fold=TEST_FOLD,
+    ):
         """
         class to extract data
         :training_matrices: dict(matrice_type, path to the tsv file)
@@ -82,17 +84,25 @@ class LoadData():
         self.sample_ids = []
         self.data_type = training_tsv.keys()
 
-        self.matrix_stacked = None
-        self.features_stacked = None
         self.survival = None
 
         self.survival_tsv_test = survival_tsv_test
 
         self.feature_test_array = {}
         self.matrix_test_array = {}
+
+        self.sample_ids_cv = []
+        self.matrix_cv_array = {}
+        self.survival_cv = None
+
         self.matrix_ref_array = {}
+        self.feature_ref_array = {}
+
         self.survival_test = None
         self.sample_ids_test = None
+
+        self.cross_validation_instance = cross_validation_instance
+        self.test_fold = test_fold
 
         self.do_feature_reduction = None
 
@@ -102,9 +112,31 @@ class LoadData():
         self.min_max_scaler = MinMaxScaler()
         self.dim_reducer = CorrelationReducer()
 
+    def load_matrix_test_fold(self):
+        """ """
+        for key in self.test_tsv:
+
+            matrix_test = self.matrix_cv_array[key].copy()
+            matrix_ref = self.matrix_array[key].copy()
+
+            matrix_ref, matrix_test = self.transform_matrices(
+                matrix_ref, matrix_test, key,
+                unit_norm=TRAIN_NORM_SCALE,
+                rank_scale=TRAIN_RANK_NORM,
+                mad_scale=TRAIN_MAD_SCALE,
+                robust_scale=TRAIN_ROBUST_SCALE,
+                min_max_scale=TRAIN_MIN_MAX,
+                correlation_reducer=TRAIN_CORR_REDUCTION,
+                corr_rank_scale=TRAIN_CORR_RANK_NORM,
+            )
+
+            self.matrix_cv_array[key] = matrix_test
+            self.feature_ref_array[key] = self.feature_array[key][:]
+
     def load_matrix_test(self):
         """ """
         for key in self.test_tsv:
+            self.feature_ref_array[key] = self.feature_array[key][:]
             sample_ids, feature_ids, matrix = load_data_from_tsv(self.test_tsv[key],
                                                              path_data=self.path_data)
 
@@ -133,8 +165,11 @@ class LoadData():
                 matrix_ref, matrix_test, key,
                 unit_norm=TRAIN_NORM_SCALE,
                 rank_scale=TRAIN_RANK_NORM,
+                mad_scale=TRAIN_MAD_SCALE,
+                robust_scale=TRAIN_ROBUST_SCALE,
                 min_max_scale=TRAIN_MIN_MAX,
-                correlation_reducer=TRAIN_DIM_REDUCTION,
+                correlation_reducer=TRAIN_CORR_REDUCTION,
+                corr_rank_scale=TRAIN_CORR_RANK_NORM,
             )
 
             self.matrix_test_array[key] = matrix_test
@@ -143,7 +178,7 @@ class LoadData():
     def reorder_test_matrix(self, key):
         """ """
         features_test = self.feature_test_array[key]
-        features_ref = self.feature_array[key]
+        features_ref = self.feature_ref_array[key]
 
         ref_dict = {feat: pos for pos, feat in enumerate(features_test)}
         index = [ref_dict[feat] for feat in features_ref]
@@ -182,15 +217,25 @@ class LoadData():
 
             print('{0} loaded of dim:{1}'.format(f_name, matrix.shape))
 
-        self._stack_matrices()
         print('data loaded in {0} s'.format(time() - t))
 
-    def _stack_matrices(self):
+    def create_a_cv_split(self):
         """ """
-        self.matrix_stacked = hstack([self.matrix_array[data]
-                                      for data in self.data_type])
-        self.features_stacked = [feat for data in self.data_type
-                                 for feat in self.feature_array[data]]
+        if not self.cross_validation_instance:
+            return
+
+        cv = self.cross_validation_instance
+        train, test = [(tn, tt) for tn, tt in cv.split(self.sample_ids)][self.test_fold]
+
+        for key in self.matrix_array:
+            self.matrix_cv_array[key] = self.matrix_array[key][test]
+            self.matrix_array[key] = self.matrix_array[key][train]
+
+        self.survival_test = self.survival.copy()[test]
+        self.survival = self.survival[train]
+
+        self.sample_ids_cv = np.asarray(self.sample_ids)[test].tolist()
+        self.sample_ids = np.asarray(self.sample_ids)[train].tolist()
 
     def load_survival(self):
         """ """
@@ -198,7 +243,11 @@ class LoadData():
         matrix = []
 
         for sample in self.sample_ids:
-            assert(sample in survival)
+            try:
+                assert(sample in survival)
+            except AssertionError:
+                raise Exception('sample: {0} not in survival!'.format(sample))
+
             matrix.append(survival[sample])
 
         self.survival = np.asmatrix(matrix)
@@ -209,7 +258,11 @@ class LoadData():
         matrix = []
 
         for sample in self.sample_ids_test:
-            assert(sample in survival)
+            try:
+                assert(sample in survival)
+            except AssertionError:
+                raise Exception('sample: {0} not in survival!'.format(sample))
+
             matrix.append(survival[sample])
 
         self.survival_test = np.asmatrix(matrix)
@@ -224,32 +277,41 @@ class LoadData():
     def _normalize(self,
                    matrix,
                    key,
-                   do_min_max=TRAIN_MIN_MAX,
-                   do_norm_scale=TRAIN_NORM_SCALE,
-                   do_rank_scale=TRAIN_RANK_NORM,
-                   do_dim_reduction=TRAIN_DIM_REDUCTION):
+                   mad_scale=TRAIN_MAD_SCALE,
+                   robust_scale=TRAIN_ROBUST_SCALE,
+                   min_max=TRAIN_MIN_MAX,
+                   norm_scale=TRAIN_NORM_SCALE,
+                   rank_scale=TRAIN_RANK_NORM,
+                   corr_rank_scale=TRAIN_CORR_RANK_NORM,
+                   dim_reduction=TRAIN_CORR_REDUCTION):
         """ """
-        print('normalizing...')
+        print('normalizing for {0}...'.format(key))
 
-        if do_min_max:
+        if mad_scale:
+            matrix = self.mad_scaler.fit_transform(matrix.T).T
+
+        if robust_scale:
+            matrix = self.robust_scaler.fit_transform(matrix)
+
+        if min_max:
             matrix = MinMaxScaler().fit_transform(
-                matrix)
+                matrix.T).T
 
-        if do_rank_scale and not do_min_max:
+        if rank_scale:
             matrix = RankNorm().fit_transform(
                 matrix)
 
-        if do_dim_reduction:
-            print('dim reduction...')
+        if dim_reduction:
+            print('dim reduction for {0}...'.format(key))
             reducer = CorrelationReducer()
             matrix = reducer.fit_transform(
                 matrix)
 
-            if do_rank_scale:
+            if corr_rank_scale:
                 matrix = RankNorm().fit_transform(
                     matrix)
 
-        if do_norm_scale:
+        if norm_scale:
             matrix = self.normalizer.fit_transform(
                 matrix)
 
@@ -257,33 +319,22 @@ class LoadData():
 
     def transform_matrices(self,
                            matrix_ref, matrix, key,
-                           mad_scale=MAD_SCALE,
-                           robust_scale=ROBUST_SCALE,
-                           min_max_scale=MIN_MAX_SCALE,
-                           rank_scale=RANK_SCALE,
-                           correlation_reducer=CORRELATION_REDUCER,
-                           unit_norm=UNIT_NORM):
+                           mad_scale=TRAIN_MAD_SCALE,
+                           robust_scale=TRAIN_ROBUST_SCALE,
+                           min_max_scale=TRAIN_MIN_MAX,
+                           rank_scale=TRAIN_RANK_NORM,
+                           correlation_reducer=TRAIN_CORR_REDUCTION,
+                           corr_rank_scale=TRAIN_CORR_RANK_NORM,
+                           unit_norm=TRAIN_NORM_SCALE):
         """ """
         print('Scaling/Normalising dataset...')
         if min_max_scale:
-            matrix_ref = self.min_max_scaler.fit_transform(matrix_ref)
-            matrix = self.min_max_scaler.fit_transform(matrix)
+            matrix_ref = self.min_max_scaler.fit_transform(matrix_ref.T).T
+            matrix = self.min_max_scaler.fit_transform(matrix.T).T
 
         if rank_scale and not min_max_scale:
             matrix_ref = RankNorm().fit_transform(matrix_ref)
             matrix = RankNorm().fit_transform(matrix)
-
-        if correlation_reducer:
-            reducer = CorrelationReducer()
-            matrix_ref = reducer.fit_transform(matrix_ref)
-            matrix = reducer.transform(matrix)
-
-            self.feature_test_array[key] = self.sample_ids
-            self.feature_array[key] = self.sample_ids
-
-            if rank_scale:
-                matrix_ref = RankNorm().fit_transform(matrix_ref)
-                matrix = RankNorm().fit_transform(matrix)
 
         if mad_scale:
             matrix_ref = self.mad_scaler.fit_transform(matrix_ref.T).T
@@ -292,6 +343,18 @@ class LoadData():
         if robust_scale:
             matrix_ref = self.robust_scaler.fit_transform(matrix_ref)
             matrix = self.robust_scaler.transform(matrix)
+
+        if correlation_reducer:
+            reducer = CorrelationReducer()
+            matrix_ref = reducer.fit_transform(matrix_ref)
+            matrix = reducer.transform(matrix)
+
+            self.feature_test_array[key] = self.sample_ids
+            self.feature_ref_array[key] = self.sample_ids
+
+            if corr_rank_scale:
+                matrix_ref = RankNorm().fit_transform(matrix_ref)
+                matrix = RankNorm().fit_transform(matrix)
 
         if unit_norm:
             matrix_ref = self.normalizer.fit_transform(matrix_ref)

@@ -36,6 +36,7 @@ class RankNorm():
 
         return np.matrix(X)
 
+
 class CorrelationReducer():
     def __init__(self):
         self.dataset = None
@@ -59,7 +60,12 @@ def load_survival_file(f_name, path_data=PATH_DATA, sep='\t'):
     """ """
     survival = {}
     f_surv = open(path_data + f_name, 'r')
-    f_surv.readline()
+    first_line = f_surv.readline()
+    first_split = first_line.split(sep)[2]
+
+    if first_split[2].isdigit() or first_split[1].isdigit():
+        print('warning! the first line of the survival' \
+              'file might be not a header!:\nfirst line:{0}'.format(first_line))
 
     for line in f_surv:
         ids, ndays, isdead = line.split(sep)[:3]
