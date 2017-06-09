@@ -42,7 +42,7 @@ def main():
     sim_deep.fit()
     sim_deep.load_test_dataset()
     sim_deep.predict_labels_on_test_dataset()
-    # sim_deep.predict_labels_on_test_dataset()
+    # sim_deep.predict_labels_on_test_fold()
 
 
 class SimDeep(DeepBase):

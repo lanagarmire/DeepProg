@@ -21,7 +21,8 @@ from simdeep.extract_data import LoadData
 from time import time
 
 from simdeep.config import NB_EPOCH
-from simdeep.config import LEVEL_DIMS
+from simdeep.config import LEVEL_DIMS_IN
+from simdeep.config import LEVEL_DIMS_OUT
 from simdeep.config import NEW_DIM
 from simdeep.config import LOSS
 from simdeep.config import OPTIMIZER
@@ -47,7 +48,8 @@ class DeepBase():
     def __init__(self,
                  dataset=LoadData(),
                  nb_epoch=NB_EPOCH,
-                 level_dims=LEVEL_DIMS,
+                 level_dims_in=LEVEL_DIMS_IN,
+                 level_dims_out=LEVEL_DIMS_OUT,
                  new_dim=NEW_DIM,
                  loss=LOSS,
                  optimizer=OPTIMIZER,
@@ -77,7 +79,8 @@ class DeepBase():
         self.matrix_array_train = {}
 
         self.nb_epoch = nb_epoch
-        self.level_dims = level_dims
+        self.level_dims_in = level_dims_in
+        self.level_dims_out = level_dims_out
         self.new_dim = new_dim
         self.loss = loss
         self.optimizer = optimizer
@@ -106,6 +109,9 @@ class DeepBase():
         """
         self.dataset.load_array()
         self.dataset.load_survival()
+
+        self.dataset.create_a_cv_split()
+
         self.dataset.normalize_training_array()
 
         self.matrix_array_train = self.dataset.matrix_array_train
@@ -135,7 +141,7 @@ class DeepBase():
 
         nb_hidden = 0
 
-        for dim in self.level_dims:
+        for dim in self.level_dims_in:
             nb_hidden += 1
             model = self._add_dense_layer(
                 model,
@@ -155,7 +161,7 @@ class DeepBase():
         if self.dropout:
             model.add(Dropout(self.dropout))
 
-        for dim in reversed(self.level_dims):
+        for dim in self.level_dims_out:
             nb_hidden += 1
             model = self._add_dense_layer(
                 model,
@@ -234,13 +240,14 @@ class DeepBase():
             X_shape = matrix_train.shape
 
             inp = Input(shape=(X_shape[1],))
-
             encoder = model.layers[0](inp)
 
-            for layer in model.layers[1:]:
-                encoder = layer(encoder)
-                if layer.name == 'new dim':
-                    break
+            if model.layers[0].name != 'new dim':
+
+                for layer in model.layers[1:]:
+                    encoder = layer(encoder)
+                    if layer.name == 'new dim':
+                        break
 
             encoder = Model(inp, encoder)
             self.encoder_array[key] = encoder

@@ -15,11 +15,15 @@ PATH_THIS_FILE = pathsplit(abspath(__file__))[0]
 NB_CLUSTERS = 2 # Number of clusters
 CLUSTER_METHOD = 'mixture'
 CLUSTER_EVAL_METHOD = 'bic'
-CLASSIFIER_TYPE = 'mixture'
-CLUSTER_ARRAY = [2,
-                 3,
-                 # 4, 5,
-                 # 6, 7
+CLASSIFIER_TYPE = 'svm'
+CLUSTER_ARRAY = [
+    2,
+    # 3,
+    # 4,
+    # 5,
+    # 6, 7,
+    # 8,9,
+    # 10
 ]
 PVALUE_THRESHOLD = 0.05 # Threshold for survival significance to set a node as valid
 ########################################################
@@ -28,34 +32,36 @@ PVALUE_THRESHOLD = 0.05 # Threshold for survival significance to set a node as v
 # path to the folder containing the data
 
 # PATH_DATA = PATH_THIS_FILE + "/../examples/data/"
-PATH_DATA = "/home/opoirion/data/survival_analysis_multiple/sijia/raw_matrix_and_raw_testing/"
+PATH_DATA = "/home/opoirion/data/survival_analysis_multiple/"
 
 # name of the tsv file containing the survival data of the training set
-SURVIVAL_TSV = 'raw_merged_survival.tsv'
+SURVIVAL_TSV = 'survival_event_gse.txt'
 
 # dict('data type', 'name of the tsv file which are inside PATH_DATA')
 # These data will be stacked together to build the autoencoder
 TRAINING_TSV = OrderedDict([
-    ('CNV', '0607_raw_cnv_data.tsv'),
-    # ('METH', '0607_raw_methyl_data.tsv'),
-    # ('RNA', '0607_raw_expr_data.tsv'),
+    # ('CNV', '0607_pds_cnv_data.tsv'),
+    # ('METH', '0607_pds_methyl_data.tsv'),
+    ('RNA', 'rna_validation_gse.tsv'),
+    # ('BRCA', '0608_brca_pds_merged_training_matrix.tsv'),
 ])
 
 ######## Cross-validation on the training set ############
-CROSS_VALIDATION_INSTANCE = KFold(n_splits=5,
-                                  shuffle=True,
-                                  random_state=1)
-TEST_FOLD = 0
+CROSS_VALIDATION_INSTANCE = None #KFold(n_splits=5,
+                             #     shuffle=True,
+                              #    random_state=1)
+TEST_FOLD = 1
 ##########################################################
 
 TEST_TSV = {
-    'CNV': '0607_raw_cnv_testing_data.tsv',
-    # 'RNA': '0607_raw_expr_testing_data.tsv',
-    # 'METH': '0607_raw_methyl_testing_data.tsv',
+    # 'CNV': '0607_pds_cnv_testing_data.tsv',
+    # 'RNA': '0607_pds_expr_testing_data.tsv',
+    # 'METH': '0607_pds_methyl_testing_data.tsv',
+    'RNA': 'rna_validation_360.tsv',
 }
 
 # name of the tsv file containing the survival data of the test set
-SURVIVAL_TSV_TEST = 'raw_testing_merged_survival.tsv'
+SURVIVAL_TSV_TEST = 'survival_event_360.txt'
 
 # Path where to save load the Keras models
 PATH_MODEL = PATH_THIS_FILE + '/../data/models/'
@@ -63,13 +69,13 @@ PATH_MODEL = PATH_THIS_FILE + '/../data/models/'
 
 ##################### NORMALIZATION PROCEDURE ###########
 ## Normalize before the autoencoder construction ########
+TRAIN_MIN_MAX = False
 TRAIN_ROBUST_SCALE = False
 TRAIN_MAD_SCALE = False
-TRAIN_MIN_MAX = False
 TRAIN_NORM_SCALE = False
 TRAIN_RANK_NORM = True
 TRAIN_CORR_REDUCTION = True
-TRAIN_CORR_RANK_NORM = False
+TRAIN_CORR_RANK_NORM = True
 #########################################################
 
 ##################### Autoencoder Variable ##############
@@ -77,7 +83,8 @@ TRAIN_CORR_RANK_NORM = False
 # if LEVEL_DIMS == [500, 250] then there will be two hidden layers with 500 and 250 nodes
 # before and after the hidden middle layer (5 hidden layers)
 # if LEVEL_DIMS = [], then the autoencoder will have only one hidden layer
-LEVEL_DIMS = []
+LEVEL_DIMS_IN = [500]
+LEVEL_DIMS_OUT = [500]
 # Number of nodes in the middle hidden layer
 # (i.e. the new dimensions of the transformed data)
 NEW_DIM = 100
@@ -92,9 +99,9 @@ DATA_SPLIT = None
 # activation function
 ACTIVATION = 'tanh'
 # Number of epoch
-NB_EPOCH = 50
+NB_EPOCH = 10
 # Loss function to minimize
-LOSS = 'mse'
+LOSS = 'binary_crossentropy'
 # Optimizer (sgd for Stochastic Gradient Descent)
 OPTIMIZER = 'adam'
 ########################################################

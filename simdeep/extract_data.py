@@ -42,8 +42,8 @@ def main():
 
     load_data.load_matrix_test_fold()
 
-    load_data.load_matrix_test()
-    load_data.load_survival_test()
+    # load_data.load_matrix_test()
+    # load_data.load_survival_test()
 
 
 class LoadData():
@@ -114,7 +114,7 @@ class LoadData():
 
     def load_matrix_test_fold(self):
         """ """
-        for key in self.test_tsv:
+        for key in self.matrix_array:
 
             matrix_test = self.matrix_cv_array[key].copy()
             matrix_ref = self.matrix_array[key].copy()
@@ -231,7 +231,7 @@ class LoadData():
             self.matrix_cv_array[key] = self.matrix_array[key][test]
             self.matrix_array[key] = self.matrix_array[key][train]
 
-        self.survival_test = self.survival.copy()[test]
+        self.survival_cv = self.survival.copy()[test]
         self.survival = self.survival[train]
 
         self.sample_ids_cv = np.asarray(self.sample_ids)[test].tolist()
@@ -287,15 +287,19 @@ class LoadData():
         """ """
         print('normalizing for {0}...'.format(key))
 
+        if min_max:
+            matrix = MinMaxScaler().fit_transform(
+                matrix.T).T
+
         if mad_scale:
             matrix = self.mad_scaler.fit_transform(matrix.T).T
 
         if robust_scale:
             matrix = self.robust_scaler.fit_transform(matrix)
 
-        if min_max:
-            matrix = MinMaxScaler().fit_transform(
-                matrix.T).T
+        if norm_scale:
+            matrix = self.normalizer.fit_transform(
+                matrix)
 
         if rank_scale:
             matrix = RankNorm().fit_transform(
@@ -310,10 +314,6 @@ class LoadData():
             if corr_rank_scale:
                 matrix = RankNorm().fit_transform(
                     matrix)
-
-        if norm_scale:
-            matrix = self.normalizer.fit_transform(
-                matrix)
 
         return matrix
 
@@ -332,10 +332,6 @@ class LoadData():
             matrix_ref = self.min_max_scaler.fit_transform(matrix_ref.T).T
             matrix = self.min_max_scaler.fit_transform(matrix.T).T
 
-        if rank_scale and not min_max_scale:
-            matrix_ref = RankNorm().fit_transform(matrix_ref)
-            matrix = RankNorm().fit_transform(matrix)
-
         if mad_scale:
             matrix_ref = self.mad_scaler.fit_transform(matrix_ref.T).T
             matrix = self.mad_scaler.fit_transform(matrix.T).T
@@ -343,6 +339,14 @@ class LoadData():
         if robust_scale:
             matrix_ref = self.robust_scaler.fit_transform(matrix_ref)
             matrix = self.robust_scaler.transform(matrix)
+
+        if unit_norm:
+            matrix_ref = self.normalizer.fit_transform(matrix_ref)
+            matrix = self.normalizer.transform(matrix)
+
+        if rank_scale:
+            matrix_ref = RankNorm().fit_transform(matrix_ref)
+            matrix = RankNorm().fit_transform(matrix)
 
         if correlation_reducer:
             reducer = CorrelationReducer()
@@ -355,10 +359,6 @@ class LoadData():
             if corr_rank_scale:
                 matrix_ref = RankNorm().fit_transform(matrix_ref)
                 matrix = RankNorm().fit_transform(matrix)
-
-        if unit_norm:
-            matrix_ref = self.normalizer.fit_transform(matrix_ref)
-            matrix = self.normalizer.transform(matrix)
 
         return matrix_ref, matrix
 
