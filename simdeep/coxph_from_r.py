@@ -17,6 +17,9 @@ with warnings.catch_warnings():
 def coxph(values,
           isdead,
           nbdays,
+          do_KM_plot=False,
+          png_path='./',
+          fig_name='KM_plot.png',
           isfactor=False):
     """
     input:
@@ -31,8 +34,6 @@ plot(fitOrg,col=2:(7+1),xlab="Years",ylab="Probablity of survival",lwd=3,main=pa
     """
     isdead = FloatVector(isdead)
     nbdays = FloatVector(nbdays)
-
-    values_str = 'values'
 
     if isfactor:
         # values_str = 'factor({0})'.format(values_str)
@@ -49,6 +50,24 @@ plot(fitOrg,col=2:(7+1),xlab="Years",ylab="Probablity of survival",lwd=3,main=pa
     res = survival.coxph(cox)
 
     pvalue = rob.r.summary(res)[-5][2]
+
+    surv = survival.survfit(cox)
+
+    # color = ['green', 'blue', 'red']
+
+    if do_KM_plot:
+        rob.r.png("{0}/{1}.png".format(png_path, fig_name.replace('.png', '')))
+        rob.r.plot(surv,
+                   col=rob.r("2:8"),
+                   xlab="Years",
+                   ylab="Probablity of survival",
+                   sub='pvalue: {0}'.format(pvalue),
+                   lwd=3,
+                   mark_time=True
+            )
+
+        rob.r("dev.off()")
+        print("{0}/{1}.png saved!".format(png_path, fig_name.replace('.png', '')))
 
     return pvalue
 

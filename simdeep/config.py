@@ -12,12 +12,12 @@ from sklearn.model_selection import KFold
 PATH_THIS_FILE = pathsplit(abspath(__file__))[0]
 
 #################### SimDeep variable ##################
-NB_CLUSTERS = 2 # Number of clusters
+NB_CLUSTERS = 3 # Number of clusters
 CLUSTER_METHOD = 'mixture'
-CLUSTER_EVAL_METHOD = 'bic'
+CLUSTER_EVAL_METHOD = 'silhouette'
 CLASSIFIER_TYPE = 'svm'
 CLUSTER_ARRAY = [
-    2,
+    # 2,
     # 3,
     # 4,
     # 5,
@@ -25,46 +25,49 @@ CLUSTER_ARRAY = [
     # 8,9,
     # 10
 ]
-PVALUE_THRESHOLD = 0.05 # Threshold for survival significance to set a node as valid
+PVALUE_THRESHOLD = 0.01 # Threshold for survival significance to set a node as valid
 ########################################################
 
 #################### Paths to data file ################
 # path to the folder containing the data
 
 # PATH_DATA = PATH_THIS_FILE + "/../examples/data/"
-PATH_DATA = "/home/opoirion/data/survival_analysis_multiple/"
+PROJECT_NAME = 'v0.1_3omic_it1'
+PATH_DATA = "/home/opoirion/data/survival_analysis_multiple/sijia/pds_matrix_and_pds_testing//"
 
 # name of the tsv file containing the survival data of the training set
-SURVIVAL_TSV = 'survival_event_gse.txt'
+SURVIVAL_TSV = 'pds_merged_survival.tsv'
 
 # dict('data type', 'name of the tsv file which are inside PATH_DATA')
 # These data will be stacked together to build the autoencoder
 TRAINING_TSV = OrderedDict([
-    # ('CNV', '0607_pds_cnv_data.tsv'),
-    # ('METH', '0607_pds_methyl_data.tsv'),
-    ('RNA', 'rna_validation_gse.tsv'),
+    ('CNV', '0607_pds_cnv_data.tsv'),
+    ('METH', '0607_pds_methyl_data.tsv'),
+    ('RNA', '0607_pds_expr_data.tsv'),
     # ('BRCA', '0608_brca_pds_merged_training_matrix.tsv'),
 ])
 
-######## Cross-validation on the training set ############
-CROSS_VALIDATION_INSTANCE = None #KFold(n_splits=5,
-                             #     shuffle=True,
-                              #    random_state=1)
-TEST_FOLD = 1
-##########################################################
-
 TEST_TSV = {
-    # 'CNV': '0607_pds_cnv_testing_data.tsv',
-    # 'RNA': '0607_pds_expr_testing_data.tsv',
-    # 'METH': '0607_pds_methyl_testing_data.tsv',
-    'RNA': 'rna_validation_360.tsv',
+    'CNV': '0607_pds_cnv_testing_data.tsv',
+    'METH': '0607_pds_methyl_testing_data.tsv',
+    'RNA': '0607_pds_expr_testing_data.tsv',
 }
 
 # name of the tsv file containing the survival data of the test set
-SURVIVAL_TSV_TEST = 'survival_event_360.txt'
+SURVIVAL_TSV_TEST = 'pds_testing_merged_survival.tsv'
 
 # Path where to save load the Keras models
 PATH_MODEL = PATH_THIS_FILE + '/../data/models/'
+
+# Path to generate png images
+PATH_RESULTS = '/home/opoirion/code/d3visualisation/sijia/'
+
+######## Cross-validation on the training set ############
+CROSS_VALIDATION_INSTANCE =  None#KFold(n_splits=5,
+                                  # shuffle=True,
+                                   #random_state=1)
+TEST_FOLD = 1
+##########################################################
 ########################################################
 
 ##################### NORMALIZATION PROCEDURE ###########
@@ -73,9 +76,9 @@ TRAIN_MIN_MAX = False
 TRAIN_ROBUST_SCALE = False
 TRAIN_MAD_SCALE = False
 TRAIN_NORM_SCALE = False
-TRAIN_RANK_NORM = True
-TRAIN_CORR_REDUCTION = True
-TRAIN_CORR_RANK_NORM = True
+TRAIN_RANK_NORM = False
+TRAIN_CORR_REDUCTION = False
+TRAIN_CORR_RANK_NORM = False
 #########################################################
 
 ##################### Autoencoder Variable ##############
@@ -83,8 +86,8 @@ TRAIN_CORR_RANK_NORM = True
 # if LEVEL_DIMS == [500, 250] then there will be two hidden layers with 500 and 250 nodes
 # before and after the hidden middle layer (5 hidden layers)
 # if LEVEL_DIMS = [], then the autoencoder will have only one hidden layer
-LEVEL_DIMS_IN = [500]
-LEVEL_DIMS_OUT = [500]
+LEVEL_DIMS_IN = [50]
+LEVEL_DIMS_OUT = [50]
 # Number of nodes in the middle hidden layer
 # (i.e. the new dimensions of the transformed data)
 NEW_DIM = 100
@@ -114,8 +117,8 @@ OPTIMIZER = 'adam'
 # If a new feature is added in the TRAINING_TSV variable this dict must be updated
 MIXTURE_PARAMS = {
     'covariance_type': 'spherical',
-    'max_iter': 10000,
-    'n_init': 100
+    'max_iter': 5000,
+    'n_init': 1000
     }
 
 # Hyper parameters used to perform the grid search to find the best classifier

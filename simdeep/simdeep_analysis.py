@@ -14,6 +14,8 @@ from simdeep.config import PVALUE_THRESHOLD
 from simdeep.config import CLASSIFIER_TYPE
 from simdeep.config import CLASSIFIER
 from simdeep.config import MIXTURE_PARAMS
+from simdeep.config import PATH_RESULTS
+from simdeep.config import PROJECT_NAME
 
 from simdeep.config import CLUSTER_EVAL_METHOD
 from simdeep.config import CLUSTER_METHOD
@@ -53,6 +55,10 @@ class SimDeep(DeepBase):
                  cluster_method=CLUSTER_METHOD,
                  cluster_eval_method=CLUSTER_EVAL_METHOD,
                  classifier_type=CLASSIFIER_TYPE,
+                 project_name=PROJECT_NAME,
+                 path_results=PATH_RESULTS,
+                 cluster_array=CLUSTER_ARRAY,
+                 mixture_params=MIXTURE_PARAMS,
                  **kwargs):
         """
         ### AUTOENCODER PARAMETERS ###:
@@ -77,6 +83,11 @@ class SimDeep(DeepBase):
         self.nb_clusters = nb_clusters
         self.pvalue_thres = pvalue_thres
         self.classifier_grid = CLASSIFIER
+        self.cluster_array = cluster_array
+        self.path_results = path_results
+        self.mixture_params = mixture_params
+        self.project_name = project_name
+
         self.classifier = None
         self.classifier_type = classifier_type
 
@@ -130,16 +141,20 @@ class SimDeep(DeepBase):
 
         self._predict_test_labels()
 
-        self.test_labels = [self._label_ordered_dict[label]
-                            for label in self.test_labels[:]]
-
         print('#### report of assigned cluster:')
         for key, value in Counter(self.test_labels).items():
             print('class: {0}, number of samples :{1}'.format(key, value))
 
-        pvalue = coxph(self.test_labels, isdead, nbdays)
+        pvalue = coxph(self.test_labels, isdead, nbdays,
+                       isfactor=False,
+                       do_KM_plot=True,
+                       png_path=self.path_results,
+                       fig_name='{0}_KM_plot_test_fold_dataset'.format(self.project_name))
 
         print('Cox-PH p-value (Log-Rank) for inferred labels: {0}'.format(pvalue))
+
+        self._write_labels(self.dataset.sample_ids_cv, self.test_labels, '{0}_test_fold_labels'.format(
+            self.project_name))
 
         return self.test_labels, pvalue
 
@@ -169,16 +184,20 @@ class SimDeep(DeepBase):
 
         self._predict_test_labels()
 
-        self.test_labels = [self._label_ordered_dict[label]
-                            for label in self.test_labels[:]]
-
         print('#### report of assigned cluster:')
         for key, value in Counter(self.test_labels).items():
             print('class: {0}, number of samples :{1}'.format(key, value))
 
-        pvalue = coxph(self.test_labels, isdead, nbdays)
+        pvalue = coxph(self.test_labels, isdead, nbdays,
+                       isfactor=False,
+                       do_KM_plot=True,
+                       png_path=self.path_results,
+                       fig_name='{0}_KM_plot_test_dataset'.format(self.project_name))
 
         print('Cox-PH p-value (Log-Rank) for inferred labels: {0}'.format(pvalue))
+
+        self._write_labels(self.dataset.sample_ids_test, self.test_labels, '{0}_test_labels'.format(
+            self.project_name))
 
         return self.test_labels, pvalue
 
@@ -219,13 +238,15 @@ class SimDeep(DeepBase):
         elif self.cluster_method == 'mixture':
             self.clustering = GaussianMixture(
                 n_components=self.nb_clusters,
-                **MIXTURE_PARAMS
+                **self.mixture_params
             )
 
         if not self.activities_train.any():
             raise Exception('No components linked to survival!'\
                             ' cannot perform clustering')
-        self._predict_best_k_for_cluster()
+
+        if self.cluster_array and len(self.cluster_array) > 1:
+            self._predict_best_k_for_cluster()
 
         self.clustering.fit(self.activities_train)
         labels = self.clustering.predict(self.activities_train)
@@ -241,9 +262,26 @@ class SimDeep(DeepBase):
 
         nbdays, isdead = self.dataset.survival.T.tolist()
         pvalue = coxph(self.labels, isdead, nbdays)
+
+        pvalue = coxph(self.labels, isdead, nbdays,
+                       isfactor=False,
+                       do_KM_plot=True,
+                       png_path=self.path_results,
+                       fig_name='{0}_KM_plot_training_dataset'.format(self.project_name))
+
+        self._write_labels(self.dataset.sample_ids, self.labels, '{0}_training_set_labels'.format(
+            self.project_name))
+
         print('Cox-PH p-value (Log-Rank) for the cluster labels: {0}'.format(pvalue))
 
         return self.labels
+
+    def _write_labels(self, sample_ids, labels, fname):
+        """ """
+        f_file = open('{0}/{1}.tsv'.format(self.path_results, fname), 'w')
+
+        for sample, label in zip(sample_ids, labels):
+            f_file.write('{0}\t{1}\n'.format(sample, label))
 
     def look_for_survival_nodes(self, keys=None):
         """
@@ -272,7 +310,7 @@ class SimDeep(DeepBase):
             self.activities_array[key] = activities.T[valid_node_ids].T
 
         self.activities_train = hstack([self.activities_array[key]
-                                        for key in self.activities_array])
+                                        for key in keys])
 
     def _predict_test_labels(self):
         """ """
@@ -284,7 +322,7 @@ class SimDeep(DeepBase):
         criterion = None
         best_k = None
 
-        for k_cluster in CLUSTER_ARRAY:
+        for k_cluster in self.cluster_array:
             if self.cluster_method == 'mixture':
                 self.clustering.set_params(n_components=k_cluster)
             else:

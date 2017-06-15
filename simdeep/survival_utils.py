@@ -84,7 +84,7 @@ def load_data_from_tsv(f_name,
     header = f_tsv.readline().strip(sep + '\n').split(sep)
 
     feature_ids = ['{0}_{1}'.format(f_short, head)
-                   for head in header[1:]]
+                   for head in header]
     sample_ids = []
     f_matrix = []
 

@@ -30,6 +30,8 @@ from time import time
 
 import numpy as np
 
+from numpy import hstack
+
 
 def main():
     """ """
@@ -40,10 +42,11 @@ def main():
 
     load_data.normalize_training_array()
 
-    load_data.load_matrix_test_fold()
+    # load_data.load_matrix_test_fold()
 
-    # load_data.load_matrix_test()
-    # load_data.load_survival_test()
+    load_data.load_matrix_test()
+    load_data.load_survival_test()
+    load_data.reorder_test_matrix('METH')
 
 
 class LoadData():
@@ -133,13 +136,12 @@ class LoadData():
             self.matrix_cv_array[key] = matrix_test
             self.feature_ref_array[key] = self.feature_array[key][:]
 
-    def load_matrix_test(self):
+    def load_matrix_test(self, fill_unkown_feature_with_0=True):
         """ """
         for key in self.test_tsv:
             self.feature_ref_array[key] = self.feature_array[key][:]
             sample_ids, feature_ids, matrix = load_data_from_tsv(self.test_tsv[key],
                                                              path_data=self.path_data)
-
             feature_ids_ref = self.feature_array[key]
             matrix_ref = self.matrix_array[key]
 
@@ -147,6 +149,18 @@ class LoadData():
 
             feature_ids_dict = {feat: i for i,feat in enumerate(feature_ids)}
             feature_ids_ref_dict = {feat: i for i,feat in enumerate(feature_ids_ref)}
+
+            if len(common_features) < len(feature_ids_ref) and fill_unkown_feature_with_0:
+                missing_features = set(feature_ids_ref).difference(common_features)
+                print('filling {0} with 0 for {1} additional features'.format(
+                    key, len(missing_features)))
+
+                matrix = hstack([matrix, np.zeros((len(sample_ids), len(missing_features)))])
+
+                for i, feat in enumerate(missing_features):
+                    feature_ids_dict[feat] = i + len(feature_ids)
+
+                common_features = feature_ids_ref
 
             feature_index = [feature_ids_dict[feature] for feature in common_features]
             feature_ref_index = [feature_ids_ref_dict[feature] for feature in common_features]
