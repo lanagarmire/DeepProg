@@ -1,12 +1,11 @@
 from sklearn.svm import SVC
 from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import KFold
 
 from collections import OrderedDict
 
 from os.path import abspath
 from os.path import split as pathsplit
-
-from sklearn.model_selection import KFold
 
 # absolute path of this file
 PATH_THIS_FILE = pathsplit(abspath(__file__))[0]
@@ -16,57 +15,65 @@ NB_CLUSTERS = 3 # Number of clusters
 CLUSTER_METHOD = 'mixture'
 CLUSTER_EVAL_METHOD = 'silhouette'
 CLASSIFIER_TYPE = 'svm'
-CLUSTER_ARRAY = [
-    # 2,
-    # 3,
-    # 4,
-    # 5,
-    # 6, 7,
-    # 8,9,
-    # 10
-]
+CLUSTER_ARRAY = []
 PVALUE_THRESHOLD = 0.01 # Threshold for survival significance to set a node as valid
+
+#### Boosting values
+NB_ITER = 2 # boosting iteration
+NB_THREADS = 4 # number of simdeep instance launched in parallel
+NB_FOLDS = 3 # for each instance, the original dataset is split in folds and one fold is left
+CLASS_SELECTION = 'mean' # mean or max: the method used to select the final class, according to class probas
 ########################################################
 
 #################### Paths to data file ################
 # path to the folder containing the data
 
 # PATH_DATA = PATH_THIS_FILE + "/../examples/data/"
-PROJECT_NAME = 'v0.1_3omic_it1'
-PATH_DATA = "/home/opoirion/data/survival_analysis_multiple/sijia/pds_matrix_and_pds_testing//"
+PROJECT_NAME = 'DREAM challenge'
+PATH_DATA = "/home/opoirion/data/survival_analysis_multiple/dream_myeloma_challenge/"
 
 # name of the tsv file containing the survival data of the training set
-SURVIVAL_TSV = 'pds_merged_survival.tsv'
+SURVIVAL_TSV = 'Clinical_Data/globalClinTraining.csv'
+
+# Field from the survival tsv file
+SURVIVAL_FLAG = {'patient_id': '"Patient"',
+                  'survival': '"D_OS"',
+                 'event': '"D_OS_FLAG"'}
 
 # dict('data type', 'name of the tsv file which are inside PATH_DATA')
 # These data will be stacked together to build the autoencoder
 TRAINING_TSV = OrderedDict([
-    ('CNV', '0607_pds_cnv_data.tsv'),
-    ('METH', '0607_pds_methyl_data.tsv'),
-    ('RNA', '0607_pds_expr_data.tsv'),
-    # ('BRCA', '0608_brca_pds_merged_training_matrix.tsv'),
+    ('RNA', 'Expression_Data/microarray/EMTAB4032entrezIDlevel.csv'),
 ])
 
+SEPARATOR = {
+    'Expression_Data/rnaseq/MMRF_CoMMpass_IA9_E74GTF_Salmon_Gene_TPM.txt': '\t',
+    'Expression_Data/rnaseq/MMRF_CoMMpass_IA9_E74GTF_Salmon_Gene_Counts.txt': '\t',
+    'Expression_Data/microarray/GSE24080UAMSentrezIDlevel.csv': ',',
+    'Expression_Data/microarray/EMTAB4032entrezIDlevel.csv': ',',
+    'Expression_Data/microarray/GSE19784HOVON65entrezIDlevel.csv': ',',
+    'Expression_Data/microarray/GSE9782APEXentrezIDlevel_mas5.csv': ','
+    }
+
 TEST_TSV = {
-    'CNV': '0607_pds_cnv_testing_data.tsv',
-    'METH': '0607_pds_methyl_testing_data.tsv',
-    'RNA': '0607_pds_expr_testing_data.tsv',
+    'RNA': 'Expression_Data/microarray/GSE19784HOVON65entrezIDlevel.csv',
 }
 
 # name of the tsv file containing the survival data of the test set
-SURVIVAL_TSV_TEST = 'pds_testing_merged_survival.tsv'
+SURVIVAL_TSV_TEST = SURVIVAL_TSV
 
 # Path where to save load the Keras models
-PATH_MODEL = PATH_THIS_FILE + '/../data/models/'
+PATH_MODEL = '/home/opoirion/data/survival_analysis_multiple/models/'
 
 # Path to generate png images
-PATH_RESULTS = '/home/opoirion/code/d3visualisation/sijia/'
+PATH_RESULTS = '/home/opoirion/code/d3visualisation/dream_challenge//'
 
 ######## Cross-validation on the training set ############
-CROSS_VALIDATION_INSTANCE =  None#KFold(n_splits=5,
-                                  # shuffle=True,
-                                   #random_state=1)
-TEST_FOLD = 1
+CROSS_VALIDATION_INSTANCE =  KFold(n_splits=3,
+                                  shuffle=True,
+                                  random_state=1
+)
+TEST_FOLD = 0
 ##########################################################
 ########################################################
 
@@ -76,9 +83,9 @@ TRAIN_MIN_MAX = False
 TRAIN_ROBUST_SCALE = False
 TRAIN_MAD_SCALE = False
 TRAIN_NORM_SCALE = False
-TRAIN_RANK_NORM = False
-TRAIN_CORR_REDUCTION = False
-TRAIN_CORR_RANK_NORM = False
+TRAIN_RANK_NORM = True
+TRAIN_CORR_REDUCTION = True
+TRAIN_CORR_RANK_NORM = True
 #########################################################
 
 ##################### Autoencoder Variable ##############
@@ -102,7 +109,7 @@ DATA_SPLIT = None
 # activation function
 ACTIVATION = 'tanh'
 # Number of epoch
-NB_EPOCH = 10
+NB_EPOCH = 50
 # Loss function to minimize
 LOSS = 'binary_crossentropy'
 # Optimizer (sgd for Stochastic Gradient Descent)
@@ -116,9 +123,9 @@ OPTIMIZER = 'adam'
 # Top K features retained by omic type.
 # If a new feature is added in the TRAINING_TSV variable this dict must be updated
 MIXTURE_PARAMS = {
-    'covariance_type': 'spherical',
-    'max_iter': 5000,
-    'n_init': 1000
+    'covariance_type': 'diag',
+    'max_iter': 1000,
+    'n_init': 100
     }
 
 # Hyper parameters used to perform the grid search to find the best classifier

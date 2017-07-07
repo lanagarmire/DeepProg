@@ -20,7 +20,7 @@ from simdeep.config import TRAIN_CORR_RANK_NORM
 from simdeep.config import CROSS_VALIDATION_INSTANCE
 from simdeep.config import TEST_FOLD
 
-from simdeep.survival_utils import load_data_from_tsv
+from simdeep.survival_utils import load_data_from_tsv_transposee
 from simdeep.survival_utils import load_survival_file
 from simdeep.survival_utils import MadScaler
 from simdeep.survival_utils import RankNorm
@@ -46,7 +46,6 @@ def main():
 
     load_data.load_matrix_test()
     load_data.load_survival_test()
-    load_data.reorder_test_matrix('METH')
 
 
 class LoadData():
@@ -59,6 +58,7 @@ class LoadData():
             survival_tsv_test=SURVIVAL_TSV_TEST,
             cross_validation_instance=CROSS_VALIDATION_INSTANCE,
             test_fold=TEST_FOLD,
+            verbose=True,
     ):
         """
         class to extract data
@@ -75,6 +75,7 @@ class LoadData():
                                 must match a key existing in training_tsv
         """
 
+        self.verbose = verbose
         self.path_data = path_data
         self.survival_tsv = survival_tsv
         self.training_tsv = training_tsv
@@ -136,12 +137,15 @@ class LoadData():
             self.matrix_cv_array[key] = matrix_test
             self.feature_ref_array[key] = self.feature_array[key][:]
 
+            self.matrix_ref = matrix_ref
+
     def load_matrix_test(self, fill_unkown_feature_with_0=True):
         """ """
         for key in self.test_tsv:
             self.feature_ref_array[key] = self.feature_array[key][:]
-            sample_ids, feature_ids, matrix = load_data_from_tsv(self.test_tsv[key],
-                                                             path_data=self.path_data)
+            sample_ids, feature_ids, matrix = load_data_from_tsv_transposee(self.test_tsv[key],
+                                                                 key,
+                                                                 path_data=self.path_data)
             feature_ids_ref = self.feature_array[key]
             matrix_ref = self.matrix_array[key]
 
@@ -152,8 +156,10 @@ class LoadData():
 
             if len(common_features) < len(feature_ids_ref) and fill_unkown_feature_with_0:
                 missing_features = set(feature_ids_ref).difference(common_features)
-                print('filling {0} with 0 for {1} additional features'.format(
-                    key, len(missing_features)))
+
+                if self.verbose:
+                    print('filling {0} with 0 for {1} additional features'.format(
+                        key, len(missing_features)))
 
                 matrix = hstack([matrix, np.zeros((len(sample_ids), len(missing_features)))])
 
@@ -204,7 +210,9 @@ class LoadData():
 
     def load_array(self):
         """ """
-        print('loading data...')
+        if self.verbose:
+            print('loading data...')
+
         t = time()
 
         self.feature_array = {}
@@ -213,25 +221,33 @@ class LoadData():
         data = self.data_type[0]
         f_name = self.training_tsv[data]
 
-        self.sample_ids, feature_ids, matrix = load_data_from_tsv(f_name,
-                                                                  path_data=self.path_data)
-        print('{0} loaded of dim:{1}'.format(f_name, matrix.shape))
+        self.sample_ids, feature_ids, matrix = load_data_from_tsv_transposee(
+            f_name,
+            data,
+            path_data=self.path_data)
+
+        if self.verbose:
+            print('{0} loaded of dim:{1}'.format(f_name, matrix.shape))
 
         self.feature_array[data] = feature_ids
         self.matrix_array[data] = matrix
 
         for data in self.data_type[1:]:
             f_name = self.training_tsv[data]
-            sample_ids, feature_ids, matrix = load_data_from_tsv(f_name,
-                                                                 path_data=self.path_data)
+            sample_ids, feature_ids, matrix = load_data_from_tsv_transposee(
+                f_name,
+                data,
+                path_data=self.path_data)
             assert(self.sample_ids == sample_ids)
 
             self.feature_array[data] = feature_ids
             self.matrix_array[data] = matrix
 
-            print('{0} loaded of dim:{1}'.format(f_name, matrix.shape))
+            if self.verbose:
+                print('{0} loaded of dim:{1}'.format(f_name, matrix.shape))
 
-        print('data loaded in {0} s'.format(time() - t))
+        if self.verbose:
+            print('data loaded in {0} s'.format(time() - t))
 
     def create_a_cv_split(self):
         """ """
@@ -256,30 +272,54 @@ class LoadData():
         survival = load_survival_file(self.survival_tsv, path_data=self.path_data)
         matrix = []
 
-        for sample in self.sample_ids:
-            try:
-                assert(sample in survival)
-            except AssertionError:
-                raise Exception('sample: {0} not in survival!'.format(sample))
+        retained_samples = []
+        sample_removed = 0
 
+        for ids, sample in enumerate(self.sample_ids):
+            if sample not in survival:
+                sample_removed += 1
+                continue
+
+            retained_samples.append(ids)
             matrix.append(survival[sample])
 
         self.survival = np.asmatrix(matrix)
+
+        if sample_removed:
+            for key in self.matrix_array:
+                self.matrix_array[key] = self.matrix_array[key][retained_samples]
+
+            self.sample_ids = np.asarray(self.sample_ids)[retained_samples]
+
+            if self.verbose:
+                print('{0} samples without survival removed'.format(sample_removed))
 
     def load_survival_test(self):
         """ """
         survival = load_survival_file(self.survival_tsv_test, path_data=self.path_data)
         matrix = []
 
-        for sample in self.sample_ids_test:
-            try:
-                assert(sample in survival)
-            except AssertionError:
-                raise Exception('sample: {0} not in survival!'.format(sample))
+        retained_samples = []
+        sample_removed = 0
 
+        for ids, sample in enumerate(self.sample_ids_test):
+            if sample not in survival:
+                sample_removed += 1
+                continue
+
+            retained_samples.append(ids)
             matrix.append(survival[sample])
 
         self.survival_test = np.asmatrix(matrix)
+
+        if sample_removed:
+            for key in self.matrix_test_array:
+                self.matrix_test_array[key] = self.matrix_test_array[key][retained_samples]
+
+            self.sample_ids_test = np.asarray(self.sample_ids_test)[retained_samples]
+
+            if self.verbose:
+                print('{0} samples without survival removed'.format(sample_removed))
 
     def normalize_training_array(self):
         """ """
@@ -299,7 +339,8 @@ class LoadData():
                    corr_rank_scale=TRAIN_CORR_RANK_NORM,
                    dim_reduction=TRAIN_CORR_REDUCTION):
         """ """
-        print('normalizing for {0}...'.format(key))
+        if self.verbose:
+            print('normalizing for {0}...'.format(key))
 
         if min_max:
             matrix = MinMaxScaler().fit_transform(
@@ -320,7 +361,9 @@ class LoadData():
                 matrix)
 
         if dim_reduction:
-            print('dim reduction for {0}...'.format(key))
+            if self.verbose:
+                print('dim reduction for {0}...'.format(key))
+
             reducer = CorrelationReducer()
             matrix = reducer.fit_transform(
                 matrix)
@@ -341,7 +384,9 @@ class LoadData():
                            corr_rank_scale=TRAIN_CORR_RANK_NORM,
                            unit_norm=TRAIN_NORM_SCALE):
         """ """
-        print('Scaling/Normalising dataset...')
+        if self.verbose:
+            print('Scaling/Normalising dataset...')
+
         if min_max_scale:
             matrix_ref = self.min_max_scaler.fit_transform(matrix_ref.T).T
             matrix = self.min_max_scaler.fit_transform(matrix.T).T
@@ -375,6 +420,11 @@ class LoadData():
                 matrix = RankNorm().fit_transform(matrix)
 
         return matrix_ref, matrix
+
+    def save_dataset(self):
+        """
+        """
+        pass
 
 
 if __name__ == '__main__':

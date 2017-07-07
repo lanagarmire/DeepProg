@@ -1,6 +1,10 @@
 """
 """
+import re
+
 from simdeep.config import PATH_DATA
+from simdeep.config import SURVIVAL_FLAG
+from simdeep.config import SEPARATOR
 
 import  numpy as np
 
@@ -55,31 +59,44 @@ class CorrelationReducer():
         self.fit(dataset)
         return self.transform(dataset)
 
-
-def load_survival_file(f_name, path_data=PATH_DATA, sep='\t'):
+def load_survival_file(f_name, path_data=PATH_DATA, sep=','):
     """ """
     survival = {}
     f_surv = open(path_data + f_name, 'r')
-    first_line = f_surv.readline()
-    first_split = first_line.split(sep)[2]
 
-    if first_split[2].isdigit() or first_split[1].isdigit():
-        print('warning! the first line of the survival' \
-              'file might be not a header!:\nfirst line:{0}'.format(first_line))
+    first_line = f_surv.readline().strip(' \n\r\t').split(sep)
+
+    for field in SURVIVAL_FLAG.values():
+        try:
+            assert(field in first_line)
+        except Exception as e:
+            raise Exception("{0} not in {1}".format(
+                field, first_line))
+
+    patient_id = first_line.index(SURVIVAL_FLAG['patient_id'])
+    surv_id = first_line.index(SURVIVAL_FLAG['survival'])
+    event_id = first_line.index(SURVIVAL_FLAG['event'])
 
     for line in f_surv:
-        ids, ndays, isdead = line.split(sep)[:3]
+        line = line.split(sep)
+        ids  = line[patient_id].strip('"')
+        ndays = line[surv_id].strip('"')
+        isdead = line[event_id].strip('"')
+
         survival[ids] = (float(ndays), float(isdead))
 
     return survival
 
-def load_data_from_tsv(f_name,
-                       sep='\t',
-                       path_data=PATH_DATA,
-                       f_type=float,
-                       nan_to_num=True):
+def load_data_from_tsv(
+        f_name,
+        key,
+        path_data=PATH_DATA,
+        f_type=float,
+        nan_to_num=True):
     """ """
-    f_short = f_name[:3]
+    f_short = key
+    sep = SEPARATOR[f_name]
+
     f_tsv = open(path_data + f_name)
     header = f_tsv.readline().strip(sep + '\n').split(sep)
 
@@ -99,6 +116,45 @@ def load_data_from_tsv(f_name,
         f_matrix.append(map(f_type, line[1:]))
 
     return sample_ids, feature_ids, np.array(f_matrix)
+
+def format_sample_name(sample_ids):
+    """
+    """
+    regex = re.compile('_1_[A-Z][A-Z]')
+
+    sample_ids = [regex.sub('', sample.strip('"')) for sample in sample_ids]
+    return sample_ids
+
+def load_data_from_tsv_transposee(
+        f_name,
+        key,
+        path_data=PATH_DATA,
+        f_type=float,
+        nan_to_num=True):
+    """ """
+    sep = SEPARATOR[f_name]
+
+    f_tsv = open(path_data + f_name)
+    header = f_tsv.readline().strip(sep + '\n').split(sep)
+
+    sample_ids = header[1:]
+
+    sample_ids = format_sample_name(sample_ids)
+
+    feature_ids = []
+    f_matrix = []
+
+    for line in f_tsv:
+        line = line.strip(sep + '\n').split(sep)
+        feature_ids.append('{0}_{1}'.format(key, line[0]))
+
+        if nan_to_num:
+            line[1:] = [0 if (l.isalpha() or not l) else l
+                        for l in line[1:]]
+
+        f_matrix.append(map(f_type, line[1:]))
+
+    return sample_ids, feature_ids, np.array(f_matrix).T
 
 def select_best_classif_params(clf):
     """

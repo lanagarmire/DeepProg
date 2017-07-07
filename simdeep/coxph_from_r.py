@@ -1,6 +1,4 @@
 import warnings
-import numpy as np
-
 
 with warnings.catch_warnings():
     warnings.simplefilter("ignore")
@@ -28,9 +26,6 @@ def coxph(values,
         :nbdays: array <int>
     return:
         pvalues from wald test
-fitOrg <- survfit(formula = Surv(new_df$days_relapse,new_df$event_relapse) ~ new_df$SNF)
-plot(fitOrg,col=2:(7+1),xlab="Years",ylab="Probablity of survival",lwd=3,main=paste0("survival analysis ","(Log-rank P value ",p.val,")"), mark.time = TRUE)
-
     """
     isdead = FloatVector(isdead)
     nbdays = FloatVector(nbdays)
@@ -59,7 +54,7 @@ plot(fitOrg,col=2:(7+1),xlab="Years",ylab="Probablity of survival",lwd=3,main=pa
         rob.r.png("{0}/{1}.png".format(png_path, fig_name.replace('.png', '')))
         rob.r.plot(surv,
                    col=rob.r("2:8"),
-                   xlab="Years",
+                   xlab="Days",
                    ylab="Probablity of survival",
                    sub='pvalue: {0}'.format(pvalue),
                    lwd=3,

@@ -43,10 +43,11 @@ def main():
     simdeep.construct_autoencoders()
 
 
-class DeepBase():
+class DeepBase(object):
     """ """
     def __init__(self,
                  dataset=LoadData(),
+                 verbose=True,
                  nb_epoch=NB_EPOCH,
                  level_dims_in=LEVEL_DIMS_IN,
                  level_dims_out=LEVEL_DIMS_OUT,
@@ -75,6 +76,7 @@ class DeepBase():
             path_model where to save/load the models
         """
         self.dataset = dataset
+        self.verbose = verbose
 
         self.matrix_array_train = {}
 
@@ -132,7 +134,8 @@ class DeepBase():
         """
         Instantiate the  autoencoder architecture
         """
-        print('creating autoencoder...')
+        if self.verbose:
+            print('creating autoencoder...')
         t = time()
 
         model = Sequential()
@@ -180,7 +183,8 @@ class DeepBase():
 
         self.model_array[key] = model
 
-        print('model for {1} created in {0}s !'.format(time() - t, key))
+        if self.verbose:
+            print('model for {1} created in {0}s !'.format(time() - t, key))
 
     def _add_dense_layer(self, model, shape, dim, name=None):
         """
@@ -208,10 +212,12 @@ class DeepBase():
         """
         for key in self.model_array:
             model = self.model_array[key]
-            print('compiling deep model...')
+            if self.verbose:
+                print('compiling deep model...')
             model.compile(optimizer=self.optimizer, loss=self.loss)
 
-            print('compilation done for key {0}!'.format(key))
+            if self.verbose:
+                print('compilation done for key {0}!'.format(key))
 
     def fit_autoencoders(self):
         """
@@ -221,13 +227,20 @@ class DeepBase():
             model = self.model_array[key]
             matrix_train = self.matrix_array_train[key]
 
+            if not self.verbose:
+                verbose = None
+            else:
+                verbose = 2
+
             model.fit(x=matrix_train,
                        y=matrix_train,
-                       verbose=2,
+                       verbose=verbose,
                        nb_epoch=self.nb_epoch,
                        validation_split=self.data_split,
                        shuffle=True)
-            print('fitting done for model {0}!'.format(key))
+
+            if self.verbose:
+                print('fitting done for model {0}!'.format(key))
 
         self._define_encoders()
 
@@ -260,7 +273,9 @@ class DeepBase():
         for key in self.encoder_array:
             encoder = self.encoder_array[key]
             encoder.save('{0}/{1}_{2}'.format(self.path_model, key, fname))
-            print('model saved for key:{0}!'.format(key))
+
+            if self.verbose:
+                print('model saved for key:{0}!'.format(key))
 
     def load_encoders(self, fname='encoder.h5'):
         """
@@ -272,7 +287,10 @@ class DeepBase():
             assert(isfile(file_path))
             t = time()
             encoder = load_model(file_path)
-            print('model {1} loaded in {0} s!'.format(time() - t, key))
+
+            if self.verbose:
+                print('model {1} loaded in {0} s!'.format(time() - t, key))
+
             self.encoder_array[key] = encoder
 
 

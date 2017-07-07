@@ -37,14 +37,13 @@ from numpy import hstack
 
 def main():
     """
-    DEBUG function
     """
     sim_deep = SimDeep()
     sim_deep.load_training_dataset()
     sim_deep.fit()
     sim_deep.load_test_dataset()
     sim_deep.predict_labels_on_test_dataset()
-    # sim_deep.predict_labels_on_test_fold()
+    sim_deep.predict_labels_on_test_fold()
 
 
 class SimDeep(DeepBase):
@@ -59,6 +58,8 @@ class SimDeep(DeepBase):
                  path_results=PATH_RESULTS,
                  cluster_array=CLUSTER_ARRAY,
                  mixture_params=MIXTURE_PARAMS,
+                 do_KM_plot=False,
+                 verbose=True,
                  **kwargs):
         """
         ### AUTOENCODER PARAMETERS ###:
@@ -87,7 +88,10 @@ class SimDeep(DeepBase):
         self.path_results = path_results
         self.mixture_params = mixture_params
         self.project_name = project_name
+        self.do_KM_plot = do_KM_plot
 
+
+        self.train_pvalue = None
         self.classifier = None
         self.classifier_type = classifier_type
 
@@ -105,8 +109,9 @@ class SimDeep(DeepBase):
 
         self.cluster_method = cluster_method
         self.cluster_eval_method = cluster_eval_method
+        self.verbose = verbose
 
-        DeepBase.__init__(self, **kwargs)
+        DeepBase.__init__(self, verbose=self.verbose, **kwargs)
 
     def fit(self):
         """
@@ -141,17 +146,13 @@ class SimDeep(DeepBase):
 
         self._predict_test_labels()
 
-        print('#### report of assigned cluster:')
-        for key, value in Counter(self.test_labels).items():
-            print('class: {0}, number of samples :{1}'.format(key, value))
 
-        pvalue = coxph(self.test_labels, isdead, nbdays,
-                       isfactor=False,
-                       do_KM_plot=True,
-                       png_path=self.path_results,
-                       fig_name='{0}_KM_plot_test_fold_dataset'.format(self.project_name))
+        if self.verbose:
+            print('#### report of assigned cluster:')
+            for key, value in Counter(self.test_labels).items():
+                print('class: {0}, number of samples :{1}'.format(key, value))
 
-        print('Cox-PH p-value (Log-Rank) for inferred labels: {0}'.format(pvalue))
+        pvalue, pvalue_proba = self._compute_test_coxph('KM_plot_test_fold', nbdays, isdead)
 
         self._write_labels(self.dataset.sample_ids_cv, self.test_labels, '{0}_test_fold_labels'.format(
             self.project_name))
@@ -184,22 +185,42 @@ class SimDeep(DeepBase):
 
         self._predict_test_labels()
 
-        print('#### report of assigned cluster:')
-        for key, value in Counter(self.test_labels).items():
-            print('class: {0}, number of samples :{1}'.format(key, value))
+        if self.verbose:
+            print('#### report of assigned cluster:')
+            for key, value in Counter(self.test_labels).items():
+                print('class: {0}, number of samples :{1}'.format(key, value))
 
-        pvalue = coxph(self.test_labels, isdead, nbdays,
-                       isfactor=False,
-                       do_KM_plot=True,
-                       png_path=self.path_results,
-                       fig_name='{0}_KM_plot_test_dataset'.format(self.project_name))
-
-        print('Cox-PH p-value (Log-Rank) for inferred labels: {0}'.format(pvalue))
+        pvalue, pvalue_proba = self._compute_test_coxph('KM_plot_test', nbdays, isdead)
 
         self._write_labels(self.dataset.sample_ids_test, self.test_labels, '{0}_test_labels'.format(
             self.project_name))
 
         return self.test_labels, pvalue
+
+    def _compute_test_coxph(self, fname_base, nbdays, isdead):
+        """ """
+        pvalue = coxph(
+            self.test_labels, isdead, nbdays,
+            isfactor=False,
+            do_KM_plot=self.do_KM_plot,
+            png_path=self.path_results,
+            fig_name='{0}_{1}'.format(self.project_name, fname_base))
+
+        if self.verbose:
+            print('Cox-PH p-value (Log-Rank) for inferred labels: {0}'.format(pvalue))
+
+        pvalue_proba = coxph(
+            self.test_labels_proba.T[0],
+            isdead, nbdays,
+            isfactor=False,
+            do_KM_plot=self.do_KM_plot,
+            png_path=self.path_results,
+            fig_name='{0}_{1}_proba'.format(self.project_name, fname_base))
+
+        if self.verbose:
+            print('Cox-PH proba p-value (Log-Rank) for inferred labels: {0}'.format(pvalue_proba))
+
+        return pvalue, pvalue_proba
 
     def fit_classification_model(self):
         """ """
@@ -207,21 +228,27 @@ class SimDeep(DeepBase):
         labels = self.labels
 
         if self.classifier_type == 'clustering':
-            print('clustering model defined as the classifier')
+            if self.verbose:
+                print('clustering model defined as the classifier')
+
             self.classifier = self.clustering
             return
 
-        print('classification analysis...')
+        if self.verbose:
+            print('classification analysis...')
 
         self.classifier_grid.fit(train_matrix, labels)
         self.classifier, params = select_best_classif_params(self.classifier_grid)
-        print('best params:', params)
 
         cvs = cross_val_score(self.classifier, train_matrix, labels, cv=5)
-        print('cross val score: {0}'.format(np.mean(cvs)))
+
         self.classifier.set_params(probability=True)
         self.classifier.fit(train_matrix, labels)
-        print('classification score:', self.classifier.score(train_matrix, labels))
+
+        if self.verbose:
+            print('best params:', params)
+            print('cross val score: {0}'.format(np.mean(cvs)))
+            print('classification score:', self.classifier.score(train_matrix, labels))
 
     def predict_labels(self):
         """
@@ -229,8 +256,9 @@ class SimDeep(DeepBase):
         using K-Means algorithm on the node activities,
         using only nodes linked to survival
         """
-        print('performing clustering on the omic model with the following key:{0}'.format(
-            self.training_omic_list))
+        if self.verbose:
+            print('performing clustering on the omic model with the following key:{0}'.format(
+                self.training_omic_list))
 
         if self.cluster_method == 'kmeans':
             self.clustering = KMeans(n_clusters=self.nb_clusters, n_init=100)
@@ -254,27 +282,28 @@ class SimDeep(DeepBase):
         labels = self._order_labels_according_to_survival(labels)
         self.labels = labels
 
-        print("clustering done, labels ordered according to survival:")
-        for key, value in Counter(labels).items():
-            print('cluster label: {0}\t number of samples:{1}'.format(key, value))
-
-        print('\n')
+        if self.verbose:
+            print("clustering done, labels ordered according to survival:")
+            for key, value in Counter(labels).items():
+                print('cluster label: {0}\t number of samples:{1}'.format(key, value))
+            print('\n')
 
         nbdays, isdead = self.dataset.survival.T.tolist()
         pvalue = coxph(self.labels, isdead, nbdays)
 
         pvalue = coxph(self.labels, isdead, nbdays,
                        isfactor=False,
-                       do_KM_plot=True,
+                       do_KM_plot=self.do_KM_plot,
                        png_path=self.path_results,
                        fig_name='{0}_KM_plot_training_dataset'.format(self.project_name))
 
         self._write_labels(self.dataset.sample_ids, self.labels, '{0}_training_set_labels'.format(
             self.project_name))
 
-        print('Cox-PH p-value (Log-Rank) for the cluster labels: {0}'.format(pvalue))
+        if self.verbose:
+            print('Cox-PH p-value (Log-Rank) for the cluster labels: {0}'.format(pvalue))
 
-        return self.labels
+        self.train_pvalue = pvalue
 
     def _write_labels(self, sample_ids, labels, fname):
         """ """
@@ -304,8 +333,9 @@ class SimDeep(DeepBase):
             valid_node_ids = self._look_for_survival_nodes(activities)
             self.valid_node_ids_array[key] = valid_node_ids
 
-            print('number of components linked to survival found:{0} for key {1}'.format(
-                len(valid_node_ids), key))
+            if self.verbose:
+                print('number of components linked to survival found:{0} for key {1}'.format(
+                    len(valid_node_ids), key))
 
             self.activities_array[key] = activities.T[valid_node_ids].T
 
@@ -343,13 +373,15 @@ class SimDeep(DeepBase):
                     self.clustering.predict(self.activities_train)
                 )
 
-            print('obtained {2}: {0} for k = {1}'.format(score, k_cluster,
-                                                         self.cluster_eval_method))
+            if self.verbose:
+                print('obtained {2}: {0} for k = {1}'.format(score, k_cluster,
+                                                             self.cluster_eval_method))
 
             if criterion == None or score < criterion:
                 criterion, best_k = score, k_cluster
 
-        print('best k: {0}'.format(best_k))
+        if self.verbose:
+            print('best k: {0}'.format(best_k))
 
         if self.cluster_method == 'mixture':
             self.clustering.set_params(n_components=best_k)
