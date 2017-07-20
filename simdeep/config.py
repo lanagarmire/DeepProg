@@ -19,10 +19,10 @@ CLUSTER_ARRAY = []
 PVALUE_THRESHOLD = 0.01 # Threshold for survival significance to set a node as valid
 
 #### Boosting values
-NB_ITER = 2 # boosting iteration
+NB_ITER = 5 # boosting iteration
 NB_THREADS = 4 # number of simdeep instance launched in parallel
 NB_FOLDS = 3 # for each instance, the original dataset is split in folds and one fold is left
-CLASS_SELECTION = 'mean' # mean or max: the method used to select the final class, according to class probas
+CLASS_SELECTION = 'max' # mean or max: the method used to select the final class, according to class probas
 ########################################################
 
 #################### Paths to data file ################
@@ -35,6 +35,8 @@ PATH_DATA = "/home/opoirion/data/survival_analysis_multiple/dream_myeloma_challe
 # name of the tsv file containing the survival data of the training set
 SURVIVAL_TSV = 'Clinical_Data/globalClinTraining.csv'
 
+ENTREZ_TO_ENSG_FILE = PATH_THIS_FILE + '/../data/entrez2ensg.tsv'
+
 # Field from the survival tsv file
 SURVIVAL_FLAG = {'patient_id': '"Patient"',
                   'survival': '"D_OS"',
@@ -43,7 +45,7 @@ SURVIVAL_FLAG = {'patient_id': '"Patient"',
 # dict('data type', 'name of the tsv file which are inside PATH_DATA')
 # These data will be stacked together to build the autoencoder
 TRAINING_TSV = OrderedDict([
-    ('RNA', 'Expression_Data/microarray/EMTAB4032entrezIDlevel.csv'),
+    ('GE', 'Expression_Data/microarray/GSE19784HOVON65entrezIDlevel.csv'),
 ])
 
 SEPARATOR = {
@@ -56,7 +58,7 @@ SEPARATOR = {
     }
 
 TEST_TSV = {
-    'RNA': 'Expression_Data/microarray/GSE19784HOVON65entrezIDlevel.csv',
+    'GE': 'Expression_Data/rnaseq/MMRF_CoMMpass_IA9_E74GTF_Salmon_Gene_TPM.txt',
 }
 
 # name of the tsv file containing the survival data of the test set

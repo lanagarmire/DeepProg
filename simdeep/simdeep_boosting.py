@@ -39,9 +39,6 @@ def main():
     boosting.load_test_dataset()
     boosting.predict_labels_on_test_dataset()
 
-    save_class(boosting)
-    import ipdb;ipdb.set_trace()
-
 class SimDeepBoosting():
     """
     """

@@ -5,6 +5,7 @@ import re
 from simdeep.config import PATH_DATA
 from simdeep.config import SURVIVAL_FLAG
 from simdeep.config import SEPARATOR
+from simdeep.config import ENTREZ_TO_ENSG_FILE
 
 import  numpy as np
 
@@ -144,15 +145,28 @@ def load_data_from_tsv_transposee(
     feature_ids = []
     f_matrix = []
 
+    if f_name.lower().count('entrez'):
+        ensg_dict = load_entrezID_to_ensg()
+        use_ensg = True
+    else:
+        use_ensg = False
+
     for line in f_tsv:
         line = line.strip(sep + '\n').split(sep)
-        feature_ids.append('{0}_{1}'.format(key, line[0]))
+        feature = line[0].strip('"')
 
         if nan_to_num:
             line[1:] = [0 if (l.isalpha() or not l) else l
                         for l in line[1:]]
 
-        f_matrix.append(map(f_type, line[1:]))
+        if use_ensg and feature in ensg_dict:
+            features = ensg_dict[feature]
+        else:
+            features = [feature]
+
+        for feature in features:
+            feature_ids.append('{0}_{1}'.format(key, feature))
+            f_matrix.append(map(f_type, line[1:]))
 
     return sample_ids, feature_ids, np.array(f_matrix).T
 
@@ -175,3 +189,14 @@ def select_best_classif_params(clf):
     clf = clf.estimator.set_params(**params)
 
     return clf, params
+
+def load_entrezID_to_ensg():
+    """
+    """
+    entrez_dict = {}
+
+    for line in open(ENTREZ_TO_ENSG_FILE):
+        line = line.split()
+        entrez_dict[line[0]] = line[1:]
+
+    return entrez_dict
