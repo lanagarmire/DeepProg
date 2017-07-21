@@ -68,7 +68,7 @@ class SimDeepBoosting():
         for it in range(nb_it):
             split = KFold(n_splits=3, shuffle=True, random_state=np.random.randint(0,1000))
             dataset = LoadData(cross_validation_instance=split, verbose=False)
-            self.models.append(SimDeep(dataset=dataset, verbose=False))
+            self.models.append(SimDeep(dataset=dataset, verbose=False, _isboosting=True))
 
     def load_training_dataset(self):
         """ """

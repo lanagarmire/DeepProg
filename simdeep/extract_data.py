@@ -45,10 +45,7 @@ def main():
     load_data.load_matrix_test()
     load_data.load_matrix_test_fold()
 
-    # load_data.load_survival_test()
-    # load_data.load_matrix_test_fold()
-    # load_data.load_matrix_test()
-    # load_data.load_survival_test()
+    load_data.load_survival_test()
 
 
 class LoadData():
@@ -238,7 +235,7 @@ class LoadData():
         self.feature_test_array[key] = features_ref[:]
 
         self.matrix_test_array[key] = self.matrix_test_array[key].T[index].T
-        self.matrix_ref_array[key] = self.matrix_ref_array[key].T[index].T
+        self.matrix_ref_array[key] = self.matrix_array_train[key].T[index].T
 
     def load_array(self):
         """ """

@@ -41,6 +41,8 @@ from numpy import hstack
 
 from collections import defaultdict
 
+import warnings
+
 from multiprocessing import Pool
 
 
@@ -77,6 +79,7 @@ class SimDeep(DeepBase):
                  classification_method=CLASSIFICATION_METHOD,
                  do_KM_plot=False,
                  verbose=True,
+                 _isboosting=False,
                  **kwargs):
         """
         ### AUTOENCODER PARAMETERS ###:
@@ -113,6 +116,7 @@ class SimDeep(DeepBase):
         self.train_pvalue = None
         self.classifier = None
         self.classifier_type = classifier_type
+        self._isboosting = _isboosting
 
         self.valid_node_ids_array = {}
         self.activities_array = {}
@@ -149,6 +153,9 @@ class SimDeep(DeepBase):
     def predict_labels_on_test_fold(self):
         """
         """
+        if not self.dataset.cross_validation_instance:
+            return
+
         self.dataset.load_matrix_test_fold()
 
         nbdays, isdead = self.dataset.survival_cv.T.tolist()
@@ -183,7 +190,7 @@ class SimDeep(DeepBase):
         """
         nbdays, isdead = self.dataset.survival_test.T.tolist()
 
-        if set(self.dataset.test_tsv.keys()) != set(self.training_omic_list):
+        if set(self.dataset.matrix_test_array.keys()) != set(self.training_omic_list):
             self.look_for_survival_nodes(self.dataset.matrix_test_array.keys())
             self.fit_classification_model()
 
@@ -245,7 +252,11 @@ class SimDeep(DeepBase):
         if self.feature_scores:
             return
 
-        pool = Pool(self.nb_threads_coxph)
+        if not self._isboosting:
+            pool = Pool(self.nb_threads_coxph)
+            mapf = pool.map
+        else:
+            mapf = map
 
         def generator(labels, feature_list, matrix):
             for i in range(len(feature_list)):
@@ -258,7 +269,7 @@ class SimDeep(DeepBase):
 
             input_list = generator(labels, feature_list, matrix.T)
 
-            features_scored = pool.map(_process_parallel_feature_importance, input_list)
+            features_scored = mapf(_process_parallel_feature_importance, input_list)
             features_scored.sort(key=lambda x:x[1])
 
             self.feature_scores[key] = features_scored
@@ -320,7 +331,10 @@ class SimDeep(DeepBase):
         cvs = cross_val_score(self.classifier, train_matrix, labels, cv=5)
 
         self.classifier.set_params(probability=True)
-        self.classifier.fit(train_matrix, labels)
+
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            self.classifier.fit(train_matrix, labels)
 
         if self.verbose:
             print('best params:', params)
@@ -507,19 +521,19 @@ class SimDeep(DeepBase):
     def _look_for_survival_nodes(self, activities):
         """
         """
+        if not self._isboosting:
+            pool = Pool(self.nb_threads_coxph)
+            mapf = pool.map
+        else:
+            mapf = map
+
         nbdays, isdead = self.dataset.survival.T.tolist()
         pvalue_list = []
-        pool = Pool(self.nb_threads_coxph)
 
         input_list = iter((node_id, activity, isdead, nbdays)
                            for node_id, activity in enumerate(activities.T))
 
-        pvalue_list = pool.map(_process_parallel_coxph, input_list)
-
-        # for node_id, activity in enumerate(activities.T):
-        #     activity = activity.tolist()
-        #     pvalue = coxph(activity, isdead, nbdays)
-        #     pvalue_list.append((node_id, pvalue))
+        pvalue_list = mapf(_process_parallel_coxph, input_list)
 
         pvalue_list = filter(lambda x: not np.isnan(x[1]), pvalue_list)
         pvalue_list.sort(key=lambda x:x[1], reverse=True)

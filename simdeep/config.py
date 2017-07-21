@@ -11,7 +11,7 @@ from os.path import split as pathsplit
 PATH_THIS_FILE = pathsplit(abspath(__file__))[0]
 
 #################### SimDeep variable ##################
-NB_CLUSTERS = 2 # Number of clusters
+NB_CLUSTERS = 3 # Number of clusters
 CLUSTER_METHOD = 'mixture'
 CLUSTER_EVAL_METHOD = 'silhouette'
 CLASSIFIER_TYPE = 'svm'
@@ -23,10 +23,10 @@ NB_THREADS_COXPH = 10
 STACK_MULTI_OMIC = False
 
 #### Boosting values
-NB_ITER = 5 # boosting iteration
+NB_ITER = 10 # boosting iteration
 NB_THREADS = 4 # number of simdeep instance launched in parallel
-NB_FOLDS = 3 # for each instance, the original dataset is split in folds and one fold is left
-CLASS_SELECTION = 'max' # mean or max: the method used to select the final class, according to class probas
+NB_FOLDS = 4 # for each instance, the original dataset is split in folds and one fold is left
+CLASS_SELECTION = 'mean' # mean or max: the method used to select the final class, according to class probas
 ########################################################
 
 #################### Paths to data file ################
@@ -37,7 +37,7 @@ PROJECT_NAME = 'DREAM challenge'
 PATH_DATA = "/home/opoirion/data/survival_analysis_multiple/sijia/v2/"
 
 # name of the tsv file containing the survival data of the training set
-SURVIVAL_TSV = 'pds_merged_survival.tsv'
+SURVIVAL_TSV = 'pds_testing_merged_survival.tsv'
 # True if
 USE_INPUT_TRANSPOSE = False
 
@@ -55,9 +55,9 @@ SURVIVAL_FLAG = {'patient_id': 'barcode',
 # dict('data type', 'name of the tsv file which are inside PATH_DATA')
 # These data will be stacked together to build the autoencoder
 TRAINING_TSV = OrderedDict([
-    ('GE', '0607_pds_expr_data.tsv'),
-    ('CNV', '0607_pds_cnv_data.tsv'),
-    ('METH', '0607_pds_methyl_data.tsv'),
+    ('GE', '0607_pds_expr_testing_data.tsv'),
+    ('CNV', '0607_pds_cnv_testing_data.tsv'),
+    ('METH', '0607_pds_methyl_testing_data.tsv'),
     # ('CNV_METH', '0717_methyl_cnv_inter_matrix.tsv'),
     # ('EXPR_METH', '0717_expr_methyl_inter_matrix.tsv'),
     # ('CNV_EXPR', '0717_expr_cnv_inter_matrix.tsv'),
@@ -75,12 +75,15 @@ SEPARATOR = {
     '0717_expr_cnv_inter_matrix.tsv': ' ',
     'pds_merged_survival.tsv': '\t',
     'pds_testing_merged_survival.tsv':'\t',
+    '0607_pds_expr_testing_data.tsv': '\t',
+    '0607_pds_cnv_testing_data.tsv': '\t',
+    '0607_pds_methyl_testing_data.tsv': '\t',
     }
 
 TEST_TSV = {
     'GE': '0607_pds_expr_data.tsv',
-    # 'CNV': '0607_pds_cnv_data.tsv',
-    # 'METH': '0607_pds_methyl_data.tsv',
+    'CNV': '0607_pds_cnv_data.tsv',
+    'METH': '0607_pds_methyl_data.tsv',
 }
 
 # name of the tsv file containing the survival data of the test set
@@ -90,13 +93,11 @@ SURVIVAL_TSV_TEST = 'pds_merged_survival.tsv'
 PATH_MODEL = '/home/opoirion/data/survival_analysis_multiple/models/'
 
 # Path to generate png images
-PATH_RESULTS = '/home/opoirion/code/d3visualisation/dream_challenge//'
+PATH_RESULTS = '/home/opoirion/code/d3visualisation/sijia/'
 
 ######## Cross-validation on the training set ############
-CROSS_VALIDATION_INSTANCE =  KFold(n_splits=3,
-                                  shuffle=True,
-                                  random_state=1
-)
+CROSS_VALIDATION_INSTANCE =  None # KFold(n_splits=3, shuffle=True,random_state=1)
+
 TEST_FOLD = 0
 ##########################################################
 ########################################################
@@ -117,8 +118,8 @@ TRAIN_CORR_RANK_NORM = False
 # if LEVEL_DIMS == [500, 250] then there will be two hidden layers with 500 and 250 nodes
 # before and after the hidden middle layer (5 hidden layers)
 # if LEVEL_DIMS = [], then the autoencoder will have only one hidden layer
-LEVEL_DIMS_IN = [50]
-LEVEL_DIMS_OUT = [50]
+LEVEL_DIMS_IN = []
+LEVEL_DIMS_OUT = []
 # Number of nodes in the middle hidden layer
 # (i.e. the new dimensions of the transformed data)
 NEW_DIM = 100
