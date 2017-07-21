@@ -184,7 +184,7 @@ class SimDeep(DeepBase):
         nbdays, isdead = self.dataset.survival_test.T.tolist()
 
         if set(self.dataset.test_tsv.keys()) != set(self.training_omic_list):
-            self.look_for_survival_nodes(self.dataset.test_tsv.keys())
+            self.look_for_survival_nodes(self.dataset.matrix_test_array.keys())
             self.fit_classification_model()
 
         activities_array = []
