@@ -8,6 +8,7 @@ from simdeep.config import TEST_TSV
 from simdeep.config import SURVIVAL_TSV
 from simdeep.config import SURVIVAL_TSV_TEST
 from simdeep.config import PATH_DATA
+from simdeep.config import STACK_MULTI_OMIC
 
 from simdeep.config import TRAIN_MIN_MAX
 from simdeep.config import TRAIN_NORM_SCALE
@@ -20,7 +21,7 @@ from simdeep.config import TRAIN_CORR_RANK_NORM
 from simdeep.config import CROSS_VALIDATION_INSTANCE
 from simdeep.config import TEST_FOLD
 
-from simdeep.survival_utils import load_data_from_tsv_transposee
+from simdeep.survival_utils import load_data_from_tsv
 from simdeep.survival_utils import load_survival_file
 from simdeep.survival_utils import MadScaler
 from simdeep.survival_utils import RankNorm
@@ -41,11 +42,13 @@ def main():
     load_data.create_a_cv_split()
 
     load_data.normalize_training_array()
-
-    # load_data.load_matrix_test_fold()
-
     load_data.load_matrix_test()
-    load_data.load_survival_test()
+    load_data.load_matrix_test_fold()
+
+    # load_data.load_survival_test()
+    # load_data.load_matrix_test_fold()
+    # load_data.load_matrix_test()
+    # load_data.load_survival_test()
 
 
 class LoadData():
@@ -58,6 +61,7 @@ class LoadData():
             survival_tsv_test=SURVIVAL_TSV_TEST,
             cross_validation_instance=CROSS_VALIDATION_INSTANCE,
             test_fold=TEST_FOLD,
+            stack_multi_omic=STACK_MULTI_OMIC,
             verbose=True,
     ):
         """
@@ -76,6 +80,7 @@ class LoadData():
         """
 
         self.verbose = verbose
+        self.do_stack_multi_omic = stack_multi_omic
         self.path_data = path_data
         self.survival_tsv = survival_tsv
         self.training_tsv = training_tsv
@@ -100,7 +105,8 @@ class LoadData():
         self.survival_cv = None
 
         self.matrix_ref_array = {}
-        self.feature_ref_array = {}
+        self.feature_train_array = {}
+        self.feature_train_index = {}
 
         self.survival_test = None
         self.sample_ids_test = None
@@ -115,6 +121,28 @@ class LoadData():
         self.robust_scaler = RobustScaler()
         self.min_max_scaler = MinMaxScaler()
         self.dim_reducer = CorrelationReducer()
+
+    def _stack_multiomics(self, arrays, features=None):
+        """
+        """
+        if not self.do_stack_multi_omic:
+            return
+
+        if len(arrays) > 1:
+            arrays['STACKED'] = hstack(
+                arrays.values())
+
+            for key in arrays.keys():
+                arrays.pop(key) if key != 'STACKED' else True
+
+        if not features:
+            return
+
+        if len(features) > 1:
+            features['STACKED'] = [feat for key in features
+                                   for feat in features[key]]
+            for key in features.keys():
+                features.pop(key) if key != 'STACKED' else True
 
     def load_matrix_test_fold(self):
         """ """
@@ -135,17 +163,18 @@ class LoadData():
             )
 
             self.matrix_cv_array[key] = matrix_test
-            self.feature_ref_array[key] = self.feature_array[key][:]
 
-            self.matrix_ref = matrix_ref
+        self._stack_multiomics(self.matrix_cv_array)
 
     def load_matrix_test(self, fill_unkown_feature_with_0=True):
         """ """
         for key in self.test_tsv:
-            self.feature_ref_array[key] = self.feature_array[key][:]
-            sample_ids, feature_ids, matrix = load_data_from_tsv_transposee(self.test_tsv[key],
-                                                                 key,
-                                                                 path_data=self.path_data)
+            self.feature_train_array[key] = self.feature_array[key][:]
+            sample_ids, feature_ids, matrix = load_data_from_tsv(
+                f_name=self.test_tsv[key],
+                key=key,
+                path_data=self.path_data)
+
             feature_ids_ref = self.feature_array[key]
             matrix_ref = self.matrix_array[key]
 
@@ -195,10 +224,13 @@ class LoadData():
             self.matrix_test_array[key] = matrix_test
             self.matrix_ref_array[key] = matrix_ref
 
+        self._stack_multiomics(self.matrix_test_array,
+                               self.feature_test_array)
+
     def reorder_test_matrix(self, key):
         """ """
         features_test = self.feature_test_array[key]
-        features_ref = self.feature_ref_array[key]
+        features_ref = self.feature_train_array[key]
 
         ref_dict = {feat: pos for pos, feat in enumerate(features_test)}
         index = [ref_dict[feat] for feat in features_ref]
@@ -221,9 +253,9 @@ class LoadData():
         data = self.data_type[0]
         f_name = self.training_tsv[data]
 
-        self.sample_ids, feature_ids, matrix = load_data_from_tsv_transposee(
-            f_name,
-            data,
+        self.sample_ids, feature_ids, matrix = load_data_from_tsv(
+            f_name=f_name,
+            key=data,
             path_data=self.path_data)
 
         if self.verbose:
@@ -234,9 +266,9 @@ class LoadData():
 
         for data in self.data_type[1:]:
             f_name = self.training_tsv[data]
-            sample_ids, feature_ids, matrix = load_data_from_tsv_transposee(
-                f_name,
-                data,
+            sample_ids, feature_ids, matrix = load_data_from_tsv(
+                f_name=f_name,
+                key=data,
                 path_data=self.path_data)
             assert(self.sample_ids == sample_ids)
 
@@ -327,6 +359,11 @@ class LoadData():
             matrix = self.matrix_array[key]
             matrix = self._normalize(matrix, key)
             self.matrix_array_train[key] = matrix
+            self.feature_train_array[key] = self.feature_array[key][:]
+            self.feature_train_index[key] = {key: id for id, key in enumerate(
+                self.feature_train_array[key])}
+
+        self._stack_multiomics(self.matrix_array_train, self.feature_train_array)
 
     def _normalize(self,
                    matrix,
@@ -413,7 +450,7 @@ class LoadData():
             matrix = reducer.transform(matrix)
 
             self.feature_test_array[key] = self.sample_ids
-            self.feature_ref_array[key] = self.sample_ids
+            self.feature_train_array[key] = self.sample_ids
 
             if corr_rank_scale:
                 matrix_ref = RankNorm().fit_transform(matrix_ref)

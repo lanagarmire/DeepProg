@@ -16,9 +16,15 @@ from simdeep.config import CLASSIFIER
 from simdeep.config import MIXTURE_PARAMS
 from simdeep.config import PATH_RESULTS
 from simdeep.config import PROJECT_NAME
+from simdeep.config import CLASSIFICATION_METHOD
 
 from simdeep.config import CLUSTER_EVAL_METHOD
 from simdeep.config import CLUSTER_METHOD
+from simdeep.config import NB_THREADS_COXPH
+from simdeep.config import NB_SELECTED_FEATURES
+
+from simdeep.survival_utils import _process_parallel_coxph
+from simdeep.survival_utils import _process_parallel_feature_importance
 
 from simdeep.survival_utils import select_best_classif_params
 
@@ -31,9 +37,16 @@ from sklearn.metrics import silhouette_score
 from sklearn.metrics import calinski_harabaz_score
 
 import numpy as np
-
 from numpy import hstack
 
+from collections import defaultdict
+
+from multiprocessing import Pool
+
+
+################ VARIABLE ############################################
+_CLASSIFICATION_METHOD_LIST = ['ALL_FEATURES', 'SURVIVAL_FEATURES']
+######################################################################
 
 def main():
     """
@@ -41,6 +54,7 @@ def main():
     sim_deep = SimDeep()
     sim_deep.load_training_dataset()
     sim_deep.fit()
+
     sim_deep.load_test_dataset()
     sim_deep.predict_labels_on_test_dataset()
     sim_deep.predict_labels_on_test_fold()
@@ -57,7 +71,10 @@ class SimDeep(DeepBase):
                  project_name=PROJECT_NAME,
                  path_results=PATH_RESULTS,
                  cluster_array=CLUSTER_ARRAY,
+                 nb_selected_features=NB_SELECTED_FEATURES,
                  mixture_params=MIXTURE_PARAMS,
+                 nb_threads_coxph=NB_THREADS_COXPH,
+                 classification_method=CLASSIFICATION_METHOD,
                  do_KM_plot=False,
                  verbose=True,
                  **kwargs):
@@ -89,7 +106,9 @@ class SimDeep(DeepBase):
         self.mixture_params = mixture_params
         self.project_name = project_name
         self.do_KM_plot = do_KM_plot
-
+        self.nb_threads_coxph = nb_threads_coxph
+        self.classification_method = classification_method
+        self.nb_selected_features = nb_selected_features
 
         self.train_pvalue = None
         self.classifier = None
@@ -100,10 +119,13 @@ class SimDeep(DeepBase):
 
         self.activities_train = None
         self.activities_test = None
+        self.activities_cv = None
 
         self.test_labels = None
         self.test_labels_proba = None
         self.training_omic_list = []
+
+        self.feature_scores = defaultdict(list)
 
         self._label_ordered_dict = {}
 
@@ -127,8 +149,6 @@ class SimDeep(DeepBase):
     def predict_labels_on_test_fold(self):
         """
         """
-        # self.dataset.reorder_matrix_test()
-
         self.dataset.load_matrix_test_fold()
 
         nbdays, isdead = self.dataset.survival_cv.T.tolist()
@@ -142,10 +162,9 @@ class SimDeep(DeepBase):
 
             activities_array.append(encoder.predict(test_matrix).T[valid_node_ids].T)
 
-        self.activities_test = hstack(activities_array)
+        self.activities_cv = hstack(activities_array)
 
-        self._predict_test_labels()
-
+        self._predict_test_labels(self.activities_cv, self.dataset.matrix_cv_array)
 
         if self.verbose:
             print('#### report of assigned cluster:')
@@ -162,8 +181,6 @@ class SimDeep(DeepBase):
     def predict_labels_on_test_dataset(self):
         """
         """
-        # self.dataset.reorder_matrix_test()
-
         nbdays, isdead = self.dataset.survival_test.T.tolist()
 
         if set(self.dataset.test_tsv.keys()) != set(self.training_omic_list):
@@ -183,7 +200,7 @@ class SimDeep(DeepBase):
 
         self.activities_test = hstack(activities_array)
 
-        self._predict_test_labels()
+        self._predict_test_labels(self.activities_test, self.dataset.matrix_test_array)
 
         if self.verbose:
             print('#### report of assigned cluster:')
@@ -222,9 +239,69 @@ class SimDeep(DeepBase):
 
         return pvalue, pvalue_proba
 
+    def compute_feature_scores(self):
+        """
+        """
+        if self.feature_scores:
+            return
+
+        pool = Pool(self.nb_threads_coxph)
+
+        def generator(labels, feature_list, matrix):
+            for i in range(len(feature_list)):
+                yield feature_list[i], matrix[i], labels
+
+        for key in self.dataset.matrix_array_train:
+            feature_list = self.dataset.feature_train_array[key][:]
+            matrix = self.dataset.matrix_array_train[key][:]
+            labels = self.labels[:]
+
+            input_list = generator(labels, feature_list, matrix.T)
+
+            features_scored = pool.map(_process_parallel_feature_importance, input_list)
+            features_scored.sort(key=lambda x:x[1])
+
+            self.feature_scores[key] = features_scored
+
+    def _return_train_matrix_for_classification(self):
+        """
+        """
+        assert (self.classification_method in _CLASSIFICATION_METHOD_LIST)
+
+        if self.verbose:
+            print('classification method: {0}'.format(self.classification_method))
+
+        if self.classification_method == 'SURVIVAL_FEATURES':
+            assert(self.classifier_type != 'clustering')
+            matrix = self.activities_train
+        elif self.classification_method == 'ALL_FEATURES':
+            matrix = self._reduce_and_stack_matrices(self.matrix_array_train)
+        if self.verbose:
+            print('number of features for the classifier: {0}'.format(matrix.shape[1]))
+
+        return matrix
+
+    def _reduce_and_stack_matrices(self, matrices):
+        """
+        """
+        if not self.nb_selected_features:
+            return hstack(matrices.values())
+        else:
+            self.compute_feature_scores()
+
+            matrix = []
+
+            for key in self.feature_scores:
+                index = [self.dataset.feature_train_index[key][feature]
+                         for feature, pvalue in
+                         self.feature_scores[key][:self.nb_selected_features]]
+                matrix.append(matrices[key].T[index].T)
+
+            return hstack(matrix)
+
     def fit_classification_model(self):
         """ """
-        train_matrix = self.activities_train
+        train_matrix = self._return_train_matrix_for_classification()
         labels = self.labels
 
         if self.classifier_type == 'clustering':
@@ -342,10 +419,23 @@ class SimDeep(DeepBase):
         self.activities_train = hstack([self.activities_array[key]
                                         for key in keys])
 
-    def _predict_test_labels(self):
+    def _return_test_matrix_for_classification(self, activities, matrix_array):
+        """
+        """
+        if self.classification_method == 'SURVIVAL_FEATURES':
+            return activities
+        elif self.classification_method == 'ALL_FEATURES':
+            matrix = self._reduce_and_stack_matrices(matrix_array)
+            assert(matrix.shape[1] == self.classifier.shape_fit_[1])
+            return matrix
+
+    def _predict_test_labels(self, activities, matrix_array):
         """ """
-        self.test_labels = self.classifier.predict(self.activities_test)
-        self.test_labels_proba = self.classifier.predict_proba(self.activities_test)
+        matrix_test = self._return_test_matrix_for_classification(
+            activities, matrix_array)
+
+        self.test_labels = self.classifier.predict(matrix_test)
+        self.test_labels_proba = self.classifier.predict_proba(matrix_test)
 
     def _predict_best_k_for_cluster(self):
         """ """
@@ -419,11 +509,17 @@ class SimDeep(DeepBase):
         """
         nbdays, isdead = self.dataset.survival.T.tolist()
         pvalue_list = []
+        pool = Pool(self.nb_threads_coxph)
 
-        for node_id, activity in enumerate(activities.T):
-            activity = activity.tolist()
-            pvalue = coxph(activity, isdead, nbdays)
-            pvalue_list.append((node_id, pvalue))
+        input_list = iter((node_id, activity, isdead, nbdays)
+                           for node_id, activity in enumerate(activities.T))
+
+        pvalue_list = pool.map(_process_parallel_coxph, input_list)
+
+        # for node_id, activity in enumerate(activities.T):
+        #     activity = activity.tolist()
+        #     pvalue = coxph(activity, isdead, nbdays)
+        #     pvalue_list.append((node_id, pvalue))
 
         pvalue_list = filter(lambda x: not np.isnan(x[1]), pvalue_list)
         pvalue_list.sort(key=lambda x:x[1], reverse=True)

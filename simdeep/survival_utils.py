@@ -6,12 +6,18 @@ from simdeep.config import PATH_DATA
 from simdeep.config import SURVIVAL_FLAG
 from simdeep.config import SEPARATOR
 from simdeep.config import ENTREZ_TO_ENSG_FILE
+from simdeep.config import USE_INPUT_TRANSPOSE
 
 import  numpy as np
 
 from scipy.stats import rankdata
 
 from sklearn.metrics import pairwise_distances
+
+from collections import defaultdict
+from coxph_from_r import coxph
+
+from scipy.stats import kruskal
 
 
 class MadScaler():
@@ -60,8 +66,10 @@ class CorrelationReducer():
         self.fit(dataset)
         return self.transform(dataset)
 
-def load_survival_file(f_name, path_data=PATH_DATA, sep=','):
+def load_survival_file(f_name, path_data=PATH_DATA):
     """ """
+    sep = SEPARATOR[f_name]
+
     survival = {}
     f_surv = open(path_data + f_name, 'r')
 
@@ -88,7 +96,15 @@ def load_survival_file(f_name, path_data=PATH_DATA, sep=','):
 
     return survival
 
-def load_data_from_tsv(
+def load_data_from_tsv(use_transpose=USE_INPUT_TRANSPOSE, **kwargs):
+    """
+    """
+    if use_transpose:
+        return _load_data_from_tsv_transposee(**kwargs)
+    else:
+        return _load_data_from_tsv(**kwargs)
+
+def _load_data_from_tsv(
         f_name,
         key,
         path_data=PATH_DATA,
@@ -118,7 +134,7 @@ def load_data_from_tsv(
 
     return sample_ids, feature_ids, np.array(f_matrix)
 
-def format_sample_name(sample_ids):
+def _format_sample_name(sample_ids):
     """
     """
     regex = re.compile('_1_[A-Z][A-Z]')
@@ -126,7 +142,7 @@ def format_sample_name(sample_ids):
     sample_ids = [regex.sub('', sample.strip('"')) for sample in sample_ids]
     return sample_ids
 
-def load_data_from_tsv_transposee(
+def _load_data_from_tsv_transposee(
         f_name,
         key,
         path_data=PATH_DATA,
@@ -140,7 +156,7 @@ def load_data_from_tsv_transposee(
 
     sample_ids = header[1:]
 
-    sample_ids = format_sample_name(sample_ids)
+    sample_ids = _format_sample_name(sample_ids)
 
     feature_ids = []
     f_matrix = []
@@ -200,3 +216,24 @@ def load_entrezID_to_ensg():
         entrez_dict[line[0]] = line[1:]
 
     return entrez_dict
+
+
+def _process_parallel_coxph(inp):
+    """
+    """
+    node_id, activity, isdead, nbdays = inp
+    pvalue = coxph(activity, isdead, nbdays)
+
+    return node_id, pvalue
+
+def _process_parallel_feature_importance(inp):
+    """
+    """
+    arrays = defaultdict(list)
+    feature, array, labels = inp
+
+    for label, value in zip(labels,array):
+        arrays[label].append(value)
+
+    score, pvalue = kruskal(*arrays.values())
+    return feature, pvalue

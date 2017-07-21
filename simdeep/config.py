@@ -11,12 +11,16 @@ from os.path import split as pathsplit
 PATH_THIS_FILE = pathsplit(abspath(__file__))[0]
 
 #################### SimDeep variable ##################
-NB_CLUSTERS = 3 # Number of clusters
+NB_CLUSTERS = 2 # Number of clusters
 CLUSTER_METHOD = 'mixture'
 CLUSTER_EVAL_METHOD = 'silhouette'
 CLASSIFIER_TYPE = 'svm'
+CLASSIFICATION_METHOD = 'ALL_FEATURES' # ['ALL_FEATURES', 'SURVIVAL_FEATURES']
+NB_SELECTED_FEATURES = 50
 CLUSTER_ARRAY = []
 PVALUE_THRESHOLD = 0.01 # Threshold for survival significance to set a node as valid
+NB_THREADS_COXPH = 10
+STACK_MULTI_OMIC = True
 
 #### Boosting values
 NB_ITER = 5 # boosting iteration
@@ -30,39 +34,57 @@ CLASS_SELECTION = 'max' # mean or max: the method used to select the final class
 
 # PATH_DATA = PATH_THIS_FILE + "/../examples/data/"
 PROJECT_NAME = 'DREAM challenge'
-PATH_DATA = "/home/opoirion/data/survival_analysis_multiple/dream_myeloma_challenge/"
+PATH_DATA = "/home/opoirion/data/survival_analysis_multiple/sijia/v2/"
 
 # name of the tsv file containing the survival data of the training set
-SURVIVAL_TSV = 'Clinical_Data/globalClinTraining.csv'
+SURVIVAL_TSV = 'pds_merged_survival.tsv'
+# True if
+USE_INPUT_TRANSPOSE = False
 
 ENTREZ_TO_ENSG_FILE = PATH_THIS_FILE + '/../data/entrez2ensg.tsv'
 
 # Field from the survival tsv file
-SURVIVAL_FLAG = {'patient_id': '"Patient"',
-                  'survival': '"D_OS"',
-                 'event': '"D_OS_FLAG"'}
+# SURVIVAL_FLAG = {'patient_id': '"Patient"',
+#                   'survival': '"D_OS"',
+#                  'event': '"D_OS_FLAG"'}
+
+SURVIVAL_FLAG = {'patient_id': 'barcode',
+                  'survival': 'days',
+                 'event': 'recurrence'}
 
 # dict('data type', 'name of the tsv file which are inside PATH_DATA')
 # These data will be stacked together to build the autoencoder
 TRAINING_TSV = OrderedDict([
-    ('GE', 'Expression_Data/microarray/GSE19784HOVON65entrezIDlevel.csv'),
+    ('GE', '0607_pds_expr_data.tsv'),
+    ('CNV', '0607_pds_cnv_data.tsv'),
+    ('METH', '0607_pds_methyl_data.tsv'),
+    # ('CNV_METH', '0717_methyl_cnv_inter_matrix.tsv'),
+    # ('EXPR_METH', '0717_expr_methyl_inter_matrix.tsv'),
+    # ('CNV_EXPR', '0717_expr_cnv_inter_matrix.tsv'),
 ])
 
 SEPARATOR = {
-    'Expression_Data/rnaseq/MMRF_CoMMpass_IA9_E74GTF_Salmon_Gene_TPM.txt': '\t',
-    'Expression_Data/rnaseq/MMRF_CoMMpass_IA9_E74GTF_Salmon_Gene_Counts.txt': '\t',
-    'Expression_Data/microarray/GSE24080UAMSentrezIDlevel.csv': ',',
-    'Expression_Data/microarray/EMTAB4032entrezIDlevel.csv': ',',
-    'Expression_Data/microarray/GSE19784HOVON65entrezIDlevel.csv': ',',
-    'Expression_Data/microarray/GSE9782APEXentrezIDlevel_mas5.csv': ','
+    '0607_pds_expr_data.tsv': '\t',
+    '0607_pds_cnv_data.tsv': '\t',
+    '0607_pds_methyl_data.tsv': '\t',
+    '0718_methyl_cnv_inter_matrix.tsv' : '\t',
+    '0718_expr_methyl_inter_matrix.tsv': '\t',
+    '0718_expr_cnv_inter_matrix.tsv': '\t',
+    '0717_methyl_cnv_inter_matrix.tsv' : ' ',
+    '0717_expr_methyl_inter_matrix.tsv': ' ',
+    '0717_expr_cnv_inter_matrix.tsv': ' ',
+    'pds_merged_survival.tsv': '\t',
+    'pds_testing_merged_survival.tsv':'\t',
     }
 
 TEST_TSV = {
-    'GE': 'Expression_Data/rnaseq/MMRF_CoMMpass_IA9_E74GTF_Salmon_Gene_TPM.txt',
+    'GE': '0607_pds_expr_data.tsv',
+    # 'CNV': '0607_pds_cnv_data.tsv',
+    # 'METH': '0607_pds_methyl_data.tsv',
 }
 
 # name of the tsv file containing the survival data of the test set
-SURVIVAL_TSV_TEST = SURVIVAL_TSV
+SURVIVAL_TSV_TEST = 'pds_merged_survival.tsv'
 
 # Path where to save load the Keras models
 PATH_MODEL = '/home/opoirion/data/survival_analysis_multiple/models/'
@@ -85,9 +107,9 @@ TRAIN_MIN_MAX = False
 TRAIN_ROBUST_SCALE = False
 TRAIN_MAD_SCALE = False
 TRAIN_NORM_SCALE = False
-TRAIN_RANK_NORM = True
-TRAIN_CORR_REDUCTION = True
-TRAIN_CORR_RANK_NORM = True
+TRAIN_RANK_NORM = False
+TRAIN_CORR_REDUCTION = False
+TRAIN_CORR_RANK_NORM = False
 #########################################################
 
 ##################### Autoencoder Variable ##############
@@ -147,6 +169,10 @@ HYPER_PARAMETERS = [
 
 # grid search classifier using Support Vector Machine Classifier (SVC)
 CLASSIFIER = GridSearchCV(SVC(), HYPER_PARAMETERS, cv=5)
+
+# Number of top features selected for classification
+# Apply only when CLASSIFICATION_METHOD == 'ALL_FEATURES'
+SELECT_TOP_FEATURES_FOR_CLASSIFICATION = 50
 
 ##########################################################
 
