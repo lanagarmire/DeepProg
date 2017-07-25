@@ -60,6 +60,7 @@ def main():
     sim_deep.load_test_dataset()
     sim_deep.predict_labels_on_test_dataset()
     sim_deep.predict_labels_on_test_fold()
+    sim_deep.predict_labels_on_full_dataset()
 
 
 class SimDeep(DeepBase):
@@ -77,7 +78,7 @@ class SimDeep(DeepBase):
                  mixture_params=MIXTURE_PARAMS,
                  nb_threads_coxph=NB_THREADS_COXPH,
                  classification_method=CLASSIFICATION_METHOD,
-                 do_KM_plot=False,
+                 do_KM_plot=True,
                  verbose=True,
                  _isboosting=False,
                  **kwargs):
@@ -185,6 +186,38 @@ class SimDeep(DeepBase):
 
         return self.test_labels, pvalue
 
+    def predict_labels_on_full_dataset(self):
+        """
+        """
+        self.dataset.load_matrix_full()
+
+        nbdays, isdead = self.dataset.survival_full.T.tolist()
+        activities_array = []
+
+        for key in self.training_omic_list:
+
+            test_matrix = self.dataset.matrix_array_full[key]
+            encoder = self.encoder_array[key]
+            valid_node_ids = self.valid_node_ids_array[key]
+
+            activities_array.append(encoder.predict(test_matrix).T[valid_node_ids].T)
+
+        self.activities_full = hstack(activities_array)
+
+        self._predict_test_labels(self.activities_full, self.dataset.matrix_array_full)
+
+        if self.verbose:
+            print('#### report of assigned cluster for full dataset:')
+            for key, value in Counter(self.test_labels).items():
+                print('class: {0}, number of samples :{1}'.format(key, value))
+
+        pvalue, pvalue_proba = self._compute_test_coxph('KM_plot_full', nbdays, isdead)
+
+        self._write_labels(self.dataset.sample_ids_cv, self.test_labels, '{0}_full_labels'.format(
+            self.project_name))
+
+        return self.test_labels, pvalue
+
     def predict_labels_on_test_dataset(self):
         """
         """
@@ -237,7 +270,7 @@ class SimDeep(DeepBase):
             self.test_labels_proba.T[0],
             isdead, nbdays,
             isfactor=False,
-            do_KM_plot=self.do_KM_plot,
+            do_KM_plot=False,
             png_path=self.path_results,
             fig_name='{0}_{1}_proba'.format(self.project_name, fname_base))
 
@@ -325,16 +358,17 @@ class SimDeep(DeepBase):
         if self.verbose:
             print('classification analysis...')
 
-        self.classifier_grid.fit(train_matrix, labels)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            self.classifier_grid.fit(train_matrix, labels)
+
         self.classifier, params = select_best_classif_params(self.classifier_grid)
 
         cvs = cross_val_score(self.classifier, train_matrix, labels, cv=5)
 
         self.classifier.set_params(probability=True)
 
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
-            self.classifier.fit(train_matrix, labels)
+        self.classifier.fit(train_matrix, labels)
 
         if self.verbose:
             print('best params:', params)

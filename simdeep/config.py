@@ -15,7 +15,7 @@ NB_CLUSTERS = 3 # Number of clusters
 CLUSTER_METHOD = 'mixture'
 CLUSTER_EVAL_METHOD = 'silhouette'
 CLASSIFIER_TYPE = 'svm'
-CLASSIFICATION_METHOD = 'SURVIVAL_FEATURES' # ['ALL_FEATURES', 'SURVIVAL_FEATURES']
+CLASSIFICATION_METHOD = 'ALL_FEATURES' # ['ALL_FEATURES', 'SURVIVAL_FEATURES']
 NB_SELECTED_FEATURES = 50
 CLUSTER_ARRAY = []
 PVALUE_THRESHOLD = 0.01 # Threshold for survival significance to set a node as valid
@@ -23,9 +23,9 @@ NB_THREADS_COXPH = 10
 STACK_MULTI_OMIC = False
 
 #### Boosting values
-NB_ITER = 10 # boosting iteration
+NB_ITER = 20 # boosting iteration
 NB_THREADS = 4 # number of simdeep instance launched in parallel
-NB_FOLDS = 4 # for each instance, the original dataset is split in folds and one fold is left
+NB_FOLDS = 3 # for each instance, the original dataset is split in folds and one fold is left
 CLASS_SELECTION = 'mean' # mean or max: the method used to select the final class, according to class probas
 ########################################################
 
@@ -33,11 +33,11 @@ CLASS_SELECTION = 'mean' # mean or max: the method used to select the final clas
 # path to the folder containing the data
 
 # PATH_DATA = PATH_THIS_FILE + "/../examples/data/"
-PROJECT_NAME = 'DREAM challenge'
+PROJECT_NAME = 'sijia v2 survival V3 3 clusters'
 PATH_DATA = "/home/opoirion/data/survival_analysis_multiple/sijia/v2/"
 
 # name of the tsv file containing the survival data of the training set
-SURVIVAL_TSV = 'pds_testing_merged_survival.tsv'
+SURVIVAL_TSV = 'pds_merged_survival.tsv'
 # True if
 USE_INPUT_TRANSPOSE = False
 
@@ -55,9 +55,9 @@ SURVIVAL_FLAG = {'patient_id': 'barcode',
 # dict('data type', 'name of the tsv file which are inside PATH_DATA')
 # These data will be stacked together to build the autoencoder
 TRAINING_TSV = OrderedDict([
-    ('GE', '0607_pds_expr_testing_data.tsv'),
-    ('CNV', '0607_pds_cnv_testing_data.tsv'),
-    ('METH', '0607_pds_methyl_testing_data.tsv'),
+    ('GE', '0607_pds_expr_data.tsv'),
+    ('CNV', '0607_pds_cnv_data.tsv'),
+    ('METH', '0607_pds_methyl_data.tsv'),
     # ('CNV_METH', '0717_methyl_cnv_inter_matrix.tsv'),
     # ('EXPR_METH', '0717_expr_methyl_inter_matrix.tsv'),
     # ('CNV_EXPR', '0717_expr_cnv_inter_matrix.tsv'),
@@ -81,13 +81,13 @@ SEPARATOR = {
     }
 
 TEST_TSV = {
-    'GE': '0607_pds_expr_data.tsv',
-    'CNV': '0607_pds_cnv_data.tsv',
-    'METH': '0607_pds_methyl_data.tsv',
+    'GE': '0607_pds_expr_testing_data.tsv',
+    'CNV': '0607_pds_cnv_testing_data.tsv',
+    'METH': '0607_pds_methyl_testing_data.tsv',
 }
 
 # name of the tsv file containing the survival data of the test set
-SURVIVAL_TSV_TEST = 'pds_merged_survival.tsv'
+SURVIVAL_TSV_TEST = 'pds_testing_merged_survival.tsv'
 
 # Path where to save load the Keras models
 PATH_MODEL = '/home/opoirion/data/survival_analysis_multiple/models/'
@@ -96,7 +96,7 @@ PATH_MODEL = '/home/opoirion/data/survival_analysis_multiple/models/'
 PATH_RESULTS = '/home/opoirion/code/d3visualisation/sijia/'
 
 ######## Cross-validation on the training set ############
-CROSS_VALIDATION_INSTANCE =  None # KFold(n_splits=3, shuffle=True,random_state=1)
+CROSS_VALIDATION_INSTANCE = None # KFold(n_splits=3, shuffle=True,random_state=1)
 
 TEST_FOLD = 0
 ##########################################################

@@ -32,6 +32,7 @@ from time import time
 import numpy as np
 
 from numpy import hstack
+from numpy import vstack
 
 
 def main():
@@ -44,8 +45,8 @@ def main():
     load_data.normalize_training_array()
     load_data.load_matrix_test()
     load_data.load_matrix_test_fold()
-
     load_data.load_survival_test()
+    load_data.load_matrix_full()
 
 
 class LoadData():
@@ -94,6 +95,10 @@ class LoadData():
 
         self.survival_tsv_test = survival_tsv_test
 
+        self.matrix_array_full = {}
+        self.sample_ids_full = []
+        self.survival_full = None
+
         self.feature_test_array = {}
         self.matrix_test_array = {}
 
@@ -119,13 +124,13 @@ class LoadData():
         self.min_max_scaler = MinMaxScaler()
         self.dim_reducer = CorrelationReducer()
 
-    def _stack_multiomics(self, arrays, features=None):
+    def _stack_multiomics(self, arrays=None, features=None):
         """
         """
         if not self.do_stack_multi_omic:
             return
 
-        if len(arrays) > 1:
+        if arrays is not None and len(arrays) > 1:
             arrays['STACKED'] = hstack(
                 arrays.values())
 
@@ -143,6 +148,9 @@ class LoadData():
 
     def load_matrix_test_fold(self):
         """ """
+        if not self.cross_validation_instance:
+            return
+
         for key in self.matrix_array:
 
             matrix_test = self.matrix_cv_array[key].copy()
@@ -296,6 +304,22 @@ class LoadData():
         self.sample_ids_cv = np.asarray(self.sample_ids)[test].tolist()
         self.sample_ids = np.asarray(self.sample_ids)[train].tolist()
 
+    def load_matrix_full(self):
+        """
+        """
+        if not self.cross_validation_instance:
+            self.matrix_array_full = self.matrix_array_train
+            self.sample_ids_full = self.sample_ids
+            self.survival_full = self.survival
+            return
+
+        for key in self.matrix_array_train:
+            self.matrix_array_full[key] = vstack([self.matrix_array_train[key],
+                                                  self.matrix_cv_array[key]])
+
+        self.sample_ids_full = [self.sample_ids] + [self.sample_ids_cv]
+        self.survival_full = vstack([self.survival, self.survival_cv])
+
     def load_survival(self):
         """ """
         survival = load_survival_file(self.survival_tsv, path_data=self.path_data)
@@ -361,6 +385,24 @@ class LoadData():
                 self.feature_train_array[key])}
 
         self._stack_multiomics(self.matrix_array_train, self.feature_train_array)
+        self._stack_index()
+
+    def _stack_index(self):
+        """
+        """
+        if not self.do_stack_multi_omic:
+            return
+
+        index = {'STACKED':{}}
+        count = 0
+
+        for key in self.feature_train_index:
+            for feature in self.feature_train_index[key]:
+                index['STACKED'][feature] = count + self.feature_train_index[key][feature]
+
+            count += len(self.feature_train_index[key])
+
+        self.feature_train_index = index
 
     def _normalize(self,
                    matrix,

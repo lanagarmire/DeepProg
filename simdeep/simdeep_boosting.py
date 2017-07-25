@@ -38,6 +38,7 @@ def main():
     boosting.fit()
     boosting.load_test_dataset()
     boosting.predict_labels_on_test_dataset()
+    boosting.predict_labels_on_full_dataset()
 
 class SimDeepBoosting():
     """
@@ -68,7 +69,10 @@ class SimDeepBoosting():
         for it in range(nb_it):
             split = KFold(n_splits=3, shuffle=True, random_state=np.random.randint(0,1000))
             dataset = LoadData(cross_validation_instance=split, verbose=False)
-            self.models.append(SimDeep(dataset=dataset, verbose=False, _isboosting=True))
+            self.models.append(SimDeep(dataset=dataset,
+                                       verbose=False,
+                                       _isboosting=True,
+                                       do_KM_plot=False))
 
     def load_training_dataset(self):
         """ """
@@ -123,6 +127,29 @@ class SimDeepBoosting():
 
         nbdays, isdead = self.models[0].dataset.survival_test.T.tolist()
         pvalue, pvalue_proba = self._compute_test_coxph('KM_plot_boosting_test', nbdays, isdead)
+
+    def predict_labels_on_full_dataset(self):
+        """
+        """
+        print('predict labels on full datasets...')
+        pool = Pool(self.nb_threads)
+        self.models = pool.map(_predict_labels_on_full_dataset, self.models)
+
+        test_labels_proba = np.asarray([model.test_labels_proba for model in self.models])
+
+        if self.class_selection == 'max':
+            res = _highest_proba(test_labels_proba)
+        elif self.class_selection == 'mean':
+            res = _mean_proba(test_labels_proba)
+
+        self.test_labels, self.test_labels_proba = res
+
+        print('#### report of assigned cluster:')
+        for key, value in Counter(self.test_labels).items():
+            print('class: {0}, number of samples :{1}'.format(key, value))
+
+        nbdays, isdead = self.models[0].dataset.survival_full.T.tolist()
+        pvalue, pvalue_proba = self._compute_test_coxph('KM_plot_boosting_full', nbdays, isdead)
 
     def _compute_test_coxph(self, fname_base, nbdays, isdead):
         """ """
@@ -224,6 +251,12 @@ def _predict_labels_on_test_dataset(model):
     """
     """
     model.predict_labels_on_test_dataset()
+    return model
+
+def _predict_labels_on_full_dataset(model):
+    """
+    """
+    model.predict_labels_on_full_dataset()
     return model
 
 def _load_test_dataset(model):
