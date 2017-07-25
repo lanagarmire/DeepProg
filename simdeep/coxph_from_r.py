@@ -72,4 +72,14 @@ def surv_mean(isdead,nbdays):
     nbdays = FloatVector(nbdays)
 
     surv = rob.r.summary(survival.Surv(nbdays, isdead))
+
     return float(surv[3].split(':')[1])
+
+def surv_median(isdead,nbdays):
+    """ """
+    isdead = FloatVector(isdead)
+    nbdays = FloatVector(nbdays)
+
+    surv = rob.r.summary(survival.Surv(nbdays, isdead))
+
+    return float(surv[2].split(':')[1])

@@ -29,7 +29,8 @@ from simdeep.survival_utils import _process_parallel_feature_importance
 from simdeep.survival_utils import select_best_classif_params
 
 from coxph_from_r import coxph
-from coxph_from_r import surv_mean
+# from coxph_from_r import surv_mean
+from coxph_from_r import surv_median
 
 from collections import Counter
 
@@ -537,7 +538,7 @@ class SimDeep(DeepBase):
         self._label_ordered_dict = {}
 
         for label in set(labels_old):
-            mean = surv_mean(dead[labels_old == label],
+            mean = surv_median(dead[labels_old == label],
                              days[labels_old == label])
             self._label_ordered_dict[label] = mean
 

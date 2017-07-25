@@ -7,6 +7,7 @@ from simdeep.config import SURVIVAL_FLAG
 from simdeep.config import SEPARATOR
 from simdeep.config import ENTREZ_TO_ENSG_FILE
 from simdeep.config import USE_INPUT_TRANSPOSE
+from simdeep.config import DEFAULTSEP
 
 import  numpy as np
 
@@ -66,9 +67,10 @@ class CorrelationReducer():
         self.fit(dataset)
         return self.transform(dataset)
 
-def load_survival_file(f_name, path_data=PATH_DATA):
+def load_survival_file(f_name, path_data=PATH_DATA, sep=DEFAULTSEP):
     """ """
-    sep = SEPARATOR[f_name]
+    if f_name in SEPARATOR:
+        sep = SEPARATOR[f_name]
 
     survival = {}
     f_surv = open(path_data + f_name, 'r')
@@ -109,10 +111,13 @@ def _load_data_from_tsv(
         key,
         path_data=PATH_DATA,
         f_type=float,
+        sep=DEFAULTSEP,
         nan_to_num=True):
     """ """
     f_short = key
-    sep = SEPARATOR[f_name]
+
+    if f_name in SEPARATOR:
+        sep = SEPARATOR[f_name]
 
     f_tsv = open(path_data + f_name)
     header = f_tsv.readline().strip(sep + '\n').split(sep)
@@ -132,7 +137,15 @@ def _load_data_from_tsv(
 
         f_matrix.append(map(f_type, line[1:]))
 
-    return sample_ids, feature_ids, np.array(f_matrix)
+    f_matrix = np.array(f_matrix)
+
+    if f_matrix.shape[1] == len(feature_ids) - 1:
+        feature_ids = feature_ids[1:]
+
+    assert(f_matrix.shape[1] == len(feature_ids))
+    assert(f_matrix.shape[0] == len(sample_ids))
+
+    return sample_ids, feature_ids, f_matrix
 
 def _format_sample_name(sample_ids):
     """
@@ -147,9 +160,11 @@ def _load_data_from_tsv_transposee(
         key,
         path_data=PATH_DATA,
         f_type=float,
+        sep=DEFAULTSEP,
         nan_to_num=True):
     """ """
-    sep = SEPARATOR[f_name]
+    if f_name in SEPARATOR:
+        sep = SEPARATOR[f_name]
 
     f_tsv = open(path_data + f_name)
     header = f_tsv.readline().strip(sep + '\n').split(sep)
@@ -184,7 +199,13 @@ def _load_data_from_tsv_transposee(
             feature_ids.append('{0}_{1}'.format(key, feature))
             f_matrix.append(map(f_type, line[1:]))
 
-    return sample_ids, feature_ids, np.array(f_matrix).T
+
+    f_matrix = np.array(f_matrix).T
+
+    assert(f_matrix.shape[1] == len(feature_ids))
+    assert(f_matrix.shape[0] == len(sample_ids))
+
+    return sample_ids, feature_ids, f_matrix
 
 def select_best_classif_params(clf):
     """
