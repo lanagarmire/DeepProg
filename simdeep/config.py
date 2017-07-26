@@ -16,6 +16,9 @@ CLUSTER_METHOD = 'mixture'
 CLUSTER_EVAL_METHOD = 'silhouette'
 CLASSIFIER_TYPE = 'svm'
 CLASSIFICATION_METHOD = 'SURVIVAL_FEATURES' # ['ALL_FEATURES', 'SURVIVAL_FEATURES']
+FILL_UNKOWN_FEATURE_WITH_0 = False
+# Number of top features selected for classification
+# Apply only when CLASSIFICATION_METHOD == 'ALL_FEATURES'
 NB_SELECTED_FEATURES = 50
 CLUSTER_ARRAY = []
 PVALUE_THRESHOLD = 0.01 # Threshold for survival significance to set a node as valid
@@ -23,7 +26,7 @@ NB_THREADS_COXPH = 10
 STACK_MULTI_OMIC = False
 
 #### Boosting values
-NB_ITER = 20 # boosting iteration
+NB_ITER = 10 # boosting iteration
 NB_THREADS = 4 # number of simdeep instance launched in parallel
 NB_FOLDS = 3 # for each instance, the original dataset is split in folds and one fold is left
 CLASS_SELECTION = 'mean' # mean or max: the method used to select the final class, according to class probas
@@ -39,7 +42,7 @@ PATH_DATA = "/home/opoirion/data/survival_analysis_multiple/psb18/"
 # name of the tsv file containing the survival data of the training set
 SURVIVAL_TSV = 'surv_mapped_BLCA.tsv'
 # name of the tsv file containing the survival data of the test set
-SURVIVAL_TSV_TEST = 'surv_mapped_BLCA.tsv'
+SURVIVAL_TSV_TEST = 'survival_validation3.tsv'
 
 # True if
 USE_INPUT_TRANSPOSE = False
@@ -59,16 +62,16 @@ SURVIVAL_FLAG = {'patient_id': 'SampleID',
 # These data will be stacked together to build the autoencoder
 TRAINING_TSV = OrderedDict([
     ('GE', 'rna_mapped_BLCA.tsv'),
-    # ('CNV', 'mir_mapped_BLCA.tsv'),
-    # ('METH', 'meth_mapped_BLCA.tsv'),
+    ('MIR', 'mir_mapped_BLCA.tsv'),
+    ('METH', 'meth_mapped_BLCA.tsv'),
     # ('CNV_METH', '0717_methyl_cnv_inter_matrix.tsv'),
     # ('EXPR_METH', '0717_expr_methyl_inter_matrix.tsv'),
     # ('CNV_EXPR', '0717_expr_cnv_inter_matrix.tsv'),
 ])
 
 TEST_TSV = {
-    'GE': 'rna_mapped_BLCA.tsv',
-    # 'CNV': 'mir_mapped_BLCA.tsv',
+    # 'GE': 'mRNA_validation2.tsv',
+    'MIR': 'miRNA.tsv',
     # 'METH': 'meth_mapped_BLCA.tsv',
     # 'GE': '0607_pds_expr_testing_data.tsv',
     # 'CNV': '0607_pds_cnv_testing_data.tsv',
@@ -84,13 +87,13 @@ SEPARATOR = {
     }
 
 # Path where to save load the Keras models
-PATH_MODEL = '/home/opoirion/data/survival_analysis_multiple/models/'
+PATH_MODEL = '/home/opoirion/data/survival_analysis_multiple/models/psb18/'
 
 # Path to generate png images
 PATH_RESULTS = '/home/opoirion/code/d3visualisation/psb18/'
 
 ######## Cross-validation on the training set ############
-CROSS_VALIDATION_INSTANCE = None # KFold(n_splits=3, shuffle=True,random_state=1)
+CROSS_VALIDATION_INSTANCE = KFold(n_splits=3, shuffle=True,random_state=1)
 
 TEST_FOLD = 0
 ##########################################################
@@ -100,6 +103,7 @@ TEST_FOLD = 0
 ## Normalize before the autoencoder construction ########
 TRAIN_MIN_MAX = False
 TRAIN_ROBUST_SCALE = False
+TRAIN_ROBUST_SCALE_TWO_WAY = False
 TRAIN_MAD_SCALE = False
 TRAIN_NORM_SCALE = False
 TRAIN_RANK_NORM = True
@@ -164,11 +168,6 @@ HYPER_PARAMETERS = [
 
 # grid search classifier using Support Vector Machine Classifier (SVC)
 CLASSIFIER = GridSearchCV(SVC(), HYPER_PARAMETERS, cv=5)
-
-# Number of top features selected for classification
-# Apply only when CLASSIFICATION_METHOD == 'ALL_FEATURES'
-SELECT_TOP_FEATURES_FOR_CLASSIFICATION = 50
-
 ##########################################################
 
 #################### Other variables #####################

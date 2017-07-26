@@ -78,7 +78,7 @@ class DeepBase(object):
         self.dataset = dataset
         self.verbose = verbose
 
-        self.matrix_array_train = {}
+        self.matrix_train_array = {}
 
         self.nb_epoch = nb_epoch
         self.level_dims_in = level_dims_in
@@ -115,7 +115,7 @@ class DeepBase(object):
         self.dataset.create_a_cv_split()
         self.dataset.normalize_training_array()
 
-        self.matrix_array_train = self.dataset.matrix_array_train
+        self.matrix_train_array = self.dataset.matrix_train_array
 
     def load_test_dataset(self):
         """
@@ -126,8 +126,8 @@ class DeepBase(object):
 
     def create_autoencoders(self):
         """ """
-        for key in self.matrix_array_train:
-            self._create_autoencoder(self.matrix_array_train[key], key)
+        for key in self.matrix_train_array:
+            self._create_autoencoder(self.matrix_train_array[key], key)
 
     def _create_autoencoder(self, matrix_train, key):
         """
@@ -224,7 +224,7 @@ class DeepBase(object):
         """
         for key in self.model_array:
             model = self.model_array[key]
-            matrix_train = self.matrix_array_train[key]
+            matrix_train = self.matrix_train_array[key]
 
             if not self.verbose:
                 verbose = None
@@ -247,7 +247,7 @@ class DeepBase(object):
         """ """
         for key in self.model_array:
             model = self.model_array[key]
-            matrix_train = self.matrix_array_train[key]
+            matrix_train = self.matrix_train_array[key]
 
             X_shape = matrix_train.shape
 
@@ -281,7 +281,7 @@ class DeepBase(object):
         Load a keras model from the self.path_model directory
         :fname: str    the name of the file to load
         """
-        for key in self.matrix_array_train:
+        for key in self.matrix_train_array:
             file_path = '{0}/{1}_{2}'.format(self.path_model, key, fname)
             assert(isfile(file_path))
             t = time()

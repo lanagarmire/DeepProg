@@ -197,7 +197,7 @@ class SimDeep(DeepBase):
 
         for key in self.training_omic_list:
 
-            test_matrix = self.dataset.matrix_array_full[key]
+            test_matrix = self.dataset.matrix_full_array[key]
             encoder = self.encoder_array[key]
             valid_node_ids = self.valid_node_ids_array[key]
 
@@ -205,7 +205,7 @@ class SimDeep(DeepBase):
 
         self.activities_full = hstack(activities_array)
 
-        self._predict_test_labels(self.activities_full, self.dataset.matrix_array_full)
+        self._predict_test_labels(self.activities_full, self.dataset.matrix_full_array)
 
         if self.verbose:
             print('#### report of assigned cluster for full dataset:')
@@ -224,15 +224,19 @@ class SimDeep(DeepBase):
         """
         nbdays, isdead = self.dataset.survival_test.T.tolist()
 
-        if set(self.dataset.matrix_test_array.keys()) != set(self.training_omic_list):
+        activities_array = []
+
+        is_same_keys = set(self.dataset.matrix_test_array.keys()) == set(self.training_omic_list)
+        is_same_features = self.dataset.feature_ref_array == self.dataset.feature_train_array
+
+        if not is_same_keys or not is_same_features:
+            if self.verbose:
+                print('same keys used: {0} same features used: {1}. rebuilding the classifier'\
+                      .format(is_same_keys, is_same_features))
             self.look_for_survival_nodes(self.dataset.matrix_test_array.keys())
             self.fit_classification_model()
 
-        activities_array = []
-
         for key in self.training_omic_list:
-            self.dataset.reorder_test_matrix(key)
-
             test_matrix = self.dataset.matrix_test_array[key]
             encoder = self.encoder_array[key]
             valid_node_ids = self.valid_node_ids_array[key]
@@ -296,9 +300,9 @@ class SimDeep(DeepBase):
             for i in range(len(feature_list)):
                 yield feature_list[i], matrix[i], labels
 
-        for key in self.dataset.matrix_array_train:
+        for key in self.dataset.matrix_train_array:
             feature_list = self.dataset.feature_train_array[key][:]
-            matrix = self.dataset.matrix_array_train[key][:]
+            matrix = self.dataset.matrix_train_array[key][:]
             labels = self.labels[:]
 
             input_list = generator(labels, feature_list, matrix.T)
@@ -320,7 +324,7 @@ class SimDeep(DeepBase):
             assert(self.classifier_type != 'clustering')
             matrix = self.activities_train
         elif self.classification_method == 'ALL_FEATURES':
-            matrix = self._reduce_and_stack_matrices(self.matrix_array_train)
+            matrix = self._reduce_and_stack_matrices(self.matrix_ref_array)
         if self.verbose:
             print('number of features for the classifier: {0}'.format(matrix.shape[1]))
 
@@ -337,7 +341,7 @@ class SimDeep(DeepBase):
             matrix = []
 
             for key in self.feature_scores:
-                index = [self.dataset.feature_train_index[key][feature]
+                index = [self.dataset.feature_ref_index[key][feature]
                          for feature, pvalue in
                          self.feature_scores[key][:self.nb_selected_features]]
                 matrix.append(matrices[key].T[index].T)
@@ -452,7 +456,7 @@ class SimDeep(DeepBase):
             self.training_omic_list.append(key)
 
             encoder = self.encoder_array[key]
-            matrix_train = self.matrix_array_train[key]
+            matrix_train = self.matrix_train_array[key]
 
             activities = encoder.predict(matrix_train)
 

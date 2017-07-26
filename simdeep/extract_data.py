@@ -16,7 +16,9 @@ from simdeep.config import TRAIN_CORR_REDUCTION
 from simdeep.config import TRAIN_RANK_NORM
 from simdeep.config import TRAIN_MAD_SCALE
 from simdeep.config import TRAIN_ROBUST_SCALE
+from simdeep.config import TRAIN_ROBUST_SCALE_TWO_WAY
 from simdeep.config import TRAIN_CORR_RANK_NORM
+from simdeep.config import FILL_UNKOWN_FEATURE_WITH_0
 
 from simdeep.config import CROSS_VALIDATION_INSTANCE
 from simdeep.config import TEST_FOLD
@@ -44,6 +46,7 @@ def main():
 
     load_data.normalize_training_array()
     load_data.load_matrix_test()
+
     load_data.load_matrix_test_fold()
     load_data.load_survival_test()
     load_data.load_matrix_full()
@@ -60,6 +63,7 @@ class LoadData():
             cross_validation_instance=CROSS_VALIDATION_INSTANCE,
             test_fold=TEST_FOLD,
             stack_multi_omic=STACK_MULTI_OMIC,
+            fill_unkown_feature_with_0=FILL_UNKOWN_FEATURE_WITH_0,
             verbose=True,
     ):
         """
@@ -82,20 +86,23 @@ class LoadData():
         self.path_data = path_data
         self.survival_tsv = survival_tsv
         self.training_tsv = training_tsv
+        self.fill_unkown_feature_with_0 = fill_unkown_feature_with_0
         self.feature_array = {}
         self.matrix_array = {}
 
         self.test_tsv = test_tsv
-        self.matrix_array_train = {}
+        self.matrix_train_array = {}
 
         self.sample_ids = []
         self.data_type = training_tsv.keys()
+
+        self._correlation_red_used = False
 
         self.survival = None
 
         self.survival_tsv_test = survival_tsv_test
 
-        self.matrix_array_full = {}
+        self.matrix_full_array = {}
         self.sample_ids_full = []
         self.survival_full = None
 
@@ -107,6 +114,8 @@ class LoadData():
         self.survival_cv = None
 
         self.matrix_ref_array = {}
+        self.feature_ref_array = {}
+        self.feature_ref_index = {}
         self.feature_train_array = {}
         self.feature_train_index = {}
 
@@ -158,23 +167,15 @@ class LoadData():
 
             matrix_ref, matrix_test = self.transform_matrices(
                 matrix_ref, matrix_test, key,
-                unit_norm=TRAIN_NORM_SCALE,
-                rank_scale=TRAIN_RANK_NORM,
-                mad_scale=TRAIN_MAD_SCALE,
-                robust_scale=TRAIN_ROBUST_SCALE,
-                min_max_scale=TRAIN_MIN_MAX,
-                correlation_reducer=TRAIN_CORR_REDUCTION,
-                corr_rank_scale=TRAIN_CORR_RANK_NORM,
             )
 
             self.matrix_cv_array[key] = matrix_test
 
         self._stack_multiomics(self.matrix_cv_array)
 
-    def load_matrix_test(self, fill_unkown_feature_with_0=True):
+    def load_matrix_test(self):
         """ """
         for key in self.test_tsv:
-            self.feature_train_array[key] = self.feature_array[key][:]
             sample_ids, feature_ids, matrix = load_data_from_tsv(
                 f_name=self.test_tsv[key],
                 key=key,
@@ -185,10 +186,13 @@ class LoadData():
 
             common_features = set(feature_ids).intersection(feature_ids_ref)
 
+            if self.verbose:
+                print('nb common features for the test set:{0}'.format(len(common_features)))
+
             feature_ids_dict = {feat: i for i,feat in enumerate(feature_ids)}
             feature_ids_ref_dict = {feat: i for i,feat in enumerate(feature_ids_ref)}
 
-            if len(common_features) < len(feature_ids_ref) and fill_unkown_feature_with_0:
+            if len(common_features) < len(feature_ids_ref) and self.fill_unkown_feature_with_0:
                 missing_features = set(feature_ids_ref).difference(common_features)
 
                 if self.verbose:
@@ -216,34 +220,33 @@ class LoadData():
                 self.sample_ids_test = sample_ids
 
             matrix_ref, matrix_test = self.transform_matrices(
-                matrix_ref, matrix_test, key,
-                unit_norm=TRAIN_NORM_SCALE,
-                rank_scale=TRAIN_RANK_NORM,
-                mad_scale=TRAIN_MAD_SCALE,
-                robust_scale=TRAIN_ROBUST_SCALE,
-                min_max_scale=TRAIN_MIN_MAX,
-                correlation_reducer=TRAIN_CORR_REDUCTION,
-                corr_rank_scale=TRAIN_CORR_RANK_NORM,
-            )
+                matrix_ref, matrix_test, key)
+
+            self._define_test_features(key)
 
             self.matrix_test_array[key] = matrix_test
             self.matrix_ref_array[key] = matrix_ref
+            self._create_ref_matrix(key)
 
         self._stack_multiomics(self.matrix_test_array,
                                self.feature_test_array)
+        self._stack_multiomics(self.matrix_ref_array,
+                               self.feature_ref_array)
 
-    def reorder_test_matrix(self, key):
+    def _create_ref_matrix(self, key):
         """ """
         features_test = self.feature_test_array[key]
-        features_ref = self.feature_train_array[key]
+        features_train = self.feature_train_array[key]
 
-        ref_dict = {feat: pos for pos, feat in enumerate(features_test)}
-        index = [ref_dict[feat] for feat in features_ref]
+        test_dict = {feat: pos for pos, feat in enumerate(features_test)}
+        train_dict = {feat: pos for pos, feat in enumerate(features_train)}
 
-        self.feature_test_array[key] = features_ref[:]
+        index = [train_dict[feat] for feat in features_test]
 
-        self.matrix_test_array[key] = self.matrix_test_array[key].T[index].T
-        self.matrix_ref_array[key] = self.matrix_array_train[key].T[index].T
+        self.feature_ref_array[key] = self.feature_test_array[key]
+        self.matrix_ref_array[key] = self.matrix_train_array[key].T[index].T
+
+        self.feature_ref_index[key] = test_dict
 
     def load_array(self):
         """ """
@@ -308,16 +311,16 @@ class LoadData():
         """
         """
         if not self.cross_validation_instance:
-            self.matrix_array_full = self.matrix_array_train
+            self.matrix_full_array = self.matrix_train_array
             self.sample_ids_full = self.sample_ids
             self.survival_full = self.survival
             return
 
-        for key in self.matrix_array_train:
-            self.matrix_array_full[key] = vstack([self.matrix_array_train[key],
+        for key in self.matrix_train_array:
+            self.matrix_full_array[key] = vstack([self.matrix_train_array[key],
                                                   self.matrix_cv_array[key]])
 
-        self.sample_ids_full = [self.sample_ids] + [self.sample_ids_cv]
+        self.sample_ids_full = self.sample_ids[:] + self.sample_ids_cv[:]
         self.survival_full = vstack([self.survival, self.survival_cv])
 
     def load_survival(self):
@@ -374,17 +377,37 @@ class LoadData():
             if self.verbose:
                 print('{0} samples without survival removed'.format(sample_removed))
 
+    def _define_train_features(self, key):
+        """ """
+        self.feature_train_array[key] = self.feature_array[key][:]
+
+        if self._correlation_red_used:
+            self.feature_train_array[key] = ['{0}_{1}'.format(key, sample)
+                                             for sample in self.sample_ids]
+
+        self.feature_ref_array[key] = self.feature_train_array[key]
+
+        self.feature_train_index[key] = {key: id for id, key in enumerate(
+            self.feature_train_array[key])}
+        self.feature_ref_index[key] = self.feature_train_index[key]
+
+    def _define_test_features(self, key):
+        """ """
+        if self._correlation_red_used:
+            self.feature_test_array[key] = ['{0}_{1}'.format(key, sample)
+                                             for sample in self.sample_ids]
+
     def normalize_training_array(self):
         """ """
         for key in self.matrix_array:
             matrix = self.matrix_array[key]
             matrix = self._normalize(matrix, key)
-            self.matrix_array_train[key] = matrix
-            self.feature_train_array[key] = self.feature_array[key][:]
-            self.feature_train_index[key] = {key: id for id, key in enumerate(
-                self.feature_train_array[key])}
 
-        self._stack_multiomics(self.matrix_array_train, self.feature_train_array)
+            self.matrix_train_array[key] = matrix
+            self.matrix_ref_array[key] = self.matrix_train_array[key]
+            self._define_train_features(key)
+
+        self._stack_multiomics(self.matrix_train_array, self.feature_train_array)
         self._stack_index()
 
     def _stack_index(self):
@@ -403,12 +426,14 @@ class LoadData():
             count += len(self.feature_train_index[key])
 
         self.feature_train_index = index
+        self.feature_ref_index = self.feature_train_index
 
     def _normalize(self,
                    matrix,
                    key,
                    mad_scale=TRAIN_MAD_SCALE,
                    robust_scale=TRAIN_ROBUST_SCALE,
+                   robust_scale_two_way=TRAIN_ROBUST_SCALE_TWO_WAY,
                    min_max=TRAIN_MIN_MAX,
                    norm_scale=TRAIN_NORM_SCALE,
                    rank_scale=TRAIN_RANK_NORM,
@@ -425,7 +450,7 @@ class LoadData():
         if mad_scale:
             matrix = self.mad_scaler.fit_transform(matrix.T).T
 
-        if robust_scale:
+        if robust_scale or robust_scale_two_way:
             matrix = self.robust_scaler.fit_transform(matrix)
 
         if norm_scale:
@@ -443,6 +468,7 @@ class LoadData():
             reducer = CorrelationReducer()
             matrix = reducer.fit_transform(
                 matrix)
+            self._correlation_red_used = True
 
             if corr_rank_scale:
                 matrix = RankNorm().fit_transform(
@@ -454,6 +480,7 @@ class LoadData():
                            matrix_ref, matrix, key,
                            mad_scale=TRAIN_MAD_SCALE,
                            robust_scale=TRAIN_ROBUST_SCALE,
+                           robust_scale_two_way=TRAIN_ROBUST_SCALE_TWO_WAY,
                            min_max_scale=TRAIN_MIN_MAX,
                            rank_scale=TRAIN_RANK_NORM,
                            correlation_reducer=TRAIN_CORR_REDUCTION,
@@ -475,6 +502,10 @@ class LoadData():
             matrix_ref = self.robust_scaler.fit_transform(matrix_ref)
             matrix = self.robust_scaler.transform(matrix)
 
+        if robust_scale_two_way:
+            matrix_ref = self.robust_scaler.fit_transform(matrix_ref)
+            matrix = self.robust_scaler.transform(matrix)
+
         if unit_norm:
             matrix_ref = self.normalizer.fit_transform(matrix_ref)
             matrix = self.normalizer.transform(matrix)
@@ -487,9 +518,6 @@ class LoadData():
             reducer = CorrelationReducer()
             matrix_ref = reducer.fit_transform(matrix_ref)
             matrix = reducer.transform(matrix)
-
-            self.feature_test_array[key] = self.sample_ids
-            self.feature_train_array[key] = self.sample_ids
 
             if corr_rank_scale:
                 matrix_ref = RankNorm().fit_transform(matrix_ref)
