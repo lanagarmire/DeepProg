@@ -214,7 +214,7 @@ class SimDeep(DeepBase):
 
         if self.verbose:
             print('#### report of assigned cluster for full dataset:')
-            for key, value in Counter(self.test_labels).items():
+            for key, value in Counter(self.full_labels).items():
                 print('class: {0}, number of samples :{1}'.format(key, value))
 
         pvalue, pvalue_proba = self._compute_test_coxph('KM_plot_full',
@@ -463,12 +463,18 @@ class SimDeep(DeepBase):
 
         self.train_pvalue = pvalue
 
-    def _write_labels(self, sample_ids, labels, fname):
+    def _write_labels(self, sample_ids, labels, fname, labels_proba=None):
         """ """
         f_file = open('{0}/{1}.tsv'.format(self.path_results, fname), 'w')
 
-        for sample, label in zip(sample_ids, labels):
-            f_file.write('{0}\t{1}\n'.format(sample, label))
+        for ids, (sample, label) in enumerate(zip(sample_ids, labels)):
+
+            if labels_proba is not None:
+                proba = '\t{0}'.format(labels_proba[ids])
+            else:
+                proba = ''
+
+            f_file.write('{0}\t{1}{2}\n'.format(sample, label, proba))
 
     def _predict_survival_nodes(self, matrix_array):
         """

@@ -15,12 +15,12 @@ NB_CLUSTERS = 2 # Number of clusters
 CLUSTER_METHOD = 'mixture'
 CLUSTER_EVAL_METHOD = 'silhouette'
 CLASSIFIER_TYPE = 'svm'
-CLASSIFICATION_METHOD = 'SURVIVAL_FEATURES' # ['ALL_FEATURES', 'SURVIVAL_FEATURES']
+CLASSIFICATION_METHOD = 'ALL_FEATURES' # ['ALL_FEATURES', 'SURVIVAL_FEATURES']
 FILL_UNKOWN_FEATURE_WITH_0 = False
 
 # Number of top features selected for classification
 # Apply only when CLASSIFICATION_METHOD == 'ALL_FEATURES'
-NB_SELECTED_FEATURES = 50
+NB_SELECTED_FEATURES = 10
 CLUSTER_ARRAY = []
 PVALUE_THRESHOLD = 0.01 # Threshold for survival significance to set a node as valid
 NB_THREADS_COXPH = 10
@@ -36,7 +36,7 @@ CLASS_SELECTION = 'mean' # mean or max: the method used to select the final clas
 # save fitted models
 SAVE_FITTED_MODELS = True
 # load existing models if founds
-LOAD_EXISTING_MODELS = False
+LOAD_EXISTING_MODELS = True
 ########################################################
 
 #################### Paths to data file ################
@@ -100,9 +100,9 @@ PATH_MODEL = '/home/opoirion/data/survival_analysis_multiple/models/psb18/'
 PATH_RESULTS = '/home/opoirion/code/d3visualisation/psb18/'
 
 ######## Cross-validation on the training set ############
-CROSS_VALIDATION_INSTANCE = KFold(n_splits=3, shuffle=True, random_state=0)
+CROSS_VALIDATION_INSTANCE = KFold(n_splits=3, shuffle=True, random_state=1)
 
-TEST_FOLD = 0
+TEST_FOLD = 1
 ##########################################################
 ########################################################
 
