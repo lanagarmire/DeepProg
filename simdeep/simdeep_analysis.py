@@ -317,7 +317,7 @@ class SimDeep(DeepBase):
 
         if self.classification_method == 'SURVIVAL_FEATURES':
             assert(self.classifier_type != 'clustering')
-            matrix = self.activities_train
+            matrix = self._predict_survival_nodes(self.dataset.matrix_ref_array)
         elif self.classification_method == 'ALL_FEATURES':
             matrix = self._reduce_and_stack_matrices(self.dataset.matrix_ref_array)
         if self.verbose:
