@@ -174,7 +174,8 @@ HYPER_PARAMETERS = [
 ]
 
 # grid search classifier using Support Vector Machine Classifier (SVC)
-CLASSIFIER = GridSearchCV(SVC(), HYPER_PARAMETERS, cv=5)
+CLASSIFIER = SVC
+CLASSIFIER_GRID = GridSearchCV(CLASSIFIER(), HYPER_PARAMETERS, cv=5)
 ##########################################################
 
 #################### Other variables #####################

@@ -12,7 +12,7 @@ from simdeep.config import NB_CLUSTERS
 from simdeep.config import CLUSTER_ARRAY
 from simdeep.config import PVALUE_THRESHOLD
 from simdeep.config import CLASSIFIER_TYPE
-from simdeep.config import CLASSIFIER
+from simdeep.config import CLASSIFIER_GRID
 from simdeep.config import MIXTURE_PARAMS
 from simdeep.config import PATH_RESULTS
 from simdeep.config import PROJECT_NAME
@@ -110,7 +110,7 @@ class SimDeep(DeepBase):
         """
         self.nb_clusters = nb_clusters
         self.pvalue_thres = pvalue_thres
-        self.classifier_grid = CLASSIFIER
+        self.classifier_grid = CLASSIFIER_GRID
         self.cluster_array = cluster_array
         self.path_results = path_results
         self.mixture_params = mixture_params
@@ -209,9 +209,6 @@ class SimDeep(DeepBase):
         nbdays, isdead = self.dataset.survival_full.T.tolist()
 
         self.activities_full = self._predict_survival_nodes(self.dataset.matrix_full_array)
-        self.full_labels, self.full_labels_proba = self._predict_labels(
-            self.activities_full, self.dataset.matrix_full_array)
-
         self.full_labels, self.full_labels_proba = self._predict_labels(
             self.activities_full, self.dataset.matrix_full_array)
 
@@ -370,9 +367,7 @@ class SimDeep(DeepBase):
         cvs = cross_val_score(self.classifier, train_matrix, labels, cv=5)
 
         self.classifier.set_params(probability=True)
-
         self.classifier.fit(train_matrix, labels)
-        self.classifier_test = self.classifier
 
         if self.verbose:
             print('best params:', params)
@@ -403,17 +398,15 @@ class SimDeep(DeepBase):
             self.classifier_grid.fit(train_matrix, labels)
 
         self.classifier_test, params = select_best_classif_params(self.classifier_grid)
-
         cvs = cross_val_score(self.classifier_test, train_matrix, labels, cv=5)
 
         self.classifier_test.set_params(probability=True)
         self.classifier_test.fit(train_matrix, labels)
-        self.classifier_test = self.classifier
 
         if self.verbose:
             print('best params:', params)
             print('cross val score: {0}'.format(np.mean(cvs)))
-            print('classification score:', self.classifier.score(train_matrix, labels))
+            print('classification score:', self.classifier_test.score(train_matrix, labels))
 
     def predict_labels(self):
         """

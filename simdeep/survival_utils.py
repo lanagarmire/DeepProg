@@ -8,6 +8,7 @@ from simdeep.config import SEPARATOR
 from simdeep.config import ENTREZ_TO_ENSG_FILE
 from simdeep.config import USE_INPUT_TRANSPOSE
 from simdeep.config import DEFAULTSEP
+from simdeep.config import CLASSIFIER
 
 import  numpy as np
 
@@ -223,7 +224,7 @@ def select_best_classif_params(clf):
 
     params = clf.cv_results_['params'][index]
 
-    clf = clf.estimator.set_params(**params)
+    clf = CLASSIFIER(**params)
 
     return clf, params
 
