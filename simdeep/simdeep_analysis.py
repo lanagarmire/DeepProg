@@ -22,6 +22,8 @@ from simdeep.config import CLUSTER_EVAL_METHOD
 from simdeep.config import CLUSTER_METHOD
 from simdeep.config import NB_THREADS_COXPH
 from simdeep.config import NB_SELECTED_FEATURES
+from simdeep.config import SAVE_FITTED_MODELS
+from simdeep.config import LOAD_EXISTING_MODELS
 
 from simdeep.survival_utils import _process_parallel_coxph
 from simdeep.survival_utils import _process_parallel_feature_importance
@@ -58,11 +60,13 @@ def main():
     sim_deep.load_training_dataset()
     sim_deep.fit()
 
+    if SAVE_FITTED_MODELS:
+        sim_deep.save_encoders()
+
     sim_deep.load_test_dataset()
     sim_deep.predict_labels_on_test_dataset()
     sim_deep.predict_labels_on_test_fold()
     sim_deep.predict_labels_on_full_dataset()
-
 
 class SimDeep(DeepBase):
     """ """
@@ -79,6 +83,7 @@ class SimDeep(DeepBase):
                  mixture_params=MIXTURE_PARAMS,
                  nb_threads_coxph=NB_THREADS_COXPH,
                  classification_method=CLASSIFICATION_METHOD,
+                 load_existing_models=LOAD_EXISTING_MODELS,
                  do_KM_plot=True,
                  verbose=True,
                  _isboosting=False,
@@ -117,6 +122,7 @@ class SimDeep(DeepBase):
 
         self.train_pvalue = None
         self.classifier = None
+        self.classifier_test = None
         self.classifier_type = classifier_type
         self._isboosting = _isboosting
 
@@ -129,7 +135,13 @@ class SimDeep(DeepBase):
 
         self.test_labels = None
         self.test_labels_proba = None
+        self.cv_labels = None
+        self.cv_labels_proba = None
+        self.full_labels = None
+        self.full_labels_proba = None
+
         self.training_omic_list = []
+        self.test_omic_list = []
 
         self.feature_scores = defaultdict(list)
 
@@ -139,6 +151,8 @@ class SimDeep(DeepBase):
         self.cluster_eval_method = cluster_eval_method
         self.verbose = verbose
 
+        self._load_existing_models = load_existing_models
+
         DeepBase.__init__(self, verbose=self.verbose, **kwargs)
 
     def fit(self):
@@ -147,9 +161,16 @@ class SimDeep(DeepBase):
         construct an autoencoder, predict nodes linked with survival
         and do clustering
         """
-        self.construct_autoencoders()
+        if self._load_existing_models:
+            self.load_encoders()
+
+        if not self.is_model_loaded:
+            self.construct_autoencoders()
+
         self.look_for_survival_nodes()
+        self.training_omic_list = self.encoder_array.keys()
         self.predict_labels()
+
         self.fit_classification_model()
 
     def predict_labels_on_test_fold(self):
@@ -161,28 +182,21 @@ class SimDeep(DeepBase):
         self.dataset.load_matrix_test_fold()
 
         nbdays, isdead = self.dataset.survival_cv.T.tolist()
-        activities_array = []
 
-        for key in self.training_omic_list:
-
-            test_matrix = self.dataset.matrix_cv_array[key]
-            encoder = self.encoder_array[key]
-            valid_node_ids = self.valid_node_ids_array[key]
-
-            activities_array.append(encoder.predict(test_matrix).T[valid_node_ids].T)
-
-        self.activities_cv = hstack(activities_array)
-
-        self._predict_test_labels(self.activities_cv, self.dataset.matrix_cv_array)
+        self.activities_cv = self._predict_survival_nodes(self.dataset.matrix_cv_array)
+        self.cv_labels, self.cv_labels_proba = self._predict_labels(
+            self.activities_cv, self.dataset.matrix_cv_array)
 
         if self.verbose:
             print('#### report of assigned cluster:')
-            for key, value in Counter(self.test_labels).items():
+            for key, value in Counter(self.cv_labels).items():
                 print('class: {0}, number of samples :{1}'.format(key, value))
 
-        pvalue, pvalue_proba = self._compute_test_coxph('KM_plot_test_fold', nbdays, isdead)
+        pvalue, pvalue_proba = self._compute_test_coxph('KM_plot_test_fold',
+                                                        nbdays, isdead,
+                                                        self.cv_labels, self.cv_labels_proba)
 
-        self._write_labels(self.dataset.sample_ids_cv, self.test_labels, '{0}_test_fold_labels'.format(
+        self._write_labels(self.dataset.sample_ids_cv, self.cv_labels, '{0}_test_fold_labels'.format(
             self.project_name))
 
         return self.test_labels, pvalue
@@ -193,28 +207,24 @@ class SimDeep(DeepBase):
         self.dataset.load_matrix_full()
 
         nbdays, isdead = self.dataset.survival_full.T.tolist()
-        activities_array = []
 
-        for key in self.training_omic_list:
+        self.activities_full = self._predict_survival_nodes(self.dataset.matrix_full_array)
+        self.full_labels, self.full_labels_proba = self._predict_labels(
+            self.activities_full, self.dataset.matrix_full_array)
 
-            test_matrix = self.dataset.matrix_full_array[key]
-            encoder = self.encoder_array[key]
-            valid_node_ids = self.valid_node_ids_array[key]
-
-            activities_array.append(encoder.predict(test_matrix).T[valid_node_ids].T)
-
-        self.activities_full = hstack(activities_array)
-
-        self._predict_test_labels(self.activities_full, self.dataset.matrix_full_array)
+        self.full_labels, self.full_labels_proba = self._predict_labels(
+            self.activities_full, self.dataset.matrix_full_array)
 
         if self.verbose:
             print('#### report of assigned cluster for full dataset:')
             for key, value in Counter(self.test_labels).items():
                 print('class: {0}, number of samples :{1}'.format(key, value))
 
-        pvalue, pvalue_proba = self._compute_test_coxph('KM_plot_full', nbdays, isdead)
+        pvalue, pvalue_proba = self._compute_test_coxph('KM_plot_full',
+                                                        nbdays, isdead,
+                                                        self.full_labels, self.full_labels_proba)
 
-        self._write_labels(self.dataset.sample_ids_cv, self.test_labels, '{0}_full_labels'.format(
+        self._write_labels(self.dataset.sample_ids_cv, self.full_labels, '{0}_full_labels'.format(
             self.project_name))
 
         return self.test_labels, pvalue
@@ -224,27 +234,10 @@ class SimDeep(DeepBase):
         """
         nbdays, isdead = self.dataset.survival_test.T.tolist()
 
-        activities_array = []
+        self.test_omic_list = self.dataset.matrix_test_array.keys()
+        self.fit_classification_test_model()
 
-        is_same_keys = set(self.dataset.matrix_test_array.keys()) == set(self.training_omic_list)
-        is_same_features = self.dataset.feature_ref_array == self.dataset.feature_train_array
-
-        if not is_same_keys or not is_same_features:
-            if self.verbose:
-                print('same keys used: {0} same features used: {1}. rebuilding the classifier'\
-                      .format(is_same_keys, is_same_features))
-            self.look_for_survival_nodes(self.dataset.matrix_test_array.keys())
-            self.fit_classification_model()
-
-        for key in self.training_omic_list:
-            test_matrix = self.dataset.matrix_test_array[key]
-            encoder = self.encoder_array[key]
-            valid_node_ids = self.valid_node_ids_array[key]
-
-            activities_array.append(encoder.predict(test_matrix).T[valid_node_ids].T)
-
-        self.activities_test = hstack(activities_array)
-
+        self.activities_test = self._predict_survival_nodes(self.dataset.matrix_test_array)
         self._predict_test_labels(self.activities_test, self.dataset.matrix_test_array)
 
         if self.verbose:
@@ -252,17 +245,21 @@ class SimDeep(DeepBase):
             for key, value in Counter(self.test_labels).items():
                 print('class: {0}, number of samples :{1}'.format(key, value))
 
-        pvalue, pvalue_proba = self._compute_test_coxph('KM_plot_test', nbdays, isdead)
+        pvalue, pvalue_proba = self._compute_test_coxph('KM_plot_test',
+                                                        nbdays, isdead,
+                                                        self.test_labels, self.test_labels_proba)
 
         self._write_labels(self.dataset.sample_ids_test, self.test_labels, '{0}_test_labels'.format(
             self.project_name))
 
         return self.test_labels, pvalue
 
-    def _compute_test_coxph(self, fname_base, nbdays, isdead):
+    def _compute_test_coxph(self, fname_base,
+                            nbdays, isdead,
+                            labels, labels_proba):
         """ """
         pvalue = coxph(
-            self.test_labels, isdead, nbdays,
+            labels, isdead, nbdays,
             isfactor=False,
             do_KM_plot=self.do_KM_plot,
             png_path=self.path_results,
@@ -272,7 +269,7 @@ class SimDeep(DeepBase):
             print('Cox-PH p-value (Log-Rank) for inferred labels: {0}'.format(pvalue))
 
         pvalue_proba = coxph(
-            self.test_labels_proba.T[0],
+            labels_proba.T[0],
             isdead, nbdays,
             isfactor=False,
             do_KM_plot=False,
@@ -291,8 +288,9 @@ class SimDeep(DeepBase):
             return
 
         if not self._isboosting:
-            pool = Pool(self.nb_threads_coxph)
-            mapf = pool.map
+            # pool = Pool(self.nb_threads_coxph)
+            # mapf = pool.map
+            mapf = map
         else:
             mapf = map
 
@@ -324,7 +322,7 @@ class SimDeep(DeepBase):
             assert(self.classifier_type != 'clustering')
             matrix = self.activities_train
         elif self.classification_method == 'ALL_FEATURES':
-            matrix = self._reduce_and_stack_matrices(self.matrix_ref_array)
+            matrix = self._reduce_and_stack_matrices(self.dataset.matrix_ref_array)
         if self.verbose:
             print('number of features for the classifier: {0}'.format(matrix.shape[1]))
 
@@ -340,7 +338,7 @@ class SimDeep(DeepBase):
 
             matrix = []
 
-            for key in self.feature_scores:
+            for key in matrices:
                 index = [self.dataset.feature_ref_index[key][feature]
                          for feature, pvalue in
                          self.feature_scores[key][:self.nb_selected_features]]
@@ -374,6 +372,43 @@ class SimDeep(DeepBase):
         self.classifier.set_params(probability=True)
 
         self.classifier.fit(train_matrix, labels)
+        self.classifier_test = self.classifier
+
+        if self.verbose:
+            print('best params:', params)
+            print('cross val score: {0}'.format(np.mean(cvs)))
+            print('classification score:', self.classifier.score(train_matrix, labels))
+
+    def fit_classification_test_model(self):
+        """ """
+        is_same_keys = self.test_omic_list  == self.training_omic_list
+        is_same_features = self.dataset.feature_ref_array == self.dataset.feature_train_array
+
+        if (is_same_keys and is_same_features) or self.classifier_type == 'clustering':
+            if self.verbose:
+                print('Not rebuilding the test classifier'\
+                      .format(is_same_keys, is_same_features))
+
+            self.classifier_test = self.classifier
+            return
+
+        if self.verbose:
+            print('classification for test set analysis...')
+
+        train_matrix = self._return_train_matrix_for_classification()
+        labels = self.labels
+
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            self.classifier_grid.fit(train_matrix, labels)
+
+        self.classifier_test, params = select_best_classif_params(self.classifier_grid)
+
+        cvs = cross_val_score(self.classifier_test, train_matrix, labels, cv=5)
+
+        self.classifier_test.set_params(probability=True)
+        self.classifier_test.fit(train_matrix, labels)
+        self.classifier_test = self.classifier
 
         if self.verbose:
             print('best params:', params)
@@ -442,19 +477,30 @@ class SimDeep(DeepBase):
         for sample, label in zip(sample_ids, labels):
             f_file.write('{0}\t{1}\n'.format(sample, label))
 
+    def _predict_survival_nodes(self, matrix_array):
+        """
+        """
+        activities_array = {}
+        keys = matrix_array.keys()
+
+        for key in keys:
+            encoder = self.encoder_array[key]
+            matrix = matrix_array[key]
+            activities = encoder.predict(matrix)
+            activities_array[key] = activities.T[self.valid_node_ids_array[key]].T
+
+        return hstack([activities_array[key]
+                       for key in keys])
+
     def look_for_survival_nodes(self, keys=None):
         """
         detect nodes from the autoencoder significantly
         linked with survival through coxph regression
         """
-        self.training_omic_list = []
-
         if not keys:
             keys = self.encoder_array.keys()
 
         for key in keys:
-            self.training_omic_list.append(key)
-
             encoder = self.encoder_array[key]
             matrix_train = self.matrix_train_array[key]
 
@@ -479,7 +525,6 @@ class SimDeep(DeepBase):
             return activities
         elif self.classification_method == 'ALL_FEATURES':
             matrix = self._reduce_and_stack_matrices(matrix_array)
-            assert(matrix.shape[1] == self.classifier.shape_fit_[1])
             return matrix
 
     def _predict_test_labels(self, activities, matrix_array):
@@ -487,8 +532,18 @@ class SimDeep(DeepBase):
         matrix_test = self._return_test_matrix_for_classification(
             activities, matrix_array)
 
-        self.test_labels = self.classifier.predict(matrix_test)
-        self.test_labels_proba = self.classifier.predict_proba(matrix_test)
+        self.test_labels = self.classifier_test.predict(matrix_test)
+        self.test_labels_proba = self.classifier_test.predict_proba(matrix_test)
+
+    def _predict_labels(self, activities, matrix_array):
+        """ """
+        matrix_test = self._return_test_matrix_for_classification(
+            activities, matrix_array)
+
+        labels = self.classifier.predict(matrix_test)
+        labels_proba = self.classifier.predict_proba(matrix_test)
+
+        return labels, labels_proba
 
     def _predict_best_k_for_cluster(self):
         """ """

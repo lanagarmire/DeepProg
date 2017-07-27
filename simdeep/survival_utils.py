@@ -253,7 +253,7 @@ def _process_parallel_feature_importance(inp):
     arrays = defaultdict(list)
     feature, array, labels = inp
 
-    for label, value in zip(labels,array):
+    for label, value in zip(labels, np.array(array).reshape(-1)):
         arrays[label].append(value)
 
     score, pvalue = kruskal(*arrays.values())

@@ -183,6 +183,7 @@ class LoadData():
 
             feature_ids_ref = self.feature_array[key]
             matrix_ref = self.matrix_array[key]
+            self.matrix_ref_array = {}
 
             common_features = set(feature_ids).intersection(feature_ids_ref)
 

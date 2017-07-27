@@ -97,6 +97,8 @@ class DeepBase(object):
         self.encoder_array = {}
         self.model_array = {}
 
+        self.is_model_loaded = False
+
     def construct_autoencoders(self):
         """
         main class to create the autoencoder
@@ -283,7 +285,15 @@ class DeepBase(object):
         """
         for key in self.matrix_train_array:
             file_path = '{0}/{1}_{2}'.format(self.path_model, key, fname)
-            assert(isfile(file_path))
+            try:
+                assert(isfile(file_path))
+            except AssertionError:
+                if self.verbose:
+                    print('try loading autoencoder for {0} but file not found'.format(file_path))
+                    print('no encoder loaded')
+                    self.encoder_array = {}
+                    return
+
             t = time()
             encoder = load_model(file_path)
 
@@ -291,6 +301,7 @@ class DeepBase(object):
                 print('model {1} loaded in {0} s!'.format(time() - t, key))
 
             self.encoder_array[key] = encoder
+            self.is_model_loaded = True
 
 
 if __name__ == "__main__":
