@@ -19,6 +19,8 @@ from sklearn.metrics import pairwise_distances
 from collections import defaultdict
 from coxph_from_r import coxph
 
+from coxph_from_r import c_index
+
 from scipy.stats import kruskal
 
 
@@ -239,7 +241,6 @@ def load_entrezID_to_ensg():
 
     return entrez_dict
 
-
 def _process_parallel_coxph(inp):
     """
     """
@@ -247,6 +248,18 @@ def _process_parallel_coxph(inp):
     pvalue = coxph(activity, isdead, nbdays)
 
     return node_id, pvalue
+
+def _process_parallel_cindex(inp):
+    """
+    """
+    (node_id,
+     act_ref, isdead_ref, nbdays_ref,
+     act_test, isdead_test, nbdays_test) = inp
+
+    score = c_index(act_ref, isdead_ref, nbdays_ref,
+                    act_test, isdead_test, nbdays_test)
+
+    return node_id, score
 
 def _process_parallel_feature_importance(inp):
     """

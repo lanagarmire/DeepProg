@@ -23,6 +23,7 @@ FILL_UNKOWN_FEATURE_WITH_0 = False
 NB_SELECTED_FEATURES = 10
 CLUSTER_ARRAY = []
 PVALUE_THRESHOLD = 0.01 # Threshold for survival significance to set a node as valid
+CINDEX_THRESHOLD = 0.70 # experimental
 NB_THREADS_COXPH = 10
 STACK_MULTI_OMIC = False
 
@@ -36,7 +37,7 @@ CLASS_SELECTION = 'mean' # mean or max: the method used to select the final clas
 # save fitted models
 SAVE_FITTED_MODELS = False
 # load existing models if founds
-LOAD_EXISTING_MODELS = True
+LOAD_EXISTING_MODELS = False
 ########################################################
 
 #################### Paths to data file ################

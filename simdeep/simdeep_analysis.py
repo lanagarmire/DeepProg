@@ -11,6 +11,7 @@ from simdeep.deepmodel_base import DeepBase
 from simdeep.config import NB_CLUSTERS
 from simdeep.config import CLUSTER_ARRAY
 from simdeep.config import PVALUE_THRESHOLD
+from simdeep.config import CINDEX_THRESHOLD
 from simdeep.config import CLASSIFIER_TYPE
 from simdeep.config import CLASSIFIER_GRID
 from simdeep.config import MIXTURE_PARAMS
@@ -26,6 +27,7 @@ from simdeep.config import SAVE_FITTED_MODELS
 from simdeep.config import LOAD_EXISTING_MODELS
 
 from simdeep.survival_utils import _process_parallel_coxph
+from simdeep.survival_utils import _process_parallel_cindex
 from simdeep.survival_utils import _process_parallel_feature_importance
 
 from simdeep.survival_utils import select_best_classif_params
@@ -66,13 +68,15 @@ def main():
         sim_deep.save_encoders()
 
     sim_deep.load_test_dataset()
-    sim_deep.predict_labels_on_test_dataset()
+    # sim_deep.predict_labels_on_test_dataset()
     sim_deep.predict_labels_on_test_fold()
     sim_deep.predict_labels_on_full_dataset()
 
-    sim_deep.compute_c_indexes_for_test_dataset()
-    sim_deep.compute_c_indexes_for_test_fold_dataset()
-    sim_deep.compute_c_indexes_for_full_dataset()
+    # sim_deep.compute_c_indexes_for_test_dataset()
+    # sim_deep.compute_c_indexes_for_test_fold_dataset()
+    # sim_deep.compute_c_indexes_for_full_dataset()
+
+    sim_deep.look_for_prediction_nodes()
 
 
 class SimDeep(DeepBase):
@@ -80,6 +84,7 @@ class SimDeep(DeepBase):
     def __init__(self,
                  nb_clusters=NB_CLUSTERS,
                  pvalue_thres=PVALUE_THRESHOLD,
+                 cindex_thres=CINDEX_THRESHOLD,
                  cluster_method=CLUSTER_METHOD,
                  cluster_eval_method=CLUSTER_EVAL_METHOD,
                  classifier_type=CLASSIFIER_TYPE,
@@ -117,6 +122,7 @@ class SimDeep(DeepBase):
         """
         self.nb_clusters = nb_clusters
         self.pvalue_thres = pvalue_thres
+        self.cindex_thres = cindex_thres
         self.classifier_grid = CLASSIFIER_GRID
         self.cluster_array = cluster_array
         self.path_results = path_results
@@ -136,10 +142,16 @@ class SimDeep(DeepBase):
 
         self.valid_node_ids_array = {}
         self.activities_array = {}
+        self.activities_pred_array = {}
+        self.pred_node_ids_array = {}
 
         self.activities_train = None
         self.activities_test = None
         self.activities_cv = None
+
+        self.activities_for_pred_train = None
+        self.activities_for_pred_test = None
+        self.activities_for_pred_cv = None
 
         self.test_labels = None
         self.test_labels_proba = None
@@ -545,6 +557,28 @@ class SimDeep(DeepBase):
         self.activities_train = hstack([self.activities_array[key]
                                         for key in keys])
 
+    def look_for_prediction_nodes(self, keys=None):
+        """
+        detect nodes from the autoencoder that predict a
+        high c-index scores using label from the retained test fold
+        """
+        if not keys:
+            keys = self.encoder_array.keys()
+
+        for key in keys:
+            encoder = self.encoder_array[key]
+            matrix_train = self.matrix_train_array[key]
+
+            activities = encoder.predict(matrix_train)
+
+            valid_node_ids = self._look_for_prediction_nodes(key)
+            self.pred_node_ids_array[key] = valid_node_ids
+
+            self.activities_pred_array[key] = activities.T[valid_node_ids].T
+
+        self.activities_for_pred_train = hstack([self.activities_pred_array[key]
+                                                 for key in keys])
+
     def _return_test_matrix_for_classification(self, activities, matrix_array):
         """
         """
@@ -661,6 +695,49 @@ class SimDeep(DeepBase):
 
         valid_node_ids = [node_id for node_id, pvalue in pvalue_list
                                if pvalue < self.pvalue_thres]
+        return valid_node_ids
+
+    def _look_for_prediction_nodes(self, key):
+        """
+        """
+        if not self._isboosting:
+            pool = Pool(self.nb_threads_coxph)
+            mapf = pool.map
+        else:
+            mapf = map
+
+        nbdays, isdead = self.dataset.survival.T.tolist()
+        nbdays_cv, isdead_cv = self.dataset.survival_cv.T.tolist()
+
+        encoder = self.encoder_array[key]
+
+        matrix_train = self.matrix_train_array[key]
+        matrix_cv = self.dataset.matrix_cv_array[key]
+
+        activities_train = encoder.predict(matrix_train)
+        activities_cv = encoder.predict(matrix_cv)
+
+        input_list = iter((node_id,
+                           activities_train.T[node_id], isdead, nbdays,
+                           activities_cv.T[node_id], isdead_cv, nbdays_cv)
+                           for node_id in range(activities_train.shape[1]))
+
+        score_list = mapf(_process_parallel_cindex, input_list)
+
+        score_list = filter(lambda x: not np.isnan(x[1]), score_list)
+        score_list.sort(key=lambda x:x[1], reverse=True)
+
+        valid_node_ids = [node_id for node_id, pvalue in score_list
+                               if pvalue > self.cindex_thres]
+
+        scores = [score for node_id, score in score_list
+                  if score > self.cindex_thres]
+
+        if self.verbose:
+            print('number of components with a high prediction score:{0} for key {1}'\
+                  ' \n\t mean: {2} std: {3}'.format(
+                      len(valid_node_ids), key, np.mean(scores), np.std(scores)))
+
         return valid_node_ids
 
     def compute_c_indexes_for_full_dataset(self):
