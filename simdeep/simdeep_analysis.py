@@ -31,7 +31,9 @@ from simdeep.survival_utils import _process_parallel_feature_importance
 from simdeep.survival_utils import select_best_classif_params
 
 from coxph_from_r import coxph
-# from coxph_from_r import surv_mean
+from coxph_from_r import c_index
+from coxph_from_r import c_index_multiple
+
 from coxph_from_r import surv_median
 
 from collections import Counter
@@ -67,6 +69,11 @@ def main():
     sim_deep.predict_labels_on_test_dataset()
     sim_deep.predict_labels_on_test_fold()
     sim_deep.predict_labels_on_full_dataset()
+
+    sim_deep.compute_c_indexes_for_test_dataset()
+    sim_deep.compute_c_indexes_for_test_fold_dataset()
+    sim_deep.compute_c_indexes_for_full_dataset()
+
 
 class SimDeep(DeepBase):
     """ """
@@ -121,6 +128,7 @@ class SimDeep(DeepBase):
         self.nb_selected_features = nb_selected_features
 
         self.train_pvalue = None
+        self.train_pvalue_proba = None
         self.classifier = None
         self.classifier_test = None
         self.classifier_type = classifier_type
@@ -182,7 +190,6 @@ class SimDeep(DeepBase):
         self.dataset.load_matrix_test_fold()
 
         nbdays, isdead = self.dataset.survival_cv.T.tolist()
-
         self.activities_cv = self._predict_survival_nodes(self.dataset.matrix_cv_array)
         self.cv_labels, self.cv_labels_proba = self._predict_labels(
             self.activities_cv, self.dataset.matrix_cv_array)
@@ -199,7 +206,7 @@ class SimDeep(DeepBase):
         self._write_labels(self.dataset.sample_ids_cv, self.cv_labels, '{0}_test_fold_labels'.format(
             self.project_name))
 
-        return self.test_labels, pvalue
+        return self.cv_labels, pvalue, pvalue_proba
 
     def predict_labels_on_full_dataset(self):
         """
@@ -209,6 +216,7 @@ class SimDeep(DeepBase):
         nbdays, isdead = self.dataset.survival_full.T.tolist()
 
         self.activities_full = self._predict_survival_nodes(self.dataset.matrix_full_array)
+
         self.full_labels, self.full_labels_proba = self._predict_labels(
             self.activities_full, self.dataset.matrix_full_array)
 
@@ -221,10 +229,10 @@ class SimDeep(DeepBase):
                                                         nbdays, isdead,
                                                         self.full_labels, self.full_labels_proba)
 
-        self._write_labels(self.dataset.sample_ids_cv, self.full_labels, '{0}_full_labels'.format(
+        self._write_labels(self.dataset.sample_ids_full, self.full_labels, '{0}_full_labels'.format(
             self.project_name))
 
-        return self.test_labels, pvalue
+        return self.full_labels, pvalue, pvalue_proba
 
     def predict_labels_on_test_dataset(self):
         """
@@ -249,7 +257,7 @@ class SimDeep(DeepBase):
         self._write_labels(self.dataset.sample_ids_test, self.test_labels, '{0}_test_labels'.format(
             self.project_name))
 
-        return self.test_labels, pvalue
+        return self.test_labels, pvalue, pvalue_proba
 
     def _compute_test_coxph(self, fname_base,
                             nbdays, isdead,
@@ -435,10 +443,15 @@ class SimDeep(DeepBase):
             self._predict_best_k_for_cluster()
 
         self.clustering.fit(self.activities_train)
+
         labels = self.clustering.predict(self.activities_train)
 
         labels = self._order_labels_according_to_survival(labels)
+
         self.labels = labels
+        self.labels_proba = self.clustering.predict_proba(self.activities_train)
+
+        self._evalutate_cluster_performance()
 
         if self.verbose:
             print("clustering done, labels ordered according to survival:")
@@ -447,13 +460,15 @@ class SimDeep(DeepBase):
             print('\n')
 
         nbdays, isdead = self.dataset.survival.T.tolist()
-        pvalue = coxph(self.labels, isdead, nbdays)
 
         pvalue = coxph(self.labels, isdead, nbdays,
                        isfactor=False,
                        do_KM_plot=self.do_KM_plot,
                        png_path=self.path_results,
                        fig_name='{0}_KM_plot_training_dataset'.format(self.project_name))
+
+        pvalue_proba = coxph(self.labels_proba.T[0], isdead, nbdays,
+                             isfactor=False)
 
         self._write_labels(self.dataset.sample_ids, self.labels, '{0}_training_set_labels'.format(
             self.project_name))
@@ -462,6 +477,19 @@ class SimDeep(DeepBase):
             print('Cox-PH p-value (Log-Rank) for the cluster labels: {0}'.format(pvalue))
 
         self.train_pvalue = pvalue
+        self.train_pvalue_proba = pvalue_proba
+
+    def _evalutate_cluster_performance(self):
+        """
+        """
+        if self.verbose:
+            if self.cluster_method == 'mixture':
+                print('bic score: {0}'.format(self.clustering.bic(self.activities_train)))
+
+            print('silhouette score: {0}'.format(
+                silhouette_score(self.activities_train, self.labels)))
+            print('calinski-harabaz score: {0}'.format(calinski_harabaz_score(
+                self.activities_train, self.labels)))
 
     def _write_labels(self, sample_ids, labels, fname, labels_proba=None):
         """ """
@@ -634,6 +662,51 @@ class SimDeep(DeepBase):
         valid_node_ids = [node_id for node_id, pvalue in pvalue_list
                                if pvalue < self.pvalue_thres]
         return valid_node_ids
+
+    def compute_c_indexes_for_full_dataset(self):
+        """
+        return c-index using labels as predicat
+        """
+        days, dead = np.asarray(self.dataset.survival).T
+        days_full, dead_full = np.asarray(self.dataset.survival_full).T
+
+        cindex = c_index(self.labels, dead, days,
+                       self.full_labels, dead_full, days_full)
+
+        if self.verbose:
+            print('c-index for full dataset:{0}'.format(cindex))
+
+        return cindex
+
+    def compute_c_indexes_for_test_dataset(self):
+        """
+        return c-index using labels as predicat
+        """
+        days, dead = np.asarray(self.dataset.survival).T
+        days_test, dead_test = np.asarray(self.dataset.survival_test).T
+
+        cindex = c_index(self.labels, dead, days,
+                         self.test_labels, dead_test, days_test)
+
+        if self.verbose:
+            print('c-index for test dataset:{0}'.format(cindex))
+
+        return cindex
+
+    def compute_c_indexes_for_test_fold_dataset(self):
+        """
+        return c-index using labels as predicat
+        """
+        days, dead = np.asarray(self.dataset.survival).T
+        days_cv, dead_cv= np.asarray(self.dataset.survival_cv).T
+
+        cindex =  c_index(self.labels, dead, days,
+                          self.cv_labels, dead_cv, days_cv)
+
+        if self.verbose:
+            print('c-index for test fold dataset:{0}'.format(cindex))
+
+        return cindex
 
 
 if __name__ == "__main__":

@@ -113,6 +113,10 @@ class LoadData():
         self.matrix_cv_array = {}
         self.survival_cv = None
 
+        self._cv_loaded = False
+        self._test_loaded = False
+        self._full_loaded = False
+
         self.matrix_ref_array = {}
         self.feature_ref_array = {}
         self.feature_ref_index = {}
@@ -157,7 +161,7 @@ class LoadData():
 
     def load_matrix_test_fold(self):
         """ """
-        if not self.cross_validation_instance:
+        if not self.cross_validation_instance or self._cv_loaded:
             return
 
         for key in self.matrix_array:
@@ -172,9 +176,13 @@ class LoadData():
             self.matrix_cv_array[key] = matrix_test
 
         self._stack_multiomics(self.matrix_cv_array)
+        self._cv_loaded = True
 
     def load_matrix_test(self):
         """ """
+        if self._test_loaded:
+            return
+
         for key in self.test_tsv:
             sample_ids, feature_ids, matrix = load_data_from_tsv(
                 f_name=self.test_tsv[key],
@@ -233,6 +241,8 @@ class LoadData():
                                self.feature_test_array)
         self._stack_multiomics(self.matrix_ref_array,
                                self.feature_ref_array)
+
+        self._test_loaded = True
 
     def _create_ref_matrix(self, key):
         """ """
@@ -311,11 +321,17 @@ class LoadData():
     def load_matrix_full(self):
         """
         """
+        if self._full_loaded:
+            return
+
         if not self.cross_validation_instance:
             self.matrix_full_array = self.matrix_train_array
             self.sample_ids_full = self.sample_ids
             self.survival_full = self.survival
             return
+
+        if not self._cv_loaded:
+            self.load_matrix_test_fold()
 
         for key in self.matrix_train_array:
             self.matrix_full_array[key] = vstack([self.matrix_train_array[key],
@@ -323,6 +339,8 @@ class LoadData():
 
         self.sample_ids_full = self.sample_ids[:] + self.sample_ids_cv[:]
         self.survival_full = vstack([self.survival, self.survival_cv])
+
+        self._full_loaded = True
 
     def load_survival(self):
         """ """

@@ -34,7 +34,7 @@ CLASS_SELECTION = 'mean' # mean or max: the method used to select the final clas
 
 #### SimDeep analysis
 # save fitted models
-SAVE_FITTED_MODELS = True
+SAVE_FITTED_MODELS = False
 # load existing models if founds
 LOAD_EXISTING_MODELS = True
 ########################################################
@@ -43,7 +43,7 @@ LOAD_EXISTING_MODELS = True
 # path to the folder containing the data
 
 # PATH_DATA = PATH_THIS_FILE + "/../examples/data/"
-PROJECT_NAME = 'psb18'
+PROJECT_NAME = 'psb18 k fold'
 PATH_DATA = "/home/opoirion/data/survival_analysis_multiple/psb18/"
 
 # name of the tsv file containing the survival data of the training set
