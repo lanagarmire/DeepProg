@@ -34,7 +34,6 @@ from simdeep.survival_utils import select_best_classif_params
 
 from coxph_from_r import coxph
 from coxph_from_r import c_index
-from coxph_from_r import c_index_multiple
 
 from coxph_from_r import surv_median
 
@@ -203,11 +202,12 @@ class SimDeep(DeepBase):
 
         nbdays, isdead = self.dataset.survival_cv.T.tolist()
         self.activities_cv = self._predict_survival_nodes(self.dataset.matrix_cv_array)
+
         self.cv_labels, self.cv_labels_proba = self._predict_labels(
             self.activities_cv, self.dataset.matrix_cv_array)
 
         if self.verbose:
-            print('#### report of assigned cluster:')
+            print('#### report of test fold cluster:):')
             for key, value in Counter(self.cv_labels).items():
                 print('class: {0}, number of samples :{1}'.format(key, value))
 
@@ -516,11 +516,13 @@ class SimDeep(DeepBase):
 
             f_file.write('{0}\t{1}{2}\n'.format(sample, label, proba))
 
-    def _predict_survival_nodes(self, matrix_array):
+    def _predict_survival_nodes(self, matrix_array, keys=None):
         """
         """
         activities_array = {}
-        keys = matrix_array.keys()
+
+        if keys is None:
+            keys = matrix_array.keys()
 
         for key in keys:
             encoder = self.encoder_array[key]

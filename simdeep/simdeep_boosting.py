@@ -29,6 +29,8 @@ import cPickle
 
 from time import time
 
+from numpy import hstack
+
 
 ################# Variable ################
 MODEL_THRES = 0.05
@@ -44,17 +46,17 @@ def main():
     boosting.load_test_dataset()
 
     boosting.predict_labels_on_test_dataset()
-    # boosting.predict_labels_on_full_dataset()
+    boosting.predict_labels_on_full_dataset()
 
     boosting.collect_pvalue_on_training_dataset()
     boosting.collect_pvalue_on_test_fold()
-    boosting.collect_number_of_features_per_omic()
-    boosting.collect_cindex_for_test_fold()
-    boosting.collect_pvalue_on_test_dataset()
-    boosting.collect_cindex_for_test_dataset()
+    # boosting.collect_number_of_features_per_omic()
+    # boosting.collect_cindex_for_test_fold()
+    # boosting.collect_pvalue_on_test_dataset()
+    # boosting.collect_cindex_for_test_dataset()
 
-    # boosting.compute_c_indexes_for_test_dataset()
-    # boosting.compute_c_indexes_for_full_dataset()
+    boosting.compute_c_indexes_for_test_dataset()
+
 
 class SimDeepBoosting():
     """
@@ -72,8 +74,12 @@ class SimDeepBoosting():
         """ """
         assert(class_selection in ['max', 'mean'])
 
+        if class_selection == 'max':
+            self.class_selection =  _highest_proba
+        elif class_selection == 'mean':
+            self.class_selection = _mean_proba
+
         self.model_thres = model_thres
-        self.class_selection = class_selection
         self.models = []
         self.verbose = verbose
         self.nb_threads = nb_threads
@@ -87,6 +93,7 @@ class SimDeepBoosting():
         self.cv_labels_proba = None
         self.full_labels = None
         self.full_labels_proba = None
+        self.sample_ids_full = None
 
         for it in range(nb_it):
             split = KFold(n_splits=3, shuffle=True, random_state=np.random.randint(0, 1000))
@@ -144,10 +151,7 @@ class SimDeepBoosting():
 
         test_labels_proba = np.asarray([model.test_labels_proba for model in self.models])
 
-        if self.class_selection == 'max':
-            res = _highest_proba(test_labels_proba)
-        elif self.class_selection == 'mean':
-            res = _mean_proba(test_labels_proba)
+        res = self.class_selection(test_labels_proba)
 
         self.test_labels, self.test_labels_proba = res
 
@@ -167,7 +171,7 @@ class SimDeepBoosting():
     def collect_pvalue_on_test_fold(self):
         """
         """
-        print('predict labels on test datasets...')
+        print('predict labels on test fold datasets...')
         pool = Pool(self.nb_threads)
         res = pool.map(_predict_labels_on_test_fold, self.models)
 
@@ -182,7 +186,7 @@ class SimDeepBoosting():
     def collect_pvalue_on_training_dataset(self):
         """
         """
-        print('predict labels on test datasets...')
+        print('predict labels on training datasets...')
         pvalues, pvalues_proba = [], []
 
         for model in self.models:
@@ -198,7 +202,7 @@ class SimDeepBoosting():
     def collect_pvalue_on_test_dataset(self):
         """
         """
-        print('predict labels on test datasets...')
+        print('collect pvalues on test datasets...')
         res = []
 
         for model in self.models:
@@ -267,21 +271,14 @@ class SimDeepBoosting():
         pool = Pool(self.nb_threads)
 
         self.models = pool.map(_predict_labels_on_full_dataset, self.models)
-
-        test_labels_proba = np.asarray([model.full_labels_proba for model in self.models])
-
-        if self.class_selection == 'max':
-            res = _highest_proba(test_labels_proba)
-        elif self.class_selection == 'mean':
-            res = _mean_proba(test_labels_proba)
-
-        self.full_labels, self.full_labels_proba = res
+        self._get_probas_for_full_models()
+        self._reorder_survival_full()
 
         print('#### report of assigned cluster:')
         for key, value in Counter(self.full_labels).items():
             print('class: {0}, number of samples :{1}'.format(key, value))
 
-        nbdays, isdead = self.models[0].dataset.survival_full.T.tolist()
+        nbdays, isdead = self.survival_full.T.tolist()
         pvalue, pvalue_proba = self._compute_test_coxph('KM_plot_boosting_full',
                                                         nbdays, isdead,
                                                         self.full_labels, self.full_labels_proba)
@@ -289,6 +286,31 @@ class SimDeepBoosting():
         self.models[0]._write_labels(
             self.models[0].dataset.sample_ids_full, self.full_labels, '{0}_full_labels'.format(
             self.project_name))
+
+    def _reorder_survival_full(self):
+        """
+        """
+        survival_old = self.models[0].dataset.survival_full
+        sample_ids = self.models[0].dataset.sample_ids_full
+        surv_dict = {sample: surv for sample, surv in zip(sample_ids, survival_old)}
+
+        self.survival_full = np.asarray([np.asarray(surv_dict[sample])[0]
+                                         for sample in self.sample_ids_full])
+
+    def _get_probas_for_full_models(self):
+        """
+        """
+        proba_dict = defaultdict(list)
+
+        for model in self.models:
+            for sample, proba in zip(model.dataset.sample_ids_full, model.full_labels_proba):
+                proba_dict[sample].append([proba.tolist()])
+
+        labels, probas = self.class_selection(hstack(proba_dict.values()))
+
+        self.full_labels = labels
+        self.full_labels_proba = probas
+        self.sample_ids_full = proba_dict.keys()
 
     def _compute_test_coxph(self, fname_base, nbdays, isdead, labels, labels_proba):
         """ """
@@ -317,29 +339,18 @@ class SimDeepBoosting():
         """
         return c-index using labels as predicat
         """
-        days, dead = np.asarray(self.models[0].dataset.survival).T
+        days_full, dead_full = np.asarray(self.survival_full).T
         days_test, dead_test = np.asarray(self.models[0].dataset.survival_test).T
 
-        cindex = c_index(self.labels, dead, days,
+        cindex = c_index(self.full_labels, dead_full, days_full,
                          self.test_labels, dead_test, days_test)
+
+        cindex_proba = c_index(self.full_labels_proba.T[0], dead_full, days_full,
+                               self.test_labels_proba.T[0], dead_test, days_test)
 
         if self.verbose:
             print('c-index for boosting test dataset:{0}'.format(cindex))
-
-        return cindex
-
-    def compute_c_indexes_for_full_dataset(self):
-        """
-        return c-index using labels as predicat
-        """
-        days, dead = np.asarray(self.models[0].dataset.survival).T
-        days_full, dead_full = np.asarray(self.models[0].self.dataset.survival_full).T
-
-        cindex = c_index(self.labels, dead, days,
-                         self.full_labels, dead_full, days_full)
-
-        if self.verbose:
-            print('c-index for boosting full dataset:{0}'.format(cindex))
+            print('c-index proba for boosting test dataset:{0}'.format(cindex_proba))
 
         return cindex
 
