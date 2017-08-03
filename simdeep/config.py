@@ -45,12 +45,12 @@ LOAD_EXISTING_MODELS = False
 
 # PATH_DATA = PATH_THIS_FILE + "/../examples/data/"
 PROJECT_NAME = 'psb18'
-PATH_DATA = "/home/opoirion/data/survival_analysis_multiple/psb18/"
+PATH_DATA = "/home/opoirion/data/survival_analysis_multiple/sijia/v2/"
 
 # name of the tsv file containing the survival data of the training set
-SURVIVAL_TSV = 'surv_mapped_BLCA.tsv'
+SURVIVAL_TSV = 'pds_merged_survival.tsv'
 # name of the tsv file containing the survival data of the test set
-SURVIVAL_TSV_TEST = 'survival_validation3.tsv'
+SURVIVAL_TSV_TEST = 'pds_testing_merged_survival.tsv'
 
 # True if
 USE_INPUT_TRANSPOSE = False
@@ -58,32 +58,32 @@ USE_INPUT_TRANSPOSE = False
 ENTREZ_TO_ENSG_FILE = PATH_THIS_FILE + '/../data/entrez2ensg.tsv'
 
 # Field from the survival tsv file
-# SURVIVAL_FLAG = {'patient_id': '"Patient"',
-#                   'survival': '"D_OS"',
-#                  'event': '"D_OS_FLAG"'}
+SURVIVAL_FLAG = {'patient_id': 'barcode',
+                  'survival': 'days',
+                 'event': 'recurrence'}
 
-SURVIVAL_FLAG = {'patient_id': 'SampleID',
-                  'survival': 'time',
-                 'event': 'event'}
+# SURVIVAL_FLAG = {'patient_id': 'SampleID',
+#                   'survival': 'time',
+#                  'event': 'event'}
 
 # dict('data type', 'name of the tsv file which are inside PATH_DATA')
 # These data will be stacked together to build the autoencoder
 TRAINING_TSV = OrderedDict([
-    ('GE', 'rna_mapped_BLCA.tsv'),
-    ('MIR', 'mir_mapped_BLCA.tsv'),
-    ('METH', 'meth_mapped_BLCA.tsv'),
-    # ('CNV_METH', '0717_methyl_cnv_inter_matrix.tsv'),
-    # ('EXPR_METH', '0717_expr_methyl_inter_matrix.tsv'),
-    # ('CNV_EXPR', '0717_expr_cnv_inter_matrix.tsv'),
+    # ('GE', 'rna_mapped_BLCA.tsv'),
+    # ('MIR', 'mir_mapped_BLCA.tsv'),
+    # ('METH', 'meth_mapped_BLCA.tsv'),
+    ('GE', '0607_pds_expr_data.tsv'),
+    ('CNV', '0607_pds_cnv_data.tsv'),
+    ('METH', '0607_pds_methyl_data.tsv'),
 ])
 
 TEST_TSV = {
     # 'GE': 'mRNA_validation2.tsv',
-    'MIR': 'miRNA.tsv',
+    # 'MIR': 'miRNA.tsv',
     # 'METH': 'meth_mapped_BLCA.tsv',
-    # 'GE': '0607_pds_expr_testing_data.tsv',
-    # 'CNV': '0607_pds_cnv_testing_data.tsv',
-    # 'METH': '0607_pds_methyl_testing_data.tsv',
+    'GE': '0607_pds_expr_testing_data.tsv',
+    'CNV': '0607_pds_cnv_testing_data.tsv',
+    'METH': '0607_pds_methyl_testing_data.tsv',
 }
 
 DEFAULTSEP = '\t'
@@ -114,9 +114,9 @@ TRAIN_ROBUST_SCALE = False
 TRAIN_ROBUST_SCALE_TWO_WAY = False
 TRAIN_MAD_SCALE = False
 TRAIN_NORM_SCALE = False
-TRAIN_RANK_NORM = True
-TRAIN_CORR_REDUCTION = True
-TRAIN_CORR_RANK_NORM = True
+TRAIN_RANK_NORM = False
+TRAIN_CORR_REDUCTION = False
+TRAIN_CORR_RANK_NORM = False
 #########################################################
 
 ##################### Autoencoder Variable ##############
