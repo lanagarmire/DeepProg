@@ -34,6 +34,7 @@ from simdeep.survival_utils import select_best_classif_params
 
 from coxph_from_r import coxph
 from coxph_from_r import c_index
+from coxph_from_r import c_index_multiple
 
 from coxph_from_r import surv_median
 
@@ -67,15 +68,17 @@ def main():
         sim_deep.save_encoders()
 
     sim_deep.load_test_dataset()
-    # sim_deep.predict_labels_on_test_dataset()
+    sim_deep.predict_labels_on_test_dataset()
     sim_deep.predict_labels_on_test_fold()
     sim_deep.predict_labels_on_full_dataset()
 
-    # sim_deep.compute_c_indexes_for_test_dataset()
-    # sim_deep.compute_c_indexes_for_test_fold_dataset()
-    # sim_deep.compute_c_indexes_for_full_dataset()
+    sim_deep.compute_c_indexes_for_test_dataset()
+    sim_deep.compute_c_indexes_for_test_fold_dataset()
+    sim_deep.compute_c_indexes_for_full_dataset()
 
     sim_deep.look_for_prediction_nodes()
+    sim_deep.compute_c_indexes_multiple_for_test_dataset()
+    sim_deep.compute_c_indexes_multiple_for_test_fold_dataset()
 
 
 class SimDeep(DeepBase):
@@ -581,6 +584,57 @@ class SimDeep(DeepBase):
         self.activities_for_pred_train = hstack([self.activities_pred_array[key]
                                                  for key in keys])
 
+    def compute_c_indexes_multiple_for_test_dataset(self):
+        """
+        return c-index using labels as predicat
+        """
+        days, dead = np.asarray(self.dataset.survival).T
+        days_test, dead_test = np.asarray(self.dataset.survival_test).T
+
+        activities_test = {}
+
+        for key in self.dataset.matrix_test_array:
+            encoder = self.encoder_array[key]
+            node_ids = self.pred_node_ids_array[key]
+            activities_test[key] = encoder.predict(
+                self.dataset.matrix_test_array[key]).T[node_ids].T
+
+        activities_test = hstack(activities_test.values())
+        activities_train = hstack([self.activities_pred_array[key]
+                                   for key in self.dataset.matrix_ref_array])
+
+        cindex = c_index_multiple(activities_train, dead, days,
+                                  activities_test, dead_test, days_test)
+
+        if self.verbose:
+            print('c-index multiple for test dataset:{0}'.format(cindex))
+
+        return cindex
+
+    def compute_c_indexes_multiple_for_test_fold_dataset(self):
+        """
+        return c-index using labels as predicat
+        """
+        days, dead = np.asarray(self.dataset.survival).T
+        days_cv, dead_cv = np.asarray(self.dataset.survival_cv).T
+
+        activities_cv = {}
+
+        for key in self.dataset.matrix_cv_array:
+            node_ids = self.pred_node_ids_array[key]
+            encoder = self.encoder_array[key]
+            activities_cv[key] = encoder.predict(
+                self.dataset.matrix_cv_array[key]).T[node_ids].T
+
+        activities_cv = hstack(activities_cv.values())
+        cindex = c_index_multiple(self.activities_for_pred_train, dead, days,
+                                  activities_cv, dead_cv, days_cv)
+
+        if self.verbose:
+            print('c-index multiple for test fold dataset:{0}'.format(cindex))
+
+        return cindex
+
     def _return_test_matrix_for_classification(self, activities, matrix_array):
         """
         """
@@ -786,6 +840,22 @@ class SimDeep(DeepBase):
             print('c-index for test fold dataset:{0}'.format(cindex))
 
         return cindex
+
+    def predict_nodes_activities(self, matrix_array):
+        """
+        """
+        activities = []
+
+        for key in matrix_array:
+            if key not in self.pred_node_ids_array:
+                continue
+
+            encoder = self.encoder_array[key]
+            node_ids = self.pred_node_ids_array[key]
+
+            activities.append(encoder.predict(matrix_array[key]).T[node_ids].T)
+
+        return hstack(activities)
 
 
 if __name__ == "__main__":

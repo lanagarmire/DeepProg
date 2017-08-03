@@ -16,7 +16,7 @@ CLUSTER_METHOD = 'mixture'
 CLUSTER_EVAL_METHOD = 'silhouette'
 CLASSIFIER_TYPE = 'svm'
 CLASSIFICATION_METHOD = 'ALL_FEATURES' # ['ALL_FEATURES', 'SURVIVAL_FEATURES']
-FILL_UNKOWN_FEATURE_WITH_0 = False
+FILL_UNKOWN_FEATURE_WITH_0 = True
 
 # Number of top features selected for classification
 # Apply only when CLASSIFICATION_METHOD == 'ALL_FEATURES'
@@ -28,7 +28,7 @@ NB_THREADS_COXPH = 10
 STACK_MULTI_OMIC = False
 
 #### Boosting values
-NB_ITER = 10 # boosting iteration
+NB_ITER = 20 # boosting iteration
 NB_THREADS = 4 # number of simdeep instance launched in parallel
 NB_FOLDS = 3 # for each instance, the original dataset is split in folds and one fold is left
 CLASS_SELECTION = 'mean' # mean or max: the method used to select the final class, according to class probas

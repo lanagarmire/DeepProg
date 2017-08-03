@@ -3,6 +3,7 @@ from simdeep.extract_data import LoadData
 
 from coxph_from_r import coxph
 from coxph_from_r import c_index
+from coxph_from_r import c_index_multiple
 
 from sklearn.model_selection import KFold
 
@@ -48,6 +49,7 @@ def main():
     boosting.predict_labels_on_test_dataset()
     boosting.predict_labels_on_full_dataset()
 
+    boosting.collect_pvalue_on_full_dataset()
     boosting.collect_pvalue_on_training_dataset()
     boosting.collect_pvalue_on_test_fold()
     # boosting.collect_number_of_features_per_omic()
@@ -56,6 +58,8 @@ def main():
     # boosting.collect_cindex_for_test_dataset()
 
     boosting.compute_c_indexes_for_test_dataset()
+    boosting.look_for_prediction_nodes()
+    boosting.compute_c_indexes_multiple_for_test_dataset()
 
 
 class SimDeepBoosting():
@@ -216,6 +220,23 @@ class SimDeepBoosting():
 
         return labels, pvalues, pvalues_proba
 
+    def collect_pvalue_on_full_dataset(self):
+        """
+        """
+        print('collect pvalues on full datasets...')
+        res = []
+
+        for model in self.models:
+            res.append(model.predict_labels_on_full_dataset())
+
+        labels, pvalues, pvalues_proba = zip(*res)
+
+        if self.verbose:
+            print('full geo mean pvalues: {0} geo mean pvalues probas: {1}'.format(
+                gmean(pvalues), gmean(pvalues_proba)))
+
+        return labels, pvalues, pvalues_proba
+
     def collect_number_of_features_per_omic(self):
         """
         """
@@ -354,6 +375,37 @@ class SimDeepBoosting():
 
         return cindex
 
+    def look_for_prediction_nodes(self):
+        """
+        """
+        print('search for prediction nodes amongst models')
+        pool = Pool(self.nb_threads)
+        self.models = pool.map(_look_for_prediction_nodes, self.models)
+
+    def compute_c_indexes_multiple_for_test_dataset(self):
+        """
+        """
+        matrix_array_train = self.models[0].dataset.matrix_ref_array
+        matrix_array_test = self.models[0].dataset.matrix_test_array
+
+        nbdays, isdead = self.models[0].dataset.survival.T.tolist()
+        nbdays_test, isdead_test = self.models[0].dataset.survival_test.T.tolist()
+
+        activities_train, activities_test = [], []
+
+        for model in self.models:
+            activities_train.append(model.predict_nodes_activities(matrix_array_train))
+            activities_test.append(model.predict_nodes_activities(matrix_array_test))
+
+        activities_train = hstack(activities_train)
+        activities_test = hstack(activities_test)
+
+        cindex = c_index_multiple(activities_train, isdead, nbdays,
+                                   activities_test, isdead_test, nbdays_test)
+
+        print('total number of survival features: {0}'.format(activities_train.shape[1]))
+        print('cindex multiple for test set: {0}:'.format(cindex))
+
 def save_class(boosting):
     """ """
     assert(isdir(PATH_MODEL))
@@ -431,6 +483,12 @@ def _predict_labels_on_test_dataset(model):
     """
     """
     model.predict_labels_on_test_dataset()
+    return model
+
+def _look_for_prediction_nodes(model):
+    """
+    """
+    model.look_for_prediction_nodes()
     return model
 
 def _predict_labels_on_test_fold(model):

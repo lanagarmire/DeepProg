@@ -183,6 +183,8 @@ class LoadData():
         if self._test_loaded:
             return
 
+        self.matrix_ref_array = {}
+
         for key in self.test_tsv:
             sample_ids, feature_ids, matrix = load_data_from_tsv(
                 f_name=self.test_tsv[key],
@@ -191,7 +193,6 @@ class LoadData():
 
             feature_ids_ref = self.feature_array[key]
             matrix_ref = self.matrix_array[key]
-            self.matrix_ref_array = {}
 
             common_features = set(feature_ids).intersection(feature_ids_ref)
 
