@@ -7,6 +7,7 @@ from sklearn.model_selection import cross_val_score
 
 from simdeep.deepmodel_base import DeepBase
 
+from simdeep.config import PATH_DATA
 from simdeep.config import NB_CLUSTERS
 from simdeep.config import PVALUE_THRESHOLD
 from simdeep.config import SELECT_FEATURES_METHOD
@@ -251,6 +252,30 @@ class SimDeep(DeepBase):
         print 'number of components linked to survival found:', len(self.valid_node_ids)
 
         self.activities = self.activities.T[self.valid_node_ids].T
+
+    def write_train_labels(self):
+        """
+        """
+        f_name = '{0}/train_labels.csv'.format(PATH_DATA)
+        f_res = open(f_name, 'w')
+        f_res.write('SampleID,label\n')
+
+        for ids, label in zip(self.dataset.sample_ids, self.labels):
+            f_res.write('{0},{1}\n'.format(ids, label))
+
+        print('training labels written in: {0}'.format(f_name))
+
+    def write_test_labels(self):
+        """
+        """
+        f_name = '{0}/test_labels.csv'.format(PATH_DATA)
+        f_res = open(f_name, 'w')
+        f_res.write('SampleID,label\n')
+
+        for ids, label in zip(self.dataset.sample_ids_test, self.test_labels):
+            f_res.write('{0},{1}\n'.format(ids, label))
+
+        print('test labels written in: {0}'.format(f_name))
 
 
 if __name__ == "__main__":

@@ -74,6 +74,9 @@ def main():
     # And predict labels and survivals pvalue using the rna.tsv only
     labels, pvalue = simDeep.predict_labels_on_test_dataset()
 
+    simDeep.write_train_labels()
+    simDeep.write_test_labels()
+
     #All the parameters are attributes of the SimDeep instance:
     # simDeep.labels
     # simDeep.test_labels
