@@ -43,6 +43,8 @@ def main():
     survival_tsv = 'survival.tsv'
 
     # As test dataset we will use the rna.tsv only
+    print('#### test tsv will be executed only on rna.tsv file!')
+
     tsv_test = 'rna.tsv'
     # because it is the same data, we should use the same survival file
     test_survival = 'survival.tsv'
