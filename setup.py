@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 import sys, os
 
-VERSION = '0.2.7'
+VERSION = '0.2.8'
 
 setup(name='garmire_simdeep',
       version=VERSION,
