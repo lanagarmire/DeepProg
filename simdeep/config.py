@@ -18,35 +18,33 @@ PVALUE_THRESHOLD = 0.05 # Threshold for survival significance to set a node as v
 
 #################### Paths to data file ################
 # path to the folder containing the data
-# PATH_DATA = PATH_THIS_FILE + "/../examples/data/"
-PATH_DATA = "/home/opoirion/data/survival_analysis_multiple/sijia/"
+PATH_DATA = PATH_THIS_FILE + "/../examples/data/"
 
 # name of the tsv file containing the survival data of the training set
-SURVIVAL_TSV = '0601_raw_merged_survival.tsv'
+SURVIVAL_TSV = 'survival_dummy.tsv'
 
 # dict('data type', 'name of the tsv file which are inside PATH_DATA')
 # These data will be stacked together to build the autoencoder
 TRAINING_TSV = OrderedDict([
-    # ('MIR', 'mir_dummy.tsv'),
-    # ('METH', 'meth_dummy.tsv'),
-    # ('RNA', 'rna_dummy.tsv'),
-    ('SIJIA', '0601_brca_raw_merged_matrix.tsv'),
+    ('MIR', 'mir_dummy.tsv'),
+    ('METH', 'meth_dummy.tsv'),
+    ('RNA', 'rna_dummy.tsv'),
 
 ])
 
 # name of the file containing the test dataset
-TSV_TEST = '0601_brca_raw_merged_matrix.tsv'
+TSV_TEST = 'survival_dummy.tsv'
 # name of the tsv file containing the survival data of the test set
 SURVIVAL_TSV_TEST = '0601_raw_merged_survival.tsv'
 # name of the data type of the test set
-DATA_TYPE_TEST = 'SIJIA'
+DATA_TYPE_TEST = 'RNA'
 # Path where to save load the Keras models
 PATH_MODEL = PATH_THIS_FILE + '/../data/models/'
 ########################################################
 
 ##################### NORMALIZATION PROCEDURE ###########
-MAD_SCALE=False
-ROBUST_SCALE=False
+MAD_SCALE=True
+ROBUST_SCALE=True
 MIN_MAX_SCALE=False
 UNIT_NORM=False
 #########################################################
