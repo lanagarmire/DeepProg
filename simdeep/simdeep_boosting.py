@@ -41,10 +41,7 @@ MODEL_THRES = 0.05
 def main():
     """ """
     boosting = SimDeepBoosting()
-    boosting.load_training_dataset()
     boosting.fit()
-
-    boosting.load_test_dataset()
 
     boosting.predict_labels_on_test_dataset()
     boosting.predict_labels_on_full_dataset()
@@ -58,7 +55,6 @@ def main():
     # boosting.collect_cindex_for_test_dataset()
 
     boosting.compute_c_indexes_for_test_dataset()
-    boosting.look_for_prediction_nodes()
     boosting.compute_c_indexes_multiple_for_test_dataset()
 
 
@@ -99,27 +95,17 @@ class SimDeepBoosting():
         self.full_labels_proba = None
         self.sample_ids_full = None
 
+        self.datasets = []
+
         for it in range(nb_it):
             split = KFold(n_splits=3, shuffle=True, random_state=np.random.randint(0, 1000))
-            dataset = LoadData(cross_validation_instance=split, verbose=False)
-            self.models.append(SimDeep(dataset=dataset,
-                                       load_existing_models=False,
-                                       verbose=False,
-                                       _isboosting=True,
-                                       do_KM_plot=False))
-
-    def load_training_dataset(self):
-        """ """
-        print('load training sets...')
-        pool = Pool(self.nb_threads)
-
-        self.models = pool.map(_load_training_dataset_pool, self.models)
+            self.datasets.append(LoadData(cross_validation_instance=split, verbose=False))
 
     def fit(self):
         """ """
         print('fit models...')
         pool = Pool(self.nb_threads)
-        self.models = pool.map(_fit_model_pool,  self.models)
+        self.models = pool.map(_fit_model_pool,  self.datasets)
 
         self.models = [model for model in self.models if model != None]
 
@@ -132,31 +118,13 @@ class SimDeepBoosting():
         if nb_models > 1:
             assert(len(set([model.train_pvalue for model in self.models])) > 1)
 
-    def load_test_dataset(self):
-        """
-        """
-        print('load test datasets for the fitted models...')
-        pool = Pool(self.nb_threads)
-        self.models = pool.map(_load_test_dataset, self.models)
-
-    def load_cv_dataset(self):
-        """
-        """
-        print('load test datasets for the fitted models...')
-        pool = Pool(self.nb_threads)
-        self.models = pool.map(_load_test_dataset, self.models)
-
     def predict_labels_on_test_dataset(self):
         """
         """
         print('predict labels on test datasets...')
-        pool = Pool(self.nb_threads)
-        self.models = pool.map(_predict_labels_on_test_dataset, self.models)
-
         test_labels_proba = np.asarray([model.test_labels_proba for model in self.models])
 
         res = self.class_selection(test_labels_proba)
-
         self.test_labels, self.test_labels_proba = res
 
         print('#### report of assigned cluster:')
@@ -176,16 +144,15 @@ class SimDeepBoosting():
         """
         """
         print('predict labels on test fold datasets...')
-        pool = Pool(self.nb_threads)
-        res = pool.map(_predict_labels_on_test_fold, self.models)
 
-        labels, pvalues, pvalues_proba = zip(*res)
+        pvalues, pvalues_proba = zip(*[(model.cv_pvalue, model.cv_pvalue_proba)
+                                       for model in self.models])
 
         if self.verbose:
             print('geo mean pvalues: {0} geo mean pvalues probas: {1}'.format(
                 gmean(pvalues), gmean(pvalues_proba)))
 
-        return labels, pvalues, pvalues_proba
+        return pvalues, pvalues_proba
 
     def collect_pvalue_on_training_dataset(self):
         """
@@ -207,35 +174,29 @@ class SimDeepBoosting():
         """
         """
         print('collect pvalues on test datasets...')
-        res = []
 
-        for model in self.models:
-            res.append(model.predict_labels_on_test_dataset())
-
-        labels, pvalues, pvalues_proba = zip(*res)
+        pvalues, pvalues_proba = zip(*[(model.test_pvalue, model.test_pvalue_proba)
+                                       for model in self.models])
 
         if self.verbose:
             print('test geo mean pvalues: {0} geo mean pvalues probas: {1}'.format(
                 gmean(pvalues), gmean(pvalues_proba)))
 
-        return labels, pvalues, pvalues_proba
+        return pvalues, pvalues_proba
 
     def collect_pvalue_on_full_dataset(self):
         """
         """
         print('collect pvalues on full datasets...')
-        res = []
 
-        for model in self.models:
-            res.append(model.predict_labels_on_full_dataset())
-
-        labels, pvalues, pvalues_proba = zip(*res)
+        pvalues, pvalues_proba = zip(*[(model.full_pvalue, model.full_pvalue_proba)
+                                       for model in self.models])
 
         if self.verbose:
             print('full geo mean pvalues: {0} geo mean pvalues probas: {1}'.format(
                 gmean(pvalues), gmean(pvalues_proba)))
 
-        return labels, pvalues, pvalues_proba
+        return pvalues, pvalues_proba
 
     def collect_number_of_features_per_omic(self):
         """
@@ -289,9 +250,7 @@ class SimDeepBoosting():
         """
         """
         print('predict labels on full datasets...')
-        pool = Pool(self.nb_threads)
 
-        self.models = pool.map(_predict_labels_on_full_dataset, self.models)
         self._get_probas_for_full_models()
         self._reorder_survival_full()
 
@@ -374,13 +333,6 @@ class SimDeepBoosting():
             print('c-index proba for boosting test dataset:{0}'.format(cindex_proba))
 
         return cindex
-
-    def look_for_prediction_nodes(self):
-        """
-        """
-        print('search for prediction nodes amongst models')
-        pool = Pool(self.nb_threads)
-        self.models = pool.map(_look_for_prediction_nodes, self.models)
 
     def compute_c_indexes_multiple_for_test_dataset(self):
         """
@@ -479,50 +431,24 @@ def _mean_proba(proba):
 
     return labels, np.asarray(probas)
 
-def _predict_labels_on_test_dataset(model):
-    """
-    """
-    model.predict_labels_on_test_dataset()
-    return model
-
-def _look_for_prediction_nodes(model):
-    """
-    """
-    model.look_for_prediction_nodes()
-    return model
-
-def _predict_labels_on_test_fold(model):
-    """
-    """
-    return model.predict_labels_on_test_fold()
-
-def _predict_labels_on_full_dataset(model):
-    """
-    """
-    model.predict_labels_on_full_dataset()
-    return model
-
-def _load_test_dataset(model):
-    """
-    """
-    model.load_test_dataset()
-    return model
-
-def _load_training_dataset_pool(model):
+def _fit_model_pool(dataset):
     """ """
-    model.load_training_dataset()
-    return model
+    model = SimDeep(dataset=dataset,
+                    load_existing_models=False,
+                    verbose=False,
+                    _isboosting=True,
+                    do_KM_plot=False)
 
-def _fit_model_pool(model):
-    """ """
     before = model.dataset.cross_validation_instance.random_state
     try:
+        model.load_training_dataset()
         model.fit()
-        assert(len(set(model.labels)) > 1)
-        assert(model.train_pvalue < MODEL_THRES)
 
-        after = model.dataset.cross_validation_instance.random_state
-        assert(before == after)
+        if len(set(model.labels)) < 1:
+            raise Exception('only one class!')
+
+        if model.train_pvalue > MODEL_THRES:
+            raise Exception('pvalue: {0} not significant!'.format(model.train_pvalue))
 
     except Exception as e:
         print('model with random state:{1} didn\'t converge:{0}'.format(e, before))
@@ -530,7 +456,17 @@ def _fit_model_pool(model):
 
     else:
         print('model with random state:{0} fitted'.format(before))
-        return model
+
+    model.predict_labels_on_test_fold()
+    model.predict_labels_on_full_dataset()
+
+    model.load_test_dataset()
+    print('test dataset loaded for model: {0}'.format(before))
+    model.predict_labels_on_test_dataset()
+
+    model.look_for_prediction_nodes()
+
+    return model
 
 
 if __name__ == '__main__':

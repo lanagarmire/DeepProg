@@ -156,6 +156,9 @@ def c_index_multiple(
     """
     rob.r('set.seed(2016)')
 
+    if matrix.shape[1] < 2:
+        return np.nan
+
     nbdays[nbdays == 0] = 1
     nbdays_test[nbdays_test == 0] = 1
 

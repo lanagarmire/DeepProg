@@ -25,6 +25,7 @@ from simdeep.config import NB_THREADS_COXPH
 from simdeep.config import NB_SELECTED_FEATURES
 from simdeep.config import SAVE_FITTED_MODELS
 from simdeep.config import LOAD_EXISTING_MODELS
+from simdeep.config import NODES_SELECTION
 
 from simdeep.survival_utils import _process_parallel_coxph
 from simdeep.survival_utils import _process_parallel_cindex
@@ -46,9 +47,13 @@ from sklearn.metrics import calinski_harabaz_score
 import numpy as np
 from numpy import hstack
 
+import cPickle
+
 from collections import defaultdict
 
 import warnings
+
+
 
 from multiprocessing import Pool
 
@@ -95,6 +100,7 @@ class SimDeep(DeepBase):
                  cluster_array=CLUSTER_ARRAY,
                  nb_selected_features=NB_SELECTED_FEATURES,
                  mixture_params=MIXTURE_PARAMS,
+                 node_selection=NODES_SELECTION,
                  nb_threads_coxph=NB_THREADS_COXPH,
                  classification_method=CLASSIFICATION_METHOD,
                  load_existing_models=LOAD_EXISTING_MODELS,
@@ -134,9 +140,17 @@ class SimDeep(DeepBase):
         self.nb_threads_coxph = nb_threads_coxph
         self.classification_method = classification_method
         self.nb_selected_features = nb_selected_features
+        self.node_selection = node_selection
 
         self.train_pvalue = None
         self.train_pvalue_proba = None
+        self.full_pvalue = None
+        self.full_pvalue_proba = None
+        self.cv_pvalue = None
+        self.cv_pvalue_proba = None
+        self.test_pvalue = None
+        self.test_pvalue_proba = None
+
         self.classifier = None
         self.classifier_test = None
         self.classifier_type = classifier_type
@@ -172,10 +186,20 @@ class SimDeep(DeepBase):
         self.cluster_method = cluster_method
         self.cluster_eval_method = cluster_eval_method
         self.verbose = verbose
-
         self._load_existing_models = load_existing_models
 
         DeepBase.__init__(self, verbose=self.verbose, **kwargs)
+
+    def _look_for_nodes(self, key):
+        """
+        """
+        assert(self.node_selection in ['Cox-PH', 'C-index'])
+
+        if self.node_selection == 'Cox-PH':
+            return self._look_for_survival_nodes(key)
+
+        if self.node_selection == 'C-index':
+            return self._look_for_prediction_nodes(key)
 
     def fit(self):
         """
@@ -217,9 +241,12 @@ class SimDeep(DeepBase):
         pvalue, pvalue_proba = self._compute_test_coxph('KM_plot_test_fold',
                                                         nbdays, isdead,
                                                         self.cv_labels, self.cv_labels_proba)
+        self.cv_pvalue = pvalue
+        self.cv_pvalue_proba = pvalue_proba
 
-        self._write_labels(self.dataset.sample_ids_cv, self.cv_labels, '{0}_test_fold_labels'.format(
-            self.project_name))
+        self._write_labels(self.dataset.sample_ids_cv, self.cv_labels,
+                           labels_proba=self.cv_labels_proba.T[0],
+                           fname='{0}_test_fold_labels'.format(self.project_name))
 
         return self.cv_labels, pvalue, pvalue_proba
 
@@ -243,9 +270,12 @@ class SimDeep(DeepBase):
         pvalue, pvalue_proba = self._compute_test_coxph('KM_plot_full',
                                                         nbdays, isdead,
                                                         self.full_labels, self.full_labels_proba)
+        self.full_pvalue = pvalue
+        self.full_pvalue_proba = pvalue_proba
 
-        self._write_labels(self.dataset.sample_ids_full, self.full_labels, '{0}_full_labels'.format(
-            self.project_name))
+        self._write_labels(self.dataset.sample_ids_full, self.full_labels,
+                           labels_proba=self.full_labels_proba.T[0],
+                           fname='{0}_full_labels'.format(self.project_name))
 
         return self.full_labels, pvalue, pvalue_proba
 
@@ -268,9 +298,12 @@ class SimDeep(DeepBase):
         pvalue, pvalue_proba = self._compute_test_coxph('KM_plot_test',
                                                         nbdays, isdead,
                                                         self.test_labels, self.test_labels_proba)
+        self.test_pvalue = pvalue
+        self.test_pvalue_proba = pvalue_proba
 
-        self._write_labels(self.dataset.sample_ids_test, self.test_labels, '{0}_test_labels'.format(
-            self.project_name))
+        self._write_labels(self.dataset.sample_ids_test, self.test_labels,
+                           labels_proba=self.test_labels_proba.T[0],
+                           fname='{0}_test_labels'.format(self.project_name))
 
         return self.test_labels, pvalue, pvalue_proba
 
@@ -485,8 +518,9 @@ class SimDeep(DeepBase):
         pvalue_proba = coxph(self.labels_proba.T[0], isdead, nbdays,
                              isfactor=False)
 
-        self._write_labels(self.dataset.sample_ids, self.labels, '{0}_training_set_labels'.format(
-            self.project_name))
+        self._write_labels(self.dataset.sample_ids, self.labels,
+                           labels_proba=self.labels_proba.T[0],
+                           fname='{0}_training_set_labels'.format(self.project_name))
 
         if self.verbose:
             print('Cox-PH p-value (Log-Rank) for the cluster labels: {0}'.format(pvalue))
@@ -545,18 +579,13 @@ class SimDeep(DeepBase):
             keys = self.encoder_array.keys()
 
         for key in keys:
+            valid_node_ids = self._look_for_nodes(key)
+            self.valid_node_ids_array[key] = valid_node_ids
+
             encoder = self.encoder_array[key]
             matrix_train = self.matrix_train_array[key]
 
             activities = encoder.predict(matrix_train)
-
-            valid_node_ids = self._look_for_survival_nodes(activities)
-            self.valid_node_ids_array[key] = valid_node_ids
-
-            if self.verbose:
-                print('number of components linked to survival found:{0} for key {1}'.format(
-                    len(valid_node_ids), key))
-
             self.activities_array[key] = activities.T[valid_node_ids].T
 
         self.activities_train = hstack([self.activities_array[key]
@@ -729,7 +758,7 @@ class SimDeep(DeepBase):
 
         return labels
 
-    def _look_for_survival_nodes(self, activities):
+    def _look_for_survival_nodes(self, key):
         """
         """
         if not self._isboosting:
@@ -737,6 +766,11 @@ class SimDeep(DeepBase):
             mapf = pool.map
         else:
             mapf = map
+
+        encoder = self.encoder_array[key]
+        matrix_train = self.matrix_train_array[key]
+
+        activities = encoder.predict(matrix_train)
 
         nbdays, isdead = self.dataset.survival.T.tolist()
         pvalue_list = []
@@ -751,6 +785,11 @@ class SimDeep(DeepBase):
 
         valid_node_ids = [node_id for node_id, pvalue in pvalue_list
                                if pvalue < self.pvalue_thres]
+
+        if self.verbose:
+            print('number of components linked to survival found:{0} for key {1}'.format(
+                len(valid_node_ids), key))
+
         return valid_node_ids
 
     def _look_for_prediction_nodes(self, key):
@@ -856,6 +895,36 @@ class SimDeep(DeepBase):
             activities.append(encoder.predict(matrix_array[key]).T[node_ids].T)
 
         return hstack(activities)
+
+    def save_model(self, id=None):
+        """
+        """
+        id = '_{0}'.format(id) if id is None else ''
+        f_name = '{0}/{1}{2}.pickle'.format(self.path_model, self.project_name, id)
+
+        with open(f_name, 'w') as f_pick:
+            cPickle.dump(f_pick, {
+                'train_labels': self.train_labels,
+                'train_labels_proba': self.train_labels_proba,
+                'train_pvalue': self.train_pvalue,
+                'train_pvalue_proba': self.train_pvalue_proba,
+                'valid_node_ids_array': self.valid_node_ids_array,
+                'pred_node_ids_array': self.pred_node_ids_array,
+                'test_labels': self.test_labels,
+                'test_labels_proba': self.test_labels_proba,
+                'cv_labels': self.cv_labels,
+                'cv_labels_proba': self.cv_labels_proba,
+                'full_labels': self.full_labels,
+                'full_labels_proba': self.full_labels_proba,
+            })
+
+        self.save_encoders(fname=self.project_name + '.h5')
+
+    def load_model(self, id=None):
+        """ """
+        id = '_{0}'.format(id) if id is None else ''
+        f_name = '{0}/{1}{2}.pickle'.format(self.path_model, self.project_name, id)
+
 
 
 if __name__ == "__main__":

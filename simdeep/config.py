@@ -15,6 +15,7 @@ NB_CLUSTERS = 2 # Number of clusters
 CLUSTER_METHOD = 'mixture'
 CLUSTER_EVAL_METHOD = 'silhouette'
 CLASSIFIER_TYPE = 'svm'
+NODES_SELECTION = 'Cox-PH' # possible choice: ['Cox-PH', 'C-index']
 CLASSIFICATION_METHOD = 'ALL_FEATURES' # ['ALL_FEATURES', 'SURVIVAL_FEATURES']
 FILL_UNKOWN_FEATURE_WITH_0 = True
 
@@ -23,14 +24,14 @@ FILL_UNKOWN_FEATURE_WITH_0 = True
 NB_SELECTED_FEATURES = 10
 CLUSTER_ARRAY = []
 PVALUE_THRESHOLD = 0.01 # Threshold for survival significance to set a node as valid
-CINDEX_THRESHOLD = 0.70 # experimental
+CINDEX_THRESHOLD = 0.65 # experimental
 NB_THREADS_COXPH = 10
 STACK_MULTI_OMIC = False
 
 #### Boosting values
 NB_ITER = 20 # boosting iteration
-NB_THREADS = 4 # number of simdeep instance launched in parallel
-NB_FOLDS = 3 # for each instance, the original dataset is split in folds and one fold is left
+NB_THREADS = 5 # number of simdeep instance launched in parallel
+NB_FOLDS = 5 # for each instance, the original dataset is split in folds and one fold is left
 CLASS_SELECTION = 'mean' # mean or max: the method used to select the final class, according to class probas
 
 #### SimDeep analysis
@@ -44,7 +45,7 @@ LOAD_EXISTING_MODELS = False
 # path to the folder containing the data
 
 # PATH_DATA = PATH_THIS_FILE + "/../examples/data/"
-PROJECT_NAME = 'psb18'
+PROJECT_NAME = 'sijia v4'
 PATH_DATA = "/home/opoirion/data/survival_analysis_multiple/sijia/v2/"
 
 # name of the tsv file containing the survival data of the training set
@@ -95,15 +96,15 @@ SEPARATOR = {
     }
 
 # Path where to save load the Keras models
-PATH_MODEL = '/home/opoirion/data/survival_analysis_multiple/models/psb18/'
+PATH_MODEL = '/home/opoirion/data/survival_analysis_multiple/models/sijia/'
 
 # Path to generate png images
-PATH_RESULTS = '/home/opoirion/code/d3visualisation/psb18/'
+PATH_RESULTS = '/home/opoirion/code/d3visualisation/sijia//'
 
 ######## Cross-validation on the training set ############
-CROSS_VALIDATION_INSTANCE = KFold(n_splits=3, shuffle=True, random_state=1)
+CROSS_VALIDATION_INSTANCE = KFold(n_splits=5, shuffle=True, random_state=1)
 
-TEST_FOLD = 1
+TEST_FOLD = 0
 ##########################################################
 ########################################################
 
