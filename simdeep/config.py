@@ -33,9 +33,9 @@ TRAINING_TSV = OrderedDict([
 ])
 
 # name of the file containing the test dataset
-TSV_TEST = 'survival_dummy.tsv'
+TSV_TEST = 'rna_test_dummy.tsv'
 # name of the tsv file containing the survival data of the test set
-SURVIVAL_TSV_TEST = '0601_raw_merged_survival.tsv'
+SURVIVAL_TSV_TEST = 'survival_test_dummy.tsv'
 # name of the data type of the test set
 DATA_TYPE_TEST = 'RNA'
 # Path where to save load the Keras models
