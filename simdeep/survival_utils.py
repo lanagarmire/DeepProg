@@ -19,7 +19,7 @@ class MadScaler():
             mad = np.median(np.abs(X[i] - med))
             X[i] = (X[i] - med) / mad
 
-        return np.matrix(X)
+        return np.nan_to_num(np.matrix(X))
 
 
 def load_survival_file(f_name, path_data=PATH_DATA, sep='\t'):
