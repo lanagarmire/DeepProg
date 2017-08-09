@@ -7,7 +7,6 @@ from sklearn.model_selection import cross_val_score
 
 from simdeep.deepmodel_base import DeepBase
 
-from simdeep.config import PATH_DATA
 from simdeep.config import NB_CLUSTERS
 from simdeep.config import PVALUE_THRESHOLD
 from simdeep.config import SELECT_FEATURES_METHOD
@@ -256,7 +255,7 @@ class SimDeep(DeepBase):
     def write_train_labels(self):
         """
         """
-        f_name = '{0}/train_labels.csv'.format(PATH_DATA)
+        f_name = 'train_labels.csv'
         f_res = open(f_name, 'w')
         f_res.write('SampleID,label\n')
 
@@ -268,7 +267,7 @@ class SimDeep(DeepBase):
     def write_test_labels(self):
         """
         """
-        f_name = '{0}/test_labels.csv'.format(PATH_DATA)
+        f_name = 'test_labels.csv'
         f_res = open(f_name, 'w')
         f_res.write('SampleID,label\n')
 
