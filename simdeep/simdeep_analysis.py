@@ -84,6 +84,7 @@ class SimDeep(DeepBase):
 
     def predict_labels_on_test_dataset(
             self,
+            log_ref_matrix=False,
             return_proba=False,
             mad_scale=True,
             robust_scale=True,
@@ -104,6 +105,9 @@ class SimDeep(DeepBase):
         """
         test_matrix = self.dataset.matrix_test
         ref_matrix = self.dataset.matrix_ref
+
+        if log_ref_matrix:
+            ref_matrix = np.log2(1.0 + ref_matrix)
 
         ref_matrix, test_matrix = self.dataset.transform_matrices(
             ref_matrix,
