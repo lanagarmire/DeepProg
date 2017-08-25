@@ -497,9 +497,11 @@ class SimDeep(DeepBase):
         labels = self._order_labels_according_to_survival(labels)
 
         self.labels = labels
-        self.labels_proba = self.clustering.predict_proba(self.activities_train)
 
-        self._evalutate_cluster_performance()
+        if self.cluster_method == 'mixture':
+            self.labels_proba = self.clustering.predict_proba(self.activities_train)
+        else:
+            self.labels_proba = np.array([self.labels, self.labels]).T
 
         if self.verbose:
             print("clustering done, labels ordered according to survival:")

@@ -24,6 +24,12 @@ from coxph_from_r import c_index
 from scipy.stats import kruskal
 
 
+################ DEBUG ################
+# supposed to be None for normal usage
+MAX_FEATURE = None
+#######################################
+
+
 class MadScaler():
     def __init__(self):
         pass
@@ -126,7 +132,7 @@ def _load_data_from_tsv(
     header = f_tsv.readline().strip(sep + '\n').split(sep)
 
     feature_ids = ['{0}_{1}'.format(f_short, head)
-                   for head in header]
+                   for head in header][:MAX_FEATURE]
     sample_ids = []
     f_matrix = []
 
@@ -136,9 +142,9 @@ def _load_data_from_tsv(
 
         if nan_to_num:
             line[1:] = [0 if (l.isalpha() or not l) else l
-                        for l in line[1:]]
+                        for l in line[1:MAX_FEATURE]]
 
-        f_matrix.append(map(f_type, line[1:]))
+        f_matrix.append(map(f_type, line[1:MAX_FEATURE]))
 
     f_matrix = np.array(f_matrix)
 
@@ -269,6 +275,8 @@ def _process_parallel_feature_importance(inp):
 
     for label, value in zip(labels, np.array(array).reshape(-1)):
         arrays[label].append(value)
-
-    score, pvalue = kruskal(*arrays.values())
+    try:
+        score, pvalue = kruskal(*arrays.values())
+    except Exception:
+        return feature, 1.0
     return feature, pvalue

@@ -236,12 +236,18 @@ class LoadData():
 
             self.matrix_test_array[key] = matrix_test
             self.matrix_ref_array[key] = matrix_ref
-            self._create_ref_matrix(key)
+            self.feature_ref_array[key] = self.feature_test_array[key]
+
+            if not self.do_stack_multi_omic:
+                self._create_ref_matrix(key)
 
         self._stack_multiomics(self.matrix_test_array,
                                self.feature_test_array)
         self._stack_multiomics(self.matrix_ref_array,
                                self.feature_ref_array)
+
+        if self.do_stack_multi_omic:
+            self._create_ref_matrix('STACKED')
 
         self._test_loaded = True
 
@@ -428,6 +434,7 @@ class LoadData():
             self._define_train_features(key)
 
         self._stack_multiomics(self.matrix_train_array, self.feature_train_array)
+        self._stack_multiomics(self.matrix_ref_array, self.feature_ref_array)
         self._stack_index()
 
     def _stack_index(self):

@@ -12,7 +12,7 @@ PATH_THIS_FILE = pathsplit(abspath(__file__))[0]
 
 #################### SimDeep variable ##################
 NB_CLUSTERS = 2 # Number of clusters
-CLUSTER_METHOD = 'mixture'
+CLUSTER_METHOD = 'kmeans'
 CLUSTER_EVAL_METHOD = 'silhouette'
 CLASSIFIER_TYPE = 'svm'
 NODES_SELECTION = 'Cox-PH' # possible choice: ['Cox-PH', 'C-index']
@@ -21,16 +21,16 @@ FILL_UNKOWN_FEATURE_WITH_0 = True
 
 # Number of top features selected for classification
 # Apply only when CLASSIFICATION_METHOD == 'ALL_FEATURES'
-NB_SELECTED_FEATURES = 10
+NB_SELECTED_FEATURES = 50
 CLUSTER_ARRAY = []
 PVALUE_THRESHOLD = 0.01 # Threshold for survival significance to set a node as valid
 CINDEX_THRESHOLD = 0.65 # experimental
 NB_THREADS_COXPH = 10
-STACK_MULTI_OMIC = False
+STACK_MULTI_OMIC = True
 
 #### Boosting values
 NB_ITER = 20 # boosting iteration
-NB_THREADS = 5 # number of simdeep instance launched in parallel
+NB_THREADS= 5 # number of simdeep instance launched in parallel
 NB_FOLDS = 5 # for each instance, the original dataset is split in folds and one fold is left
 CLASS_SELECTION = 'mean' # mean or max: the method used to select the final class, according to class probas
 
@@ -70,9 +70,6 @@ SURVIVAL_FLAG = {'patient_id': 'barcode',
 # dict('data type', 'name of the tsv file which are inside PATH_DATA')
 # These data will be stacked together to build the autoencoder
 TRAINING_TSV = OrderedDict([
-    # ('GE', 'rna_mapped_BLCA.tsv'),
-    # ('MIR', 'mir_mapped_BLCA.tsv'),
-    # ('METH', 'meth_mapped_BLCA.tsv'),
     ('GE', '0607_pds_expr_data.tsv'),
     ('CNV', '0607_pds_cnv_data.tsv'),
     ('METH', '0607_pds_methyl_data.tsv'),
@@ -141,7 +138,7 @@ DATA_SPLIT = None
 # activation function
 ACTIVATION = 'tanh'
 # Number of epoch
-NB_EPOCH = 50
+NB_EPOCH = 10
 # Loss function to minimize
 LOSS = 'binary_crossentropy'
 # Optimizer (sgd for Stochastic Gradient Descent)

@@ -11,10 +11,12 @@ from multiprocessing.pool import Pool
 
 from collections import Counter
 from collections import defaultdict
+from itertools import combinations
 
 import numpy as np
 
 from scipy.stats import gmean
+from sklearn.metrics import adjusted_rand_score
 
 from simdeep.config import PROJECT_NAME
 from simdeep.config import PATH_RESULTS
@@ -56,6 +58,8 @@ def main():
 
     boosting.compute_c_indexes_for_test_dataset()
     boosting.compute_c_indexes_multiple_for_test_dataset()
+    boosting.compute_clusters_consistency_for_full_labels()
+    boosting.compute_clusters_consistency_for_test_labels()
 
 
 class SimDeepBoosting():
@@ -92,6 +96,7 @@ class SimDeepBoosting():
         self.cv_labels = None
         self.cv_labels_proba = None
         self.full_labels = None
+        self.full_labels_dicts = None
         self.full_labels_proba = None
         self.sample_ids_full = None
 
@@ -267,6 +272,29 @@ class SimDeepBoosting():
             self.models[0].dataset.sample_ids_full, self.full_labels, '{0}_full_labels'.format(
             self.project_name))
 
+    def compute_clusters_consistency_for_full_labels(self):
+        """
+        """
+        self._get_labels_for_full_models()
+        scores = []
+
+        for model_1, model_2 in combinations(self.full_labels_dicts.keys(), 2):
+            scores.append(adjusted_rand_score(self.full_labels_dicts[model_1]['labels'],
+                                              self.full_labels_dicts[model_2]['labels']))
+        print('Adj. Rand scores for full label: mean: {0} std: {1}'.format(
+            np.mean(scores), np.std(scores)))
+
+    def compute_clusters_consistency_for_test_labels(self):
+        """
+        """
+        scores = []
+
+        for model_1, model_2 in combinations(self.models, 2):
+            scores.append(adjusted_rand_score(model_1.test_labels,
+                                              model_2.test_labels))
+        print('Adj. Rand scores for test label: mean: {0} std: {1}'.format(
+            np.mean(scores), np.std(scores)))
+
     def _reorder_survival_full(self):
         """
         """
@@ -291,6 +319,21 @@ class SimDeepBoosting():
         self.full_labels = labels
         self.full_labels_proba = probas
         self.sample_ids_full = proba_dict.keys()
+
+    def _get_labels_for_full_models(self):
+        """
+        """
+        self.full_labels_dicts = defaultdict(dict)
+
+        for model in self.models:
+            label_dict = defaultdict(list)
+
+            for sample, label in zip(model.dataset.sample_ids_full, model.full_labels):
+                label_dict[sample] = label
+
+            model_id = model.dataset.cross_validation_instance.random_state
+            self.full_labels_dicts[model_id]['labels'] = label_dict.values()
+            self.full_labels_dicts[model_id]['id'] = label_dict.keys()
 
     def _compute_test_coxph(self, fname_base, nbdays, isdead, labels, labels_proba):
         """ """
