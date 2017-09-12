@@ -91,6 +91,7 @@ class SimDeepBoosting():
         self.nb_threads = nb_threads
         self.do_KM_plot = do_KM_plot
         self.project_name = project_name
+        self._project_name = project_name
         self.path_results = path_results
 
         self.test_labels = None
@@ -100,6 +101,7 @@ class SimDeepBoosting():
         self.full_labels = None
         self.full_labels_dicts = None
         self.full_labels_proba = None
+        self.survival_full = None
         self.sample_ids_full = None
 
         self.datasets = []
@@ -124,6 +126,23 @@ class SimDeepBoosting():
         print('fit models...')
         pool = Pool(self.nb_threads)
         self.models = pool.map(_fit_model_pool,  self.datasets)
+
+        self.models = [model for model in self.models if model != None]
+
+        nb_models = len(self.models)
+
+        print('{0} models fitted'.format(nb_models))
+
+        assert(nb_models)
+
+        if nb_models > 1:
+            assert(len(set([model.train_pvalue for model in self.models])) > 1)
+
+    def partial_fit(self):
+        """ """
+        print('fit models...')
+        pool = Pool(self.nb_threads)
+        self.models = pool.map(_partial_fit_model_pool,  self.datasets)
 
         self.models = [model for model in self.models if model != None]
 
@@ -414,6 +433,17 @@ class SimDeepBoosting():
         print('total number of survival features: {0}'.format(activities_train.shape[1]))
         print('cindex multiple for test set: {0}:'.format(cindex))
 
+    def load_new_test_dataset(self, tsv_dict, path_survival_file, fname_key=None):
+        """
+        """
+        for model in self.models:
+            model.load_new_test_dataset(tsv_dict, path_survival_file)
+            model.predict_labels_on_test_dataset()
+
+        if fname_key:
+            self.project_name = '{0}_{1}'.format(self._project_name, fname_key)
+
+
 def save_class(boosting):
     """ """
     assert(isdir(PATH_MODEL))
@@ -522,6 +552,38 @@ def _fit_model_pool(dataset):
     model.predict_labels_on_test_dataset()
 
     model.look_for_prediction_nodes()
+
+    return model
+
+def _partial_fit_model_pool(dataset):
+    """ """
+    model = SimDeep(dataset=dataset,
+                    load_existing_models=False,
+                    verbose=False,
+                    _isboosting=True,
+                    seed=dataset.cross_validation_instance.random_state,
+                    do_KM_plot=False)
+
+    before = model.dataset.cross_validation_instance.random_state
+    try:
+        model.load_training_dataset()
+        model.fit()
+
+        if len(set(model.labels)) < 1:
+            raise Exception('only one class!')
+
+        if model.train_pvalue > MODEL_THRES:
+            raise Exception('pvalue: {0} not significant!'.format(model.train_pvalue))
+
+    except Exception as e:
+        print('model with random state:{1} didn\'t converge:{0}'.format(e, before))
+        return None
+
+    else:
+        print('model with random state:{0} fitted'.format(before))
+
+    model.predict_labels_on_test_fold()
+    model.predict_labels_on_full_dataset()
 
     return model
 

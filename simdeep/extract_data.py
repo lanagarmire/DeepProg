@@ -184,6 +184,7 @@ class LoadData():
             return
 
         self.matrix_ref_array = {}
+        self.matrix_test_array = {}
 
         for key in self.test_tsv:
             sample_ids, feature_ids, matrix = load_data_from_tsv(
