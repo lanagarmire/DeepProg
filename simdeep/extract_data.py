@@ -251,6 +251,18 @@ class LoadData():
 
         self._test_loaded = True
 
+    def load_new_test_dataset(self, tsv_dict, path_survival_file):
+        """
+        """
+        self._test_loaded = False
+        self.test_tsv = tsv_dict
+        self.survival_test = None
+        self.sample_ids_test = None
+        self.survival_tsv_test = path_survival_file
+
+        self.load_matrix_test()
+        self.load_survival_test()
+
     def _create_ref_matrix(self, key):
         """ """
         features_test = self.feature_test_array[key]

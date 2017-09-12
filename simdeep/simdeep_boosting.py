@@ -73,8 +73,10 @@ class SimDeepBoosting():
                  class_selection=CLASS_SELECTION,
                  model_thres=MODEL_THRES,
                  verbose=True,
+                 seed=None,
                  project_name='{0}_boosting'.format(PROJECT_NAME),
-                 path_results=PATH_RESULTS):
+                 path_results=PATH_RESULTS,
+                 **kwargs):
         """ """
         assert(class_selection in ['max', 'mean'])
 
@@ -101,10 +103,21 @@ class SimDeepBoosting():
         self.sample_ids_full = None
 
         self.datasets = []
+        self.seed = seed
+
+        if self.seed:
+            np.random.seed(seed)
+
+        random_states = np.random.randint(0, 1000, nb_it)
 
         for it in range(nb_it):
-            split = KFold(n_splits=3, shuffle=True, random_state=np.random.randint(0, 1000))
-            self.datasets.append(LoadData(cross_validation_instance=split, verbose=False))
+            split = KFold(n_splits=3, shuffle=True, random_state=random_states[it])
+
+            dataset = LoadData(cross_validation_instance=split,
+                               verbose=False,
+                               **kwargs)
+
+            self.datasets.append(dataset)
 
     def fit(self):
         """ """
@@ -480,6 +493,7 @@ def _fit_model_pool(dataset):
                     load_existing_models=False,
                     verbose=False,
                     _isboosting=True,
+                    seed=dataset.cross_validation_instance.random_state,
                     do_KM_plot=False)
 
     before = model.dataset.cross_validation_instance.random_state

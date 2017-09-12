@@ -2,9 +2,6 @@ import numpy as np
 
 from simdeep.config import SEED
 
-if SEED:
-    np.random.seed(SEED)
-
 from keras.layers import Dense
 from keras.layers import Dropout
 from keras.layers import Input
@@ -59,6 +56,7 @@ class DeepBase(object):
                  dropout=DROPOUT,
                  data_split=DATA_SPLIT,
                  activation=ACTIVATION,
+                 seed=SEED,
                  path_model=PATH_MODEL):
         """
         ### DEFAULT PARAMETER ###:
@@ -90,6 +88,10 @@ class DeepBase(object):
         self.path_model = path_model
         self.activation = activation
         self.data_split = data_split
+        self.seed = seed
+
+        if self.seed:
+            np.random.seed(self.seed)
 
         self.W_l1_constant = w_reg
         self.A_l2_constant = act_reg

@@ -2,8 +2,6 @@ from sklearn.svm import SVC
 from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import KFold
 
-from collections import OrderedDict
-
 from os.path import abspath
 from os.path import split as pathsplit
 
@@ -12,7 +10,7 @@ PATH_THIS_FILE = pathsplit(abspath(__file__))[0]
 
 #################### SimDeep variable ##################
 NB_CLUSTERS = 2 # Number of clusters
-CLUSTER_METHOD = 'kmeans'
+CLUSTER_METHOD = 'mixture'
 CLUSTER_EVAL_METHOD = 'silhouette'
 CLASSIFIER_TYPE = 'svm'
 NODES_SELECTION = 'Cox-PH' # possible choice: ['Cox-PH', 'C-index']
@@ -21,15 +19,15 @@ FILL_UNKOWN_FEATURE_WITH_0 = True
 
 # Number of top features selected for classification
 # Apply only when CLASSIFICATION_METHOD == 'ALL_FEATURES'
-NB_SELECTED_FEATURES = 50
+NB_SELECTED_FEATURES = 10
 CLUSTER_ARRAY = []
 PVALUE_THRESHOLD = 0.01 # Threshold for survival significance to set a node as valid
 CINDEX_THRESHOLD = 0.65 # experimental
 NB_THREADS_COXPH = 10
-STACK_MULTI_OMIC = True
+STACK_MULTI_OMIC = False
 
 #### Boosting values
-NB_ITER = 20 # boosting iteration
+NB_ITER = 5 # boosting iteration
 NB_THREADS= 5 # number of simdeep instance launched in parallel
 NB_FOLDS = 5 # for each instance, the original dataset is split in folds and one fold is left
 CLASS_SELECTION = 'mean' # mean or max: the method used to select the final class, according to class probas
@@ -45,13 +43,13 @@ LOAD_EXISTING_MODELS = False
 # path to the folder containing the data
 
 # PATH_DATA = PATH_THIS_FILE + "/../examples/data/"
-PROJECT_NAME = 'sijia v4'
+PROJECT_NAME = '360 HCC'
 PATH_DATA = "/home/opoirion/data/survival_analysis_multiple/sijia/v2/"
 
 # name of the tsv file containing the survival data of the training set
-SURVIVAL_TSV = 'pds_merged_survival.tsv'
+SURVIVAL_TSV = 'survival.tsv'
 # name of the tsv file containing the survival data of the test set
-SURVIVAL_TSV_TEST = 'pds_testing_merged_survival.tsv'
+SURVIVAL_TSV_TEST = 'GE/testing/170821_anna_survival.tsv'
 
 # True if
 USE_INPUT_TRANSPOSE = False
@@ -69,19 +67,19 @@ SURVIVAL_FLAG = {'patient_id': 'barcode',
 
 # dict('data type', 'name of the tsv file which are inside PATH_DATA')
 # These data will be stacked together to build the autoencoder
-TRAINING_TSV = OrderedDict([
-    ('GE', '0607_pds_expr_data.tsv'),
-    ('CNV', '0607_pds_cnv_data.tsv'),
-    ('METH', '0607_pds_methyl_data.tsv'),
-])
+TRAINING_TSV = {
+    'GE': 'rna.tsv',
+    'MIR': 'mir.tsv',
+    'METH': 'meth.tsv',
+}
 
 TEST_TSV = {
     # 'GE': 'mRNA_validation2.tsv',
     # 'MIR': 'miRNA.tsv',
     # 'METH': 'meth_mapped_BLCA.tsv',
-    'GE': '0607_pds_expr_testing_data.tsv',
-    'CNV': '0607_pds_cnv_testing_data.tsv',
-    'METH': '0607_pds_methyl_testing_data.tsv',
+    'GE': 'rna.tsv',
+    'MIR': 'mir.tsv',
+    'METH': 'meth.tsv',
 }
 
 DEFAULTSEP = '\t'
@@ -93,10 +91,10 @@ SEPARATOR = {
     }
 
 # Path where to save load the Keras models
-PATH_MODEL = '/home/opoirion/data/survival_analysis_multiple/models/sijia/'
+PATH_MODEL = '/home/opoirion/data/survival_analysis_multiple/models/'
 
 # Path to generate png images
-PATH_RESULTS = '/home/opoirion/code/d3visualisation/sijia//'
+PATH_RESULTS = '/home/opoirion/code/d3visualisation/sijia/'
 
 ######## Cross-validation on the training set ############
 CROSS_VALIDATION_INSTANCE = KFold(n_splits=5, shuffle=True, random_state=1)

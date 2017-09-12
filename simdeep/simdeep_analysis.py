@@ -136,6 +136,7 @@ class SimDeep(DeepBase):
         self.path_results = path_results
         self.mixture_params = mixture_params
         self.project_name = project_name
+        self._project_name = project_name
         self.do_KM_plot = do_KM_plot
         self.nb_threads_coxph = nb_threads_coxph
         self.classification_method = classification_method
@@ -200,6 +201,14 @@ class SimDeep(DeepBase):
 
         if self.node_selection == 'C-index':
             return self._look_for_prediction_nodes(key)
+
+    def load_new_test_dataset(self, tsv_dict, path_survival_file, fname_key=None):
+        """
+        """
+        self.dataset.load_new_test_dataset(tsv_dict, path_survival_file)
+
+        if fname_key:
+            self.project_name = '{0}_{1}'.format(self._project_name, fname_key)
 
     def fit(self):
         """
