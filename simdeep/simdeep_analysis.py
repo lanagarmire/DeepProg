@@ -30,6 +30,7 @@ from simdeep.config import NODES_SELECTION
 from simdeep.survival_utils import _process_parallel_coxph
 from simdeep.survival_utils import _process_parallel_cindex
 from simdeep.survival_utils import _process_parallel_feature_importance
+from simdeep.survival_utils import _process_parallel_feature_importance_per_cluster
 
 from simdeep.survival_utils import select_best_classif_params
 
@@ -181,6 +182,7 @@ class SimDeep(DeepBase):
         self.test_omic_list = []
 
         self.feature_scores = defaultdict(list)
+        self.feature_scores_per_cluster = {}
 
         self._label_ordered_dict = {}
 
@@ -350,8 +352,8 @@ class SimDeep(DeepBase):
             return
 
         if not self._isboosting:
-            # pool = Pool(self.nb_threads_coxph)
-            # mapf = pool.map
+            pool = Pool(self.nb_threads_coxph)
+            mapf = pool.map
             mapf = map
         else:
             mapf = map
@@ -371,6 +373,66 @@ class SimDeep(DeepBase):
             features_scored.sort(key=lambda x:x[1])
 
             self.feature_scores[key] = features_scored
+
+    def compute_feature_scores_per_cluster(self):
+        """
+        """
+        print('computing feature importance per cluster...')
+
+        mapf = map
+
+        for label in set(self.labels):
+            self.feature_scores_per_cluster[label] = []
+
+        def generator(labels, feature_list, matrix):
+            for i in range(len(feature_list)):
+                yield feature_list[i], matrix[i], labels
+
+        for key in self.dataset.matrix_train_array:
+            feature_list = self.dataset.feature_train_array[key][:]
+            matrix = self.dataset.matrix_train_array[key][:]
+            labels = self.labels[:]
+
+            input_list = generator(labels, feature_list, matrix.T)
+
+            features_scored = mapf(_process_parallel_feature_importance_per_cluster, input_list)
+            features_scored = [feat for feat_list in features_scored for feat in feat_list]
+
+            for label, feature, pvalue in features_scored:
+                self.feature_scores_per_cluster[label].append((feature, pvalue))
+
+            for label in self.feature_scores_per_cluster:
+                self.feature_scores_per_cluster[label].sort(key=lambda x:x[1])
+
+    def write_feature_score_per_cluster(self):
+        """
+        """
+        f_file = open('{0}/{1}_features_scores_per_clusters.tsv'.format(
+            self.path_results, self.project_name), 'w')
+
+        f_file.write('cluster id;feature;p-value\n')
+
+        for label in self.feature_scores_per_cluster:
+            for feature, pvalue in self.feature_scores_per_cluster[label]:
+                f_file.write('{0};{1};{2}\n'.format(label, feature, pvalue))
+
+        print('{0}/{1}_features_scores_per_clusters.tsv written'.format(
+            self.path_results, self.project_name))
+
+    def write_feature_scores(self):
+        """
+        """
+        f_file = open('{0}/{1}_features_scores.tsv'.format(
+            self.path_results, self.project_name), 'w')
+
+        for key in self.feature_scores:
+            f_file.write('#### {0} ####\n'.format(key))
+
+            for feature, score in self.feature_scores[key]:
+                f_file.write('{0};{1}\n'.format(feature, score))
+
+        print('{0}/{1}_features_scores.tsv written'.format(
+            self.path_results, self.project_name))
 
     def _return_train_matrix_for_classification(self):
         """

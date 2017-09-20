@@ -22,6 +22,7 @@ from coxph_from_r import coxph
 from coxph_from_r import c_index
 
 from scipy.stats import kruskal
+from scipy.stats import ranksums
 
 
 ################ DEBUG ################
@@ -279,4 +280,28 @@ def _process_parallel_feature_importance(inp):
         score, pvalue = kruskal(*arrays.values())
     except Exception:
         return feature, 1.0
+
     return feature, pvalue
+
+def _process_parallel_feature_importance_per_cluster(inp):
+    """
+    """
+    arrays = defaultdict(list)
+    results = []
+
+    feature, array, labels = inp
+
+    for label, value in zip(labels, np.array(array).reshape(-1)):
+        arrays[label].append(value)
+
+    for cluster in arrays:
+        array = np.array(arrays[cluster])
+        array_comp = np.array([a for comp in arrays for a in arrays[comp]
+                      if comp != cluster])
+
+        score, pvalue = ranksums(array, array_comp)
+
+        if pvalue < 0.05 and np.median(array) > np.median(array_comp):
+            results.append((cluster, feature, pvalue))
+
+    return results

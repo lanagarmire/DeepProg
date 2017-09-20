@@ -33,6 +33,7 @@ import cPickle
 from time import time
 
 from numpy import hstack
+from simdeep.survival_utils import _process_parallel_feature_importance_per_cluster
 
 
 ################# Variable ################
@@ -103,6 +104,10 @@ class SimDeepBoosting():
         self.full_labels_proba = None
         self.survival_full = None
         self.sample_ids_full = None
+        self.feature_scores_per_cluster = {}
+
+        self.feature_train_array = None
+        self.matrix_full_array = None
 
         self.datasets = []
         self.seed = seed
@@ -337,6 +342,19 @@ class SimDeepBoosting():
         self.survival_full = np.asarray([np.asarray(surv_dict[sample])[0]
                                          for sample in self.sample_ids_full])
 
+    def _reorder_matrix_full(self):
+        """
+        """
+        sample_ids = self.models[0].dataset.sample_ids_full
+        index_dict = {sample: ids for ids, sample in enumerate(sample_ids)}
+        index = [index_dict[sample] for sample in self.sample_ids_full]
+
+        self.feature_train_array = self.models[0].dataset.feature_train_array
+        self.matrix_full_array = self.models[0].dataset.matrix_full_array
+
+        for key in self.matrix_full_array:
+            self.matrix_full_array[key] = self.matrix_full_array[key][index]
+
     def _get_probas_for_full_models(self):
         """
         """
@@ -442,6 +460,53 @@ class SimDeepBoosting():
 
         if fname_key:
             self.project_name = '{0}_{1}'.format(self._project_name, fname_key)
+
+    def compute_feature_scores_per_cluster(self):
+        """
+        """
+        print('computing feature importance per cluster...')
+
+        self._reorder_matrix_full()
+
+        mapf = map
+
+        for label in set(self.full_labels):
+            self.feature_scores_per_cluster[label] = []
+
+        def generator(labels, feature_list, matrix):
+            for i in range(len(feature_list)):
+                yield feature_list[i], matrix[i], labels
+
+        for key in self.matrix_full_array:
+            feature_list = self.feature_train_array[key][:]
+            matrix = self.matrix_full_array[key][:]
+            labels = self.full_labels[:]
+
+            input_list = generator(labels, feature_list, matrix.T)
+
+            features_scored = mapf(_process_parallel_feature_importance_per_cluster, input_list)
+            features_scored = [feat for feat_list in features_scored for feat in feat_list]
+
+            for label, feature, pvalue in features_scored:
+                self.feature_scores_per_cluster[label].append((feature, pvalue))
+
+            for label in self.feature_scores_per_cluster:
+                self.feature_scores_per_cluster[label].sort(key=lambda x:x[1])
+
+    def write_feature_score_per_cluster(self):
+        """
+        """
+        f_file = open('{0}/{1}_features_scores_per_clusters.tsv'.format(
+            self.path_results, self.project_name), 'w')
+
+        f_file.write('cluster id;feature;p-value\n')
+
+        for label in self.feature_scores_per_cluster:
+            for feature, pvalue in self.feature_scores_per_cluster[label]:
+                f_file.write('{0};{1};{2}\n'.format(label, feature, pvalue))
+
+        print('{0}/{1}_features_scores_per_clusters.tsv written'.format(
+            self.path_results, self.project_name))
 
 
 def save_class(boosting):

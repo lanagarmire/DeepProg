@@ -61,9 +61,9 @@ SURVIVAL_FLAG = {'patient_id': 'barcode',
                   'survival': 'days',
                  'event': 'recurrence'}
 
-# SURVIVAL_FLAG = {'patient_id': 'SampleID',
-#                   'survival': 'time',
-#                  'event': 'event'}
+# SURVIVAL_FLAG = {'patient_id': 'Sample',
+#                   'survival': 'days_overall',
+#                  'event': 'event_overall'}
 
 # dict('data type', 'name of the tsv file which are inside PATH_DATA')
 # These data will be stacked together to build the autoencoder
