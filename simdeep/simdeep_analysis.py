@@ -136,6 +136,7 @@ class SimDeep(DeepBase):
         self.cluster_array = cluster_array
         self.path_results = path_results
         self.mixture_params = mixture_params
+
         self.project_name = project_name
         self._project_name = project_name
         self.do_KM_plot = do_KM_plot
@@ -185,6 +186,11 @@ class SimDeep(DeepBase):
         self.feature_scores_per_cluster = {}
 
         self._label_ordered_dict = {}
+
+        self.clustering_performance = None
+        self.bic_score = None
+        self.silhouette_score = None
+        self.calinski_score = None
 
         self.cluster_method = cluster_method
         self.cluster_eval_method = cluster_eval_method
@@ -601,17 +607,20 @@ class SimDeep(DeepBase):
         self.train_pvalue = pvalue
         self.train_pvalue_proba = pvalue_proba
 
-    def _evalutate_cluster_performance(self):
+    def evalutate_cluster_performance(self):
         """
         """
-        if self.verbose:
-            if self.cluster_method == 'mixture':
-                print('bic score: {0}'.format(self.clustering.bic(self.activities_train)))
 
-            print('silhouette score: {0}'.format(
-                silhouette_score(self.activities_train, self.labels)))
-            print('calinski-harabaz score: {0}'.format(calinski_harabaz_score(
-                self.activities_train, self.labels)))
+        if self.cluster_method == 'mixture':
+            self.bic_score = self.clustering.bic(self.activities_train)
+
+        self.silhouette_score = silhouette_score(self.activities_train, self.labels)
+        self.calinski_score = calinski_harabaz_score(self.activities_train, self.labels)
+
+        if self.verbose:
+            print('silhouette score: {0}'.format(self.silhouette_score))
+            print('calinski-harabaz score: {0}'.format(self.calinski_score))
+            print('bic score: {0}'.format(self.bic_score))
 
     def _write_labels(self, sample_ids, labels, fname, labels_proba=None):
         """ """
@@ -796,6 +805,8 @@ class SimDeep(DeepBase):
 
             if criterion == None or score < criterion:
                 criterion, best_k = score, k_cluster
+
+                self.clustering_performance = criterion
 
         if self.verbose:
             print('best k: {0}'.format(best_k))

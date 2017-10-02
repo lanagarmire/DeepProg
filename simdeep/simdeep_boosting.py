@@ -501,6 +501,25 @@ class SimDeepBoosting():
         print('{0}/{1}_features_scores_per_clusters.tsv written'.format(
             self.path_results, self.project_name))
 
+    def evalutate_cluster_performance(self):
+        """
+        """
+        bic_scores = np.array([model.bic_score for model in self.models])
+
+        print('bic score: mean: {0} std :{1}'.format(bic_scores.mean(), bic_scores.std()
+        ))
+
+        silhouette_scores = np.array([model.silhouette_score for model in self.models])
+        print('silhouette score: mean: {0} std :{1}'.format(silhouette_scores.mean(),
+                                                            silhouette_scores.std()
+        ))
+
+        calinski_scores = np.array([model.calinski_score for model in self.models])
+        print('calinski harabasz score: mean: {0} std :{1}'.format(calinski_scores.mean(),
+                                                                   calinski_scores.std()
+        ))
+
+
 
 def save_class(boosting):
     """ """
@@ -610,6 +629,7 @@ def _fit_model_pool(dataset):
     model.predict_labels_on_test_dataset()
 
     model.look_for_prediction_nodes()
+    model.evalutate_cluster_performance()
 
     return model
 
@@ -642,6 +662,7 @@ def _partial_fit_model_pool(dataset):
 
     model.predict_labels_on_test_fold()
     model.predict_labels_on_full_dataset()
+    model.evalutate_cluster_performance()
 
     return model
 
