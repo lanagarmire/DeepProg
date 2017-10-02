@@ -312,12 +312,20 @@ class SimDeepBoosting():
     def compute_clusters_consistency_for_full_labels(self):
         """
         """
-        self._get_labels_for_full_models()
         scores = []
 
-        for model_1, model_2 in combinations(self.full_labels_dicts.keys(), 2):
-            scores.append(adjusted_rand_score(self.full_labels_dicts[model_1]['labels'],
-                                              self.full_labels_dicts[model_2]['labels']))
+        for model_1, model_2 in combinations(self.models, 2):
+            full_labels_1_old = model_1.full_labels
+            full_labels_2_old = model_2.full_labels
+
+            full_ids_1 = model_1.dataset.sample_ids_full
+            full_ids_2 = model_2.dataset.sample_ids_full
+
+            full_labels_1 = _reorder_labels(full_labels_1_old, full_ids_1)
+            full_labels_2 = _reorder_labels(full_labels_2_old, full_ids_2)
+
+            scores.append(adjusted_rand_score(full_labels_1,
+                                              full_labels_2))
         print('Adj. Rand scores for full label: mean: {0} std: {1}'.format(
             np.mean(scores), np.std(scores)))
 
@@ -369,21 +377,6 @@ class SimDeepBoosting():
         self.full_labels = labels
         self.full_labels_proba = probas
         self.sample_ids_full = proba_dict.keys()
-
-    def _get_labels_for_full_models(self):
-        """
-        """
-        self.full_labels_dicts = defaultdict(dict)
-
-        for model in self.models:
-            label_dict = defaultdict(list)
-
-            for sample, label in zip(model.dataset.sample_ids_full, model.full_labels):
-                label_dict[sample] = label
-
-            model_id = model.dataset.cross_validation_instance.random_state
-            self.full_labels_dicts[model_id]['labels'] = label_dict.values()
-            self.full_labels_dicts[model_id]['id'] = label_dict.keys()
 
     def _compute_test_coxph(self, fname_base, nbdays, isdead, labels, labels_proba):
         """ """
@@ -651,6 +644,16 @@ def _partial_fit_model_pool(dataset):
     model.predict_labels_on_full_dataset()
 
     return model
+
+def _reorder_labels(labels, sample_ids):
+    """
+    """
+    sample_dict = {sample: id for id, sample in enumerate(sample_ids)}
+    sample_ordered = set(sample_ids)
+
+    index = [sample_dict[sample] for sample in sample_ordered]
+
+    return labels[index]
 
 
 if __name__ == '__main__':

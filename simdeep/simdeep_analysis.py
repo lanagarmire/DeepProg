@@ -779,12 +779,12 @@ class SimDeep(DeepBase):
 
             if self.cluster_eval_method == 'bic':
                 score = self.clustering.bic(self.activities_train)
-            elif self.cluster_eval_method:
+            elif self.cluster_eval_method == 'calinski':
                 score = calinski_harabaz_score(
                     self.activities_train,
                     self.clustering.predict(self.activities_train)
                 )
-            elif self.cluster_eval_method:
+            elif self.cluster_eval_method == 'silhouette':
                 score = silhouette_score(
                     self.activities_train,
                     self.clustering.predict(self.activities_train)

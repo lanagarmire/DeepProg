@@ -11,7 +11,7 @@ PATH_THIS_FILE = pathsplit(abspath(__file__))[0]
 #################### SimDeep variable ##################
 NB_CLUSTERS = 2 # Number of clusters
 CLUSTER_METHOD = 'mixture'
-CLUSTER_EVAL_METHOD = 'silhouette'
+CLUSTER_EVAL_METHOD = 'silhouette' # possible choice: ['bic', 'silhouette', 'calinski']
 CLASSIFIER_TYPE = 'svm'
 NODES_SELECTION = 'Cox-PH' # possible choice: ['Cox-PH', 'C-index']
 CLASSIFICATION_METHOD = 'ALL_FEATURES' # ['ALL_FEATURES', 'SURVIVAL_FEATURES']
@@ -42,9 +42,9 @@ LOAD_EXISTING_MODELS = False
 #################### Paths to data file ################
 # path to the folder containing the data
 
-# PATH_DATA = PATH_THIS_FILE + "/../examples/data/"
 PROJECT_NAME = '360 HCC'
-PATH_DATA = "/home/opoirion/data/survival_analysis_multiple/sijia/v2/"
+PATH_DATA = PATH_THIS_FILE + "/../data/"
+# PATH_DATA = "/home/opoirion/data/survival_analysis_multiple/"
 
 # name of the tsv file containing the survival data of the training set
 SURVIVAL_TSV = 'survival.tsv'
