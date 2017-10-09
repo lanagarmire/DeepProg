@@ -934,6 +934,20 @@ class SimDeep(DeepBase):
 
         return cindex
 
+    def compute_c_indexes_for_training_dataset(self):
+        """
+        return c-index using labels as predicat
+        """
+        days, dead = np.asarray(self.dataset.survival).T
+
+        cindex = c_index(self.labels, dead, days,
+                       self.labels, dead, days)
+
+        if self.verbose:
+            print('c-index for training dataset:{0}'.format(cindex))
+
+        return cindex
+
     def compute_c_indexes_for_test_dataset(self):
         """
         return c-index using labels as predicat

@@ -265,10 +265,38 @@ class SimDeepBoosting():
             model.predict_labels_on_test_fold()
             cindexes_list.append(model.compute_c_indexes_for_test_fold_dataset())
 
-        cindexes, cindexes_proba, cindexes_act = zip(*cindexes_list)
-
         if self.verbose:
             print('C-index results for test fold: mean {0} std {1}'.format(
+                np.mean(cindexes_list), np.std(cindexes_list)))
+
+        return cindexes_list
+
+    def collect_cindex_for_full_dataset(self):
+        """
+        """
+        cindexes_list = []
+
+        for model in self.models:
+            model.predict_labels_on_test_fold()
+            cindexes_list.append(model.compute_c_indexes_for_full_dataset())
+
+        if self.verbose:
+            print('C-index results for full dataset: mean {0} std {1}'.format(
+                np.mean(cindexes_list), np.std(cindexes_list)))
+
+        return cindexes_list
+
+    def collect_cindex_for_training_dataset(self):
+        """
+        """
+        cindexes_list = []
+
+        for model in self.models:
+            model.predict_labels_on_test_fold()
+            cindexes_list.append(model.compute_c_indexes_for_training_dataset())
+
+        if self.verbose:
+            print('C-index results for training dataset: mean {0} std {1}'.format(
                 np.mean(cindexes_list), np.std(cindexes_list)))
 
         return cindexes_list
