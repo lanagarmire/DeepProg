@@ -99,7 +99,7 @@ def load_survival_file(f_name, path_data=PATH_DATA, sep=DEFAULTSEP):
     event_id = first_line.index(SURVIVAL_FLAG['event'])
 
     for line in f_surv:
-        line = line.split(sep)
+        line = line.strip('\n').split(sep)
         ids  = line[patient_id].strip('"')
         ndays = line[surv_id].strip('"')
         isdead = line[event_id].strip('"')

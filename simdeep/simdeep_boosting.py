@@ -534,8 +534,9 @@ class SimDeepBoosting():
         """
         bic_scores = np.array([model.bic_score for model in self.models])
 
-        print('bic score: mean: {0} std :{1}'.format(bic_scores.mean(), bic_scores.std()
-        ))
+        if bic_scores[0] is not None:
+            print('bic score: mean: {0} std :{1}'.format(bic_scores.mean(), bic_scores.std()
+            ))
 
         silhouette_scores = np.array([model.silhouette_score for model in self.models])
         print('silhouette score: mean: {0} std :{1}'.format(silhouette_scores.mean(),
