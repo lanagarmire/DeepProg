@@ -548,8 +548,6 @@ class SimDeepBoosting():
                                                                    calinski_scores.std()
         ))
 
-
-
 def save_class(boosting):
     """ """
     assert(isdir(PATH_MODEL))
