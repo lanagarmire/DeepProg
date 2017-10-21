@@ -179,8 +179,10 @@ class SimDeepBoosting():
                                                         self.test_labels, self.test_labels_proba)
 
         self.models[0]._write_labels(
-            self.models[0].dataset.sample_ids_test, self.test_labels, '{0}_test_labels'.format(
-            self.project_name))
+            self.models[0].dataset.sample_ids_test,
+            self.test_labels,
+            '{0}_test_labels'.format(self.project_name),
+            labels_proba=self.test_labels_proba)
 
     def collect_pvalue_on_test_fold(self):
         """
@@ -334,8 +336,10 @@ class SimDeepBoosting():
                                                         self.full_labels, self.full_labels_proba)
 
         self.models[0]._write_labels(
-            self.models[0].dataset.sample_ids_full, self.full_labels, '{0}_full_labels'.format(
-            self.project_name))
+            self.models[0].dataset.sample_ids_full,
+            self.full_labels,
+            '{0}_full_labels'.format(self.project_name),
+            labels_proba=self.full_labels_proba)
 
     def compute_clusters_consistency_for_full_labels(self):
         """
