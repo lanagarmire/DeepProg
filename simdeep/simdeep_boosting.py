@@ -182,7 +182,7 @@ class SimDeepBoosting():
             self.models[0].dataset.sample_ids_test,
             self.test_labels,
             '{0}_test_labels'.format(self.project_name),
-            labels_proba=self.test_labels_proba)
+            labels_proba=self.test_labels_proba.T[0])
 
     def collect_pvalue_on_test_fold(self):
         """
@@ -339,7 +339,7 @@ class SimDeepBoosting():
             self.models[0].dataset.sample_ids_full,
             self.full_labels,
             '{0}_full_labels'.format(self.project_name),
-            labels_proba=self.full_labels_proba)
+            labels_proba=self.full_labels_proba.T[0])
 
     def compute_clusters_consistency_for_full_labels(self):
         """
