@@ -622,18 +622,22 @@ class SimDeep(DeepBase):
             print('calinski-harabaz score: {0}'.format(self.calinski_score))
             print('bic score: {0}'.format(self.bic_score))
 
-    def _write_labels(self, sample_ids, labels, fname, labels_proba=None):
+    def _write_labels(self, sample_ids, labels, fname,
+                      labels_proba=None, nbdays=None, isdead=None):
         """ """
         f_file = open('{0}/{1}.tsv'.format(self.path_results, fname), 'w')
 
         for ids, (sample, label) in enumerate(zip(sample_ids, labels)):
+            suppl = ''
 
             if labels_proba is not None:
-                proba = '\t{0}'.format(labels_proba[ids])
-            else:
-                proba = ''
+                suppl += '\t{0}'.format(labels_proba[ids])
+            if nbdays is not None:
+                suppl += '\t{0}'.format(nbdays[ids])
+            if isdead is not None:
+                suppl += '\t{0}'.format(isdead[ids])
 
-            f_file.write('{0}\t{1}{2}\n'.format(sample, label, proba))
+            f_file.write('{0}\t{1}{2}\n'.format(sample, label, suppl))
 
     def _predict_survival_nodes(self, matrix_array, keys=None):
         """

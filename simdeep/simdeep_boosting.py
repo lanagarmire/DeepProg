@@ -336,10 +336,11 @@ class SimDeepBoosting():
                                                         self.full_labels, self.full_labels_proba)
 
         self.models[0]._write_labels(
-            self.models[0].dataset.sample_ids_full,
+            self.sample_ids_full,
             self.full_labels,
             '{0}_full_labels'.format(self.project_name),
-            labels_proba=self.full_labels_proba.T[0])
+            labels_proba=self.full_labels_proba.T[0],
+            nbdays=nbdays, isdead=isdead)
 
     def compute_clusters_consistency_for_full_labels(self):
         """
