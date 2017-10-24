@@ -61,10 +61,6 @@ SURVIVAL_FLAG = {'patient_id': 'barcode',
                   'survival': 'days',
                  'event': 'recurrence'}
 
-# SURVIVAL_FLAG = {'patient_id': 'Sample',
-#                   'survival': 'days_overall',
-#                  'event': 'event_overall'}
-
 # dict('data type', 'name of the tsv file which are inside PATH_DATA')
 # These data will be stacked together to build the autoencoder
 TRAINING_TSV = {
@@ -74,9 +70,6 @@ TRAINING_TSV = {
 }
 
 TEST_TSV = {
-    # 'GE': 'mRNA_validation2.tsv',
-    # 'MIR': 'miRNA.tsv',
-    # 'METH': 'meth_mapped_BLCA.tsv',
     'GE': 'rna.tsv',
     'MIR': 'mir.tsv',
     'METH': 'meth.tsv',
@@ -105,14 +98,16 @@ TEST_FOLD = 0
 
 ##################### NORMALIZATION PROCEDURE ###########
 ## Normalize before the autoencoder construction ########
-TRAIN_MIN_MAX = False
-TRAIN_ROBUST_SCALE = False
-TRAIN_ROBUST_SCALE_TWO_WAY = False
-TRAIN_MAD_SCALE = False
-TRAIN_NORM_SCALE = False
-TRAIN_RANK_NORM = False
-TRAIN_CORR_REDUCTION = False
-TRAIN_CORR_RANK_NORM = False
+NORMALIZATION = {
+    'TRAIN_MIN_MAX': False,
+    'TRAIN_ROBUST_SCALE': False,
+    'TRAIN_ROBUST_SCALE_TWO_WAY': False,
+    'TRAIN_MAD_SCALE': False,
+    'TRAIN_NORM_SCALE': False,
+    'TRAIN_RANK_NORM': False,
+    'TRAIN_CORR_REDUCTION': False,
+    'TRAIN_CORR_RANK_NORM': False,
+}
 #########################################################
 
 ##################### Autoencoder Variable ##############

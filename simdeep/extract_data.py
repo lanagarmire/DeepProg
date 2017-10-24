@@ -10,14 +10,8 @@ from simdeep.config import SURVIVAL_TSV_TEST
 from simdeep.config import PATH_DATA
 from simdeep.config import STACK_MULTI_OMIC
 
-from simdeep.config import TRAIN_MIN_MAX
-from simdeep.config import TRAIN_NORM_SCALE
-from simdeep.config import TRAIN_CORR_REDUCTION
-from simdeep.config import TRAIN_RANK_NORM
-from simdeep.config import TRAIN_MAD_SCALE
-from simdeep.config import TRAIN_ROBUST_SCALE
-from simdeep.config import TRAIN_ROBUST_SCALE_TWO_WAY
-from simdeep.config import TRAIN_CORR_RANK_NORM
+from simdeep.config import NORMALIZATION
+
 from simdeep.config import FILL_UNKOWN_FEATURE_WITH_0
 
 from simdeep.config import CROSS_VALIDATION_INSTANCE
@@ -64,6 +58,8 @@ class LoadData():
             test_fold=TEST_FOLD,
             stack_multi_omic=STACK_MULTI_OMIC,
             fill_unkown_feature_with_0=FILL_UNKOWN_FEATURE_WITH_0,
+            normalization=NORMALIZATION,
+            _parameters={},
             verbose=True,
     ):
         """
@@ -136,6 +132,13 @@ class LoadData():
         self.robust_scaler = RobustScaler()
         self.min_max_scaler = MinMaxScaler()
         self.dim_reducer = CorrelationReducer()
+
+        self._parameters = _parameters
+
+        if normalization != NORMALIZATION:
+            NORMALIZATION.update(normalization)
+
+        self.normalization = NORMALIZATION
 
     def _stack_multiomics(self, arrays=None, features=None):
         """
@@ -468,40 +471,31 @@ class LoadData():
         self.feature_train_index = index
         self.feature_ref_index = self.feature_train_index
 
-    def _normalize(self,
-                   matrix,
-                   key,
-                   mad_scale=TRAIN_MAD_SCALE,
-                   robust_scale=TRAIN_ROBUST_SCALE,
-                   robust_scale_two_way=TRAIN_ROBUST_SCALE_TWO_WAY,
-                   min_max=TRAIN_MIN_MAX,
-                   norm_scale=TRAIN_NORM_SCALE,
-                   rank_scale=TRAIN_RANK_NORM,
-                   corr_rank_scale=TRAIN_CORR_RANK_NORM,
-                   dim_reduction=TRAIN_CORR_REDUCTION):
+    def _normalize(self, matrix, key):
         """ """
         if self.verbose:
             print('normalizing for {0}...'.format(key))
 
-        if min_max:
+        if self.normalization['TRAIN_MIN_MAX']:
             matrix = MinMaxScaler().fit_transform(
                 matrix.T).T
 
-        if mad_scale:
+        if self.normalization['TRAIN_MAD_SCALE']:
             matrix = self.mad_scaler.fit_transform(matrix.T).T
 
-        if robust_scale or robust_scale_two_way:
+        if self.normalization['TRAIN_ROBUST_SCALE'] or\
+           self.normalization['TRAIN_ROBUST_SCALE_TWO_WAY']:
             matrix = self.robust_scaler.fit_transform(matrix)
 
-        if norm_scale:
+        if self.normalization['TRAIN_NORM_SCALE']:
             matrix = self.normalizer.fit_transform(
                 matrix)
 
-        if rank_scale:
+        if self.normalization['TRAIN_RANK_NORM']:
             matrix = RankNorm().fit_transform(
                 matrix)
 
-        if dim_reduction:
+        if self.normalization['TRAIN_CORR_REDUCTION']:
             if self.verbose:
                 print('dim reduction for {0}...'.format(key))
 
@@ -510,56 +504,47 @@ class LoadData():
                 matrix)
             self._correlation_red_used = True
 
-            if corr_rank_scale:
+        if self.normalization['TRAIN_CORR_RANK_NORM']:
                 matrix = RankNorm().fit_transform(
                     matrix)
 
         return matrix
 
-    def transform_matrices(self,
-                           matrix_ref, matrix, key,
-                           mad_scale=TRAIN_MAD_SCALE,
-                           robust_scale=TRAIN_ROBUST_SCALE,
-                           robust_scale_two_way=TRAIN_ROBUST_SCALE_TWO_WAY,
-                           min_max_scale=TRAIN_MIN_MAX,
-                           rank_scale=TRAIN_RANK_NORM,
-                           correlation_reducer=TRAIN_CORR_REDUCTION,
-                           corr_rank_scale=TRAIN_CORR_RANK_NORM,
-                           unit_norm=TRAIN_NORM_SCALE):
+    def transform_matrices(self, matrix_ref, matrix, key):
         """ """
         if self.verbose:
             print('Scaling/Normalising dataset...')
 
-        if min_max_scale:
+        if self.normalization['TRAIN_MIN_MAX']:
             matrix_ref = self.min_max_scaler.fit_transform(matrix_ref.T).T
             matrix = self.min_max_scaler.fit_transform(matrix.T).T
 
-        if mad_scale:
+        if self.normalization['TRAIN_MAD_SCALE']:
             matrix_ref = self.mad_scaler.fit_transform(matrix_ref.T).T
             matrix = self.mad_scaler.fit_transform(matrix.T).T
 
-        if robust_scale:
+        if self.normalization['TRAIN_ROBUST_SCALE']:
             matrix_ref = self.robust_scaler.fit_transform(matrix_ref)
             matrix = self.robust_scaler.transform(matrix)
 
-        if robust_scale_two_way:
+        if self.normalization['TRAIN_ROBUST_SCALE_TWO_WAY']:
             matrix_ref = self.robust_scaler.fit_transform(matrix_ref)
             matrix = self.robust_scaler.transform(matrix)
 
-        if unit_norm:
+        if self.normalization['TRAIN_NORM_SCALE']:
             matrix_ref = self.normalizer.fit_transform(matrix_ref)
             matrix = self.normalizer.transform(matrix)
 
-        if rank_scale:
+        if self.normalization['TRAIN_RANK_NORM']:
             matrix_ref = RankNorm().fit_transform(matrix_ref)
             matrix = RankNorm().fit_transform(matrix)
 
-        if correlation_reducer:
+        if self.normalization['TRAIN_CORR_REDUCTION']:
             reducer = CorrelationReducer()
             matrix_ref = reducer.fit_transform(matrix_ref)
             matrix = reducer.transform(matrix)
 
-            if corr_rank_scale:
+            if self.normalization['TRAIN_CORR_RANK_NORM']:
                 matrix_ref = RankNorm().fit_transform(matrix_ref)
                 matrix = RankNorm().fit_transform(matrix)
 

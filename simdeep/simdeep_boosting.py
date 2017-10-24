@@ -25,6 +25,8 @@ from simdeep.config import NB_ITER
 from simdeep.config import NB_FOLDS
 from simdeep.config import CLASS_SELECTION
 from simdeep.config import PATH_MODEL
+from simdeep.config import NB_CLUSTERS
+from simdeep.config import NORMALIZATION
 
 from os.path import isdir
 
@@ -77,6 +79,8 @@ class SimDeepBoosting():
                  seed=None,
                  project_name='{0}_boosting'.format(PROJECT_NAME),
                  path_results=PATH_RESULTS,
+                 nb_clusters=NB_CLUSTERS,
+                 normalization=NORMALIZATION,
                  **kwargs):
         """ """
         assert(class_selection in ['max', 'mean'])
@@ -108,6 +112,12 @@ class SimDeepBoosting():
 
         self.feature_train_array = None
         self.matrix_full_array = None
+        self.nb_clusters = nb_clusters
+        self.normalization = normalization
+
+        parameters = {
+            'nb_clusters': self.nb_clusters,
+        }
 
         self.datasets = []
         self.seed = seed
@@ -122,6 +132,8 @@ class SimDeepBoosting():
 
             dataset = LoadData(cross_validation_instance=split,
                                verbose=False,
+                               normalization=self.normalization,
+                               _parameters=parameters,
                                **kwargs)
 
             self.datasets.append(dataset)
@@ -129,8 +141,9 @@ class SimDeepBoosting():
     def fit(self):
         """ """
         print('fit models...')
+
         pool = Pool(self.nb_threads)
-        self.models = pool.map(_fit_model_pool,  self.datasets)
+        self.models = pool.map(_fit_model_pool, self.datasets)
 
         self.models = [model for model in self.models if model != None]
 
@@ -182,7 +195,8 @@ class SimDeepBoosting():
             self.models[0].dataset.sample_ids_test,
             self.test_labels,
             '{0}_test_labels'.format(self.project_name),
-            labels_proba=self.test_labels_proba.T[0])
+            labels_proba=self.test_labels_proba.T[0],
+            nbdays=nbdays, isdead=isdead)
 
     def collect_pvalue_on_test_fold(self):
         """
@@ -628,12 +642,15 @@ def _mean_proba(proba):
 
 def _fit_model_pool(dataset):
     """ """
+    parameters = dataset._parameters
+
     model = SimDeep(dataset=dataset,
                     load_existing_models=False,
                     verbose=False,
                     _isboosting=True,
                     seed=dataset.cross_validation_instance.random_state,
-                    do_KM_plot=False)
+                    do_KM_plot=False,
+                    **parameters)
 
     before = model.dataset.cross_validation_instance.random_state
     try:
@@ -667,12 +684,15 @@ def _fit_model_pool(dataset):
 
 def _partial_fit_model_pool(dataset):
     """ """
+    parameters = dataset._parameters
+
     model = SimDeep(dataset=dataset,
                     load_existing_models=False,
                     verbose=False,
                     _isboosting=True,
                     seed=dataset.cross_validation_instance.random_state,
-                    do_KM_plot=False)
+                    do_KM_plot=False,
+                    **parameters)
 
     before = model.dataset.cross_validation_instance.random_state
     try:
