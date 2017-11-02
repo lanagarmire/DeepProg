@@ -27,6 +27,11 @@ from simdeep.config import CLASS_SELECTION
 from simdeep.config import PATH_MODEL
 from simdeep.config import NB_CLUSTERS
 from simdeep.config import NORMALIZATION
+from simdeep.config import NB_EPOCH
+from simdeep.config import NEW_DIM
+from simdeep.config import NB_SELECTED_FEATURES
+from simdeep.config import PVALUE_THRESHOLD
+from simdeep.config import CLUSTER_METHOD
 
 from os.path import isdir
 
@@ -54,10 +59,11 @@ def main():
     boosting.collect_pvalue_on_full_dataset()
     boosting.collect_pvalue_on_training_dataset()
     boosting.collect_pvalue_on_test_fold()
-    # boosting.collect_number_of_features_per_omic()
-    # boosting.collect_cindex_for_test_fold()
-    # boosting.collect_pvalue_on_test_dataset()
-    # boosting.collect_cindex_for_test_dataset()
+
+    boosting.collect_number_of_features_per_omic()
+    boosting.collect_cindex_for_test_fold()
+    boosting.collect_pvalue_on_test_dataset()
+    boosting.collect_cindex_for_test_dataset()
 
     boosting.compute_c_indexes_for_test_dataset()
     boosting.compute_c_indexes_multiple_for_test_dataset()
@@ -80,7 +86,12 @@ class SimDeepBoosting():
                  project_name='{0}_boosting'.format(PROJECT_NAME),
                  path_results=PATH_RESULTS,
                  nb_clusters=NB_CLUSTERS,
+                 nb_epoch=NB_EPOCH,
                  normalization=NORMALIZATION,
+                 nb_selected_features=NB_SELECTED_FEATURES,
+                 cluster_method=CLUSTER_METHOD,
+                 pvalue_thres=PVALUE_THRESHOLD,
+                 new_dim=NEW_DIM,
                  **kwargs):
         """ """
         assert(class_selection in ['max', 'mean'])
@@ -112,11 +123,30 @@ class SimDeepBoosting():
 
         self.feature_train_array = None
         self.matrix_full_array = None
+
+        ######## deepprob instance parameters ########
         self.nb_clusters = nb_clusters
         self.normalization = normalization
+        self.nb_epoch = nb_epoch
+        self.new_dim = new_dim
+        self.nb_selected_features = nb_selected_features
+        self.pvalue_thres = pvalue_thres
+        self.cluster_method = cluster_method
+        ##############################################
+
+        self.full_pvalue = None
+        self.full_pvalue_proba = None
+
+        self.test_pvalue = None
+        self.test_pvalue_proba = None
 
         parameters = {
             'nb_clusters': self.nb_clusters,
+            'nb_epoch': self.nb_epoch,
+            'nb_selected_features': self.nb_selected_features,
+            'new_dim': self.new_dim,
+            'pvalue_thres': self.pvalue_thres,
+            'cluster_method': self.cluster_method
         }
 
         self.datasets = []
@@ -190,6 +220,8 @@ class SimDeepBoosting():
         pvalue, pvalue_proba = self._compute_test_coxph('KM_plot_boosting_test',
                                                         nbdays, isdead,
                                                         self.test_labels, self.test_labels_proba)
+        self.test_pvalue = pvalue
+        self.test_pvalue_proba = pvalue_proba
 
         self.models[0]._write_labels(
             self.models[0].dataset.sample_ids_test,
@@ -197,6 +229,8 @@ class SimDeepBoosting():
             '{0}_test_labels'.format(self.project_name),
             labels_proba=self.test_labels_proba.T[0],
             nbdays=nbdays, isdead=isdead)
+
+        return pvalue, pvalue_proba
 
     def collect_pvalue_on_test_fold(self):
         """
@@ -348,6 +382,8 @@ class SimDeepBoosting():
         pvalue, pvalue_proba = self._compute_test_coxph('KM_plot_boosting_full',
                                                         nbdays, isdead,
                                                         self.full_labels, self.full_labels_proba)
+        self.full_pvalue = pvalue
+        self.full_pvalue_proba = pvalue_proba
 
         self.models[0]._write_labels(
             self.sample_ids_full,
@@ -355,6 +391,8 @@ class SimDeepBoosting():
             '{0}_full_labels'.format(self.project_name),
             labels_proba=self.full_labels_proba.T[0],
             nbdays=nbdays, isdead=isdead)
+
+        return pvalue, pvalue_proba
 
     def compute_clusters_consistency_for_full_labels(self):
         """
@@ -376,6 +414,8 @@ class SimDeepBoosting():
         print('Adj. Rand scores for full label: mean: {0} std: {1}'.format(
             np.mean(scores), np.std(scores)))
 
+        return scores
+
     def compute_clusters_consistency_for_test_labels(self):
         """
         """
@@ -386,6 +426,8 @@ class SimDeepBoosting():
                                               model_2.test_labels))
         print('Adj. Rand scores for test label: mean: {0} std: {1}'.format(
             np.mean(scores), np.std(scores)))
+
+        return scores
 
     def _reorder_survival_full(self):
         """
@@ -491,6 +533,8 @@ class SimDeepBoosting():
         print('total number of survival features: {0}'.format(activities_train.shape[1]))
         print('cindex multiple for test set: {0}:'.format(cindex))
 
+        return cindex
+
     def load_new_test_dataset(self, tsv_dict, path_survival_file, fname_key=None):
         """
         """
@@ -566,6 +610,8 @@ class SimDeepBoosting():
         print('calinski harabasz score: mean: {0} std :{1}'.format(calinski_scores.mean(),
                                                                    calinski_scores.std()
         ))
+
+        return np.nanmean(bic_scores), silhouette_scores.mean(), calinski_scores.mean()
 
 def save_class(boosting):
     """ """
