@@ -157,7 +157,8 @@ class SimDeepBoosting():
             'new_dim': self.new_dim,
             'pvalue_thres': self.pvalue_thres,
             'cluster_method': self.cluster_method,
-            'path_results': self.path_results
+            'path_results': self.path_results,
+            'project_name': self.project_name
         }
 
         self.datasets = []
