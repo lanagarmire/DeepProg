@@ -456,7 +456,7 @@ class SimDeep(DeepBase):
         if self.verbose:
             print('number of features for the classifier: {0}'.format(matrix.shape[1]))
 
-        return matrix
+        return np.nan_to_num(matrix)
 
     def _reduce_and_stack_matrices(self, matrices):
         """
@@ -858,7 +858,7 @@ class SimDeep(DeepBase):
         encoder = self.encoder_array[key]
         matrix_train = self.matrix_train_array[key]
 
-        activities = encoder.predict(matrix_train)
+        activities = np.nan_to_num(encoder.predict(matrix_train))
 
         nbdays, isdead = self.dataset.survival.T.tolist()
         pvalue_list = []

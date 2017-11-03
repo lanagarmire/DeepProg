@@ -43,7 +43,7 @@ class MadScaler():
             mad = np.median(np.abs(X[i] - med))
             X[i] = (X[i] - med) / mad
 
-        return np.matrix(X)
+        return np.nan_to_num(np.matrix(X))
 
 class RankNorm():
     def __init__(self):

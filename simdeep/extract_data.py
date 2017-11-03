@@ -23,6 +23,8 @@ from simdeep.survival_utils import MadScaler
 from simdeep.survival_utils import RankNorm
 from simdeep.survival_utils import CorrelationReducer
 
+from collections import defaultdict
+
 from time import time
 
 import numpy as np
@@ -135,10 +137,7 @@ class LoadData():
 
         self._parameters = _parameters
 
-        if normalization != NORMALIZATION:
-            NORMALIZATION.update(normalization)
-
-        self.normalization = NORMALIZATION
+        self.normalization = defaultdict(bool, normalization)
 
     def _stack_multiomics(self, arrays=None, features=None):
         """
@@ -278,7 +277,7 @@ class LoadData():
         index = [train_dict[feat] for feat in features_test]
 
         self.feature_ref_array[key] = self.feature_test_array[key]
-        self.matrix_ref_array[key] = self.matrix_train_array[key].T[index].T
+        self.matrix_ref_array[key] = np.nan_to_num(self.matrix_train_array[key].T[index].T)
 
         self.feature_ref_index[key] = test_dict
 
@@ -508,7 +507,7 @@ class LoadData():
                 matrix = RankNorm().fit_transform(
                     matrix)
 
-        return matrix
+        return np.nan_to_num(matrix)
 
     def transform_matrices(self, matrix_ref, matrix, key):
         """ """
@@ -548,7 +547,7 @@ class LoadData():
                 matrix_ref = RankNorm().fit_transform(matrix_ref)
                 matrix = RankNorm().fit_transform(matrix)
 
-        return matrix_ref, matrix
+        return np.nan_to_num(matrix_ref), np.nan_to_num(matrix)
 
     def save_dataset(self):
         """
