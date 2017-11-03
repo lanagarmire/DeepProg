@@ -33,6 +33,10 @@ from simdeep.config import NB_SELECTED_FEATURES
 from simdeep.config import PVALUE_THRESHOLD
 from simdeep.config import CLUSTER_METHOD
 
+import simplejson
+
+from distutils.dir_util import mkpath
+
 from os.path import isdir
 
 import cPickle
@@ -108,7 +112,15 @@ class SimDeepBoosting():
         self.do_KM_plot = do_KM_plot
         self.project_name = project_name
         self._project_name = project_name
-        self.path_results = path_results
+        self.path_results = '{0}/{1}'.format(path_results, project_name)
+
+        if not isdir(self.path_results):
+            try:
+                mkpath(self.path_results)
+            except Exception as e:
+                print('cannot find or create the current result path: {0}'\
+                      '\n consider changing it as option' \
+                      .format(self.path_results))
 
         self.test_labels = None
         self.test_labels_proba = None
@@ -120,6 +132,8 @@ class SimDeepBoosting():
         self.survival_full = None
         self.sample_ids_full = None
         self.feature_scores_per_cluster = {}
+
+        self.log = {}
 
         self.feature_train_array = None
         self.matrix_full_array = None
@@ -134,11 +148,7 @@ class SimDeepBoosting():
         self.cluster_method = cluster_method
         ##############################################
 
-        self.full_pvalue = None
-        self.full_pvalue_proba = None
-
-        self.test_pvalue = None
-        self.test_pvalue_proba = None
+        self.test_fname_key = ''
 
         parameters = {
             'nb_clusters': self.nb_clusters,
@@ -146,11 +156,23 @@ class SimDeepBoosting():
             'nb_selected_features': self.nb_selected_features,
             'new_dim': self.new_dim,
             'pvalue_thres': self.pvalue_thres,
-            'cluster_method': self.cluster_method
+            'cluster_method': self.cluster_method,
+            'path_results': self.path_results
         }
 
         self.datasets = []
         self.seed = seed
+
+        self.log['seed'] = seed
+        self.log['parameters'] = parameters
+        self.log['nb_it'] = nb_it
+        self.log['normalization'] = normalization
+        self.log['nb clusters'] = nb_clusters
+
+        if 'survival_tsv' in kwargs:
+            self.log['survival_tsv'] = kwargs['survival_tsv']
+        if 'path_data' in kwargs:
+            self.log['path_data'] = kwargs['path_data']
 
         if self.seed:
             np.random.seed(seed)
@@ -186,6 +208,8 @@ class SimDeepBoosting():
         if nb_models > 1:
             assert(len(set([model.train_pvalue for model in self.models])) > 1)
 
+        self.log['nb. models fitted'] = nb_models
+
     def partial_fit(self):
         """ """
         print('fit models...')
@@ -202,6 +226,8 @@ class SimDeepBoosting():
 
         if nb_models > 1:
             assert(len(set([model.train_pvalue for model in self.models])) > 1)
+
+        self.log['nb. models fitted'] = nb_models
 
     def predict_labels_on_test_dataset(self):
         """
@@ -220,8 +246,9 @@ class SimDeepBoosting():
         pvalue, pvalue_proba = self._compute_test_coxph('KM_plot_boosting_test',
                                                         nbdays, isdead,
                                                         self.test_labels, self.test_labels_proba)
-        self.test_pvalue = pvalue
-        self.test_pvalue_proba = pvalue_proba
+
+        self.log['pvalue test {0}'.format(self.test_fname_key)] = pvalue
+        self.log['pvalue proba test {0}'.format(self.test_fname_key)] = pvalue_proba
 
         self.models[0]._write_labels(
             self.models[0].dataset.sample_ids_test,
@@ -240,9 +267,14 @@ class SimDeepBoosting():
         pvalues, pvalues_proba = zip(*[(model.cv_pvalue, model.cv_pvalue_proba)
                                        for model in self.models])
 
+        pvalue_gmean, pvalue_proba_gmean = gmean(pvalues), gmean(pvalues_proba)
+
         if self.verbose:
             print('geo mean pvalues: {0} geo mean pvalues probas: {1}'.format(
-                gmean(pvalues), gmean(pvalues_proba)))
+                pvalue_gmean, pvalue_proba_gmean))
+
+        self.log['pvalue geo mean test fold'] = pvalue_gmean
+        self.log['pvalue proba geo mean test fold'] = pvalue_proba_gmean
 
         return pvalues, pvalues_proba
 
@@ -256,9 +288,14 @@ class SimDeepBoosting():
             pvalues.append(model.train_pvalue)
             pvalues_proba.append(model.train_pvalue_proba)
 
+        pvalue_gmean, pvalue_proba_gmean = gmean(pvalues), gmean(pvalues_proba)
+
         if self.verbose:
             print('training geo mean pvalues: {0} geo mean pvalues probas: {1}'.format(
-                gmean(pvalues), gmean(pvalues_proba)))
+                pvalue_gmean, pvalue_proba_gmean))
+
+        self.log['pvalue geo mean train'] = pvalue_gmean
+        self.log['pvalue proba geo mean train'] = pvalue_proba_gmean
 
         return pvalues, pvalues_proba
 
@@ -269,10 +306,15 @@ class SimDeepBoosting():
 
         pvalues, pvalues_proba = zip(*[(model.test_pvalue, model.test_pvalue_proba)
                                        for model in self.models])
+        pvalue_gmean, pvalue_proba_gmean = gmean(pvalues), gmean(pvalues_proba)
 
         if self.verbose:
             print('test geo mean pvalues: {0} geo mean pvalues probas: {1}'.format(
-                gmean(pvalues), gmean(pvalues_proba)))
+                pvalue_gmean, pvalue_proba_gmean))
+
+        self.log['pvalue geo mean test {0}'.format(self.test_fname_key)] = pvalue_gmean
+        self.log['pvalue proba geo mean test {0}'.format(
+            self.test_fname_key)] = pvalue_proba_gmean
 
         return pvalues, pvalues_proba
 
@@ -283,10 +325,14 @@ class SimDeepBoosting():
 
         pvalues, pvalues_proba = zip(*[(model.full_pvalue, model.full_pvalue_proba)
                                        for model in self.models])
+        pvalue_gmean, pvalue_proba_gmean = gmean(pvalues), gmean(pvalues_proba)
 
         if self.verbose:
             print('full geo mean pvalues: {0} geo mean pvalues probas: {1}'.format(
-                gmean(pvalues), gmean(pvalues_proba)))
+                pvalue_gmean, pvalue_proba_gmean))
+
+        self.log['pvalue geo mean full'] = pvalue_gmean
+        self.log['pvalue proba geo mean full'] = pvalue_proba_gmean
 
         return pvalues, pvalues_proba
 
@@ -304,6 +350,8 @@ class SimDeepBoosting():
                 print('key:{0} mean: {1} std: {2}'.format(
                     key, np.mean(counter[key]), np.std(counter[key])))
 
+        self.log['number of features per omics'] = counter
+
         return counter
 
     def collect_cindex_for_test_fold(self):
@@ -318,6 +366,8 @@ class SimDeepBoosting():
         if self.verbose:
             print('C-index results for test fold: mean {0} std {1}'.format(
                 np.mean(cindexes_list), np.std(cindexes_list)))
+
+        self.log['C-index test fold'] = np.mean(cindexes_list)
 
         return cindexes_list
 
@@ -334,6 +384,8 @@ class SimDeepBoosting():
             print('C-index results for full dataset: mean {0} std {1}'.format(
                 np.mean(cindexes_list), np.std(cindexes_list)))
 
+        self.log['C-index full'] = np.mean(cindexes_list)
+
         return cindexes_list
 
     def collect_cindex_for_training_dataset(self):
@@ -349,6 +401,8 @@ class SimDeepBoosting():
             print('C-index results for training dataset: mean {0} std {1}'.format(
                 np.mean(cindexes_list), np.std(cindexes_list)))
 
+        self.log['C-index train'] = np.mean(cindexes_list)
+
         return cindexes_list
 
     def collect_cindex_for_test_dataset(self):
@@ -363,6 +417,8 @@ class SimDeepBoosting():
         if self.verbose:
             print('C-index results for test: mean {0} std {1}'.format(
                 np.mean(cindexes_list), np.std(cindexes_list)))
+
+        self.log['C-index test {0}'.format(self.test_fname_key)] = np.mean(cindexes_list)
 
         return cindexes_list
 
@@ -382,8 +438,9 @@ class SimDeepBoosting():
         pvalue, pvalue_proba = self._compute_test_coxph('KM_plot_boosting_full',
                                                         nbdays, isdead,
                                                         self.full_labels, self.full_labels_proba)
-        self.full_pvalue = pvalue
-        self.full_pvalue_proba = pvalue_proba
+
+        self.log['pvalue full'] = pvalue
+        self.log['pvalue proba full'] = pvalue_proba
 
         self.models[0]._write_labels(
             self.sample_ids_full,
@@ -414,6 +471,8 @@ class SimDeepBoosting():
         print('Adj. Rand scores for full label: mean: {0} std: {1}'.format(
             np.mean(scores), np.std(scores)))
 
+        self.log['Adj. Rand scores'] = np.mean(scores)
+
         return scores
 
     def compute_clusters_consistency_for_test_labels(self):
@@ -426,6 +485,8 @@ class SimDeepBoosting():
                                               model_2.test_labels))
         print('Adj. Rand scores for test label: mean: {0} std: {1}'.format(
             np.mean(scores), np.std(scores)))
+
+        self.log['Adj. Rand scores test {0}'.format(self.test_fname_key)] = np.mean(scores)
 
         return scores
 
@@ -507,6 +568,9 @@ class SimDeepBoosting():
             print('c-index for boosting test dataset:{0}'.format(cindex))
             print('c-index proba for boosting test dataset:{0}'.format(cindex_proba))
 
+        self.log['c-index test boosting {0}'.format(self.test_fname_key)] = cindex
+        self.log['c-index proba test boosting {0}'.format(self.test_fname_key)] = cindex_proba
+
         return cindex
 
     def compute_c_indexes_multiple_for_test_dataset(self):
@@ -533,11 +597,17 @@ class SimDeepBoosting():
         print('total number of survival features: {0}'.format(activities_train.shape[1]))
         print('cindex multiple for test set: {0}:'.format(cindex))
 
+        self.log['c-index multiple test {0}'.format(self.test_fname_key)] = cindex
+        self.log['Number of survival features {0}'.format(
+            self.test_fname_key)] = activities_train.shape[1]
+
         return cindex
 
     def load_new_test_dataset(self, tsv_dict, path_survival_file, fname_key=None):
         """
         """
+        self.test_fname_key = fname_key
+
         for model in self.models:
             model.load_new_test_dataset(tsv_dict, path_survival_file)
             model.predict_labels_on_test_dataset()
@@ -598,20 +668,37 @@ class SimDeepBoosting():
         bic_scores = np.array([model.bic_score for model in self.models])
 
         if bic_scores[0] is not None:
+            bic = np.nanmean(bic_scores)
             print('bic score: mean: {0} std :{1}'.format(bic_scores.mean(), bic_scores.std()
             ))
+            self.log['bic'] = bic
 
         silhouette_scores = np.array([model.silhouette_score for model in self.models])
-        print('silhouette score: mean: {0} std :{1}'.format(silhouette_scores.mean(),
+        silhouette = silhouette_scores.mean()
+        print('silhouette score: mean: {0} std :{1}'.format(silhouette,
                                                             silhouette_scores.std()
         ))
+        self.log['silhouette'] = silhouette
 
         calinski_scores = np.array([model.calinski_score for model in self.models])
+        calinski = calinski_scores.mean()
         print('calinski harabasz score: mean: {0} std :{1}'.format(calinski_scores.mean(),
                                                                    calinski_scores.std()
         ))
+        self.log['calinski'] = calinski
 
-        return np.nanmean(bic_scores), silhouette_scores.mean(), calinski_scores.mean()
+        return bic, silhouette, calinski
+
+    def write_logs(self):
+        """
+        """
+        for key in self.log:
+            if isinstance(self.log[key], np.float32):
+                self.log[key] = float(self.log[key])
+
+        with open('{0}/{1}.log.json'.format(self.path_results, self.project_name), 'w') as f:
+            f.write(simplejson.dumps(self.log, indent=2))
+
 
 def save_class(boosting):
     """ """
