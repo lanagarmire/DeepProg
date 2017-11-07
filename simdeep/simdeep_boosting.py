@@ -246,7 +246,8 @@ class SimDeepBoosting():
         nbdays, isdead = self.models[0].dataset.survival_test.T.tolist()
         pvalue, pvalue_proba = self._compute_test_coxph('KM_plot_boosting_test',
                                                         nbdays, isdead,
-                                                        self.test_labels, self.test_labels_proba)
+                                                        self.test_labels, self.test_labels_proba,
+                                                        self.project_name)
 
         self.log['pvalue test {0}'.format(self.test_fname_key)] = pvalue
         self.log['pvalue proba test {0}'.format(self.test_fname_key)] = pvalue_proba
@@ -438,7 +439,8 @@ class SimDeepBoosting():
         nbdays, isdead = self.survival_full.T.tolist()
         pvalue, pvalue_proba = self._compute_test_coxph('KM_plot_boosting_full',
                                                         nbdays, isdead,
-                                                        self.full_labels, self.full_labels_proba)
+                                                        self.full_labels, self.full_labels_proba,
+                                                        self._project_name)
 
         self.log['pvalue full'] = pvalue
         self.log['pvalue proba full'] = pvalue_proba
@@ -446,7 +448,7 @@ class SimDeepBoosting():
         self.models[0]._write_labels(
             self.sample_ids_full,
             self.full_labels,
-            '{0}_full_labels'.format(self.project_name),
+            '{0}_full_labels'.format(self._project_name),
             labels_proba=self.full_labels_proba.T[0],
             nbdays=nbdays, isdead=isdead)
 
@@ -529,14 +531,16 @@ class SimDeepBoosting():
         self.full_labels_proba = probas
         self.sample_ids_full = proba_dict.keys()
 
-    def _compute_test_coxph(self, fname_base, nbdays, isdead, labels, labels_proba):
+    def _compute_test_coxph(self, fname_base, nbdays,
+                            isdead, labels, labels_proba,
+                            project_name):
         """ """
         pvalue = coxph(
             labels, isdead, nbdays,
             isfactor=False,
             do_KM_plot=self.do_KM_plot,
             png_path=self.path_results,
-            fig_name='{0}_{1}'.format(self.project_name, fname_base))
+            fig_name='{0}_{1}'.format(project_name, fname_base))
 
         if self.verbose:
             print('Cox-PH p-value (Log-Rank) for inferred labels: {0}'.format(pvalue))
@@ -652,7 +656,7 @@ class SimDeepBoosting():
         """
         """
         f_file = open('{0}/{1}_features_scores_per_clusters.tsv'.format(
-            self.path_results, self.project_name), 'w')
+            self.path_results, self._project_name), 'w')
 
         f_file.write('cluster id;feature;p-value\n')
 
@@ -661,7 +665,7 @@ class SimDeepBoosting():
                 f_file.write('{0};{1};{2}\n'.format(label, feature, pvalue))
 
         print('{0}/{1}_features_scores_per_clusters.tsv written'.format(
-            self.path_results, self.project_name))
+            self.path_results, self._project_name))
 
     def evalutate_cluster_performance(self):
         """
@@ -697,7 +701,7 @@ class SimDeepBoosting():
             if isinstance(self.log[key], np.float32):
                 self.log[key] = float(self.log[key])
 
-        with open('{0}/{1}.log.json'.format(self.path_results, self.project_name), 'w') as f:
+        with open('{0}/{1}.log.json'.format(self.path_results, self._project_name), 'w') as f:
             f.write(simplejson.dumps(self.log, indent=2))
 
 
@@ -707,7 +711,7 @@ def save_class(boosting):
 
     t = time()
 
-    with open('{0}/{1}.pickle'.format(PATH_MODEL, boosting.project_name), 'w') as f_pick:
+    with open('{0}/{1}.pickle'.format(PATH_MODEL, boosting._project_name), 'w') as f_pick:
         cPickle.dump(boosting, f_pick)
 
     print('model saved in %2.1f s' % (time() - t))
