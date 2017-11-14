@@ -63,6 +63,7 @@ from multiprocessing import Pool
 _CLASSIFICATION_METHOD_LIST = ['ALL_FEATURES', 'SURVIVAL_FEATURES']
 ######################################################################
 
+
 def main():
     """
     """
@@ -196,6 +197,7 @@ class SimDeep(DeepBase):
         self.cluster_eval_method = cluster_eval_method
         self.verbose = verbose
         self._load_existing_models = load_existing_models
+        self._features_scores_changed = False
 
         DeepBase.__init__(self, verbose=self.verbose, **kwargs)
 
@@ -210,10 +212,22 @@ class SimDeep(DeepBase):
         if self.node_selection == 'C-index':
             return self._look_for_prediction_nodes(key)
 
-    def load_new_test_dataset(self, tsv_dict, path_survival_file, fname_key=None):
+    def load_new_test_dataset(self, tsv_dict, path_survival_file,
+                              fname_key=None, normalization=None):
         """
         """
-        self.dataset.load_new_test_dataset(tsv_dict, path_survival_file)
+        self.dataset.load_new_test_dataset(tsv_dict,
+                                           path_survival_file,
+                                           normalization=normalization)
+
+        if normalization is not None:
+            self.feature_scores = {}
+            self.compute_feature_scores(use_ref=True)
+            self._features_scores_changed = True
+        elif self._features_scores_changed:
+            self._features_scores_changed = False
+            self.feature_scores = {}
+            self.compute_feature_scores()
 
         if fname_key:
             self.project_name = '{0}_{1}'.format(self._project_name, fname_key)
@@ -351,7 +365,7 @@ class SimDeep(DeepBase):
 
         return pvalue, pvalue_proba
 
-    def compute_feature_scores(self):
+    def compute_feature_scores(self, use_ref=False):
         """
         """
         if self.feature_scores:
@@ -368,9 +382,19 @@ class SimDeep(DeepBase):
             for i in range(len(feature_list)):
                 yield feature_list[i], matrix[i], labels
 
-        for key in self.dataset.matrix_train_array:
-            feature_list = self.dataset.feature_train_array[key][:]
-            matrix = self.dataset.matrix_train_array[key][:]
+        if use_ref:
+            key_array = self.dataset.matrix_ref_array.keys()
+        else:
+            key_array = self.dataset.matrix_train_array.keys()
+
+        for key in key_array:
+            if use_ref:
+                feature_list = self.dataset.feature_ref_array[key][:]
+                matrix = self.dataset.matrix_ref_array[key][:]
+            else:
+                feature_list = self.dataset.feature_train_array[key][:]
+                matrix = self.dataset.matrix_train_array[key][:]
+
             labels = self.labels[:]
 
             input_list = generator(labels, feature_list, matrix.T)
@@ -380,7 +404,7 @@ class SimDeep(DeepBase):
 
             self.feature_scores[key] = features_scored
 
-    def compute_feature_scores_per_cluster(self):
+    def compute_feature_scores_per_cluster(self, use_ref=False):
         """
         """
         print('computing feature importance per cluster...')
@@ -394,9 +418,19 @@ class SimDeep(DeepBase):
             for i in range(len(feature_list)):
                 yield feature_list[i], matrix[i], labels
 
-        for key in self.dataset.matrix_train_array:
-            feature_list = self.dataset.feature_train_array[key][:]
-            matrix = self.dataset.matrix_train_array[key][:]
+        if use_ref:
+            key_array = self.dataset.matrix_ref_array.keys()
+        else:
+            key_array = self.dataset.matrix_train_array.keys()
+
+        for key in key_array:
+            if use_ref:
+                feature_list = self.dataset.feature_ref_array[key][:]
+                matrix = self.dataset.matrix_ref_array[key][:]
+            else:
+                feature_list = self.dataset.feature_train_array[key][:]
+                matrix = self.dataset.matrix_train_array[key][:]
+
             labels = self.labels[:]
 
             input_list = generator(labels, feature_list, matrix.T)
@@ -469,6 +503,7 @@ class SimDeep(DeepBase):
             matrix = []
 
             for key in matrices:
+
                 index = [self.dataset.feature_ref_index[key][feature]
                          for feature, pvalue in
                          self.feature_scores[key][:self.nb_selected_features]]
@@ -650,6 +685,13 @@ class SimDeep(DeepBase):
         for key in keys:
             encoder = self.encoder_array[key]
             matrix = matrix_array[key]
+
+            if encoder.input_shape[1] != matrix.shape[1]:
+                if self.verbose:
+                    print('matrix doesnt have the input dimension of the encoder'\
+                          ' returning None')
+                return None
+
             activities = encoder.predict(matrix)
             activities_array[key] = activities.T[self.valid_node_ids_array[key]].T
 

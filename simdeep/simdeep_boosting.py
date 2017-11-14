@@ -169,6 +169,7 @@ class SimDeepBoosting():
         self.log['nb_it'] = nb_it
         self.log['normalization'] = normalization
         self.log['nb clusters'] = nb_clusters
+        self.log['success'] = False
 
         if 'survival_tsv' in kwargs:
             self.log['survival_tsv'] = kwargs['survival_tsv']
@@ -178,7 +179,14 @@ class SimDeepBoosting():
         if self.seed:
             np.random.seed(seed)
 
-        random_states = np.random.randint(0, 1000, nb_it)
+        max_seed = 1000
+        min_seed = 0
+
+        if seed > max_seed:
+            min_seed = seed - max_seed
+            max_seed = seed
+
+        random_states = np.random.randint(min_seed, max_seed, nb_it)
 
         for it in range(nb_it):
             split = KFold(n_splits=3, shuffle=True, random_state=random_states[it])
@@ -196,39 +204,50 @@ class SimDeepBoosting():
         print('fit models...')
 
         pool = Pool(self.nb_threads)
-        self.models = pool.map(_fit_model_pool, self.datasets)
 
-        self.models = [model for model in self.models if model != None]
+        try:
+            self.models = pool.map(_fit_model_pool, self.datasets)
+            self.models = [model for model in self.models if model != None]
 
-        nb_models = len(self.models)
+            nb_models = len(self.models)
 
-        print('{0} models fitted'.format(nb_models))
+            print('{0} models fitted'.format(nb_models))
+            self.log['nb. models fitted'] = nb_models
 
-        assert(nb_models)
+            assert(nb_models)
 
-        if nb_models > 1:
-            assert(len(set([model.train_pvalue for model in self.models])) > 1)
+            if nb_models > 1:
+                assert(len(set([model.train_pvalue for model in self.models])) > 1)
 
-        self.log['nb. models fitted'] = nb_models
+        except Exception as e:
+            self.log['failure'] = str(e)
+            raise e
+        else:
+            self.log['success'] = True
 
     def partial_fit(self):
         """ """
         print('fit models...')
         pool = Pool(self.nb_threads)
-        self.models = pool.map(_partial_fit_model_pool,  self.datasets)
 
-        self.models = [model for model in self.models if model != None]
+        try:
+            self.models = pool.map(_partial_fit_model_pool,  self.datasets)
+            self.models = [model for model in self.models if model != None]
 
-        nb_models = len(self.models)
+            nb_models = len(self.models)
 
-        print('{0} models fitted'.format(nb_models))
+            print('{0} models fitted'.format(nb_models))
+            self.log['nb. models fitted'] = nb_models
 
-        assert(nb_models)
+            assert(nb_models)
 
-        if nb_models > 1:
-            assert(len(set([model.train_pvalue for model in self.models])) > 1)
-
-        self.log['nb. models fitted'] = nb_models
+            if nb_models > 1:
+                assert(len(set([model.train_pvalue for model in self.models])) > 1)
+        except Exception as e:
+            self.log['failure'] = str(e)
+            raise e
+        else:
+            self.log['success'] = True
 
     def predict_labels_on_test_dataset(self):
         """
@@ -342,6 +361,7 @@ class SimDeepBoosting():
         """
         """
         counter = defaultdict(list)
+        self.log['number of features per omics'] = {}
 
         for model in self.models:
             for key in model.valid_node_ids_array:
@@ -352,7 +372,7 @@ class SimDeepBoosting():
                 print('key:{0} mean: {1} std: {2}'.format(
                     key, np.mean(counter[key]), np.std(counter[key])))
 
-        self.log['number of features per omics'] = counter
+                self.log['number of features per omics'][key] = float(np.mean(counter[key]))
 
         return counter
 
@@ -369,7 +389,7 @@ class SimDeepBoosting():
             print('C-index results for test fold: mean {0} std {1}'.format(
                 np.mean(cindexes_list), np.std(cindexes_list)))
 
-        self.log['C-index test fold'] = np.mean(cindexes_list)
+        self.log['c-indexes test fold (mean)'] = np.mean(cindexes_list)
 
         return cindexes_list
 
@@ -383,10 +403,10 @@ class SimDeepBoosting():
             cindexes_list.append(model.compute_c_indexes_for_full_dataset())
 
         if self.verbose:
-            print('C-index results for full dataset: mean {0} std {1}'.format(
+            print('c-index results for full dataset: mean {0} std {1}'.format(
                 np.mean(cindexes_list), np.std(cindexes_list)))
 
-        self.log['C-index full'] = np.mean(cindexes_list)
+        self.log['c-indexes full (mean)'] = np.mean(cindexes_list)
 
         return cindexes_list
 
@@ -403,7 +423,7 @@ class SimDeepBoosting():
             print('C-index results for training dataset: mean {0} std {1}'.format(
                 np.mean(cindexes_list), np.std(cindexes_list)))
 
-        self.log['C-index train'] = np.mean(cindexes_list)
+        self.log['c-indexes train (mean)'] = np.mean(cindexes_list)
 
         return cindexes_list
 
@@ -578,6 +598,27 @@ class SimDeepBoosting():
 
         return cindex
 
+    def compute_c_indexes_for_full_dataset(self):
+        """
+        return c-index using labels as predicat
+        """
+        days_full, dead_full = np.asarray(self.survival_full).T
+
+        cindex = c_index(self.full_labels, dead_full, days_full,
+                         self.full_labels, dead_full, days_full)
+
+        cindex_proba = c_index(self.full_labels_proba.T[0], dead_full, days_full,
+                               self.full_labels_proba.T[0], dead_full, days_full)
+
+        if self.verbose:
+            print('c-index for boosting full dataset:{0}'.format(cindex))
+            print('c-index proba for boosting full dataset:{0}'.format(cindex_proba))
+
+        self.log['c-index full boosting {0}'.format(self.test_fname_key)] = cindex
+        self.log['c-index proba full boosting {0}'.format(self.test_fname_key)] = cindex_proba
+
+        return cindex
+
     def compute_c_indexes_multiple_for_test_dataset(self):
         """
         """
@@ -608,13 +649,15 @@ class SimDeepBoosting():
 
         return cindex
 
-    def load_new_test_dataset(self, tsv_dict, path_survival_file, fname_key=None):
+    def load_new_test_dataset(self, tsv_dict, path_survival_file,
+                              fname_key=None, normalization=None):
         """
         """
         self.test_fname_key = fname_key
 
         for model in self.models:
-            model.load_new_test_dataset(tsv_dict, path_survival_file)
+            model.load_new_test_dataset(tsv_dict, path_survival_file,
+                                        normalization=normalization)
             model.predict_labels_on_test_dataset()
 
         if fname_key:

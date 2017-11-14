@@ -43,13 +43,13 @@ LOAD_EXISTING_MODELS = False
 # path to the folder containing the data
 
 PROJECT_NAME = '360 HCC'
-PATH_DATA = PATH_THIS_FILE + "/../data/"
+PATH_DATA = PATH_THIS_FILE + "/../examples/data/"
 # PATH_DATA = "/home/opoirion/data/survival_analysis_multiple/"
 
 # name of the tsv file containing the survival data of the training set
-SURVIVAL_TSV = 'survival.tsv'
+SURVIVAL_TSV = 'survival_dummy.tsv'
 # name of the tsv file containing the survival data of the test set
-SURVIVAL_TSV_TEST = 'GE/testing/170821_anna_survival.tsv'
+SURVIVAL_TSV_TEST = 'survival_test_dummy.tsv'
 
 # True if
 USE_INPUT_TRANSPOSE = False
@@ -64,15 +64,13 @@ SURVIVAL_FLAG = {'patient_id': 'barcode',
 # dict('data type', 'name of the tsv file which are inside PATH_DATA')
 # These data will be stacked together to build the autoencoder
 TRAINING_TSV = {
-    'GE': 'rna.tsv',
-    'MIR': 'mir.tsv',
-    'METH': 'meth.tsv',
+    'GE': 'rna_dummy.tsv',
+    'MIR': 'mir_dummy.tsv',
+    'METH': 'meth_dummy.tsv',
 }
 
 TEST_TSV = {
-    'GE': 'rna.tsv',
-    'MIR': 'mir.tsv',
-    'METH': 'meth.tsv',
+    'GE': 'rna_test_dummy.tsv',
 }
 
 DEFAULTSEP = '\t'

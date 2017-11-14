@@ -35,7 +35,7 @@ from numpy import vstack
 
 def main():
     """ """
-    load_data = LoadData()
+    load_data = LoadData(normalization={'TRAIN_CORR_REDUCTION': True,})
     load_data.load_array()
     load_data.load_survival()
     load_data.create_a_cv_split()
@@ -44,9 +44,12 @@ def main():
     load_data.load_matrix_test()
 
     load_data.load_matrix_test_fold()
-    load_data.load_survival_test()
     load_data.load_matrix_full()
 
+    load_data.load_new_test_dataset(
+        {'METH': '../../../../data/survival_analysis_multiple/meth_validation.tsv'},
+        '../../../../data/survival_analysis_multiple/survival_event_meth.txt',
+        normalization={'TRAIN_NORM_SCALE': True})
 
 class LoadData():
     def __init__(
@@ -93,8 +96,6 @@ class LoadData():
 
         self.sample_ids = []
         self.data_type = training_tsv.keys()
-
-        self._correlation_red_used = False
 
         self.survival = None
 
@@ -180,7 +181,7 @@ class LoadData():
         self._stack_multiomics(self.matrix_cv_array)
         self._cv_loaded = True
 
-    def load_matrix_test(self):
+    def load_matrix_test(self, normalization=None):
         """ """
         if self._test_loaded:
             return
@@ -233,15 +234,16 @@ class LoadData():
                 self.sample_ids_test = sample_ids
 
             matrix_ref, matrix_test = self.transform_matrices(
-                matrix_ref, matrix_test, key)
+                matrix_ref, matrix_test, key, normalization=normalization)
 
-            self._define_test_features(key)
+            self._define_test_features(key, normalization)
 
             self.matrix_test_array[key] = matrix_test
             self.matrix_ref_array[key] = matrix_ref
             self.feature_ref_array[key] = self.feature_test_array[key]
+            self.feature_ref_index[key] = {feat: pos for pos, feat in enumerate(common_features)}
 
-            if not self.do_stack_multi_omic:
+            if not self.do_stack_multi_omic and not normalization:
                 self._create_ref_matrix(key)
 
         self._stack_multiomics(self.matrix_test_array,
@@ -254,7 +256,7 @@ class LoadData():
 
         self._test_loaded = True
 
-    def load_new_test_dataset(self, tsv_dict, path_survival_file):
+    def load_new_test_dataset(self, tsv_dict, path_survival_file, normalization=None):
         """
         """
         self._test_loaded = False
@@ -263,7 +265,7 @@ class LoadData():
         self.sample_ids_test = None
         self.survival_tsv_test = path_survival_file
 
-        self.load_matrix_test()
+        self.load_matrix_test(normalization)
         self.load_survival_test()
 
     def _create_ref_matrix(self, key):
@@ -422,7 +424,7 @@ class LoadData():
         """ """
         self.feature_train_array[key] = self.feature_array[key][:]
 
-        if self._correlation_red_used:
+        if self.normalization['TRAIN_CORR_REDUCTION']:
             self.feature_train_array[key] = ['{0}_{1}'.format(key, sample)
                                              for sample in self.sample_ids]
 
@@ -432,9 +434,14 @@ class LoadData():
             self.feature_train_array[key])}
         self.feature_ref_index[key] = self.feature_train_index[key]
 
-    def _define_test_features(self, key):
+    def _define_test_features(self, key, normalization=None):
         """ """
-        if self._correlation_red_used:
+        if normalization is None:
+            normalization = self.normalization
+        else:
+            normalization = defaultdict(bool, normalization)
+
+        if normalization['TRAIN_CORR_REDUCTION']:
             self.feature_test_array[key] = ['{0}_{1}'.format(key, sample)
                                              for sample in self.sample_ids]
 
@@ -501,7 +508,6 @@ class LoadData():
             reducer = CorrelationReducer()
             matrix = reducer.fit_transform(
                 matrix)
-            self._correlation_red_used = True
 
         if self.normalization['TRAIN_CORR_RANK_NORM']:
                 matrix = RankNorm().fit_transform(
@@ -509,41 +515,46 @@ class LoadData():
 
         return np.nan_to_num(matrix)
 
-    def transform_matrices(self, matrix_ref, matrix, key):
+    def transform_matrices(self, matrix_ref, matrix, key, normalization=None):
         """ """
+        if normalization is None:
+            normalization = self.normalization
+        else:
+            normalization = defaultdict(bool, normalization)
+
         if self.verbose:
             print('Scaling/Normalising dataset...')
 
-        if self.normalization['TRAIN_MIN_MAX']:
+        if normalization['TRAIN_MIN_MAX']:
             matrix_ref = self.min_max_scaler.fit_transform(matrix_ref.T).T
             matrix = self.min_max_scaler.fit_transform(matrix.T).T
 
-        if self.normalization['TRAIN_MAD_SCALE']:
+        if normalization['TRAIN_MAD_SCALE']:
             matrix_ref = self.mad_scaler.fit_transform(matrix_ref.T).T
             matrix = self.mad_scaler.fit_transform(matrix.T).T
 
-        if self.normalization['TRAIN_ROBUST_SCALE']:
+        if normalization['TRAIN_ROBUST_SCALE']:
             matrix_ref = self.robust_scaler.fit_transform(matrix_ref)
             matrix = self.robust_scaler.transform(matrix)
 
-        if self.normalization['TRAIN_ROBUST_SCALE_TWO_WAY']:
+        if normalization['TRAIN_ROBUST_SCALE_TWO_WAY']:
             matrix_ref = self.robust_scaler.fit_transform(matrix_ref)
             matrix = self.robust_scaler.transform(matrix)
 
-        if self.normalization['TRAIN_NORM_SCALE']:
+        if normalization['TRAIN_NORM_SCALE']:
             matrix_ref = self.normalizer.fit_transform(matrix_ref)
             matrix = self.normalizer.transform(matrix)
 
-        if self.normalization['TRAIN_RANK_NORM']:
+        if normalization['TRAIN_RANK_NORM']:
             matrix_ref = RankNorm().fit_transform(matrix_ref)
             matrix = RankNorm().fit_transform(matrix)
 
-        if self.normalization['TRAIN_CORR_REDUCTION']:
+        if normalization['TRAIN_CORR_REDUCTION']:
             reducer = CorrelationReducer()
             matrix_ref = reducer.fit_transform(matrix_ref)
             matrix = reducer.transform(matrix)
 
-            if self.normalization['TRAIN_CORR_RANK_NORM']:
+            if normalization['TRAIN_CORR_RANK_NORM']:
                 matrix_ref = RankNorm().fit_transform(matrix_ref)
                 matrix = RankNorm().fit_transform(matrix)
 
