@@ -654,11 +654,10 @@ class SimDeepBoosting():
         """
         """
         self.test_fname_key = fname_key
-
-        for model in self.models:
-            model.load_new_test_dataset(tsv_dict, path_survival_file,
-                                        normalization=normalization)
-            model.predict_labels_on_test_dataset()
+        pool = Pool(self.nb_threads)
+        inputs = [(model, tsv_dict, path_survival_file, normalization)
+                  for model in self.models]
+        self.models = pool.map(_predict_new_dataset, inputs)
 
         if fname_key:
             self.project_name = '{0}_{1}'.format(self._project_name, fname_key)
@@ -896,6 +895,17 @@ def _partial_fit_model_pool(dataset):
     model.predict_labels_on_test_fold()
     model.predict_labels_on_full_dataset()
     model.evalutate_cluster_performance()
+
+    return model
+
+def _predict_new_dataset(inputs):
+    """
+    """
+    model, tsv_dict, path_survival_file, normalization = inputs
+
+    model.load_new_test_dataset(tsv_dict, path_survival_file,
+                                        normalization=normalization)
+    model.predict_labels_on_test_dataset()
 
     return model
 
