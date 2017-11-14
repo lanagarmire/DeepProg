@@ -229,7 +229,10 @@ class LoadData():
             self.feature_test_array[key] = list(common_features)
 
             if not isinstance(self.sample_ids_test, type(None)):
-                assert(self.sample_ids_test == sample_ids)
+                try:
+                    assert(self.sample_ids_test == sample_ids)
+                except Exception as e:
+                    raise Exception('Assertion error when loading test sample ids!')
             else:
                 self.sample_ids_test = sample_ids
 
@@ -313,7 +316,11 @@ class LoadData():
                 f_name=f_name,
                 key=data,
                 path_data=self.path_data)
-            assert(self.sample_ids == sample_ids)
+            try:
+                assert(self.sample_ids == sample_ids)
+            except Exception as e:
+                raise Exception('Assertion error: {0} when loading'\
+                                ' the sample from the training set!'.format(e))
 
             self.feature_array[data] = feature_ids
             self.matrix_array[data] = matrix

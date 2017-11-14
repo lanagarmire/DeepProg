@@ -199,14 +199,22 @@ class SimDeepBoosting():
 
             self.datasets.append(dataset)
 
-    def fit(self):
+    def fit(self, debug=True):
         """ """
         print('fit models...')
+
+        if debug:
+            map_func = map
+            for dataset in self.datasets:
+                dataset.verbose = True
+        else:
+            pool = Pool(self.nb_threads)
+            map_func = pool.map
 
         pool = Pool(self.nb_threads)
 
         try:
-            self.models = pool.map(_fit_model_pool, self.datasets)
+            self.models = map_func(_fit_model_pool, self.datasets)
             self.models = [model for model in self.models if model != None]
 
             nb_models = len(self.models)
@@ -225,13 +233,20 @@ class SimDeepBoosting():
         else:
             self.log['success'] = True
 
-    def partial_fit(self):
+    def partial_fit(self, debug=False):
         """ """
         print('fit models...')
-        pool = Pool(self.nb_threads)
+
+        if debug:
+            map_func = map
+            for dataset in self.datasets:
+                dataset.verbose = True
+        else:
+            pool = Pool(self.nb_threads)
+            map_func = pool.map
 
         try:
-            self.models = pool.map(_partial_fit_model_pool,  self.datasets)
+            self.models = map_func(_partial_fit_model_pool,  self.datasets)
             self.models = [model for model in self.models if model != None]
 
             nb_models = len(self.models)
@@ -826,7 +841,7 @@ def _fit_model_pool(dataset):
 
     model = SimDeep(dataset=dataset,
                     load_existing_models=False,
-                    verbose=False,
+                    verbose=dataset.verbose,
                     _isboosting=True,
                     seed=dataset.cross_validation_instance.random_state,
                     do_KM_plot=False,
@@ -868,13 +883,14 @@ def _partial_fit_model_pool(dataset):
 
     model = SimDeep(dataset=dataset,
                     load_existing_models=False,
-                    verbose=False,
+                    verbose=dataset.verbose,
                     _isboosting=True,
                     seed=dataset.cross_validation_instance.random_state,
                     do_KM_plot=False,
                     **parameters)
 
     before = model.dataset.cross_validation_instance.random_state
+
     try:
         model.load_training_dataset()
         model.fit()
@@ -886,7 +902,7 @@ def _partial_fit_model_pool(dataset):
             raise Exception('pvalue: {0} not significant!'.format(model.train_pvalue))
 
     except Exception as e:
-        print('model with random state:{1} didn\'t converge:{0}'.format(e, before))
+        print('model with random state:{1} didn\'t converge:{0}'.format(str(e), before))
         return None
 
     else:
