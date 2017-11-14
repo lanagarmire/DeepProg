@@ -143,6 +143,7 @@ class TestPackage(unittest.TestCase):
             project_name=PROJECT_NAME,
             path_results=PATH_DATA,
             nb_epoch=NB_EPOCH,
+            normalization={'TRAIN_CORR_REDUCTION':True},
             seed=SEED)
 
         boosting.partial_fit()
@@ -155,7 +156,9 @@ class TestPackage(unittest.TestCase):
         boosting.load_new_test_dataset(
             {'RNA': 'rna_test_dummy.tsv'},
             'survival_test_dummy.tsv',
-            'dummy')
+            'dummy',
+            normalization={'TRAIN_NORM_SCALE':True},
+        )
 
         boosting.predict_labels_on_test_dataset()
         boosting.predict_labels_on_test_dataset()
