@@ -13,7 +13,7 @@ from simdeep.config import CLUSTER_ARRAY
 from simdeep.config import PVALUE_THRESHOLD
 from simdeep.config import CINDEX_THRESHOLD
 from simdeep.config import CLASSIFIER_TYPE
-from simdeep.config import CLASSIFIER_GRID
+
 from simdeep.config import MIXTURE_PARAMS
 from simdeep.config import PATH_RESULTS
 from simdeep.config import PROJECT_NAME
@@ -26,6 +26,8 @@ from simdeep.config import NB_SELECTED_FEATURES
 from simdeep.config import SAVE_FITTED_MODELS
 from simdeep.config import LOAD_EXISTING_MODELS
 from simdeep.config import NODES_SELECTION
+from simdeep.config import CLASSIFIER
+from simdeep.config import HYPER_PARAMETERS
 
 from simdeep.survival_utils import _process_parallel_coxph
 from simdeep.survival_utils import _process_parallel_cindex
@@ -45,6 +47,8 @@ from collections import Counter
 from sklearn.metrics import silhouette_score
 from sklearn.metrics import calinski_harabaz_score
 
+from sklearn.model_selection import GridSearchCV
+
 import numpy as np
 from numpy import hstack
 
@@ -54,9 +58,9 @@ from collections import defaultdict
 
 import warnings
 
-
-
 from multiprocessing import Pool
+
+import gc
 
 
 ################ VARIABLE ############################################
@@ -133,7 +137,8 @@ class SimDeep(DeepBase):
         self.nb_clusters = nb_clusters
         self.pvalue_thres = pvalue_thres
         self.cindex_thres = cindex_thres
-        self.classifier_grid = CLASSIFIER_GRID
+
+        self.classifier_grid = GridSearchCV(CLASSIFIER(), HYPER_PARAMETERS, cv=5)
         self.cluster_array = cluster_array
         self.path_results = path_results
         self.mixture_params = mixture_params
@@ -201,6 +206,12 @@ class SimDeep(DeepBase):
 
         DeepBase.__init__(self, verbose=self.verbose, **kwargs)
 
+    def __del__(self):
+        """
+        """
+        del self.dataset
+        gc.collect()
+
     def _look_for_nodes(self, key):
         """
         """
@@ -245,6 +256,7 @@ class SimDeep(DeepBase):
             self.construct_autoencoders()
 
         self.look_for_survival_nodes()
+
         self.training_omic_list = self.encoder_array.keys()
         self.predict_labels()
 
@@ -371,6 +383,8 @@ class SimDeep(DeepBase):
         if self.feature_scores:
             return
 
+        pool = None
+
         if not self._isboosting:
             pool = Pool(self.nb_threads_coxph)
             mapf = pool.map
@@ -403,6 +417,9 @@ class SimDeep(DeepBase):
             features_scored.sort(key=lambda x:x[1])
 
             self.feature_scores[key] = features_scored
+
+        if pool is not None:
+            pool.close()
 
     def compute_feature_scores_per_cluster(self, use_ref=False):
         """
@@ -447,32 +464,32 @@ class SimDeep(DeepBase):
     def write_feature_score_per_cluster(self):
         """
         """
-        f_file = open('{0}/{1}_features_scores_per_clusters.tsv'.format(
-            self.path_results, self.project_name), 'w')
+        with open('{0}/{1}_features_scores_per_clusters.tsv'.format(
+            self.path_results, self.project_name), 'w') as f_file:
 
-        f_file.write('cluster id;feature;p-value\n')
+            f_file.write('cluster id;feature;p-value\n')
 
-        for label in self.feature_scores_per_cluster:
-            for feature, pvalue in self.feature_scores_per_cluster[label]:
-                f_file.write('{0};{1};{2}\n'.format(label, feature, pvalue))
+            for label in self.feature_scores_per_cluster:
+                for feature, pvalue in self.feature_scores_per_cluster[label]:
+                    f_file.write('{0};{1};{2}\n'.format(label, feature, pvalue))
 
-        print('{0}/{1}_features_scores_per_clusters.tsv written'.format(
-            self.path_results, self.project_name))
+            print('{0}/{1}_features_scores_per_clusters.tsv written'.format(
+                self.path_results, self.project_name))
 
     def write_feature_scores(self):
         """
         """
-        f_file = open('{0}/{1}_features_scores.tsv'.format(
-            self.path_results, self.project_name), 'w')
+        with open('{0}/{1}_features_scores.tsv'.format(
+            self.path_results, self.project_name), 'w') as f_file:
 
-        for key in self.feature_scores:
-            f_file.write('#### {0} ####\n'.format(key))
+            for key in self.feature_scores:
+                f_file.write('#### {0} ####\n'.format(key))
 
-            for feature, score in self.feature_scores[key]:
-                f_file.write('{0};{1}\n'.format(feature, score))
+                for feature, score in self.feature_scores[key]:
+                    f_file.write('{0};{1}\n'.format(feature, score))
 
-        print('{0}/{1}_features_scores.tsv written'.format(
-            self.path_results, self.project_name))
+            print('{0}/{1}_features_scores.tsv written'.format(
+                self.path_results, self.project_name))
 
     def _return_train_matrix_for_classification(self):
         """
@@ -660,19 +677,18 @@ class SimDeep(DeepBase):
     def _write_labels(self, sample_ids, labels, fname,
                       labels_proba=None, nbdays=None, isdead=None):
         """ """
-        f_file = open('{0}/{1}.tsv'.format(self.path_results, fname), 'w')
+        with open('{0}/{1}.tsv'.format(self.path_results, fname), 'w') as f_file:
+            for ids, (sample, label) in enumerate(zip(sample_ids, labels)):
+                suppl = ''
 
-        for ids, (sample, label) in enumerate(zip(sample_ids, labels)):
-            suppl = ''
+                if labels_proba is not None:
+                    suppl += '\t{0}'.format(labels_proba[ids])
+                if nbdays is not None:
+                    suppl += '\t{0}'.format(nbdays[ids])
+                if isdead is not None:
+                    suppl += '\t{0}'.format(isdead[ids])
 
-            if labels_proba is not None:
-                suppl += '\t{0}'.format(labels_proba[ids])
-            if nbdays is not None:
-                suppl += '\t{0}'.format(nbdays[ids])
-            if isdead is not None:
-                suppl += '\t{0}'.format(isdead[ids])
-
-            f_file.write('{0}\t{1}{2}\n'.format(sample, label, suppl))
+                f_file.write('{0}\t{1}{2}\n'.format(sample, label, suppl))
 
     def _predict_survival_nodes(self, matrix_array, keys=None):
         """
@@ -891,6 +907,8 @@ class SimDeep(DeepBase):
     def _look_for_survival_nodes(self, key):
         """
         """
+        pool = None
+
         if not self._isboosting:
             pool = Pool(self.nb_threads_coxph)
             mapf = pool.map
@@ -919,6 +937,9 @@ class SimDeep(DeepBase):
         if self.verbose:
             print('number of components linked to survival found:{0} for key {1}'.format(
                 len(valid_node_ids), key))
+
+        if pool is not None:
+            pool.close()
 
         return valid_node_ids
 

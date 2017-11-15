@@ -41,6 +41,8 @@ from os.path import isdir
 
 import cPickle
 
+import gc
+
 from time import time
 
 from numpy import hstack
@@ -199,6 +201,14 @@ class SimDeepBoosting():
 
             self.datasets.append(dataset)
 
+    def __del__(self):
+        """
+        """
+        for model in self.models:
+            del model
+
+        gc.collect()
+
     def fit(self, debug=True):
         """ """
         print('fit models...')
@@ -232,6 +242,9 @@ class SimDeepBoosting():
             raise e
         else:
             self.log['success'] = True
+        finally:
+            if debug:
+                pool.close()
 
     def partial_fit(self, debug=False):
         """ """
@@ -258,11 +271,17 @@ class SimDeepBoosting():
 
             if nb_models > 1:
                 assert(len(set([model.train_pvalue for model in self.models])) > 1)
+
         except Exception as e:
             self.log['failure'] = str(e)
             raise e
+
         else:
             self.log['success'] = True
+
+        finally:
+            if debug:
+                pool.close()
 
     def predict_labels_on_test_dataset(self):
         """
@@ -677,6 +696,8 @@ class SimDeepBoosting():
         if fname_key:
             self.project_name = '{0}_{1}'.format(self._project_name, fname_key)
 
+        pool.close()
+
     def compute_feature_scores_per_cluster(self):
         """
         """
@@ -712,17 +733,17 @@ class SimDeepBoosting():
     def write_feature_score_per_cluster(self):
         """
         """
-        f_file = open('{0}/{1}_features_scores_per_clusters.tsv'.format(
-            self.path_results, self._project_name), 'w')
+        with open('{0}/{1}_features_scores_per_clusters.tsv'.format(
+            self.path_results, self._project_name), 'w') as f_file:
 
-        f_file.write('cluster id;feature;p-value\n')
+            f_file.write('cluster id;feature;p-value\n')
 
-        for label in self.feature_scores_per_cluster:
-            for feature, pvalue in self.feature_scores_per_cluster[label]:
-                f_file.write('{0};{1};{2}\n'.format(label, feature, pvalue))
+            for label in self.feature_scores_per_cluster:
+                for feature, pvalue in self.feature_scores_per_cluster[label]:
+                    f_file.write('{0};{1};{2}\n'.format(label, feature, pvalue))
 
-        print('{0}/{1}_features_scores_per_clusters.tsv written'.format(
-            self.path_results, self._project_name))
+            print('{0}/{1}_features_scores_per_clusters.tsv written'.format(
+                self.path_results, self._project_name))
 
     def evalutate_cluster_performance(self):
         """

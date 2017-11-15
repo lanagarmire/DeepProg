@@ -35,6 +35,7 @@ from numpy import vstack
 
 def main():
     """ """
+
     load_data = LoadData(normalization={'TRAIN_CORR_REDUCTION': True,})
     load_data.load_array()
     load_data.load_survival()
@@ -51,7 +52,11 @@ def main():
         '../../../../data/survival_analysis_multiple/survival_event_meth.txt',
         normalization={'TRAIN_NORM_SCALE': True})
 
+
 class LoadData():
+    """
+    """
+
     def __init__(
             self,
             path_data=PATH_DATA,
@@ -139,6 +144,12 @@ class LoadData():
         self._parameters = _parameters
 
         self.normalization = defaultdict(bool, normalization)
+
+    def __del__(self):
+        """
+        """
+        import gc
+        gc.collect()
 
     def _stack_multiomics(self, arrays=None, features=None):
         """

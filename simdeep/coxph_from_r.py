@@ -96,6 +96,8 @@ def coxph(values,
         rob.r("dev.off()")
         print("{0}/{1}.png saved!".format(png_path, fig_name.replace('.png', '')))
 
+        del res, surv, cox
+
     return pvalue
 
 def c_index(values,
@@ -141,6 +143,8 @@ def c_index(values,
     except Exception as e:
         print("exception found for c index!: {0}".format(e))
         return nan
+
+    del res, cox, frame
 
     return c_index[0][0]
 

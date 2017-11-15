@@ -83,28 +83,28 @@ def load_survival_file(f_name, path_data=PATH_DATA, sep=DEFAULTSEP):
         sep = SEPARATOR[f_name]
 
     survival = {}
-    f_surv = open(path_data + f_name, 'r')
 
-    first_line = f_surv.readline().strip(' \n\r\t').split(sep)
+    with open(path_data + f_name, 'r') as f_surv:
+        first_line = f_surv.readline().strip(' \n\r\t').split(sep)
 
-    for field in SURVIVAL_FLAG.values():
-        try:
-            assert(field in first_line)
-        except Exception as e:
-            raise Exception("{0} not in {1}".format(
-                field, first_line))
+        for field in SURVIVAL_FLAG.values():
+            try:
+                assert(field in first_line)
+            except Exception as e:
+                raise Exception("{0} not in {1}".format(
+                    field, first_line))
 
-    patient_id = first_line.index(SURVIVAL_FLAG['patient_id'])
-    surv_id = first_line.index(SURVIVAL_FLAG['survival'])
-    event_id = first_line.index(SURVIVAL_FLAG['event'])
+        patient_id = first_line.index(SURVIVAL_FLAG['patient_id'])
+        surv_id = first_line.index(SURVIVAL_FLAG['survival'])
+        event_id = first_line.index(SURVIVAL_FLAG['event'])
 
-    for line in f_surv:
-        line = line.strip('\n').split(sep)
-        ids  = line[patient_id].strip('"')
-        ndays = line[surv_id].strip('"')
-        isdead = line[event_id].strip('"')
+        for line in f_surv:
+            line = line.strip('\n').split(sep)
+            ids  = line[patient_id].strip('"')
+            ndays = line[surv_id].strip('"')
+            isdead = line[event_id].strip('"')
 
-        survival[ids] = (float(ndays), float(isdead))
+            survival[ids] = (float(ndays), float(isdead))
 
     return survival
 
@@ -154,6 +154,8 @@ def _load_data_from_tsv(
 
     assert(f_matrix.shape[1] == len(feature_ids))
     assert(f_matrix.shape[0] == len(sample_ids))
+
+    f_tsv.close()
 
     return sample_ids, feature_ids, f_matrix
 
@@ -214,6 +216,8 @@ def _load_data_from_tsv_transposee(
 
     assert(f_matrix.shape[1] == len(feature_ids))
     assert(f_matrix.shape[0] == len(sample_ids))
+
+    f_tsv.close()
 
     return sample_ids, feature_ids, f_matrix
 

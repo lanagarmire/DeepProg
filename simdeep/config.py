@@ -1,5 +1,4 @@
 from sklearn.svm import SVC
-from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import KFold
 
 from os.path import abspath
@@ -165,7 +164,6 @@ HYPER_PARAMETERS = [
 
 # grid search classifier using Support Vector Machine Classifier (SVC)
 CLASSIFIER = SVC
-CLASSIFIER_GRID = GridSearchCV(CLASSIFIER(), HYPER_PARAMETERS, cv=5)
 ##########################################################
 
 #################### Other variables #####################
