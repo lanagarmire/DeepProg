@@ -209,9 +209,10 @@ class SimDeepBoosting():
 
         gc.collect()
 
-    def fit(self, debug=True):
+    def fit(self, debug=False):
         """ """
         print('fit models...')
+        pool = None
 
         if debug:
             map_func = map
@@ -220,8 +221,6 @@ class SimDeepBoosting():
         else:
             pool = Pool(self.nb_threads)
             map_func = pool.map
-
-        pool = Pool(self.nb_threads)
 
         try:
             self.models = map_func(_fit_model_pool, self.datasets)
@@ -243,12 +242,13 @@ class SimDeepBoosting():
         else:
             self.log['success'] = True
         finally:
-            if debug:
+            if pool is not None:
                 pool.close()
 
     def partial_fit(self, debug=False):
         """ """
         print('fit models...')
+        pool = None
 
         if debug:
             map_func = map
@@ -280,7 +280,7 @@ class SimDeepBoosting():
             self.log['success'] = True
 
         finally:
-            if debug:
+            if pool is not None:
                 pool.close()
 
     def predict_labels_on_test_dataset(self):
