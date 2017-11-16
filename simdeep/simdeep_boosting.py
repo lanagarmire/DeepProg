@@ -212,6 +212,8 @@ class SimDeepBoosting():
     def fit(self, debug=False):
         """ """
         print('fit models...')
+        start_time = time()
+
         pool = None
 
         if debug:
@@ -244,11 +246,13 @@ class SimDeepBoosting():
         finally:
             if pool is not None:
                 pool.close()
+            self.log['fitting time (s)'] = time() - start_time
 
     def partial_fit(self, debug=False):
         """ """
         print('fit models...')
         pool = None
+        start_time = time()
 
         if debug:
             map_func = map
@@ -282,6 +286,7 @@ class SimDeepBoosting():
         finally:
             if pool is not None:
                 pool.close()
+            self.log['fitting time (s)'] = time() - start_time
 
     def predict_labels_on_test_dataset(self):
         """
@@ -683,20 +688,35 @@ class SimDeepBoosting():
 
         return cindex
 
-    def load_new_test_dataset(self, tsv_dict, path_survival_file,
-                              fname_key=None, normalization=None):
+    def load_new_test_dataset(self, tsv_dict,
+                              path_survival_file,
+                              fname_key=None,
+                              normalization=None,
+                              debug=False):
         """
         """
+        pool = None
+
+        if debug:
+            map_func = map
+            for model in self.models:
+                model.verbose = True
+                model.dataset.verbose = True
+        else:
+            pool = Pool(self.nb_threads)
+            map_func = pool.map
+
         self.test_fname_key = fname_key
         pool = Pool(self.nb_threads)
         inputs = [(model, tsv_dict, path_survival_file, normalization)
                   for model in self.models]
-        self.models = pool.map(_predict_new_dataset, inputs)
+        self.models = map_func(_predict_new_dataset, inputs)
 
         if fname_key:
             self.project_name = '{0}_{1}'.format(self._project_name, fname_key)
 
-        pool.close()
+        if debug:
+            pool.close()
 
     def compute_feature_scores_per_cluster(self):
         """

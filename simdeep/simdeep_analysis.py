@@ -969,6 +969,7 @@ class SimDeep(DeepBase):
                            for node_id in range(activities_train.shape[1]))
 
         score_list = mapf(_process_parallel_cindex, input_list)
+        pool.close()
 
         score_list = filter(lambda x: not np.isnan(x[1]), score_list)
         score_list.sort(key=lambda x:x[1], reverse=True)
