@@ -74,15 +74,20 @@ def coxph(values,
     cox.environment['isdead'] = isdead
     cox.environment['values'] = values
 
-    res = survival.coxph(cox)
+    try:
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            res = survival.coxph(cox)
+    except Exception as e:
+        warnings.warn('Cox-PH didnt fit return NaN: {0}'.format(e))
+        return np.nan
 
     pvalue = rob.r.summary(res)[-5][2]
-
-    surv = survival.survfit(cox)
 
     # color = ['green', 'blue', 'red']
 
     if do_KM_plot:
+        surv = survival.survfit(cox)
         rob.r.png("{0}/{1}.png".format(png_path, fig_name.replace('.png', '')))
         rob.r.plot(surv,
                    col=rob.r("2:8"),
