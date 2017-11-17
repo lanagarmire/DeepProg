@@ -60,6 +60,7 @@ def main():
     boosting.fit()
 
     boosting.predict_labels_on_test_dataset()
+
     boosting.predict_labels_on_full_dataset()
 
     boosting.collect_pvalue_on_full_dataset()
@@ -177,6 +178,8 @@ class SimDeepBoosting():
             self.log['survival_tsv'] = kwargs['survival_tsv']
         if 'path_data' in kwargs:
             self.log['path_data'] = kwargs['path_data']
+        if 'training_tsv' in kwargs:
+            self.log['training_tsv'] = kwargs['training_tsv']
 
         if self.seed:
             np.random.seed(seed)
@@ -246,6 +249,7 @@ class SimDeepBoosting():
         finally:
             if pool is not None:
                 pool.close()
+                pool.join()
             self.log['fitting time (s)'] = time() - start_time
 
     def partial_fit(self, debug=False):
@@ -286,6 +290,7 @@ class SimDeepBoosting():
         finally:
             if pool is not None:
                 pool.close()
+                pool.join()
             self.log['fitting time (s)'] = time() - start_time
 
     def predict_labels_on_test_dataset(self):
@@ -707,7 +712,7 @@ class SimDeepBoosting():
             map_func = pool.map
 
         self.test_fname_key = fname_key
-        pool = Pool(self.nb_threads)
+
         inputs = [(model, tsv_dict, path_survival_file, normalization)
                   for model in self.models]
         self.models = map_func(_predict_new_dataset, inputs)
@@ -715,8 +720,9 @@ class SimDeepBoosting():
         if fname_key:
             self.project_name = '{0}_{1}'.format(self._project_name, fname_key)
 
-        if debug:
+        if pool is not None:
             pool.close()
+            pool.join()
 
     def compute_feature_scores_per_cluster(self):
         """

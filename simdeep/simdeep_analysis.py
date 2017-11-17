@@ -420,6 +420,7 @@ class SimDeep(DeepBase):
 
         if pool is not None:
             pool.close()
+            pool.join()
 
     def compute_feature_scores_per_cluster(self, use_ref=False):
         """
@@ -940,12 +941,15 @@ class SimDeep(DeepBase):
 
         if pool is not None:
             pool.close()
+            pool.join()
 
         return valid_node_ids
 
     def _look_for_prediction_nodes(self, key):
         """
         """
+        pool = None
+
         if not self._isboosting:
             pool = Pool(self.nb_threads_coxph)
             mapf = pool.map
@@ -969,7 +973,10 @@ class SimDeep(DeepBase):
                            for node_id in range(activities_train.shape[1]))
 
         score_list = mapf(_process_parallel_cindex, input_list)
-        pool.close()
+
+        if pool is not None:
+            pool.close()
+            pool.join()
 
         score_list = filter(lambda x: not np.isnan(x[1]), score_list)
         score_list.sort(key=lambda x:x[1], reverse=True)

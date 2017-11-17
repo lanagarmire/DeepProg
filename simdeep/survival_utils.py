@@ -218,6 +218,7 @@ def _load_data_from_tsv_transposee(
     assert(f_matrix.shape[0] == len(sample_ids))
 
     f_tsv.close()
+    pool.join()
 
     return sample_ids, feature_ids, f_matrix
 
