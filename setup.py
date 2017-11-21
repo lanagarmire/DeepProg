@@ -19,7 +19,7 @@ setup(name='garmire_simdeep',
       install_requires=[
           'numpy',
           'scipy',
-          'scikit-learn>=0.18',
+          'scikit-learn>=0.19.1',
           'rpy2',
           'theano',
           'keras'

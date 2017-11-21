@@ -2,6 +2,7 @@
 from sklearn.preprocessing import Normalizer
 from sklearn.preprocessing import RobustScaler
 from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import quantile_transform
 
 from simdeep.config import TRAINING_TSV
 from simdeep.config import TEST_TSV
@@ -36,7 +37,7 @@ from numpy import vstack
 def main():
     """ """
 
-    load_data = LoadData(normalization={'TRAIN_CORR_REDUCTION': True,})
+    load_data = LoadData(normalization={'TRAIN_NORM_SCALE': True,})
     load_data.load_array()
     load_data.load_survival()
     load_data.create_a_cv_split()
@@ -50,7 +51,7 @@ def main():
     load_data.load_new_test_dataset(
         {'METH': '../../../../data/survival_analysis_multiple/meth_validation.tsv'},
         '../../../../data/survival_analysis_multiple/survival_event_meth.txt',
-        normalization={'TRAIN_NORM_SCALE': True})
+        normalization={'TRAIN_CORR_REDUCTION': True})
 
 
 class LoadData():
@@ -259,6 +260,8 @@ class LoadData():
 
             if not self.do_stack_multi_omic and not normalization:
                 self._create_ref_matrix(key)
+            elif not self.do_stack_multi_omic and normalization['TRAIN_CORR_REDUCTION']:
+                self._create_ref_matrix(key, use_ref=True)
 
         self._stack_multiomics(self.matrix_test_array,
                                self.feature_test_array)
@@ -266,13 +269,19 @@ class LoadData():
                                self.feature_ref_array)
 
         if self.do_stack_multi_omic:
-            self._create_ref_matrix('STACKED')
+            if not normalization:
+                self._create_ref_matrix('STACKED')
+            else:
+                self._create_ref_matrix('STACKED', use_ref=True)
 
         self._test_loaded = True
 
     def load_new_test_dataset(self, tsv_dict, path_survival_file, normalization=None):
         """
         """
+        if normalization is not None:
+            normalization = defaultdict(bool, normalization)
+
         self._test_loaded = False
         self.test_tsv = tsv_dict
         self.survival_test = None
@@ -282,10 +291,16 @@ class LoadData():
         self.load_matrix_test(normalization)
         self.load_survival_test()
 
-    def _create_ref_matrix(self, key):
+    def _create_ref_matrix(self, key, use_ref=False):
         """ """
         features_test = self.feature_test_array[key]
-        features_train = self.feature_train_array[key]
+
+        if use_ref:
+            features_train = self.feature_ref_array[key]
+            matrix_train = self.matrix_train_array[key]
+        else:
+            features_train = self.feature_train_array[key]
+            matrix_train = self.matrix_ref_array[key]
 
         test_dict = {feat: pos for pos, feat in enumerate(features_test)}
         train_dict = {feat: pos for pos, feat in enumerate(features_train)}
@@ -293,7 +308,7 @@ class LoadData():
         index = [train_dict[feat] for feat in features_test]
 
         self.feature_ref_array[key] = self.feature_test_array[key]
-        self.matrix_ref_array[key] = np.nan_to_num(self.matrix_train_array[key].T[index].T)
+        self.matrix_ref_array[key] = np.nan_to_num(matrix_train.T[index].T)
 
         self.feature_ref_index[key] = test_dict
 
@@ -456,8 +471,6 @@ class LoadData():
         """ """
         if normalization is None:
             normalization = self.normalization
-        else:
-            normalization = defaultdict(bool, normalization)
 
         if normalization['TRAIN_CORR_REDUCTION']:
             self.feature_test_array[key] = ['{0}_{1}'.format(key, sample)
@@ -515,6 +528,9 @@ class LoadData():
             matrix = self.normalizer.fit_transform(
                 matrix)
 
+        if self.normalization['TRAIN_QUANTILE_TRANSFORM']:
+            matrix = quantile_transform(matrix)
+
         if self.normalization['TRAIN_RANK_NORM']:
             matrix = RankNorm().fit_transform(
                 matrix)
@@ -537,8 +553,6 @@ class LoadData():
         """ """
         if normalization is None:
             normalization = self.normalization
-        else:
-            normalization = defaultdict(bool, normalization)
 
         if self.verbose:
             print('Scaling/Normalising dataset...')
@@ -563,6 +577,10 @@ class LoadData():
             matrix_ref = self.normalizer.fit_transform(matrix_ref)
             matrix = self.normalizer.transform(matrix)
 
+        if self.normalization['TRAIN_QUANTILE_TRANSFORM']:
+            matrix_ref = quantile_transform(matrix_ref)
+            matrix = quantile_transform(matrix)
+
         if normalization['TRAIN_RANK_NORM']:
             matrix_ref = RankNorm().fit_transform(matrix_ref)
             matrix = RankNorm().fit_transform(matrix)
@@ -575,6 +593,10 @@ class LoadData():
             if normalization['TRAIN_CORR_RANK_NORM']:
                 matrix_ref = RankNorm().fit_transform(matrix_ref)
                 matrix = RankNorm().fit_transform(matrix)
+
+            if self.normalization['TRAIN_CORR_QUANTILE_TRANSFORM']:
+                matrix_ref = quantile_transform(matrix_ref)
+                matrix = quantile_transform(matrix)
 
         return np.nan_to_num(matrix_ref), np.nan_to_num(matrix)
 
