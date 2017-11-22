@@ -632,7 +632,7 @@ class SimDeepBoosting():
         for cluster in range(nb_clusters):
             percentile = 100 * (1.0 - 1.0 / (cluster + 1.0))
             value = np.percentile(probas, percentile)
-            labels[probas >= value] = cluster
+            labels[probas >= value] = nb_clusters - cluster
 
         return labels
 
