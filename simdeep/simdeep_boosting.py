@@ -92,6 +92,7 @@ class SimDeepBoosting():
                  verbose=True,
                  seed=None,
                  project_name='{0}_boosting'.format(PROJECT_NAME),
+                 split_n_fold=3,
                  path_results=PATH_RESULTS,
                  nb_clusters=NB_CLUSTERS,
                  nb_epoch=NB_EPOCH,
@@ -102,12 +103,18 @@ class SimDeepBoosting():
                  new_dim=NEW_DIM,
                  **kwargs):
         """ """
-        assert(class_selection in ['max', 'mean'])
+        assert(class_selection in ['max', 'mean', 'mean_weighted'])
+
+        self._instance_weights = None
 
         if class_selection == 'max':
             self.class_selection =  _highest_proba
         elif class_selection == 'mean':
             self.class_selection = _mean_proba
+        elif class_selection == 'mean_weighted':
+            self.class_selection = _weighted_proba
+
+        self._class_selection = class_selection
 
         self.model_thres = model_thres
         self.models = []
@@ -150,6 +157,7 @@ class SimDeepBoosting():
         self.nb_selected_features = nb_selected_features
         self.pvalue_thres = pvalue_thres
         self.cluster_method = cluster_method
+        self.cindex_test_folds = []
         ##############################################
 
         self.test_fname_key = ''
@@ -194,8 +202,11 @@ class SimDeepBoosting():
 
         random_states = np.random.randint(min_seed, max_seed, nb_it)
 
+        self.split_n_fold = split_n_fold
+
         for it in range(nb_it):
-            split = KFold(n_splits=3, shuffle=True, random_state=random_states[it])
+            split = KFold(n_splits=split_n_fold,
+                          shuffle=True, random_state=random_states[it])
 
             dataset = LoadData(cross_validation_instance=split,
                                verbose=False,
@@ -213,47 +224,17 @@ class SimDeepBoosting():
 
         gc.collect()
 
-    def fit(self, debug=False):
-        """ """
-        print('fit models...')
-        start_time = time()
-
-        pool = None
-
-        if debug:
-            map_func = map
-            for dataset in self.datasets:
-                dataset.verbose = True
-        else:
-            pool = Pool(self.nb_threads)
-            map_func = pool.map
-
-        try:
-            self.models = map_func(_fit_model_pool, self.datasets)
-            self.models = [model for model in self.models if model != None]
-
-            nb_models = len(self.models)
-
-            print('{0} models fitted'.format(nb_models))
-            self.log['nb. models fitted'] = nb_models
-
-            assert(nb_models)
-
-            if nb_models > 1:
-                assert(len(set([model.train_pvalue for model in self.models])) > 1)
-
-        except Exception as e:
-            self.log['failure'] = str(e)
-            raise e
-        else:
-            self.log['success'] = True
-        finally:
-            if pool is not None:
-                pool.close()
-                pool.join()
-            self.log['fitting time (s)'] = time() - start_time
-
     def partial_fit(self, debug=False):
+        """
+        """
+        self._fit(_partial_fit_model_pool, debug=debug)
+
+    def fit(self, debug=False):
+        """
+        """
+        self._fit(_fit_model_pool, debug=debug)
+
+    def _fit(self, _fit_func, debug=False):
         """ """
         print('fit models...')
         pool = None
@@ -268,7 +249,7 @@ class SimDeepBoosting():
             map_func = pool.map
 
         try:
-            self.models = map_func(_partial_fit_model_pool,  self.datasets)
+            self.models = map_func(_fit_func,  self.datasets)
             self.models = [model for model in self.models if model != None]
 
             nb_models = len(self.models)
@@ -293,6 +274,9 @@ class SimDeepBoosting():
                 pool.close()
                 pool.join()
             self.log['fitting time (s)'] = time() - start_time
+
+        if self._class_selection == 'mean_weight':
+            self.collect_cindex_for_test_fold()
 
     def predict_labels_on_test_dataset(self):
         """
@@ -300,7 +284,7 @@ class SimDeepBoosting():
         print('predict labels on test datasets...')
         test_labels_proba = np.asarray([model.test_labels_proba for model in self.models])
 
-        res = self.class_selection(test_labels_proba)
+        res = self.class_selection(test_labels_proba, weights=self.cindex_test_folds)
         self.test_labels, self.test_labels_proba = res
 
         print('#### report of assigned cluster:')
@@ -308,13 +292,15 @@ class SimDeepBoosting():
             print('class: {0}, number of samples :{1}'.format(key, value))
 
         nbdays, isdead = self.models[0].dataset.survival_test.T.tolist()
-        pvalue, pvalue_proba = self._compute_test_coxph('KM_plot_boosting_test',
-                                                        nbdays, isdead,
-                                                        self.test_labels, self.test_labels_proba,
-                                                        self.project_name)
+        pvalue, pvalue_proba, pvalue_cat = self._compute_test_coxph(
+            'KM_plot_boosting_test',
+            nbdays, isdead,
+            self.test_labels, self.test_labels_proba,
+            self.project_name)
 
         self.log['pvalue test {0}'.format(self.test_fname_key)] = pvalue
         self.log['pvalue proba test {0}'.format(self.test_fname_key)] = pvalue_proba
+        self.log['pvalue cat test {0}'.format(self.test_fname_key)] = pvalue_cat
 
         self.models[0]._write_labels(
             self.models[0].dataset.sample_ids_test,
@@ -424,19 +410,19 @@ class SimDeepBoosting():
     def collect_cindex_for_test_fold(self):
         """
         """
-        cindexes_list = []
+        self.cindex_test_folds = []
 
         for model in self.models:
             model.predict_labels_on_test_fold()
-            cindexes_list.append(model.compute_c_indexes_for_test_fold_dataset())
+            self.cindex_test_folds.append(model.compute_c_indexes_for_test_fold_dataset())
 
         if self.verbose:
             print('C-index results for test fold: mean {0} std {1}'.format(
-                np.mean(cindexes_list), np.std(cindexes_list)))
+                np.mean(self.cindex_test_folds), np.std(self.cindex_test_folds)))
 
-        self.log['c-indexes test fold (mean)'] = np.mean(cindexes_list)
+        self.log['c-indexes test fold (mean)'] = np.mean(self.cindex_test_folds)
 
-        return cindexes_list
+        return self.cindex_test_folds
 
     def collect_cindex_for_full_dataset(self):
         """
@@ -502,13 +488,15 @@ class SimDeepBoosting():
             print('class: {0}, number of samples :{1}'.format(key, value))
 
         nbdays, isdead = self.survival_full.T.tolist()
-        pvalue, pvalue_proba = self._compute_test_coxph('KM_plot_boosting_full',
-                                                        nbdays, isdead,
-                                                        self.full_labels, self.full_labels_proba,
-                                                        self._project_name)
+        pvalue, pvalue_proba, pvalue_cat = self._compute_test_coxph(
+            'KM_plot_boosting_full',
+            nbdays, isdead,
+            self.full_labels, self.full_labels_proba,
+            self._project_name)
 
         self.log['pvalue full'] = pvalue
         self.log['pvalue proba full'] = pvalue_proba
+        self.log['pvalue cat full'] = pvalue_cat
 
         self.models[0]._write_labels(
             self.sample_ids_full,
@@ -613,13 +601,39 @@ class SimDeepBoosting():
         pvalue_proba = coxph(
             labels_proba.T[0],
             isdead, nbdays,
-            isfactor=False,
-            do_KM_plot=False)
+            isfactor=False)
 
         if self.verbose:
             print('Cox-PH proba p-value (Log-Rank) for inferred labels: {0}'.format(pvalue_proba))
 
-        return pvalue, pvalue_proba
+        labels_categorical = self._labels_proba_to_labels(labels_proba)
+
+        pvalue_cat = coxph(
+            labels_categorical, isdead, nbdays,
+            isfactor=False,
+            do_KM_plot=self.do_KM_plot,
+            png_path=self.path_results,
+            fig_name='{0}_proba_{1}'.format(project_name, fname_base))
+
+        if self.verbose:
+            print('Cox-PH categorical p-value (Log-Rank) for inferred labels: {0}'.format(
+                pvalue_cat))
+
+        return pvalue, pvalue_proba, pvalue_cat
+
+    def _labels_proba_to_labels(self, labels_proba):
+        """
+        """
+        probas = labels_proba.T[0]
+        labels = np.zeros(len(probas))
+        nb_clusters = labels_proba.shape[1]
+
+        for cluster in range(nb_clusters):
+            percentile = 100 * (1.0 - 1.0 / (cluster + 1.0))
+            value = np.percentile(probas, percentile)
+            labels[probas >= value] = cluster
+
+        return labels
 
     def compute_c_indexes_for_test_dataset(self):
         """
@@ -782,6 +796,8 @@ class SimDeepBoosting():
             print('bic score: mean: {0} std :{1}'.format(bic_scores.mean(), bic_scores.std()
             ))
             self.log['bic'] = bic
+        else:
+            bic = np.nan
 
         silhouette_scores = np.array([model.silhouette_score for model in self.models])
         silhouette = silhouette_scores.mean()
@@ -835,7 +851,7 @@ def load_class(project_name=PROJECT_NAME + '_boosting'):
     return boosting
 
 
-def _highest_proba(proba):
+def _highest_proba(proba, **kwargs):
     """
     """
     res = []
@@ -859,7 +875,7 @@ def _highest_proba(proba):
 
     return labels, np.asarray(probas)
 
-def _mean_proba(proba):
+def _mean_proba(proba, **kwargs):
     """
     """
     res = []
@@ -871,6 +887,33 @@ def _mean_proba(proba):
 
     for sample in samples:
         label = max([(cluster, proba.T[cluster][sample].mean()) for cluster in clusters],
+                    key=lambda x:x[1])
+        res.append(label)
+
+    for label, proba in res:
+        if not label:
+            probas.append([proba, 1.0 - proba])
+        else:
+            probas.append([1.0 - proba, proba])
+        labels.append(label)
+
+    return labels, np.asarray(probas)
+
+def _weighted_proba(proba, weights):
+    """
+    """
+    res = []
+    labels = []
+    probas = []
+    weights = np.array(weights)
+    weights[weights < 0.50] = 0.0
+
+    clusters = range(proba.shape[2])
+    samples = range(proba.shape[1])
+
+    for sample in samples:
+        label = max([(cluster, np.average(proba.T[cluster][sample], weights=weights))
+                     for cluster in clusters],
                     key=lambda x:x[1])
         res.append(label)
 

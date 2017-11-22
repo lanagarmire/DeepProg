@@ -24,6 +24,13 @@ def main():
     isdead = [0, 1, 1, 1, 0, 1, 0, 0, 1, 0]
     nbdays = [24, 10, 25, 50, 14, 10 ,100, 10, 50, 10]
     values = [0, 1, 1, 0 , 1, 2, 0, 1, 0, 0]
+    np.random.seed(2016)
+
+    values_proba = np.random.random(10)
+    pvalue_proba = coxph(values_proba, isdead, nbdays,
+                         do_KM_plot=True,
+                         dichotomize_afterward=True)
+    print(pvalue_proba)
 
    # matrix = np.random.random((10, 2))
 
@@ -49,6 +56,7 @@ def coxph(values,
           nbdays,
           do_KM_plot=False,
           png_path='./',
+          dichotomize_afterward=False,
           fig_name='KM_plot.png',
           isfactor=False):
     """
@@ -83,17 +91,29 @@ def coxph(values,
         return np.nan
 
     pvalue = rob.r.summary(res)[-5][2]
-
     # color = ['green', 'blue', 'red']
+    pvalue_to_print = pvalue
 
     if do_KM_plot:
+        if dichotomize_afterward:
+            frame = rob.r('data.frame')
+            predicted = np.array(rob.r.predict(res, frame(values=values)))
+            new_values = predicted.copy()
+            med = np.median(predicted)
+            new_values[predicted >= med] = 0
+            new_values[predicted < med] = 1
+            new_values = FloatVector(new_values)
+            pvalue_to_print = coxph(new_values, isdead, nbdays)
+
+            cox.environment['values'] = new_values
+
         surv = survival.survfit(cox)
         rob.r.png("{0}/{1}.png".format(png_path, fig_name.replace('.png', '')))
         rob.r.plot(surv,
                    col=rob.r("2:8"),
                    xlab="Days",
                    ylab="Probablity of survival",
-                   sub='pvalue: {0}'.format(pvalue),
+                   sub='pvalue: {0}'.format(pvalue_to_print),
                    lwd=3,
                    mark_time=True
             )
