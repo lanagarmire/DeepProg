@@ -103,7 +103,7 @@ class SimDeepBoosting():
                  new_dim=NEW_DIM,
                  **kwargs):
         """ """
-        assert(class_selection in ['max', 'mean', 'mean_weighted'])
+        assert(class_selection in ['max', 'mean', 'weighted_mean'])
 
         self._instance_weights = None
 
@@ -111,8 +111,8 @@ class SimDeepBoosting():
             self.class_selection =  _highest_proba
         elif class_selection == 'mean':
             self.class_selection = _mean_proba
-        elif class_selection == 'mean_weighted':
-            self.class_selection = _weighted_proba
+        elif class_selection == 'weighted_mean':
+            self.class_selection = _weighted_mean
 
         self._class_selection = class_selection
 
@@ -275,8 +275,8 @@ class SimDeepBoosting():
                 pool.join()
             self.log['fitting time (s)'] = time() - start_time
 
-        if self._class_selection == 'mean_weight':
-            self.collect_cindex_for_test_fold()
+            if self._class_selection == 'weighted_mean':
+                self.collect_cindex_for_test_fold()
 
     def predict_labels_on_test_dataset(self):
         """
@@ -578,7 +578,8 @@ class SimDeepBoosting():
             for sample, proba in zip(model.dataset.sample_ids_full, model.full_labels_proba):
                 proba_dict[sample].append([proba.tolist()])
 
-        labels, probas = self.class_selection(hstack(proba_dict.values()))
+        labels, probas = self.class_selection(hstack(proba_dict.values()),
+                                              weights=self.cindex_test_folds)
 
         self.full_labels = labels
         self.full_labels_proba = probas
@@ -899,7 +900,7 @@ def _mean_proba(proba, **kwargs):
 
     return labels, np.asarray(probas)
 
-def _weighted_proba(proba, weights):
+def _weighted_mean(proba, weights):
     """
     """
     res = []
@@ -907,6 +908,7 @@ def _weighted_proba(proba, weights):
     probas = []
     weights = np.array(weights)
     weights[weights < 0.50] = 0.0
+    weights = np.power(weights, 4)
 
     clusters = range(proba.shape[2])
     samples = range(proba.shape[1])
