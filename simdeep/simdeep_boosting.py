@@ -32,6 +32,7 @@ from simdeep.config import NEW_DIM
 from simdeep.config import NB_SELECTED_FEATURES
 from simdeep.config import PVALUE_THRESHOLD
 from simdeep.config import CLUSTER_METHOD
+from simdeep.config import CLASSIFICATION_METHOD
 
 import simplejson
 
@@ -100,6 +101,7 @@ class SimDeepBoosting():
                  nb_selected_features=NB_SELECTED_FEATURES,
                  cluster_method=CLUSTER_METHOD,
                  pvalue_thres=PVALUE_THRESHOLD,
+                 classification_method=CLASSIFICATION_METHOD,
                  new_dim=NEW_DIM,
                  **kwargs):
         """ """
@@ -158,6 +160,7 @@ class SimDeepBoosting():
         self.pvalue_thres = pvalue_thres
         self.cluster_method = cluster_method
         self.cindex_test_folds = []
+        self.classification_method = classification_method
         ##############################################
 
         self.test_fname_key = ''
@@ -170,7 +173,8 @@ class SimDeepBoosting():
             'pvalue_thres': self.pvalue_thres,
             'cluster_method': self.cluster_method,
             'path_results': self.path_results,
-            'project_name': self.project_name
+            'project_name': self.project_name,
+            'classification_method': self.classification_method,
         }
 
         self.datasets = []

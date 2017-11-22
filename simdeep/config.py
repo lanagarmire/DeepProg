@@ -140,8 +140,6 @@ OPTIMIZER = 'adam'
 # Variables used to perform the supervized classification procedure
 # to assign labels to the test set
 
-# Top K features retained by omic type.
-# If a new feature is added in the TRAINING_TSV variable this dict must be updated
 MIXTURE_PARAMS = {
     'covariance_type': 'diag',
     'max_iter': 1000,
