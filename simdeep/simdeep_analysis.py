@@ -5,6 +5,7 @@ SimDeep main class
 from sklearn.cluster import KMeans
 from sklearn.mixture import GaussianMixture
 from sklearn.model_selection import cross_val_score
+from sklearn.decomposition import PCA
 
 from simdeep.deepmodel_base import DeepBase
 
@@ -71,15 +72,18 @@ _CLASSIFICATION_METHOD_LIST = ['ALL_FEATURES', 'SURVIVAL_FEATURES']
 def main():
     """
     """
-    sim_deep = SimDeep()
+    sim_deep = SimDeep(seed=3)
     sim_deep.load_training_dataset()
     sim_deep.fit()
+    # sim_deep.plot_cluster_labels()
 
     if SAVE_FITTED_MODELS:
         sim_deep.save_encoders()
 
     sim_deep.load_test_dataset()
     sim_deep.predict_labels_on_test_dataset()
+    sim_deep.plot_kernel_for_test_sets()
+    return
     sim_deep.predict_labels_on_test_fold()
     sim_deep.predict_labels_on_full_dataset()
 
@@ -1068,6 +1072,161 @@ class SimDeep(DeepBase):
             activities.append(encoder.predict(matrix_array[key]).T[node_ids].T)
 
         return hstack(activities)
+
+    def plot_cluster_labels(self, labels=None):
+        """
+        """
+        from bokeh.plotting import figure
+        from bokeh.plotting import output_file
+        from bokeh.plotting import save
+        from simdeep.plot_utils import make_color_list
+
+        if not labels:
+            labels = self.labels
+
+        tools='hover,crosshair,pan,wheel_zoom,zoom_in,zoom_out,box_zoom'\
+               ',undo,redo,reset,tap,save,box_select,poly_select,lasso_select,'
+
+        activities = hstack([self.activities_array[omic]
+                             for omic in self.training_omic_list])
+
+        labels_c = make_color_list(labels)
+
+        decomp = PCA(n_components=2)
+        X, Y = decomp.fit_transform(activities).T
+
+        fig = figure(tools=tools)
+
+        for label in set(labels):
+            fig.scatter(X[labels == label],
+                        Y[labels == label],
+                        radius=0.04,
+                        fill_color=labels_c[labels == label],
+                        fill_alpha=0.6,
+                        legend='cluster nb {0}'.format(label),
+                        line_color=None)
+
+        html_name = '{0}/{1}_scatterplot.html'.format(self.path_results,
+                                                      self.project_name )
+
+        output_file(html_name, title="train scatter plot")
+        save(fig)
+        print('scatter plot saved at:{0}'.format(html_name))
+
+    def plot_predicted_labels_for_test_sets(self, test_labels=None, key=''):
+        """
+        """
+        from bokeh.plotting import figure
+        from bokeh.plotting import output_file
+        from bokeh.plotting import save
+        from simdeep.plot_utils import make_color_list
+
+        if not test_labels:
+            test_labels = self.test_labels
+
+        tools='hover,crosshair,pan,wheel_zoom,zoom_in,zoom_out,box_zoom'\
+               ',undo,redo,reset,tap,save,box_select,poly_select,lasso_select,'
+
+        activities = hstack([self.activities_array[omic]
+                             for omic in self.test_omic_list])
+
+        labels_c = make_color_list(self.labels)
+        labels_c_test = make_color_list(test_labels)
+
+        decomp = PCA(n_components=2)
+        X, Y = decomp.fit_transform(activities).T
+        X_test, Y_test = decomp.transform(self.activities_test).T
+
+        fig = figure(tools=tools)
+
+        for label in set(self.labels):
+            fig.scatter(X[self.labels == label],
+                        Y[self.labels == label],
+                        radius=0.04,
+                        fill_color=labels_c[self.labels == label],
+                        fill_alpha=0.6,
+                        legend='cluster nb {0}'.format(label),
+                        line_color=None)
+            fig.scatter(X_test[test_labels == label],
+                        Y_test[test_labels == label],
+                        size=15,
+                        marker='square_cross',
+                        fill_color=labels_c_test[test_labels == label],
+                        fill_alpha=0.6,
+                        legend='test cluster nb {0}'.format(label),
+                        line_color=None)
+
+        html_name = '{0}/{1}_test_{2}_scatterplot.html'.format(
+            self.path_results,
+            self.project_name,
+            key)
+
+        output_file(html_name, title="test scatter plot")
+        save(fig)
+
+        print('scatter plot saved at:{0}'.format(html_name))
+
+
+    def plot_kernel_for_test_sets(self, test_labels=None, key=''):
+        """
+        """
+        import seaborn as sns
+        import matplotlib.pyplot as plt
+        from simdeep.plot_utils import make_color_list
+        from simdeep.plot_utils import make_color_dict
+        import mpld3
+        sns.set(color_codes=True)
+
+        fig, ax = plt.subplots(figsize=(10, 12))
+
+        if not test_labels:
+            test_labels = self.test_labels
+
+        activities = hstack([self.activities_array[omic]
+                             for omic in self.test_omic_list])
+
+        color_dict = make_color_dict(self.labels)
+
+        # labels_c = make_color_list(self.labels)
+        labels_c_test = make_color_list(test_labels)
+
+        decomp = PCA(n_components=2)
+        X, Y = decomp.fit_transform(activities).T
+        X_test, Y_test = decomp.transform(self.activities_test).T
+
+        for label in set(self.labels):
+
+            ax.scatter(
+               X_test[test_labels == label],
+               Y_test[test_labels == label],
+               s=30,
+               alpha=0.7,
+               # marker='square_cross',
+               color=labels_c_test[test_labels == label],
+               label='test cluster nb {0}'.format(label))
+
+            sns.kdeplot(X[self.labels == label],
+                        Y[self.labels == label],
+                        shade=False,
+                        cmap=sns.dark_palette(color_dict[label], as_cmap=True),
+                        color=color_dict[label],
+                        ax=ax,
+                        label='cluster nb {0}'.format(label),
+                        shade_lowest=False
+            )
+
+        # tooltip = mpld3.plugins.PointLabelTooltip(
+        #     ax.scatter, labels=self.dataset.sample_ids_test)
+        # mpld3.plugins.connect(fig, tooltip)
+
+        html_name = '{0}/{1}_test_{2}_kdeplot.html'.format(
+            self.path_results,
+            self.project_name,
+            key)
+
+        mpld3.save_html(fig, html_name)
+
+        print('kde plot saved at:{0}'.format(html_name))
 
     def save_model(self, id=None):
         """

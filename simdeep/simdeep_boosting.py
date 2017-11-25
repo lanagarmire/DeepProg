@@ -713,6 +713,14 @@ class SimDeepBoosting():
 
         return cindex
 
+    def plot_predicted_labels_for_test_sets(self):
+        """
+        """
+        # self.models[0].plot_predicted_labels_for_test_sets(
+        #     self.test_labels, key=self.test_fname_key)
+        self.models[0].plot_kernel_for_test_sets(
+            self.test_labels, key=self.test_fname_key)
+
     def load_new_test_dataset(self, tsv_dict,
                               path_survival_file,
                               fname_key=None,
@@ -913,6 +921,9 @@ def _weighted_mean(proba, weights):
     weights = np.array(weights)
     weights[weights < 0.50] = 0.0
     weights = np.power(weights, 4)
+
+    if weights.sum() == 0:
+        weights[:] = 1.0
 
     clusters = range(proba.shape[2])
     samples = range(proba.shape[1])

@@ -33,6 +33,11 @@ import numpy as np
 from numpy import hstack
 from numpy import vstack
 
+######################## VARIABLE ############################
+QUANTILE_OPTION = {'n_quantiles': 100,
+                   'output_distribution':'normal'}
+###############################################################
+
 
 def main():
     """ """
@@ -174,6 +179,9 @@ class LoadData():
             for key in features.keys():
                 features.pop(key) if key != 'STACKED' else True
 
+            self.feature_ref_index['STACKED'] = {feature: pos for pos, feature
+                                                 in enumerate(features['STACKED'])}
+
     def load_matrix_test_fold(self):
         """ """
         if not self.cross_validation_instance or self._cv_loaded:
@@ -208,7 +216,7 @@ class LoadData():
                 path_data=self.path_data)
 
             feature_ids_ref = self.feature_array[key]
-            matrix_ref = self.matrix_array[key]
+            matrix_ref = self.matrix_array[key].copy()
 
             common_features = set(feature_ids).intersection(feature_ids_ref)
 
@@ -258,21 +266,12 @@ class LoadData():
             self.feature_ref_array[key] = self.feature_test_array[key]
             self.feature_ref_index[key] = {feat: pos for pos, feat in enumerate(common_features)}
 
-            if not self.do_stack_multi_omic and not normalization:
-                self._create_ref_matrix(key)
-            elif not self.do_stack_multi_omic and normalization['TRAIN_CORR_REDUCTION']:
-                self._create_ref_matrix(key, use_ref=True)
+            self._define_ref_features(key, normalization)
 
         self._stack_multiomics(self.matrix_test_array,
                                self.feature_test_array)
         self._stack_multiomics(self.matrix_ref_array,
                                self.feature_ref_array)
-
-        if self.do_stack_multi_omic:
-            if not normalization:
-                self._create_ref_matrix('STACKED')
-            else:
-                self._create_ref_matrix('STACKED', use_ref=True)
 
         self._test_loaded = True
 
@@ -291,16 +290,12 @@ class LoadData():
         self.load_matrix_test(normalization)
         self.load_survival_test()
 
-    def _create_ref_matrix(self, key, use_ref=False):
+    def _create_ref_matrix(self, key):
         """ """
         features_test = self.feature_test_array[key]
 
-        if use_ref:
-            features_train = self.feature_ref_array[key]
-            matrix_train = self.matrix_train_array[key]
-        else:
-            features_train = self.feature_train_array[key]
-            matrix_train = self.matrix_ref_array[key]
+        features_train = self.feature_train_array[key]
+        matrix_train = self.matrix_ref_array[key]
 
         test_dict = {feat: pos for pos, feat in enumerate(features_test)}
         train_dict = {feat: pos for pos, feat in enumerate(features_train)}
@@ -476,10 +471,22 @@ class LoadData():
             self.feature_test_array[key] = ['{0}_{1}'.format(key, sample)
                                              for sample in self.sample_ids]
 
+    def _define_ref_features(self, key, normalization=None):
+        """ """
+        if normalization is None:
+            normalization = self.normalization
+
+        if normalization['TRAIN_CORR_REDUCTION']:
+            self.feature_ref_array[key] = ['{0}_{1}'.format(key, sample)
+                                           for sample in self.sample_ids]
+
+            self.feature_ref_index[key] = {feat:pos for pos, feat in
+                                           enumerate(self.feature_ref_array[key])}
+
     def normalize_training_array(self):
         """ """
         for key in self.matrix_array:
-            matrix = self.matrix_array[key]
+            matrix = self.matrix_array[key].copy()
             matrix = self._normalize(matrix, key)
 
             self.matrix_train_array[key] = matrix
@@ -514,8 +521,7 @@ class LoadData():
             print('normalizing for {0}...'.format(key))
 
         if self.normalization['TRAIN_MIN_MAX']:
-            matrix = MinMaxScaler().fit_transform(
-                matrix.T).T
+            matrix = MinMaxScaler().fit_transform(matrix.T).T
 
         if self.normalization['TRAIN_MAD_SCALE']:
             matrix = self.mad_scaler.fit_transform(matrix.T).T
@@ -525,11 +531,10 @@ class LoadData():
             matrix = self.robust_scaler.fit_transform(matrix)
 
         if self.normalization['TRAIN_NORM_SCALE']:
-            matrix = self.normalizer.fit_transform(
-                matrix)
+            matrix = self.normalizer.fit_transform(matrix)
 
         if self.normalization['TRAIN_QUANTILE_TRANSFORM']:
-            matrix = quantile_transform(matrix)
+            matrix = quantile_transform(matrix, **QUANTILE_OPTION)
 
         if self.normalization['TRAIN_RANK_NORM']:
             matrix = RankNorm().fit_transform(
@@ -543,9 +548,15 @@ class LoadData():
             matrix = reducer.fit_transform(
                 matrix)
 
-        if self.normalization['TRAIN_CORR_RANK_NORM']:
+            if self.normalization['TRAIN_CORR_RANK_NORM']:
                 matrix = RankNorm().fit_transform(
                     matrix)
+
+            if self.normalization['TRAIN_CORR_QUANTILE_NORM']:
+                matrix = quantile_transform(matrix, **QUANTILE_OPTION)
+
+            if self.normalization['TRAIN_CORR_NORM_SCALE']:
+                matrix = self.normalizer.fit_transform(matrix)
 
         return np.nan_to_num(matrix)
 
@@ -578,8 +589,8 @@ class LoadData():
             matrix = self.normalizer.transform(matrix)
 
         if self.normalization['TRAIN_QUANTILE_TRANSFORM']:
-            matrix_ref = quantile_transform(matrix_ref)
-            matrix = quantile_transform(matrix)
+            matrix_ref = quantile_transform(matrix_ref, **QUANTILE_OPTION)
+            matrix = quantile_transform(matrix, **QUANTILE_OPTION)
 
         if normalization['TRAIN_RANK_NORM']:
             matrix_ref = RankNorm().fit_transform(matrix_ref)
@@ -595,8 +606,12 @@ class LoadData():
                 matrix = RankNorm().fit_transform(matrix)
 
             if self.normalization['TRAIN_CORR_QUANTILE_TRANSFORM']:
-                matrix_ref = quantile_transform(matrix_ref)
-                matrix = quantile_transform(matrix)
+                matrix_ref = quantile_transform(matrix_ref, **QUANTILE_OPTION)
+                matrix = quantile_transform(matrix, **QUANTILE_OPTION)
+
+            if self.normalization['TRAIN_CORR_NORM_SCALE']:
+                matrix_ref = self.normalizer.fit_transform(matrix_ref)
+                matrix = self.normalizer.fit_transform(matrix)
 
         return np.nan_to_num(matrix_ref), np.nan_to_num(matrix)
 

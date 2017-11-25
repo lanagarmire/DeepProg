@@ -92,7 +92,7 @@ class TestPackage(unittest.TestCase):
                           project_name=PROJECT_NAME,
                           path_results=PATH_DATA,
                           nb_epoch=NB_EPOCH,
-                          seed=SEED)
+                          seed=3)
         simdeep.load_training_dataset()
         simdeep.fit()
         simdeep.predict_labels_on_full_dataset()
