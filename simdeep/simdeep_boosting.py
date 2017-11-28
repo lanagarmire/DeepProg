@@ -193,6 +193,8 @@ class SimDeepBoosting():
             self.log['path_data'] = kwargs['path_data']
         if 'training_tsv' in kwargs:
             self.log['training_tsv'] = kwargs['training_tsv']
+        if 'fill_unkown_feature_with_0' in kwargs:
+            self.log['fill_unkown_feature_with_0'] = kwargs['fill_unkown_feature_with_0']
 
         if self.seed:
             np.random.seed(seed)
