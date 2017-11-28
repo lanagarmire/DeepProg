@@ -96,6 +96,7 @@ TEST_FOLD = 0
 ##################### NORMALIZATION PROCEDURE ###########
 ## Normalize before the autoencoder construction ########
 NORMALIZATION = {
+    'NB_FEATURES_TO_KEEP': 0, # variance selection features. 0 is all the features
     'TRAIN_MIN_MAX': False,
     'TRAIN_ROBUST_SCALE': False,
     'TRAIN_ROBUST_SCALE_TWO_WAY': False,

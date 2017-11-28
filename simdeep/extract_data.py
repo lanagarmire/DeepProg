@@ -146,6 +146,7 @@ class LoadData():
         self.robust_scaler = RobustScaler()
         self.min_max_scaler = MinMaxScaler()
         self.dim_reducer = CorrelationReducer()
+        self.variance_reducer = VarianceReducer()
 
         self._parameters = _parameters
         self.normalization = defaultdict(bool, normalization)
@@ -457,6 +458,9 @@ class LoadData():
         if self.normalization['TRAIN_CORR_REDUCTION']:
             self.feature_train_array[key] = ['{0}_{1}'.format(key, sample)
                                              for sample in self.sample_ids]
+        elif self.normalization['NB_FEATURES_TO_KEEP']:
+            self.feature_train_array[key] = np.array(self.feature_train_array[key])[
+                self.variance_reducer.index_to_keep].tolist()
 
         self.feature_ref_array[key] = self.feature_train_array[key]
 
@@ -473,6 +477,10 @@ class LoadData():
             self.feature_test_array[key] = ['{0}_{1}'.format(key, sample)
                                              for sample in self.sample_ids]
 
+        elif normalization['NB_FEATURES_TO_KEEP']:
+            self.feature_test_array[key] = np.array(self.feature_test_array[key])[
+                self.variance_reducer.index_to_keep].tolist()
+
     def _define_ref_features(self, key, normalization=None):
         """ """
         if normalization is None:
@@ -483,6 +491,10 @@ class LoadData():
                                            for sample in self.sample_ids]
 
             self.feature_ref_index[key] = {feat:pos for pos, feat in
+                                           enumerate(self.feature_ref_array[key])}
+
+        elif normalization['NB_FEATURES_TO_KEEP']:
+            self.feature_ref_index[key] = {feat: pos for pos, feat in
                                            enumerate(self.feature_ref_array[key])}
 
     def normalize_training_array(self):
@@ -521,6 +533,10 @@ class LoadData():
         """ """
         if self.verbose:
             print('normalizing for {0}...'.format(key))
+
+        if self.normalization['NB_FEATURES_TO_KEEP']:
+            self.variance_reducer.nb_features = self.normalization['NB_FEATURES_TO_KEEP']
+            matrix = self.variance_reducer.fit_transform(matrix)
 
         if self.normalization['TRAIN_MIN_MAX']:
             matrix = MinMaxScaler().fit_transform(matrix.T).T
@@ -569,6 +585,11 @@ class LoadData():
 
         if self.verbose:
             print('Scaling/Normalising dataset...')
+
+        if normalization['NB_FEATURES_TO_KEEP']:
+            self.variance_reducer.nb_features = normalization['NB_FEATURES_TO_KEEP']
+            matrix_ref = self.variance_reducer.fit_transform(matrix_ref)
+            matrix = self.variance_reducer.transform(matrix)
 
         if normalization['TRAIN_MIN_MAX']:
             matrix_ref = self.min_max_scaler.fit_transform(matrix_ref.T).T

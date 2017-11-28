@@ -17,8 +17,6 @@ from scipy.stats import rankdata
 from sklearn.metrics import pairwise_distances
 from scipy.stats import spearmanr
 
-from sklearn.feature_selection import VarianceThreshold
-
 from collections import defaultdict
 from coxph_from_r import coxph
 
@@ -71,24 +69,35 @@ class RankNorm():
 class VarianceReducer():
     """
     """
-    def __init__(self, nb_param=200):
+    def __init__(self, nb_features=200):
         """
         """
-        self.selector = VarianceThreshold(threshold=0)
-        self.nb_param = nb_param
+        self.nb_features = nb_features
+        self.index_to_keep = []
 
     def fit(self, dataset):
         """
         """
-        if self.nb_param < dataset.shape[1]:
-            self.nb_param = dataset.shape[1]
+        if self.nb_features > dataset.shape[1]:
+            self.nb_features = dataset.shape[1]
 
-        self.selector.fit(dataset)
-        threshold = sorted(self.selector.variances_, reverse=True)[self.nb_param]
-        self.selector.set_params(threshold=threshold)
+        variances = [np.var(array) for array in dataset.T]
+        threshold = sorted(enumerate(variances),
+                           reverse=True,
+                           key=lambda x:x[1],
+        )
+        self.index_to_keep = [pos for pos, var in threshold[:self.nb_features]]
 
     def transform(self, dataset):
-        return self.select.fit_transform(dataset)
+        """
+        """
+        return dataset.T[self.index_to_keep].T
+
+    def fit_transform(self, dataset):
+        """
+        """
+        self.fit(dataset)
+        return self.transform(dataset)
 
 class CorrelationReducer():
     """
