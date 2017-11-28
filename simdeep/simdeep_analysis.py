@@ -167,6 +167,9 @@ class SimDeep(DeepBase):
         self.classifier = None
         self.classifier_test = None
         self.classifier_type = classifier_type
+        self.used_normalization_for_classif = None
+        self.used_features_for_classif = None
+
         self._isboosting = _isboosting
 
         self.valid_node_ids_array = {}
@@ -264,6 +267,8 @@ class SimDeep(DeepBase):
         self.training_omic_list = self.encoder_array.keys()
         self.predict_labels()
 
+        self.used_normalization_for_classif = self.dataset.normalization
+        self.used_features_for_classif = self.dataset.feature_train_array
         self.fit_classification_model()
 
     def predict_labels_on_test_fold(self):
@@ -509,6 +514,7 @@ class SimDeep(DeepBase):
             matrix = self._predict_survival_nodes(self.dataset.matrix_ref_array)
         elif self.classification_method == 'ALL_FEATURES':
             matrix = self._reduce_and_stack_matrices(self.dataset.matrix_ref_array)
+
         if self.verbose:
             print('number of features for the classifier: {0}'.format(matrix.shape[1]))
 
@@ -521,11 +527,9 @@ class SimDeep(DeepBase):
             return hstack(matrices.values())
         else:
             self.compute_feature_scores()
-
             matrix = []
 
             for key in matrices:
-
                 index = [self.dataset.feature_ref_index[key][feature]
                          for feature, pvalue in
                          self.feature_scores[key][:self.nb_selected_features]]
@@ -554,32 +558,35 @@ class SimDeep(DeepBase):
 
         self.classifier, params = select_best_classif_params(self.classifier_grid)
 
-        cvs = cross_val_score(self.classifier, train_matrix, labels, cv=5)
-
         self.classifier.set_params(probability=True)
         self.classifier.fit(train_matrix, labels)
 
         if self.verbose:
+            cvs = cross_val_score(self.classifier, train_matrix, labels, cv=5)
             print('best params:', params)
             print('cross val score: {0}'.format(np.mean(cvs)))
             print('classification score:', self.classifier.score(train_matrix, labels))
 
     def fit_classification_test_model(self):
         """ """
-        is_same_keys = self.test_omic_list  == self.training_omic_list
-        is_same_features = self.dataset.feature_ref_array == self.dataset.feature_train_array
+        is_same_features = False # self.used_features_for_classif == self.dataset.feature_ref_array
+        is_same_normalization = self.used_normalization_for_classif == self.dataset.normalization_test
+        is_filled_with_zero = self.dataset.fill_unkown_feature_with_0
 
-        if (is_same_keys and is_same_features) or self.classifier_type == 'clustering':
+        if (is_same_features and is_same_normalization and is_filled_with_zero)\
+           or self.classifier_type == 'clustering':
             if self.verbose:
-                print('Not rebuilding the test classifier'\
-                      .format(is_same_keys, is_same_features))
+                print('Not rebuilding the test classifier')
 
-            self.classifier_test = self.classifier
+            if self.classifier_test is None:
+                self.classifier_test = self.classifier
             return
 
         if self.verbose:
             print('classification for test set analysis...')
 
+        self.used_normalization_for_classif = self.dataset.normalization_test
+        self.used_features_for_classif = self.dataset.feature_ref_array
         train_matrix = self._return_train_matrix_for_classification()
         labels = self.labels
 
@@ -588,12 +595,12 @@ class SimDeep(DeepBase):
             self.classifier_grid.fit(train_matrix, labels)
 
         self.classifier_test, params = select_best_classif_params(self.classifier_grid)
-        cvs = cross_val_score(self.classifier_test, train_matrix, labels, cv=5)
 
         self.classifier_test.set_params(probability=True)
         self.classifier_test.fit(train_matrix, labels)
 
         if self.verbose:
+            cvs = cross_val_score(self.classifier_test, train_matrix, labels, cv=5)
             print('best params:', params)
             print('cross val score: {0}'.format(np.mean(cvs)))
             print('classification score:', self.classifier_test.score(train_matrix, labels))

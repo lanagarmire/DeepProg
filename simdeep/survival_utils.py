@@ -15,6 +15,9 @@ import  numpy as np
 from scipy.stats import rankdata
 
 from sklearn.metrics import pairwise_distances
+from scipy.stats import spearmanr
+
+from sklearn.feature_selection import VarianceThreshold
 
 from collections import defaultdict
 from coxph_from_r import coxph
@@ -33,6 +36,8 @@ MAX_FEATURE = None
 
 class MadScaler():
     def __init__(self):
+        """
+        """
         pass
     def fit_transform(self, X):
         """ """
@@ -46,8 +51,13 @@ class MadScaler():
         return np.nan_to_num(np.matrix(X))
 
 class RankNorm():
+    """
+    """
     def __init__(self):
+        """
+        """
         pass
+
     def fit_transform(self, X):
         """ """
         X = np.asarray(X)
@@ -58,9 +68,35 @@ class RankNorm():
 
         return np.matrix(X)
 
+class VarianceReducer():
+    """
+    """
+    def __init__(self, nb_param=200):
+        """
+        """
+        self.selector = VarianceThreshold(threshold=0)
+        self.nb_param = nb_param
+
+    def fit(self, dataset):
+        """
+        """
+        if self.nb_param < dataset.shape[1]:
+            self.nb_param = dataset.shape[1]
+
+        self.selector.fit(dataset)
+        threshold = sorted(self.selector.variances_, reverse=True)[self.nb_param]
+        self.selector.set_params(threshold=threshold)
+
+    def transform(self, dataset):
+        return self.select.fit_transform(dataset)
 
 class CorrelationReducer():
-    def __init__(self):
+    """
+    """
+    def __init__(self,  corr_type='pearson'):
+        """
+        """
+        self.corr_type = corr_type
         self.dataset = None
 
     def fit(self, dataset):
@@ -69,9 +105,17 @@ class CorrelationReducer():
 
     def transform(self, dataset):
         """ """
-        return 1.0 - pairwise_distances(dataset,
-                                        self.dataset,
-                                        'correlation')
+        if self.corr_type == 'pearson':
+            return 1.0 - pairwise_distances(dataset,
+                                            self.dataset,
+                                            'correlation')
+        if self.corr_type == 'spearman':
+            matrix = np.array([spearmanr(array1, array2)[0] for array1 in self.dataset
+                               for array2 in dataset])
+            return 1.0 - matrix
+        else:
+            raise Exception('wrong correlation type: {0}'.format(self.corr_type))
+
     def fit_transform(self, dataset):
         """ """
         self.fit(dataset)

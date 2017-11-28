@@ -43,7 +43,7 @@ def main():
 class DeepBase(object):
     """ """
     def __init__(self,
-                 dataset=LoadData(),
+                 dataset=None,
                  verbose=True,
                  nb_epoch=NB_EPOCH,
                  level_dims_in=LEVEL_DIMS_IN,
@@ -73,6 +73,9 @@ class DeepBase(object):
             optimizer = 'sgd'
             path_model where to save/load the models
         """
+        if dataset is None:
+            dataset = LoadData()
+
         self.dataset = dataset
         self.verbose = verbose
 

@@ -23,6 +23,7 @@ from simdeep.survival_utils import load_survival_file
 from simdeep.survival_utils import MadScaler
 from simdeep.survival_utils import RankNorm
 from simdeep.survival_utils import CorrelationReducer
+from simdeep.survival_utils import VarianceReducer
 
 from collections import defaultdict
 
@@ -124,7 +125,6 @@ class LoadData():
         self.survival_cv = None
 
         self._cv_loaded = False
-        self._test_loaded = False
         self._full_loaded = False
 
         self.matrix_ref_array = {}
@@ -148,8 +148,8 @@ class LoadData():
         self.dim_reducer = CorrelationReducer()
 
         self._parameters = _parameters
-
         self.normalization = defaultdict(bool, normalization)
+        self.normalization_test = None
 
     def __del__(self):
         """
@@ -203,11 +203,10 @@ class LoadData():
 
     def load_matrix_test(self, normalization=None):
         """ """
-        if self._test_loaded:
-            return
-
-        self.matrix_ref_array = {}
-        self.matrix_test_array = {}
+        if normalization is not None:
+            self.normalization_test = normalization
+        else:
+            self.normalization_test = self.normalization
 
         for key in self.test_tsv:
             sample_ids, feature_ids, matrix = load_data_from_tsv(
@@ -273,19 +272,22 @@ class LoadData():
         self._stack_multiomics(self.matrix_ref_array,
                                self.feature_ref_array)
 
-        self._test_loaded = True
-
     def load_new_test_dataset(self, tsv_dict, path_survival_file, normalization=None):
         """
         """
         if normalization is not None:
             normalization = defaultdict(bool, normalization)
 
-        self._test_loaded = False
         self.test_tsv = tsv_dict
         self.survival_test = None
         self.sample_ids_test = None
         self.survival_tsv_test = path_survival_file
+
+        self.matrix_test_array = {}
+        self.matrix_ref_array = {}
+        self.feature_test_array = {}
+        self.feature_ref_array = {}
+        self.feature_ref_index = {}
 
         self.load_matrix_test(normalization)
         self.load_survival_test()
