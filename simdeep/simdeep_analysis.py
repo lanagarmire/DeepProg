@@ -72,15 +72,19 @@ _CLASSIFICATION_METHOD_LIST = ['ALL_FEATURES', 'SURVIVAL_FEATURES']
 def main():
     """
     """
+    from simdeep.config import TEST_TSV
+    from simdeep.config import SURVIVAL_TSV_TEST
+
     sim_deep = SimDeep(seed=3)
     sim_deep.load_training_dataset()
     sim_deep.fit()
+
     # sim_deep.plot_cluster_labels()
 
     if SAVE_FITTED_MODELS:
         sim_deep.save_encoders()
 
-    sim_deep.load_test_dataset()
+    sim_deep.load_new_test_dataset(TEST_TSV, SURVIVAL_TSV_TEST, fname_key='dummy')
     sim_deep.predict_labels_on_test_dataset()
     sim_deep.plot_kernel_for_test_sets()
     return
@@ -167,7 +171,10 @@ class SimDeep(DeepBase):
         self.classifier = None
         self.classifier_test = None
         self.classifier_type = classifier_type
-        self.used_normalization_for_classif = None
+
+        self.used_normalization = None
+        self.test_normalization = None
+
         self.used_features_for_classif = None
 
         self._isboosting = _isboosting
@@ -239,13 +246,24 @@ class SimDeep(DeepBase):
                                            normalization=normalization)
 
         if normalization is not None:
+            self.test_normalization = {
+                key: normalization[key]
+                for key in normalization
+                if normalization[key]}
+
+        else:
+            self.test_normalization = {
+                key: self.dataset.normalization[key]
+                for key in self.dataset.normalization
+                if self.dataset.normalization[key]}
+
+        if self.used_normalization != self.test_normalization:
+            if self.verbose:
+                print('recombuting feature scores...')
+
             self.feature_scores = {}
             self.compute_feature_scores(use_ref=True)
             self._features_scores_changed = True
-        elif self._features_scores_changed:
-            self._features_scores_changed = False
-            self.feature_scores = {}
-            self.compute_feature_scores()
 
         if fname_key:
             self.project_name = '{0}_{1}'.format(self._project_name, fname_key)
@@ -267,7 +285,10 @@ class SimDeep(DeepBase):
         self.training_omic_list = self.encoder_array.keys()
         self.predict_labels()
 
-        self.used_normalization_for_classif = self.dataset.normalization
+        self.used_normalization = {key: self.dataset.normalization[key]
+                                   for key in self.dataset.normalization
+                                   if self.dataset.normalization[key]}
+
         self.used_features_for_classif = self.dataset.feature_train_array
         self.fit_classification_model()
 
@@ -569,8 +590,9 @@ class SimDeep(DeepBase):
 
     def fit_classification_test_model(self):
         """ """
-        is_same_features = False # self.used_features_for_classif == self.dataset.feature_ref_array
-        is_same_normalization = self.used_normalization_for_classif == self.dataset.normalization_test
+        is_same_features = False #self.used_features_for_classif == self.dataset.feature_ref_array
+        is_same_normalization = self.used_normalization == self.test_normalization
+
         is_filled_with_zero = self.dataset.fill_unkown_feature_with_0
 
         if (is_same_features and is_same_normalization and is_filled_with_zero)\
@@ -587,6 +609,7 @@ class SimDeep(DeepBase):
 
         self.used_normalization_for_classif = self.dataset.normalization_test
         self.used_features_for_classif = self.dataset.feature_ref_array
+
         train_matrix = self._return_train_matrix_for_classification()
         labels = self.labels
 
@@ -1080,156 +1103,81 @@ class SimDeep(DeepBase):
 
         return hstack(activities)
 
-    def plot_cluster_labels(self, labels=None):
-        """
-        """
-        from bokeh.plotting import figure
-        from bokeh.plotting import output_file
-        from bokeh.plotting import save
-        from simdeep.plot_utils import make_color_list
-
-        if not labels:
-            labels = self.labels
-
-        tools='hover,crosshair,pan,wheel_zoom,zoom_in,zoom_out,box_zoom'\
-               ',undo,redo,reset,tap,save,box_select,poly_select,lasso_select,'
-
-        activities = hstack([self.activities_array[omic]
-                             for omic in self.training_omic_list])
-
-        labels_c = make_color_list(labels)
-
-        decomp = PCA(n_components=2)
-        X, Y = decomp.fit_transform(activities).T
-
-        fig = figure(tools=tools)
-
-        for label in set(labels):
-            fig.scatter(X[labels == label],
-                        Y[labels == label],
-                        radius=0.04,
-                        fill_color=labels_c[labels == label],
-                        fill_alpha=0.6,
-                        legend='cluster nb {0}'.format(label),
-                        line_color=None)
-
-        html_name = '{0}/{1}_scatterplot.html'.format(self.path_results,
-                                                      self.project_name )
-
-        output_file(html_name, title="train scatter plot")
-        save(fig)
-        print('scatter plot saved at:{0}'.format(html_name))
-
-    def plot_predicted_labels_for_test_sets(self, test_labels=None, key=''):
-        """
-        """
-        from bokeh.plotting import figure
-        from bokeh.plotting import output_file
-        from bokeh.plotting import save
-        from simdeep.plot_utils import make_color_list
-
-        if not test_labels:
-            test_labels = self.test_labels
-
-        tools='hover,crosshair,pan,wheel_zoom,zoom_in,zoom_out,box_zoom'\
-               ',undo,redo,reset,tap,save,box_select,poly_select,lasso_select,'
-
-        activities = hstack([self.activities_array[omic]
-                             for omic in self.test_omic_list])
-
-        labels_c = make_color_list(self.labels)
-        labels_c_test = make_color_list(test_labels)
-
-        decomp = PCA(n_components=2)
-        X, Y = decomp.fit_transform(activities).T
-        X_test, Y_test = decomp.transform(self.activities_test).T
-
-        fig = figure(tools=tools)
-
-        for label in set(self.labels):
-            fig.scatter(X[self.labels == label],
-                        Y[self.labels == label],
-                        radius=0.04,
-                        fill_color=labels_c[self.labels == label],
-                        fill_alpha=0.6,
-                        legend='cluster nb {0}'.format(label),
-                        line_color=None)
-            fig.scatter(X_test[test_labels == label],
-                        Y_test[test_labels == label],
-                        size=15,
-                        marker='square_cross',
-                        fill_color=labels_c_test[test_labels == label],
-                        fill_alpha=0.6,
-                        legend='test cluster nb {0}'.format(label),
-                        line_color=None)
-
-        html_name = '{0}/{1}_test_{2}_scatterplot.html'.format(
-            self.path_results,
-            self.project_name,
-            key)
-
-        output_file(html_name, title="test scatter plot")
-        save(fig)
-
-        print('scatter plot saved at:{0}'.format(html_name))
-
-
     def plot_kernel_for_test_sets(self, test_labels=None, key=''):
         """
         """
         import seaborn as sns
         import matplotlib.pyplot as plt
-        from simdeep.plot_utils import make_color_list
         from simdeep.plot_utils import make_color_dict
+        from simdeep.plot_utils import SampleHTML
+        from simdeep.plot_utils import CSS
+
         import mpld3
         sns.set(color_codes=True)
 
-        fig, ax = plt.subplots(figsize=(10, 12))
+        fig, ax = plt.subplots(figsize=(7, 7))
 
         if not test_labels:
             test_labels = self.test_labels
 
         activities = hstack([self.activities_array[omic]
                              for omic in self.test_omic_list])
+        # activities_test = hstack([self.dataset.matrix_test_array[omic]
+        #                           for omic in self.test_omic_list])
+
+        activities_test = self.activities_test
 
         color_dict = make_color_dict(self.labels)
-
-        # labels_c = make_color_list(self.labels)
-        labels_c_test = make_color_list(test_labels)
+        labels_c_test = np.array([color_dict[label] for label in self.test_labels])
 
         decomp = PCA(n_components=2)
         X, Y = decomp.fit_transform(activities).T
-        X_test, Y_test = decomp.transform(self.activities_test).T
+
+        X_test, Y_test = decomp.transform(activities_test).T
 
         for label in set(self.labels):
-
             ax.scatter(
-               X_test[test_labels == label],
-               Y_test[test_labels == label],
-               s=30,
-               alpha=0.7,
+                X_test[test_labels == label],
+                Y_test[test_labels == label],
+                s=40,
+                # linewidths=2.0,
+                alpha=1.0,
                # marker='square_cross',
+                edgecolors='k',
+                zorder=2,
                color=labels_c_test[test_labels == label],
                label='test cluster nb {0}'.format(label))
 
-            sns.kdeplot(X[self.labels == label],
-                        Y[self.labels == label],
-                        shade=False,
-                        cmap=sns.dark_palette(color_dict[label], as_cmap=True),
-                        color=color_dict[label],
-                        ax=ax,
-                        label='cluster nb {0}'.format(label),
-                        shade_lowest=False
+            sns.kdeplot(
+                X[self.labels == label],
+                Y[self.labels == label],
+                shade=True,
+                cmap=sns.dark_palette(color_dict[label], as_cmap=True),
+                color=color_dict[label],
+                ax=ax,
+                label='cluster nb {0}'.format(label),
+                zorder=1,
+                shade_lowest=False,
+                alpha=0.7
             )
 
-        # tooltip = mpld3.plugins.PointLabelTooltip(
-        #     ax.scatter, labels=self.dataset.sample_ids_test)
-        # mpld3.plugins.connect(fig, tooltip)
+        labels = [SampleHTML(
+            name=self.dataset.sample_ids_test[i],
+            label=test_labels[i],
+            survival=np.asarray(self.dataset.survival_test[i])[0],
+            proba=self.test_labels_proba[i][test_labels[i]]).html
+                  for i in range(len(test_labels))]
 
-        html_name = '{0}/{1}_test_{2}_kdeplot.html'.format(
+        scatter = ax.plot(X_test, Y_test, 'o', color='b', mec='k',
+                          ms=15, mew=1, alpha=0.0, zorder=3,)[0]
+
+        tooltip = mpld3.plugins.PointHTMLTooltip(
+            scatter, labels, voffset=10, hoffset=10, css=CSS)
+        mpld3.plugins.connect(fig, tooltip)
+
+        html_name = '{0}/{1}{2}_test_kdeplot.html'.format(
             self.path_results,
-            self.project_name,
-            key)
+            self.project_name, key)
 
         mpld3.save_html(fig, html_name)
 

@@ -15,7 +15,6 @@ import  numpy as np
 from scipy.stats import rankdata
 
 from sklearn.metrics import pairwise_distances
-from scipy.stats import spearmanr
 
 from collections import defaultdict
 from coxph_from_r import coxph
@@ -24,6 +23,8 @@ from coxph_from_r import c_index
 
 from scipy.stats import kruskal
 from scipy.stats import ranksums
+
+from scipy.spatial.distance import correlation
 
 
 ################ DEBUG ################
@@ -102,33 +103,43 @@ class VarianceReducer():
 class CorrelationReducer():
     """
     """
-    def __init__(self,  corr_type='pearson'):
+    def __init__(self, distance='correlation', threshold=None):
         """
         """
-        self.corr_type = corr_type
+        self.distance = distance
         self.dataset = None
+        self.threshold = threshold
 
     def fit(self, dataset):
         """ """
         self.dataset = dataset
 
+        if self.threshold:
+            self.dataset[self.dataset < self.threshold] = 0
+
     def transform(self, dataset):
         """ """
-        if self.corr_type == 'pearson':
-            return 1.0 - pairwise_distances(dataset,
-                                            self.dataset,
-                                            'correlation')
-        if self.corr_type == 'spearman':
-            matrix = np.array([spearmanr(array1, array2)[0] for array1 in self.dataset
-                               for array2 in dataset])
-            return 1.0 - matrix
-        else:
-            raise Exception('wrong correlation type: {0}'.format(self.corr_type))
+        if self.threshold:
+            dataset[dataset < self.threshold] = 0
+
+        return 1.0 - pairwise_distances(dataset,
+                                        self.dataset,
+                                        self.distance)
 
     def fit_transform(self, dataset):
         """ """
         self.fit(dataset)
         return self.transform(dataset)
+
+
+class RankCorrNorm():
+    """
+    """
+    def __init__(self, dataset):
+        """
+        """
+        self.dataset = dataset
+
 
 def load_survival_file(f_name, path_data=PATH_DATA, sep=DEFAULTSEP):
     """ """

@@ -2,6 +2,67 @@ from colour import Color
 import numpy as np
 
 
+CSS = """
+table
+{
+  border-collapse: collapse;
+}
+th
+{
+  color: #ffffff;
+  background-color: #000000;
+}
+td
+{
+  background-color: #cccccc;
+}
+table, th, td
+{
+  font-family:Arial, Helvetica, sans-serif;
+  border: 1px solid black;
+  text-align: right;
+}
+"""
+
+
+class SampleHTML():
+    def __init__(self, name, label, proba, survival):
+        """
+        """
+        nbdays, isdead = survival
+
+        self.html =  """
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>{0}</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>Assigned class</th>
+      <td>{1}</td>
+    </tr>
+    <tr>
+      <th>class probability</th>
+      <td>{2}</td>
+    </tr>
+    <tr>
+      <th>nb days followed</th>
+      <td>{3}</td>
+    </tr>
+    <tr>
+      <th>is dead</th>
+      <td>{4}</td>
+    </tr>
+  </tbody>
+</table>
+                """.format(name, label, proba, nbdays, isdead)
+
+
+
+
 def make_color_list(id_list):
     """
     According to an id_list define a color gradient

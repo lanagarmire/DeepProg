@@ -105,7 +105,7 @@ class SimDeepBoosting():
                  new_dim=NEW_DIM,
                  **kwargs):
         """ """
-        assert(class_selection in ['max', 'mean', 'weighted_mean'])
+        assert(class_selection in ['max', 'mean', 'weighted_mean', 'weighted_max'])
 
         self._instance_weights = None
 
@@ -115,6 +115,8 @@ class SimDeepBoosting():
             self.class_selection = _mean_proba
         elif class_selection == 'weighted_mean':
             self.class_selection = _weighted_mean
+        elif class_selection == 'weighted_max':
+            self.class_selection = _weighted_max
 
         self._class_selection = class_selection
 
@@ -718,10 +720,8 @@ class SimDeepBoosting():
     def plot_predicted_labels_for_test_sets(self):
         """
         """
-        # self.models[0].plot_predicted_labels_for_test_sets(
-        #     self.test_labels, key=self.test_fname_key)
         self.models[0].plot_kernel_for_test_sets(
-            self.test_labels, key=self.test_fname_key)
+            self.test_labels, key='_' + self.test_fname_key)
 
     def load_new_test_dataset(self, tsv_dict,
                               path_survival_file,
@@ -945,6 +945,37 @@ def _weighted_mean(proba, weights):
 
     return labels, np.asarray(probas)
 
+def _weighted_max(proba, weights):
+    """
+    """
+    res = []
+    labels = []
+    probas = []
+    weights = np.array(weights)
+    weights[weights < 0.50] = 0.0
+    weights = np.power(weights, 4)
+
+    if weights.sum() == 0:
+        weights[:] = 1.0
+
+    clusters = range(proba.shape[2])
+    samples = range(proba.shape[1])
+
+    for sample in samples:
+        label = max([(cluster, np.max(proba.T[cluster][sample] * weights))
+                     for cluster in clusters],
+                    key=lambda x:x[1])
+        res.append(label)
+
+    for label, proba in res:
+        if not label:
+            probas.append([proba, 1.0 - proba])
+        else:
+            probas.append([1.0 - proba, proba])
+        labels.append(label)
+
+    return labels, np.asarray(probas)
+
 def _fit_model_pool(dataset):
     """ """
     parameters = dataset._parameters
@@ -1030,7 +1061,7 @@ def _predict_new_dataset(inputs):
     model, tsv_dict, path_survival_file, normalization = inputs
 
     model.load_new_test_dataset(tsv_dict, path_survival_file,
-                                        normalization=normalization)
+                                normalization=normalization)
     model.predict_labels_on_test_dataset()
 
     return model

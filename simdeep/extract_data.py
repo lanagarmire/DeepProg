@@ -559,10 +559,14 @@ class LoadData():
                 matrix)
 
         if self.normalization['TRAIN_CORR_REDUCTION']:
+            args = self.normalization['TRAIN_CORR_REDUCTION']
+            if args == True:
+                args = {}
+
             if self.verbose:
                 print('dim reduction for {0}...'.format(key))
 
-            reducer = CorrelationReducer()
+            reducer = CorrelationReducer(**args)
             matrix = reducer.fit_transform(
                 matrix)
 
@@ -585,6 +589,12 @@ class LoadData():
 
         if self.verbose:
             print('Scaling/Normalising dataset...')
+
+        if normalization['LOG_REF_MATRIX']:
+            matrix_ref = np.log2(1.0 + matrix_ref)
+
+        if normalization['LOG_TEST_MATRIX']:
+            matrix = np.log2(1.0 +  matrix)
 
         if normalization['NB_FEATURES_TO_KEEP']:
             self.variance_reducer.nb_features = normalization['NB_FEATURES_TO_KEEP']
@@ -620,7 +630,12 @@ class LoadData():
             matrix = RankNorm().fit_transform(matrix)
 
         if normalization['TRAIN_CORR_REDUCTION']:
-            reducer = CorrelationReducer()
+            args = normalization['TRAIN_CORR_REDUCTION']
+
+            if args == True:
+                args = {}
+
+            reducer = CorrelationReducer(**args)
             matrix_ref = reducer.fit_transform(matrix_ref)
             matrix = reducer.transform(matrix)
 
