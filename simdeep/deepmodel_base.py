@@ -27,7 +27,7 @@ from simdeep.config import ACT_REG
 from simdeep.config import W_REG
 from simdeep.config import DROPOUT
 from simdeep.config import ACTIVATION
-from simdeep.config import PATH_MODEL
+from simdeep.config import PATH_TO_SAVE_MODEL
 from simdeep.config import DATA_SPLIT
 
 from os.path import isfile
@@ -35,10 +35,9 @@ from os.path import isfile
 
 def main():
     """ """
-    simdeep = DeepBase()
+    simdeep = DeepBase(seed=2)
     simdeep.load_training_dataset()
     simdeep.construct_autoencoders()
-
 
 class DeepBase(object):
     """ """
@@ -57,7 +56,7 @@ class DeepBase(object):
                  data_split=DATA_SPLIT,
                  activation=ACTIVATION,
                  seed=SEED,
-                 path_model=PATH_MODEL):
+                 path_to_save_model=PATH_TO_SAVE_MODEL):
         """
         ### DEFAULT PARAMETER ###:
             dataset=None      ExtractData instance (load the dataset),
@@ -88,7 +87,7 @@ class DeepBase(object):
         self.loss = loss
         self.optimizer = optimizer
         self.dropout = dropout
-        self.path_model = path_model
+        self.path_to_save_model = path_to_save_model
         self.activation = activation
         self.data_split = data_split
         self.seed = seed
@@ -273,23 +272,23 @@ class DeepBase(object):
 
     def save_encoders(self, fname='encoder.h5'):
         """
-        Save a keras model in the self.path_model directory
+        Save a keras model in the self.path_to_save_model directory
         :fname: str    the name of the file to save the model
         """
         for key in self.encoder_array:
             encoder = self.encoder_array[key]
-            encoder.save('{0}/{1}_{2}'.format(self.path_model, key, fname))
+            encoder.save('{0}/{1}_{2}'.format(self.path_to_save_model, key, fname))
 
             if self.verbose:
                 print('model saved for key:{0}!'.format(key))
 
     def load_encoders(self, fname='encoder.h5'):
         """
-        Load a keras model from the self.path_model directory
+        Load a keras model from the self.path_to_save_model directory
         :fname: str    the name of the file to load
         """
         for key in self.matrix_train_array:
-            file_path = '{0}/{1}_{2}'.format(self.path_model, key, fname)
+            file_path = '{0}/{1}_{2}'.format(self.path_to_save_model, key, fname)
             try:
                 assert(isfile(file_path))
             except AssertionError:

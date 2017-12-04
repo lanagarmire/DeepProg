@@ -81,7 +81,7 @@ SEPARATOR = {
     }
 
 # Path where to save load the Keras models
-PATH_MODEL = '/home/opoirion/data/survival_analysis_multiple/models/'
+PATH_TO_SAVE_MODEL = '/home/opoirion/data/survival_analysis_multiple/models/'
 
 # Path to generate png images
 PATH_RESULTS = '/home/opoirion/code/d3visualisation/sijia/'

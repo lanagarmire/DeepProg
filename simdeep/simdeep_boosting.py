@@ -24,7 +24,7 @@ from simdeep.config import NB_THREADS
 from simdeep.config import NB_ITER
 from simdeep.config import NB_FOLDS
 from simdeep.config import CLASS_SELECTION
-from simdeep.config import PATH_MODEL
+from simdeep.config import PATH_TO_SAVE_MODEL
 from simdeep.config import NB_CLUSTERS
 from simdeep.config import NORMALIZATION
 from simdeep.config import NB_EPOCH
@@ -39,6 +39,9 @@ import simplejson
 from distutils.dir_util import mkpath
 
 from os.path import isdir
+from os.path import isfile
+
+from rpy2.rinterface import NALogicalType
 
 import cPickle
 
@@ -57,20 +60,24 @@ MODEL_THRES = 0.05
 
 def main():
     """ """
-    boosting = SimDeepBoosting()
+    from simdeep.config import TEST_TSV
+    from simdeep.config import SURVIVAL_TSV_TEST
+
+    boosting = SimDeepBoosting(seed=2)
     boosting.fit()
-
-    boosting.predict_labels_on_test_dataset()
-
     boosting.predict_labels_on_full_dataset()
-
+    boosting.collect_cindex_for_test_fold()
     boosting.collect_pvalue_on_full_dataset()
+
+    boosting.load_new_test_dataset(TEST_TSV,
+                                   SURVIVAL_TSV_TEST,
+                                   fname_key='dummy')
+    boosting.predict_labels_on_test_dataset()
 
     boosting.collect_pvalue_on_training_dataset()
     boosting.collect_pvalue_on_test_fold()
 
     boosting.collect_number_of_features_per_omic()
-    boosting.collect_cindex_for_test_fold()
     boosting.collect_pvalue_on_test_dataset()
     boosting.collect_cindex_for_test_dataset()
 
@@ -106,19 +113,9 @@ class SimDeepBoosting():
                  **kwargs):
         """ """
         assert(class_selection in ['max', 'mean', 'weighted_mean', 'weighted_max'])
+        self.class_selection = class_selection
 
         self._instance_weights = None
-
-        if class_selection == 'max':
-            self.class_selection =  _highest_proba
-        elif class_selection == 'mean':
-            self.class_selection = _mean_proba
-        elif class_selection == 'weighted_mean':
-            self.class_selection = _weighted_mean
-        elif class_selection == 'weighted_max':
-            self.class_selection = _weighted_max
-
-        self._class_selection = class_selection
 
         self.model_thres = model_thres
         self.models = []
@@ -232,6 +229,18 @@ class SimDeepBoosting():
 
         gc.collect()
 
+    def _do_class_selection(self, inputs, **kwargs):
+        """
+        """
+        if self.class_selection == 'max':
+            return  _highest_proba(inputs)
+        elif self.class_selection == 'mean':
+            return _mean_proba(inputs)
+        elif self.class_selection == 'weighted_mean':
+            return _weighted_mean(inputs, **kwargs)
+        elif self.class_selection == 'weighted_max':
+            return _weighted_max(inputs, **kwargs)
+
     def partial_fit(self, debug=False):
         """
         """
@@ -240,7 +249,7 @@ class SimDeepBoosting():
     def fit(self, debug=False):
         """
         """
-        self._fit(_fit_model_pool, debug=debug)
+        self._fit(_partial_fit_model_pool, debug=debug)
 
     def _fit(self, _fit_func, debug=False):
         """ """
@@ -283,7 +292,7 @@ class SimDeepBoosting():
                 pool.join()
             self.log['fitting time (s)'] = time() - start_time
 
-            if self._class_selection == 'weighted_mean':
+            if self.class_selection == 'weighted_mean':
                 self.collect_cindex_for_test_fold()
 
     def predict_labels_on_test_dataset(self):
@@ -292,7 +301,7 @@ class SimDeepBoosting():
         print('predict labels on test datasets...')
         test_labels_proba = np.asarray([model.test_labels_proba for model in self.models])
 
-        res = self.class_selection(test_labels_proba, weights=self.cindex_test_folds)
+        res = self._do_class_selection(test_labels_proba, weights=self.cindex_test_folds)
         self.test_labels, self.test_labels_proba = res
 
         print('#### report of assigned cluster:')
@@ -422,7 +431,12 @@ class SimDeepBoosting():
 
         for model in self.models:
             model.predict_labels_on_test_fold()
-            self.cindex_test_folds.append(model.compute_c_indexes_for_test_fold_dataset())
+            cindex = model.compute_c_indexes_for_test_fold_dataset()
+
+            if isinstance(cindex, NALogicalType):
+                cindex = np.nan
+
+            self.cindex_test_folds.append(cindex)
 
         if self.verbose:
             print('C-index results for test fold: mean {0} std {1}'.format(
@@ -455,7 +469,6 @@ class SimDeepBoosting():
         cindexes_list = []
 
         for model in self.models:
-            model.predict_labels_on_test_fold()
             cindexes_list.append(model.compute_c_indexes_for_training_dataset())
 
         if self.verbose:
@@ -472,7 +485,6 @@ class SimDeepBoosting():
         cindexes_list = []
 
         for model in self.models:
-            model.predict_labels_on_test_fold()
             cindexes_list.append(model.compute_c_indexes_for_test_dataset())
 
         if self.verbose:
@@ -586,8 +598,8 @@ class SimDeepBoosting():
             for sample, proba in zip(model.dataset.sample_ids_full, model.full_labels_proba):
                 proba_dict[sample].append([proba.tolist()])
 
-        labels, probas = self.class_selection(hstack(proba_dict.values()),
-                                              weights=self.cindex_test_folds)
+        labels, probas = self._do_class_selection(hstack(proba_dict.values()),
+                                                 weights=self.cindex_test_folds)
 
         self.full_labels = labels
         self.full_labels_proba = probas
@@ -689,7 +701,11 @@ class SimDeepBoosting():
 
     def compute_c_indexes_multiple_for_test_dataset(self):
         """
+        Not Functionnal !
         """
+        print('not funtionnal!')
+        return
+
         matrix_array_train = self.models[0].dataset.matrix_ref_array
         matrix_array_test = self.models[0].dataset.matrix_test_array
 
@@ -830,35 +846,47 @@ class SimDeepBoosting():
 
         return bic, silhouette, calinski
 
-    def write_logs(self):
+    def _convert_logs(self):
         """
         """
         for key in self.log:
             if isinstance(self.log[key], np.float32):
                 self.log[key] = float(self.log[key])
+            elif isinstance(self.log[key], NALogicalType):
+                self.log[key] = np.nan
+
+    def write_logs(self):
+        """
+        """
+        self._convert_logs()
 
         with open('{0}/{1}.log.json'.format(self.path_results, self._project_name), 'w') as f:
             f.write(simplejson.dumps(self.log, indent=2))
 
-
-def save_class(boosting):
+def save_model(boosting, path_to_save_model=PATH_TO_SAVE_MODEL):
     """ """
-    assert(isdir(PATH_MODEL))
+    assert(isdir(path_to_save_model))
+    boosting._convert_logs()
 
     t = time()
 
-    with open('{0}/{1}.pickle'.format(PATH_MODEL, boosting._project_name), 'w') as f_pick:
+
+    with open('{0}/{1}.pickle'.format(
+            path_to_save_model,
+            boosting._project_name), 'w') as f_pick:
         cPickle.dump(boosting, f_pick)
 
-    print('model saved in %2.1f s' % (time() - t))
+    print('model saved in %2.1f s at %s/%s.pickle' % (
+        time() - t, path_to_save_model, boosting._project_name))
 
-def load_class(project_name=PROJECT_NAME + '_boosting'):
+def load_model(project_name, path_model=PATH_TO_SAVE_MODEL):
     """ """
-    assert(isdir(PATH_MODEL))
-
     t = time()
+    project_name = project_name.replace('.pickle', '') + '.pickle'
 
-    with open('{0}/{1}.pickle'.format(PATH_MODEL, project_name), 'r') as f_pick:
+    assert(isfile('{0}/{1}'.format(path_model, project_name)))
+
+    with open('{0}/{1}'.format(path_model, project_name), 'r') as f_pick:
         boosting = cPickle.load(f_pick)
 
     print('model loaded in %2.1f s' % (time() - t))
@@ -866,7 +894,7 @@ def load_class(project_name=PROJECT_NAME + '_boosting'):
     return boosting
 
 
-def _highest_proba(proba, **kwargs):
+def _highest_proba(proba):
     """
     """
     res = []
@@ -890,7 +918,7 @@ def _highest_proba(proba, **kwargs):
 
     return labels, np.asarray(probas)
 
-def _mean_proba(proba, **kwargs):
+def _mean_proba(proba):
     """
     """
     res = []
@@ -975,48 +1003,6 @@ def _weighted_max(proba, weights):
         labels.append(label)
 
     return labels, np.asarray(probas)
-
-def _fit_model_pool(dataset):
-    """ """
-    parameters = dataset._parameters
-
-    model = SimDeep(dataset=dataset,
-                    load_existing_models=False,
-                    verbose=dataset.verbose,
-                    _isboosting=True,
-                    seed=dataset.cross_validation_instance.random_state,
-                    do_KM_plot=False,
-                    **parameters)
-
-    before = model.dataset.cross_validation_instance.random_state
-    try:
-        model.load_training_dataset()
-        model.fit()
-
-        if len(set(model.labels)) < 1:
-            raise Exception('only one class!')
-
-        if model.train_pvalue > MODEL_THRES:
-            raise Exception('pvalue: {0} not significant!'.format(model.train_pvalue))
-
-    except Exception as e:
-        print('model with random state:{1} didn\'t converge:{0}'.format(e, before))
-        return None
-
-    else:
-        print('model with random state:{0} fitted'.format(before))
-
-    model.predict_labels_on_test_fold()
-    model.predict_labels_on_full_dataset()
-
-    model.load_test_dataset()
-    print('test dataset loaded for model: {0}'.format(before))
-    model.predict_labels_on_test_dataset()
-
-    model.look_for_prediction_nodes()
-    model.evalutate_cluster_performance()
-
-    return model
 
 def _partial_fit_model_pool(dataset):
     """ """

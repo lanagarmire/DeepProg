@@ -61,6 +61,32 @@ class SampleHTML():
                 """.format(name, label, proba, nbdays, isdead)
 
 
+def make_color_dict_from_r(labels):
+    """ """
+    labels_set = set(labels)
+
+    cin = Color('red')
+    cout = Color('#56f442')
+
+    gradient = map(lambda x:x.get_rgb(),
+                   cin.range_to(cout, len(labels_set)))
+
+    len_color = len(gradient)
+
+    if len_color > 2:
+        gradient[1] = Color('green').get_rgb()
+        gradient[2] = Color('blue').get_rgb()
+
+    if len_color > 3:
+        gradient[3] = Color('cyan').get_rgb()
+
+    if len_color > 4:
+        gradient[4] = Color('magenta').get_rgb()
+
+    if len_color > 5:
+        gradient[5] = Color('yellow').get_rgb()
+
+    return dict(zip(labels_set, gradient))
 
 
 def make_color_list(id_list):

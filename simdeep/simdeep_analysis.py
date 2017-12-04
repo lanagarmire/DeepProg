@@ -29,6 +29,7 @@ from simdeep.config import LOAD_EXISTING_MODELS
 from simdeep.config import NODES_SELECTION
 from simdeep.config import CLASSIFIER
 from simdeep.config import HYPER_PARAMETERS
+from simdeep.config import PATH_TO_SAVE_MODEL
 
 from simdeep.survival_utils import _process_parallel_coxph
 from simdeep.survival_utils import _process_parallel_cindex
@@ -52,8 +53,6 @@ from sklearn.model_selection import GridSearchCV
 
 import numpy as np
 from numpy import hstack
-
-import cPickle
 
 from collections import defaultdict
 
@@ -79,25 +78,25 @@ def main():
     sim_deep.load_training_dataset()
     sim_deep.fit()
 
+    sim_deep.predict_labels_on_test_fold()
+    sim_deep.predict_labels_on_full_dataset()
+
     # sim_deep.plot_cluster_labels()
 
     if SAVE_FITTED_MODELS:
         sim_deep.save_encoders()
 
-    sim_deep.load_new_test_dataset(TEST_TSV, SURVIVAL_TSV_TEST, fname_key='dummy')
-    sim_deep.predict_labels_on_test_dataset()
-    sim_deep.plot_kernel_for_test_sets()
-    return
-    sim_deep.predict_labels_on_test_fold()
-    sim_deep.predict_labels_on_full_dataset()
-
-    sim_deep.compute_c_indexes_for_test_dataset()
     sim_deep.compute_c_indexes_for_test_fold_dataset()
     sim_deep.compute_c_indexes_for_full_dataset()
 
     sim_deep.look_for_prediction_nodes()
     sim_deep.compute_c_indexes_multiple_for_test_dataset()
     sim_deep.compute_c_indexes_multiple_for_test_fold_dataset()
+
+    sim_deep.load_new_test_dataset(TEST_TSV, SURVIVAL_TSV_TEST, fname_key='dummy')
+    sim_deep.predict_labels_on_test_dataset()
+    sim_deep.compute_c_indexes_for_test_dataset()
+    sim_deep.plot_kernel_for_test_sets()
 
 
 class SimDeep(DeepBase):
@@ -118,6 +117,7 @@ class SimDeep(DeepBase):
                  nb_threads_coxph=NB_THREADS_COXPH,
                  classification_method=CLASSIFICATION_METHOD,
                  load_existing_models=LOAD_EXISTING_MODELS,
+                 path_to_save_model=PATH_TO_SAVE_MODEL,
                  do_KM_plot=True,
                  verbose=True,
                  _isboosting=False,
@@ -217,6 +217,10 @@ class SimDeep(DeepBase):
         self.verbose = verbose
         self._load_existing_models = load_existing_models
         self._features_scores_changed = False
+
+        self.path_to_save_model = path_to_save_model
+
+        kwargs['path_to_save_model'] = self.path_to_save_model
 
         DeepBase.__init__(self, verbose=self.verbose, **kwargs)
 
@@ -590,7 +594,7 @@ class SimDeep(DeepBase):
 
     def fit_classification_test_model(self):
         """ """
-        is_same_features = False #self.used_features_for_classif == self.dataset.feature_ref_array
+        is_same_features = self.used_features_for_classif == self.dataset.feature_ref_array
         is_same_normalization = self.used_normalization == self.test_normalization
 
         is_filled_with_zero = self.dataset.fill_unkown_feature_with_0
@@ -982,14 +986,6 @@ class SimDeep(DeepBase):
     def _look_for_prediction_nodes(self, key):
         """
         """
-        pool = None
-
-        if not self._isboosting:
-            pool = Pool(self.nb_threads_coxph)
-            mapf = pool.map
-        else:
-            mapf = map
-
         nbdays, isdead = self.dataset.survival.T.tolist()
         nbdays_cv, isdead_cv = self.dataset.survival_cv.T.tolist()
 
@@ -1006,11 +1002,7 @@ class SimDeep(DeepBase):
                            activities_cv.T[node_id], isdead_cv, nbdays_cv)
                            for node_id in range(activities_train.shape[1]))
 
-        score_list = mapf(_process_parallel_cindex, input_list)
-
-        if pool is not None:
-            pool.close()
-            pool.join()
+        score_list = map(_process_parallel_cindex, input_list)
 
         score_list = filter(lambda x: not np.isnan(x[1]), score_list)
         score_list.sort(key=lambda x:x[1], reverse=True)
@@ -1108,7 +1100,7 @@ class SimDeep(DeepBase):
         """
         import seaborn as sns
         import matplotlib.pyplot as plt
-        from simdeep.plot_utils import make_color_dict
+        from simdeep.plot_utils import make_color_dict_from_r
         from simdeep.plot_utils import SampleHTML
         from simdeep.plot_utils import CSS
 
@@ -1127,7 +1119,7 @@ class SimDeep(DeepBase):
 
         activities_test = self.activities_test
 
-        color_dict = make_color_dict(self.labels)
+        color_dict = make_color_dict_from_r(self.labels)
         labels_c_test = np.array([color_dict[label] for label in self.test_labels])
 
         decomp = PCA(n_components=2)
@@ -1182,36 +1174,6 @@ class SimDeep(DeepBase):
         mpld3.save_html(fig, html_name)
 
         print('kde plot saved at:{0}'.format(html_name))
-
-    def save_model(self, id=None):
-        """
-        """
-        id = '_{0}'.format(id) if id is None else ''
-        f_name = '{0}/{1}{2}.pickle'.format(self.path_model, self.project_name, id)
-
-        with open(f_name, 'w') as f_pick:
-            cPickle.dump(f_pick, {
-                'train_labels': self.train_labels,
-                'train_labels_proba': self.train_labels_proba,
-                'train_pvalue': self.train_pvalue,
-                'train_pvalue_proba': self.train_pvalue_proba,
-                'valid_node_ids_array': self.valid_node_ids_array,
-                'pred_node_ids_array': self.pred_node_ids_array,
-                'test_labels': self.test_labels,
-                'test_labels_proba': self.test_labels_proba,
-                'cv_labels': self.cv_labels,
-                'cv_labels_proba': self.cv_labels_proba,
-                'full_labels': self.full_labels,
-                'full_labels_proba': self.full_labels_proba,
-            })
-
-        self.save_encoders(fname=self.project_name + '.h5')
-
-    def load_model(self, id=None):
-        """ """
-        id = '_{0}'.format(id) if id is None else ''
-        f_name = '{0}/{1}{2}.pickle'.format(self.path_model, self.project_name, id)
-
 
 
 if __name__ == "__main__":

@@ -42,7 +42,6 @@ QUANTILE_OPTION = {'n_quantiles': 100,
 
 def main():
     """ """
-
     load_data = LoadData(normalization={'TRAIN_NORM_SCALE': True,})
     load_data.load_array()
     load_data.load_survival()
@@ -68,9 +67,7 @@ class LoadData():
             self,
             path_data=PATH_DATA,
             training_tsv=TRAINING_TSV,
-            test_tsv=TEST_TSV,
             survival_tsv=SURVIVAL_TSV,
-            survival_tsv_test=SURVIVAL_TSV_TEST,
             cross_validation_instance=CROSS_VALIDATION_INSTANCE,
             test_fold=TEST_FOLD,
             stack_multi_omic=STACK_MULTI_OMIC,
@@ -103,15 +100,14 @@ class LoadData():
         self.feature_array = {}
         self.matrix_array = {}
 
-        self.test_tsv = test_tsv
+        self.test_tsv = None
         self.matrix_train_array = {}
 
         self.sample_ids = []
         self.data_type = training_tsv.keys()
 
         self.survival = None
-
-        self.survival_tsv_test = survival_tsv_test
+        self.survival_tsv_test = None
 
         self.matrix_full_array = {}
         self.sample_ids_full = []
