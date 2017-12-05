@@ -39,6 +39,7 @@ def main():
     simdeep.load_training_dataset()
     simdeep.construct_autoencoders()
 
+
 class DeepBase(object):
     """ """
     def __init__(self,
@@ -111,6 +112,14 @@ class DeepBase(object):
         self.compile_models()
         self.fit_autoencoders()
 
+    def construct_supervized_network(self, objective):
+        """
+        main class to create the autoencoder
+        """
+        self.create_autoencoders(objective)
+        self.compile_models()
+        self.fit_autoencoders(objective)
+
     def load_training_dataset(self):
         """
         load training dataset and surival
@@ -130,12 +139,12 @@ class DeepBase(object):
         self.dataset.load_matrix_test()
         self.dataset.load_survival_test()
 
-    def create_autoencoders(self):
+    def create_autoencoders(self, matrix_out=None):
         """ """
         for key in self.matrix_train_array:
-            self._create_autoencoder(self.matrix_train_array[key], key)
+            self._create_autoencoder(self.matrix_train_array[key], key, matrix_out)
 
-    def _create_autoencoder(self, matrix_train, key):
+    def _create_autoencoder(self, matrix_train, key, matrix_out=None):
         """
         Instantiate the  autoencoder architecture
         """
@@ -180,11 +189,18 @@ class DeepBase(object):
             if self.dropout:
                 model.add(Dropout(self.dropout))
 
-        model = self._add_dense_layer(
-            model,
-            X_shape,
-            X_shape[1],
-            name='final layer')
+        if matrix_out is not None:
+                    model = self._add_dense_layer(
+                        model,
+                        X_shape,
+                        matrix_out.shape[1],
+                        name='final layer')
+        else:
+            model = self._add_dense_layer(
+                model,
+                X_shape,
+                X_shape[1],
+                name='final layer')
 
         self.model_array[key] = model
 
@@ -224,7 +240,7 @@ class DeepBase(object):
             if self.verbose:
                 print('compilation done for key {0}!'.format(key))
 
-    def fit_autoencoders(self):
+    def fit_autoencoders(self, objective=None):
         """
         fit the autoencoder using the training matrix
         """
@@ -232,13 +248,18 @@ class DeepBase(object):
             model = self.model_array[key]
             matrix_train = self.matrix_train_array[key]
 
+            if objective is None:
+                matrix_out = matrix_train
+            else:
+                matrix_out = objective
+
             if not self.verbose:
                 verbose = None
             else:
                 verbose = 2
 
             model.fit(x=matrix_train,
-                       y=matrix_train,
+                       y=matrix_out,
                        verbose=verbose,
                        nb_epoch=self.nb_epoch,
                        validation_split=self.data_split,

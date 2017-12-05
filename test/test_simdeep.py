@@ -82,7 +82,6 @@ class TestPackage(unittest.TestCase):
 
         PROJECT_NAME = 'TestProject'
         NB_EPOCH = 3
-        SEED = 2
 
         dataset = LoadData(path_data=PATH_DATA,
                        survival_tsv=SURVIVAL_TSV,
@@ -92,7 +91,7 @@ class TestPackage(unittest.TestCase):
                           project_name=PROJECT_NAME,
                           path_results=PATH_DATA,
                           nb_epoch=NB_EPOCH,
-                          seed=3)
+                          seed=5)
         simdeep.load_training_dataset()
         simdeep.fit()
         simdeep.predict_labels_on_full_dataset()

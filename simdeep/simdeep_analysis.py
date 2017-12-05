@@ -5,7 +5,6 @@ SimDeep main class
 from sklearn.cluster import KMeans
 from sklearn.mixture import GaussianMixture
 from sklearn.model_selection import cross_val_score
-from sklearn.decomposition import PCA
 
 from simdeep.deepmodel_base import DeepBase
 
@@ -90,10 +89,14 @@ def main():
     sim_deep.compute_c_indexes_for_full_dataset()
 
     sim_deep.look_for_prediction_nodes()
-    sim_deep.compute_c_indexes_multiple_for_test_dataset()
+
     sim_deep.compute_c_indexes_multiple_for_test_fold_dataset()
 
-    sim_deep.load_new_test_dataset(TEST_TSV, SURVIVAL_TSV_TEST, fname_key='dummy')
+    sim_deep.load_new_test_dataset(TEST_TSV,
+                                   SURVIVAL_TSV_TEST,
+                                   # normalization={'TRAIN_NORM_SCALE': True},
+                                   fname_key='dummy')
+    sim_deep.compute_c_indexes_multiple_for_test_dataset()
     sim_deep.predict_labels_on_test_dataset()
     sim_deep.compute_c_indexes_for_test_dataset()
     sim_deep.plot_kernel_for_test_sets()
@@ -170,6 +173,11 @@ class SimDeep(DeepBase):
 
         self.classifier = None
         self.classifier_test = None
+
+        self.classifier_dict = {}
+
+        self.encoder_for_kde_plot_dict = {}
+
         self.classifier_type = classifier_type
 
         self.used_normalization = None
@@ -586,6 +594,8 @@ class SimDeep(DeepBase):
         self.classifier.set_params(probability=True)
         self.classifier.fit(train_matrix, labels)
 
+        self.classifier_dict[str(self.used_normalization)] = self.classifier
+
         if self.verbose:
             cvs = cross_val_score(self.classifier, train_matrix, labels, cv=5)
             print('best params:', params)
@@ -596,7 +606,6 @@ class SimDeep(DeepBase):
         """ """
         is_same_features = self.used_features_for_classif == self.dataset.feature_ref_array
         is_same_normalization = self.used_normalization == self.test_normalization
-
         is_filled_with_zero = self.dataset.fill_unkown_feature_with_0
 
         if (is_same_features and is_same_normalization and is_filled_with_zero)\
@@ -943,7 +952,7 @@ class SimDeep(DeepBase):
 
         return labels
 
-    def _look_for_survival_nodes(self, key):
+    def _look_for_survival_nodes(self, key=None, activities=None):
         """
         """
         pool = None
@@ -954,10 +963,12 @@ class SimDeep(DeepBase):
         else:
             mapf = map
 
-        encoder = self.encoder_array[key]
-        matrix_train = self.matrix_train_array[key]
-
-        activities = np.nan_to_num(encoder.predict(matrix_train))
+        if key is not None:
+            encoder = self.encoder_array[key]
+            matrix_train = self.matrix_train_array[key]
+            activities = np.nan_to_num(encoder.predict(matrix_train))
+        else:
+            assert(activities is not None)
 
         nbdays, isdead = self.dataset.survival.T.tolist()
         pvalue_list = []
@@ -1095,85 +1106,94 @@ class SimDeep(DeepBase):
 
         return hstack(activities)
 
-    def plot_kernel_for_test_sets(self, test_labels=None, key=''):
+    def plot_kernel_for_test_sets(self,
+                                  labels=None,
+                                  labels_proba=None,
+                                  test_labels=None,
+                                  test_labels_proba=None,
+                                  key=''):
         """
         """
-        import seaborn as sns
-        import matplotlib.pyplot as plt
-        from simdeep.plot_utils import make_color_dict_from_r
-        from simdeep.plot_utils import SampleHTML
-        from simdeep.plot_utils import CSS
+        from simdeep.plot_utils import plot_kernel_plots
 
-        import mpld3
-        sns.set(color_codes=True)
+        if labels_proba is None:
+            labels_proba = self.labels_proba
 
-        fig, ax = plt.subplots(figsize=(7, 7))
+        if labels is None:
+            labels = self.labels
 
-        if not test_labels:
+        if test_labels is None:
             test_labels = self.test_labels
 
-        activities = hstack([self.activities_array[omic]
-                             for omic in self.test_omic_list])
-        # activities_test = hstack([self.dataset.matrix_test_array[omic]
-        #                           for omic in self.test_omic_list])
+        if test_labels_proba is None:
+            test_labels_proba = self.test_labels_proba
 
-        activities_test = self.activities_test
+        test_norm = self.test_normalization
+        train_norm = self.dataset.normalization
+        train_norm = {key: train_norm[key] for key in train_norm if train_norm[key]}
 
-        color_dict = make_color_dict_from_r(self.labels)
-        labels_c_test = np.array([color_dict[label] for label in self.test_labels])
+        is_same_normalization = train_norm == test_norm
+        is_filled_with_zero = self.dataset.fill_unkown_feature_with_0
 
-        decomp = PCA(n_components=2)
-        X, Y = decomp.fit_transform(activities).T
-
-        X_test, Y_test = decomp.transform(activities_test).T
-
-        for label in set(self.labels):
-            ax.scatter(
-                X_test[test_labels == label],
-                Y_test[test_labels == label],
-                s=40,
-                # linewidths=2.0,
-                alpha=1.0,
-               # marker='square_cross',
-                edgecolors='k',
-                zorder=2,
-               color=labels_c_test[test_labels == label],
-               label='test cluster nb {0}'.format(label))
-
-            sns.kdeplot(
-                X[self.labels == label],
-                Y[self.labels == label],
-                shade=True,
-                cmap=sns.dark_palette(color_dict[label], as_cmap=True),
-                color=color_dict[label],
-                ax=ax,
-                label='cluster nb {0}'.format(label),
-                zorder=1,
-                shade_lowest=False,
-                alpha=0.7
-            )
-
-        labels = [SampleHTML(
-            name=self.dataset.sample_ids_test[i],
-            label=test_labels[i],
-            survival=np.asarray(self.dataset.survival_test[i])[0],
-            proba=self.test_labels_proba[i][test_labels[i]]).html
-                  for i in range(len(test_labels))]
-
-        scatter = ax.plot(X_test, Y_test, 'o', color='b', mec='k',
-                          ms=15, mew=1, alpha=0.0, zorder=3,)[0]
-
-        tooltip = mpld3.plugins.PointHTMLTooltip(
-            scatter, labels, voffset=10, hoffset=10, css=CSS)
-        mpld3.plugins.connect(fig, tooltip)
+        if False and is_same_normalization and is_filled_with_zero:
+            activities = hstack([self.activities_array[omic]
+                                 for omic in self.test_omic_list])
+            activities_test = self.activities_test
+        else:
+            activities, activities_test = self._predict_kde_matrix(labels_proba)
 
         html_name = '{0}/{1}{2}_test_kdeplot.html'.format(
-            self.path_results,
-            self.project_name, key)
+        self.path_results,
+        self.project_name,
+        key)
 
-        mpld3.save_html(fig, html_name)
+        plot_kernel_plots(
+            test_labels=test_labels,
+            test_labels_proba=test_labels_proba,
+            labels=labels,
+            activities=activities,
+            activities_test=activities_test,
+            dataset=self.dataset,
+            path_html=html_name)
 
-        print('kde plot saved at:{0}'.format(html_name))
+    def _create_autoencoder_for_kernel_plot(self, labels_proba):
+        """
+        """
+        autoencoder = DeepBase(dataset=False, seed=self.seed)
+
+        autoencoder.matrix_train_array = self.dataset.matrix_ref_array
+        autoencoder.construct_supervized_network(labels_proba)
+
+        key = str(self.test_normalization)
+
+        self.encoder_for_kde_plot_dict[key] = autoencoder.encoder_array
+
+
+    def _predict_kde_matrix(self, labels_proba):
+        """
+        """
+        matrix_ref_list = []
+        matrix_test_list = []
+
+        encoder_key = str(self.test_normalization)
+
+        if encoder_key not in self.encoder_for_kde_plot_dict or \
+           not self.dataset.fill_unkown_feature_with_0:
+            self._create_autoencoder_for_kernel_plot(labels_proba)
+
+        encoder_array = self.encoder_for_kde_plot_dict[encoder_key]
+
+        for key in encoder_array:
+            encoder = encoder_array[key]
+            matrix_ref = encoder.predict(self.dataset.matrix_ref_array[key])
+            matrix_test = encoder.predict(self.dataset.matrix_test_array[key])
+
+            survival_node_ids = self._look_for_survival_nodes(activities=matrix_ref)
+
+            matrix_ref_list.append(matrix_ref.T[survival_node_ids].T)
+            matrix_test_list.append(matrix_test.T[survival_node_ids].T)
+
+        return hstack(matrix_ref_list), hstack(matrix_test_list)
 
 
 if __name__ == "__main__":

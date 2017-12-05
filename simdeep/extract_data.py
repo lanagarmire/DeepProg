@@ -5,9 +5,8 @@ from sklearn.preprocessing import MinMaxScaler
 from sklearn.preprocessing import quantile_transform
 
 from simdeep.config import TRAINING_TSV
-from simdeep.config import TEST_TSV
 from simdeep.config import SURVIVAL_TSV
-from simdeep.config import SURVIVAL_TSV_TEST
+
 from simdeep.config import PATH_DATA
 from simdeep.config import STACK_MULTI_OMIC
 

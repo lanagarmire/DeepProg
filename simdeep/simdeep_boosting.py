@@ -737,7 +737,9 @@ class SimDeepBoosting():
         """
         """
         self.models[0].plot_kernel_for_test_sets(
-            self.test_labels, key='_' + self.test_fname_key)
+            test_labels_proba=self.test_labels_proba,
+            test_labels=self.test_labels,
+            key='_' + self.test_fname_key)
 
     def load_new_test_dataset(self, tsv_dict,
                               path_survival_file,

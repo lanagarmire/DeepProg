@@ -1,5 +1,13 @@
+from sklearn.decomposition import PCA
+
 from colour import Color
 import numpy as np
+
+import seaborn as sns
+import matplotlib.pyplot as plt
+import mpld3
+
+sns.set(color_codes=True)
 
 
 CSS = """
@@ -123,3 +131,71 @@ def make_color_dict(id_list):
                    for i in range(len(id_list))}
 
     return color_dict
+
+def plot_kernel_plots(
+        test_labels,
+        test_labels_proba,
+        labels,
+        activities,
+        activities_test,
+        dataset,
+        path_html):
+    """
+    perform a html kernel plot
+    """
+    fig, ax = plt.subplots(figsize=(7, 7))
+
+    # activities_test = hstack([self.dataset.matrix_test_array[omic]
+    #                           for omic in self.test_omic_list])
+
+    color_dict = make_color_dict_from_r(labels)
+    labels_c_test = np.array([color_dict[label] for label in test_labels])
+
+    decomp = PCA(n_components=2)
+    X, Y = decomp.fit_transform(activities).T
+
+    X_test, Y_test = decomp.transform(activities_test).T
+
+    for label in set(labels):
+        ax.scatter(
+            X_test[test_labels == label],
+            Y_test[test_labels == label],
+            s=40,
+            # linewidths=2.0,
+            alpha=1.0,
+           # marker='square_cross',
+            edgecolors='k',
+            zorder=2,
+           color=labels_c_test[test_labels == label],
+           label='test cluster nb {0}'.format(label))
+
+        sns.kdeplot(
+            X[labels == label],
+            Y[labels == label],
+            shade=True,
+            cmap=sns.dark_palette(color_dict[label], as_cmap=True),
+            color=color_dict[label],
+            ax=ax,
+            label='cluster nb {0}'.format(label),
+            zorder=1,
+            shade_lowest=False,
+            alpha=0.7
+        )
+
+    labels = [SampleHTML(
+        name=dataset.sample_ids_test[i],
+        label=test_labels[i],
+        survival=np.asarray(dataset.survival_test[i])[0],
+        proba=test_labels_proba[i][test_labels[i]]).html
+              for i in range(len(test_labels))]
+
+    scatter = ax.plot(X_test, Y_test, 'o', color='b', mec='k',
+                      ms=15, mew=1, alpha=0.0, zorder=3,)[0]
+
+    tooltip = mpld3.plugins.PointHTMLTooltip(
+        scatter, labels, voffset=10, hoffset=10, css=CSS)
+    mpld3.plugins.connect(fig, tooltip)
+
+    mpld3.save_html(fig, path_html)
+
+    print('kde plot saved at:{0}'.format(path_html))
