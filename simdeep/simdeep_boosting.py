@@ -310,7 +310,7 @@ class SimDeepBoosting():
                 pool.join()
             self.log['fitting time (s)'] = time() - start_time
 
-            if self.class_selection == 'weighted_mean':
+            if self.class_selection in ['weighted_mean', 'weighted_max']:
                 self.collect_cindex_for_test_fold()
 
     def predict_labels_on_test_dataset(self):
@@ -621,6 +621,7 @@ class SimDeepBoosting():
 
         self.full_labels = np.asarray(labels)
         self.full_labels_proba = probas
+
         self.sample_ids_full = proba_dict.keys()
 
     def _compute_test_coxph(self, fname_base, nbdays,
@@ -949,7 +950,6 @@ def load_model(project_name, path_model=PATH_TO_SAVE_MODEL):
 def _highest_proba(proba):
     """
     """
-    res = []
     labels = []
     probas = []
 
@@ -957,23 +957,17 @@ def _highest_proba(proba):
     samples = range(proba.shape[1])
 
     for sample in samples:
-        label = max([(cluster, proba.T[cluster][sample].max()) for cluster in clusters],
-                    key=lambda x:x[1])
-        res.append(label)
+        proba_vector = [proba.T[cluster][sample].max() for cluster in clusters]
+        label = max(enumerate(proba_vector), key=lambda x:x[1])[0]
 
-    for label, proba in res:
-        if not label:
-            probas.append([proba, 1.0 - proba])
-        else:
-            probas.append([1.0 - proba, proba])
         labels.append(label)
+        probas.append(proba_vector)
 
     return np.asarray(labels), np.asarray(probas)
 
 def _mean_proba(proba):
     """
     """
-    res = []
     labels = []
     probas = []
 
@@ -981,23 +975,17 @@ def _mean_proba(proba):
     samples = range(proba.shape[1])
 
     for sample in samples:
-        label = max([(cluster, proba.T[cluster][sample].mean()) for cluster in clusters],
-                    key=lambda x:x[1])
-        res.append(label)
+        proba_vector = [proba.T[cluster][sample].mean() for cluster in clusters]
+        label = max(enumerate(proba_vector), key=lambda x:x[1])[0]
 
-    for label, proba in res:
-        if not label:
-            probas.append([proba, 1.0 - proba])
-        else:
-            probas.append([1.0 - proba, proba])
         labels.append(label)
+        probas.append(proba_vector)
 
     return np.asarray(labels), np.asarray(probas)
 
 def _weighted_mean(proba, weights):
     """
     """
-    res = []
     labels = []
     probas = []
     weights = np.array(weights)
@@ -1011,24 +999,17 @@ def _weighted_mean(proba, weights):
     samples = range(proba.shape[1])
 
     for sample in samples:
-        label = max([(cluster, np.average(proba.T[cluster][sample], weights=weights))
-                     for cluster in clusters],
-                    key=lambda x:x[1])
-        res.append(label)
+        proba_vector = [np.average(proba.T[cluster][sample]) for cluster in clusters]
+        label = max(enumerate(proba_vector), key=lambda x:x[1])[0]
 
-    for label, proba in res:
-        if not label:
-            probas.append([proba, 1.0 - proba])
-        else:
-            probas.append([1.0 - proba, proba])
         labels.append(label)
+        probas.append(proba_vector)
 
     return np.asarray(labels), np.asarray(probas)
 
 def _weighted_max(proba, weights):
     """
     """
-    res = []
     labels = []
     probas = []
     weights = np.array(weights)
@@ -1042,17 +1023,11 @@ def _weighted_max(proba, weights):
     samples = range(proba.shape[1])
 
     for sample in samples:
-        label = max([(cluster, np.max(proba.T[cluster][sample] * weights))
-                     for cluster in clusters],
-                    key=lambda x:x[1])
-        res.append(label)
+        proba_vector = [np.max(proba.T[cluster][sample] * weights) for cluster in clusters]
+        label = max(enumerate(proba_vector), key=lambda x:x[1])[0]
 
-    for label, proba in res:
-        if not label:
-            probas.append([proba, 1.0 - proba])
-        else:
-            probas.append([1.0 - proba, proba])
         labels.append(label)
+        probas.append(proba_vector)
 
     return np.asarray(labels), np.asarray(probas)
 
