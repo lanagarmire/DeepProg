@@ -26,6 +26,9 @@ from scipy.stats import ranksums
 
 from scipy.spatial.distance import correlation
 
+from os.path import isdir
+from os import mkdir
+
 
 ################ DEBUG ################
 # supposed to be None for normal usage
@@ -374,3 +377,23 @@ def _process_parallel_feature_importance_per_cluster(inp):
             results.append((cluster, feature, pvalue))
 
     return results
+
+def save_matrix(matrix, feature_array, sample_array,
+                path_folder, project_name, key='', sep='\t'):
+    """
+    """
+    if not isdir(path_folder):
+        mkdir(path_folder)
+
+    if key:
+        key = '_' + key
+
+    f_csv = open('{0}/{1}{2}.tsv'.format(path_folder, project_name, key), 'w')
+
+    f_csv.write(sep + sep.join(map(lambda x:x.split('_', 1)[-1], feature_array)) + '\n')
+
+    for sample, vector in zip(sample_array, matrix):
+        vector = np.asarray(vector).reshape(-1)
+        f_csv.write('{0}{1}'.format(sample, sep) + sep.join(map(str, vector)) + '\n')
+
+    print('{0}/{1}{2}.tsv saved'.format(path_folder, project_name, key))

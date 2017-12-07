@@ -177,6 +177,7 @@ class SimDeep(DeepBase):
         self.classifier_dict = {}
 
         self.encoder_for_kde_plot_dict = {}
+        self._main_kernel = {}
 
         self.classifier_type = classifier_type
 
@@ -952,7 +953,7 @@ class SimDeep(DeepBase):
 
         return labels
 
-    def _look_for_survival_nodes(self, key=None, activities=None):
+    def _look_for_survival_nodes(self, key=None, activities=None, survival=None):
         """
         """
         pool = None
@@ -970,7 +971,11 @@ class SimDeep(DeepBase):
         else:
             assert(activities is not None)
 
-        nbdays, isdead = self.dataset.survival.T.tolist()
+        if survival is not None:
+            nbdays, isdead = survival.T.tolist()
+        else:
+            nbdays, isdead = self.dataset.survival.T.tolist()
+
         pvalue_list = []
 
         input_list = iter((node_id, activity, isdead, nbdays)
@@ -1107,20 +1112,31 @@ class SimDeep(DeepBase):
         return hstack(activities)
 
     def plot_kernel_for_test_sets(self,
+                                  dataset=None,
                                   labels=None,
                                   labels_proba=None,
                                   test_labels=None,
                                   test_labels_proba=None,
+                                  define_as_main_kernel=False,
+                                  use_main_kernel=True,
+                                  activities=None,
+                                  activities_test=None,
                                   key=''):
         """
         """
         from simdeep.plot_utils import plot_kernel_plots
 
-        if labels_proba is None:
-            labels_proba = self.labels_proba
+        if dataset is None:
+            dataset = self.dataset
 
         if labels is None:
             labels = self.labels
+
+        if labels_proba is None:
+            labels_proba = self.labels_proba
+
+        if test_labels_proba is None:
+            test_labels_proba = self.test_labels_proba
 
         if test_labels is None:
             test_labels = self.test_labels
@@ -1135,17 +1151,20 @@ class SimDeep(DeepBase):
         is_same_normalization = train_norm == test_norm
         is_filled_with_zero = self.dataset.fill_unkown_feature_with_0
 
-        if False and is_same_normalization and is_filled_with_zero:
+        if activities is None or activities_test is None:
+            if not (is_same_normalization and is_filled_with_zero):
+                print('#### cannot plot survival KDE plot \n' \
+                      'Different normalisation used for test set ####')
+            return
+
             activities = hstack([self.activities_array[omic]
                                  for omic in self.test_omic_list])
             activities_test = self.activities_test
-        else:
-            activities, activities_test = self._predict_kde_matrix(labels_proba)
 
         html_name = '{0}/{1}{2}_test_kdeplot.html'.format(
-        self.path_results,
-        self.project_name,
-        key)
+            self.path_results,
+            self.project_name,
+            key)
 
         plot_kernel_plots(
             test_labels=test_labels,
@@ -1156,20 +1175,36 @@ class SimDeep(DeepBase):
             dataset=self.dataset,
             path_html=html_name)
 
-    def _create_autoencoder_for_kernel_plot(self, labels_proba):
+    def plot_supervised_kernel_for_test_sets(self, **kwargs):
         """
         """
-        autoencoder = DeepBase(dataset=False, seed=self.seed)
 
-        autoencoder.matrix_train_array = self.dataset.matrix_ref_array
+        activities, activities_test = self._predict_kde_matrix(
+            labels_proba, dataset)
+
+        if define_as_main_kernel:
+            self._main_kernel = {}
+
+
+
+
+    def _create_autoencoder_for_kernel_plot(self, labels_proba, dataset):
+        """
+        """
+        autoencoder = DeepBase(dataset=dataset,
+                               seed=self.seed,
+                               verbose=False,
+                               dropout=0.1,
+                               nb_epoch=50)
+
+        autoencoder.matrix_train_array = dataset.matrix_ref_array
         autoencoder.construct_supervized_network(labels_proba)
 
         key = str(self.test_normalization)
 
         self.encoder_for_kde_plot_dict[key] = autoencoder.encoder_array
 
-
-    def _predict_kde_matrix(self, labels_proba):
+    def _predict_kde_matrix(self, labels_proba, dataset):
         """
         """
         matrix_ref_list = []
@@ -1178,20 +1213,24 @@ class SimDeep(DeepBase):
         encoder_key = str(self.test_normalization)
 
         if encoder_key not in self.encoder_for_kde_plot_dict or \
-           not self.dataset.fill_unkown_feature_with_0:
-            self._create_autoencoder_for_kernel_plot(labels_proba)
+           not dataset.fill_unkown_feature_with_0:
+            self._create_autoencoder_for_kernel_plot(labels_proba, dataset)
 
         encoder_array = self.encoder_for_kde_plot_dict[encoder_key]
 
         for key in encoder_array:
             encoder = encoder_array[key]
-            matrix_ref = encoder.predict(self.dataset.matrix_ref_array[key])
-            matrix_test = encoder.predict(self.dataset.matrix_test_array[key])
+            matrix_ref = encoder.predict(dataset.matrix_ref_array[key])
+            matrix_test = encoder.predict(dataset.matrix_test_array[key])
 
-            survival_node_ids = self._look_for_survival_nodes(activities=matrix_ref)
+            survival_node_ids = self._look_for_survival_nodes(
+                activities=matrix_ref, survival=dataset.survival)
 
-            matrix_ref_list.append(matrix_ref.T[survival_node_ids].T)
-            matrix_test_list.append(matrix_test.T[survival_node_ids].T)
+            matrix_ref = matrix_ref.T[survival_node_ids].T
+            matrix_test = matrix_test.T[survival_node_ids].T
+
+            matrix_ref_list.append(matrix_ref)
+            matrix_test_list.append(matrix_test)
 
         return hstack(matrix_ref_list), hstack(matrix_test_list)
 

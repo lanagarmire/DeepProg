@@ -73,6 +73,7 @@ def main():
                                    SURVIVAL_TSV_TEST,
                                    fname_key='dummy')
     boosting.predict_labels_on_test_dataset()
+    boosting.plot_predicted_labels_for_test_sets()
 
     boosting.collect_pvalue_on_training_dataset()
     boosting.collect_pvalue_on_test_fold()
@@ -134,8 +135,13 @@ class SimDeepBoosting():
                       '\n consider changing it as option' \
                       .format(self.path_results))
 
+        self.test_tsv_dict = None
+        self.test_survival_file = None
+        self.test_normalization = None
+
         self.test_labels = None
         self.test_labels_proba = None
+
         self.cv_labels = None
         self.cv_labels_proba = None
         self.full_labels = None
@@ -220,6 +226,13 @@ class SimDeepBoosting():
                                **kwargs)
 
             self.datasets.append(dataset)
+
+        self.dataset = LoadData(
+            cross_validation_instance=None,
+            verbose=True,
+            normalization=self.normalization,
+            _parameters=parameters,
+            **kwargs)
 
     def __del__(self):
         """
@@ -601,7 +614,7 @@ class SimDeepBoosting():
         labels, probas = self._do_class_selection(hstack(proba_dict.values()),
                                                  weights=self.cindex_test_folds)
 
-        self.full_labels = labels
+        self.full_labels = np.asarray(labels)
         self.full_labels_proba = probas
         self.sample_ids_full = proba_dict.keys()
 
@@ -736,7 +749,24 @@ class SimDeepBoosting():
     def plot_predicted_labels_for_test_sets(self):
         """
         """
+        print('#### plotting labels....')
+        # print('## reloading training / test set...')
+
+        # if not self.dataset.matrix_array:
+        #     self.dataset.load_array()
+        #     self.dataset.normalize_training_array()
+        #     self.dataset.load_survival()
+
+        # self.dataset.load_new_test_dataset(self.test_tsv_dict,
+        #                                    self.test_survival_file,
+        #                                    normalization=self.test_normalization)
+
+        # self.dataset.reorder_ref_dataset(self.sample_ids_full)
+
         self.models[0].plot_kernel_for_test_sets(
+            # labels=self.full_labels,
+            # labels_proba=self.full_labels_proba,
+            # dataset=self.dataset,
             test_labels_proba=self.test_labels_proba,
             test_labels=self.test_labels,
             key='_' + self.test_fname_key)
@@ -749,6 +779,9 @@ class SimDeepBoosting():
         """
         """
         pool = None
+        self.test_tsv_dict = tsv_dict
+        self.test_survival_file = path_survival_file
+        self.test_normalization = normalization
 
         if debug:
             map_func = map
@@ -918,7 +951,7 @@ def _highest_proba(proba):
             probas.append([1.0 - proba, proba])
         labels.append(label)
 
-    return labels, np.asarray(probas)
+    return np.asarray(labels), np.asarray(probas)
 
 def _mean_proba(proba):
     """
@@ -942,7 +975,7 @@ def _mean_proba(proba):
             probas.append([1.0 - proba, proba])
         labels.append(label)
 
-    return labels, np.asarray(probas)
+    return np.asarray(labels), np.asarray(probas)
 
 def _weighted_mean(proba, weights):
     """
@@ -973,7 +1006,7 @@ def _weighted_mean(proba, weights):
             probas.append([1.0 - proba, proba])
         labels.append(label)
 
-    return labels, np.asarray(probas)
+    return np.asarray(labels), np.asarray(probas)
 
 def _weighted_max(proba, weights):
     """
@@ -1004,7 +1037,7 @@ def _weighted_max(proba, weights):
             probas.append([1.0 - proba, proba])
         labels.append(label)
 
-    return labels, np.asarray(probas)
+    return np.asarray(labels), np.asarray(probas)
 
 def _partial_fit_model_pool(dataset):
     """ """

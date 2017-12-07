@@ -24,6 +24,8 @@ from simdeep.survival_utils import RankNorm
 from simdeep.survival_utils import CorrelationReducer
 from simdeep.survival_utils import VarianceReducer
 
+from simdeep.survival_utils import save_matrix
+
 from collections import defaultdict
 
 from time import time
@@ -33,6 +35,7 @@ import numpy as np
 from numpy import hstack
 from numpy import vstack
 
+
 ######################## VARIABLE ############################
 QUANTILE_OPTION = {'n_quantiles': 100,
                    'output_distribution':'normal'}
@@ -41,16 +44,29 @@ QUANTILE_OPTION = {'n_quantiles': 100,
 
 def main():
     """ """
-    load_data = LoadData(normalization={'TRAIN_NORM_SCALE': True,})
+    training_tsv = {
+        'RNA': 'rna_validation_hoshida.tsv',
+        # 'CNV': 'cnv_360.tsv',
+        # 'MIR': 'mir_360.tsv',
+        # 'METH': 'meth_360.tsv',
+    }
+    survival_tsv = "survival_event_hoshida.txt"
+    path_data = "/home/opoirion/data/survival_analysis_multiple/"
+
+    load_data = LoadData(
+        training_tsv=training_tsv,
+        survival_tsv=survival_tsv,
+        path_data=path_data,
+        normalization={'TRAIN_RANK_NORM': True,})
     load_data.load_array()
     load_data.load_survival()
     load_data.create_a_cv_split()
 
     load_data.normalize_training_array()
-    load_data.load_matrix_test()
-
-    load_data.load_matrix_test_fold()
-    load_data.load_matrix_full()
+    load_data.save_ref_matrix(
+        path_folder='/home/opoirion/data/survival_analysis_multiple/hoshida_rank_norm/',
+        project_name='rank')
+    return
 
     load_data.load_new_test_dataset(
         {'METH': '../../../../data/survival_analysis_multiple/meth_validation.tsv'},
@@ -350,6 +366,21 @@ class LoadData():
         if self.verbose:
             print('data loaded in {0} s'.format(time() - t))
 
+    def reorder_ref_dataset(self, new_sample_ids):
+        """
+        """
+        assert(set(new_sample_ids) == set(self.sample_ids))
+        index_dict = {sample: pos for pos, sample in enumerate(self.sample_ids)}
+        index = [index_dict[sample] for sample in new_sample_ids]
+
+        self.sample_ids = np.asarray(self.sample_ids)[index].T
+
+        for key in self.matrix_train_array:
+            self.matrix_train_array[key] = self.matrix_train_array[key][index]
+
+        for key in self.matrix_ref_array:
+            self.matrix_train_array[key] = self.matrix_train_array[key][index]
+
     def create_a_cv_split(self):
         """ """
         if not self.cross_validation_instance:
@@ -648,10 +679,18 @@ class LoadData():
 
         return np.nan_to_num(matrix_ref), np.nan_to_num(matrix)
 
-    def save_dataset(self):
+    def save_ref_matrix(self, path_folder, project_name):
         """
         """
-        pass
+        for key in self.matrix_ref_array:
+            save_matrix(
+                matrix=self.matrix_ref_array[key],
+                feature_array=self.feature_array[key],
+                sample_array=self.sample_ids,
+                path_folder=path_folder,
+                project_name=project_name,
+                key=key
+            )
 
 
 if __name__ == '__main__':
