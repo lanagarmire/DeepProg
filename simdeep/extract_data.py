@@ -57,6 +57,7 @@ def main():
         training_tsv=training_tsv,
         survival_tsv=survival_tsv,
         path_data=path_data,
+        cross_validation_instance=None,
         normalization={'TRAIN_RANK_NORM': True,})
     load_data.load_array()
     load_data.load_survival()
@@ -289,6 +290,8 @@ class LoadData():
         """
         if normalization is not None:
             normalization = defaultdict(bool, normalization)
+        else:
+            normalization = self.normalization.copy()
 
         self.test_tsv = tsv_dict
         self.survival_test = None

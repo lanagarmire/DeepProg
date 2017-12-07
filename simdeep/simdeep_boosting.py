@@ -216,13 +216,18 @@ class SimDeepBoosting():
         self.split_n_fold = split_n_fold
 
         for it in range(nb_it):
-            split = KFold(n_splits=split_n_fold,
-                          shuffle=True, random_state=random_states[it])
+            if self.split_n_fold:
+                split = KFold(n_splits=split_n_fold,
+                              shuffle=True, random_state=random_states[it])
+            else:
+                split = None
+
+            parameters['seed'] = random_states[it]
 
             dataset = LoadData(cross_validation_instance=split,
                                verbose=False,
                                normalization=self.normalization,
-                               _parameters=parameters,
+                               _parameters=parameters.copy(),
                                **kwargs)
 
             self.datasets.append(dataset)
@@ -750,6 +755,19 @@ class SimDeepBoosting():
         """
         """
         print('#### plotting labels....')
+
+        self.models[0].plot_kernel_for_test_sets(
+            test_labels_proba=self.test_labels_proba,
+            test_labels=self.test_labels,
+            key='_' + self.test_fname_key)
+
+    def plot_supervised_predicted_labels_for_test_sets(
+            self,
+            define_as_main_kernel=False,
+            use_main_kernel=False):
+        """
+        """
+        print('#### plotting supervised labels....')
         # print('## reloading training / test set...')
 
         # if not self.dataset.matrix_array:
@@ -763,10 +781,9 @@ class SimDeepBoosting():
 
         # self.dataset.reorder_ref_dataset(self.sample_ids_full)
 
-        self.models[0].plot_kernel_for_test_sets(
-            # labels=self.full_labels,
-            # labels_proba=self.full_labels_proba,
-            # dataset=self.dataset,
+        self.models[0].plot_supervised_kernel_for_test_sets(
+            define_as_main_kernel=define_as_main_kernel,
+            use_main_kernel=use_main_kernel,
             test_labels_proba=self.test_labels_proba,
             test_labels=self.test_labels,
             key='_' + self.test_fname_key)
@@ -1047,11 +1064,8 @@ def _partial_fit_model_pool(dataset):
                     load_existing_models=False,
                     verbose=dataset.verbose,
                     _isboosting=True,
-                    seed=dataset.cross_validation_instance.random_state,
                     do_KM_plot=False,
                     **parameters)
-
-    before = model.dataset.cross_validation_instance.random_state
 
     try:
         model.load_training_dataset()
@@ -1064,11 +1078,11 @@ def _partial_fit_model_pool(dataset):
             raise Exception('pvalue: {0} not significant!'.format(model.train_pvalue))
 
     except Exception as e:
-        print('model with random state:{1} didn\'t converge:{0}'.format(str(e), before))
+        print('model with random state:{1} didn\'t converge:{0}'.format(str(e), model.seed))
         return None
 
     else:
-        print('model with random state:{0} fitted'.format(before))
+        print('model with random state:{0} fitted'.format(model.seed))
 
     model.predict_labels_on_test_fold()
     model.predict_labels_on_full_dataset()

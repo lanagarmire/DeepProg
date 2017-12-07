@@ -80,7 +80,7 @@ def main():
     sim_deep.predict_labels_on_test_fold()
     sim_deep.predict_labels_on_full_dataset()
 
-    # sim_deep.plot_cluster_labels()
+    sim_deep.plot_cluster_labels()
 
     if SAVE_FITTED_MODELS:
         sim_deep.save_encoders()
@@ -621,7 +621,7 @@ class SimDeep(DeepBase):
         if self.verbose:
             print('classification for test set analysis...')
 
-        self.used_normalization_for_classif = self.dataset.normalization_test
+        self.used_normalization = self.dataset.normalization_test
         self.used_features_for_classif = self.dataset.feature_ref_array
 
         train_matrix = self._return_train_matrix_for_classification()
@@ -1118,7 +1118,7 @@ class SimDeep(DeepBase):
                                   test_labels=None,
                                   test_labels_proba=None,
                                   define_as_main_kernel=False,
-                                  use_main_kernel=True,
+                                  use_main_kernel=False,
                                   activities=None,
                                   activities_test=None,
                                   key=''):
@@ -1153,13 +1153,21 @@ class SimDeep(DeepBase):
 
         if activities is None or activities_test is None:
             if not (is_same_normalization and is_filled_with_zero):
-                print('#### cannot plot survival KDE plot \n' \
-                      'Different normalisation used for test set ####')
-            return
+                print('\n<><><><> Cannot plot survival KDE plot' \
+                      ' Different normalisation used for test set <><><><>\n')
+                return
 
             activities = hstack([self.activities_array[omic]
                                  for omic in self.test_omic_list])
             activities_test = self.activities_test
+
+        if define_as_main_kernel:
+            self._main_kernel = {'activities': activities_test.copy(),
+                                 'labels': test_labels.copy()}
+
+        if use_main_kernel:
+            activities = self._main_kernel['activities']
+            labels = self._main_kernel['labels']
 
         html_name = '{0}/{1}{2}_test_kdeplot.html'.format(
             self.path_results,
@@ -1175,18 +1183,36 @@ class SimDeep(DeepBase):
             dataset=self.dataset,
             path_html=html_name)
 
-    def plot_supervised_kernel_for_test_sets(self, **kwargs):
+    def plot_supervised_kernel_for_test_sets(
+            self,
+            labels=None,
+            labels_proba=None,
+            dataset=None,
+            key='',
+            **kwargs):
         """
         """
+        if labels is None:
+            labels = self.labels
+
+        if labels_proba is None:
+            labels_proba = self.labels_proba
+
+        if dataset is None:
+            dataset = self.dataset
 
         activities, activities_test = self._predict_kde_matrix(
             labels_proba, dataset)
 
-        if define_as_main_kernel:
-            self._main_kernel = {}
+        key += '_supervised'
 
-
-
+        self.plot_kernel_for_test_sets(labels=labels,
+                                       labels_proba=labels_proba,
+                                       dataset=dataset,
+                                       activities=activities,
+                                       activities_test=activities_test,
+                                       key=key,
+                                       **kwargs)
 
     def _create_autoencoder_for_kernel_plot(self, labels_proba, dataset):
         """
