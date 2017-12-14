@@ -59,4 +59,4 @@ def test_instance():
 
 
 if __name__ == '__main__':
-    test()
+    test_instance()

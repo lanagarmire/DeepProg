@@ -457,10 +457,10 @@ class SimDeepBoosting():
             self.cindex_test_folds.append(cindex)
 
         if self.verbose:
-            print('C-index results for test fold: mean {0} std {1}'.format(
-                np.mean(self.cindex_test_folds), np.std(self.cindex_test_folds)))
+            mean, std = np.nanmean(self.cindex_test_folds), np.nanstd(self.cindex_test_folds)
+            print('C-index results for test fold: mean {0} std {1}'.format(mean, std))
 
-        self.log['c-indexes test fold (mean)'] = np.mean(self.cindex_test_folds)
+        self.log['c-indexes test fold (mean)'] = np.mean(mean)
 
         return self.cindex_test_folds
 

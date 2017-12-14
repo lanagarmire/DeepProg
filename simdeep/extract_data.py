@@ -45,12 +45,13 @@ QUANTILE_OPTION = {'n_quantiles': 100,
 def main():
     """ """
     training_tsv = {
-        'RNA': 'rna_validation_hoshida.tsv',
-        # 'CNV': 'cnv_360.tsv',
-        # 'MIR': 'mir_360.tsv',
-        # 'METH': 'meth_360.tsv',
+        # 'RNA': 'rna_validation_hoshida.tsv',
+        'CNV': 'cnv_360.tsv',
+        'MIR': 'mir_360.tsv',
+        'METH': 'meth_360.tsv',
+        'RNA': 'rna_360.tsv',
     }
-    survival_tsv = "survival_event_hoshida.txt"
+    survival_tsv = "survival_event_360.txt"
     path_data = "/home/opoirion/data/survival_analysis_multiple/"
 
     load_data = LoadData(
@@ -58,15 +59,17 @@ def main():
         survival_tsv=survival_tsv,
         path_data=path_data,
         cross_validation_instance=None,
-        normalization={'TRAIN_RANK_NORM': True,})
+        normalization={'TRAIN_RANK_NORM': True,
+                       'TRAIN_CORR_REDUCTION': True,
+        })
     load_data.load_array()
     load_data.load_survival()
     load_data.create_a_cv_split()
 
     load_data.normalize_training_array()
     load_data.save_ref_matrix(
-        path_folder='/home/opoirion/data/survival_analysis_multiple/hoshida_rank_norm/',
-        project_name='rank')
+        path_folder='/home/opoirion/data/survival_analysis_multiple/hcc_rank_corr_norm/',
+        project_name='rank_corr')
     return
 
     load_data.load_new_test_dataset(
@@ -176,7 +179,7 @@ class LoadData():
         if not self.do_stack_multi_omic:
             return
 
-        if arrays is not None and len(arrays) > 1:
+        if arrays is not None:
             arrays['STACKED'] = hstack(
                 arrays.values())
 
@@ -186,14 +189,13 @@ class LoadData():
         if not features:
             return
 
-        if len(features) > 1:
-            features['STACKED'] = [feat for key in features
-                                   for feat in features[key]]
-            for key in features.keys():
-                features.pop(key) if key != 'STACKED' else True
+        features['STACKED'] = [feat for key in features
+                               for feat in features[key]]
+        for key in features.keys():
+            features.pop(key) if key != 'STACKED' else True
 
-            self.feature_ref_index['STACKED'] = {feature: pos for pos, feature
-                                                 in enumerate(features['STACKED'])}
+        self.feature_ref_index['STACKED'] = {feature: pos for pos, feature
+                                             in enumerate(features['STACKED'])}
 
     def load_matrix_test_fold(self):
         """ """
@@ -688,7 +690,7 @@ class LoadData():
         for key in self.matrix_ref_array:
             save_matrix(
                 matrix=self.matrix_ref_array[key],
-                feature_array=self.feature_array[key],
+                feature_array=self.feature_ref_array[key],
                 sample_array=self.sample_ids,
                 path_folder=path_folder,
                 project_name=project_name,
