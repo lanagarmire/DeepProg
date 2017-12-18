@@ -295,7 +295,12 @@ class LoadData():
         else:
             normalization = self.normalization.copy()
 
-        self.test_tsv = tsv_dict
+        self.test_tsv = tsv_dict.copy()
+
+        for key in tsv_dict:
+            if key not in self.training_tsv:
+                self.test_tsv.pop(key)
+
         self.survival_test = None
         self.sample_ids_test = None
         self.survival_tsv_test = path_survival_file

@@ -186,7 +186,7 @@ class SimDeepBoosting():
         self.seed = seed
 
         self.log['seed'] = seed
-        self.log['parameters'] = parameters
+        self.log['parameters'] = parameters.copy()
         self.log['nb_it'] = nb_it
         self.log['normalization'] = normalization
         self.log['nb clusters'] = nb_clusters

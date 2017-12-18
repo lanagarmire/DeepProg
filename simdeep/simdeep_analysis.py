@@ -371,6 +371,15 @@ class SimDeep(DeepBase):
         nbdays, isdead = self.dataset.survival_test.T.tolist()
 
         self.test_omic_list = self.dataset.matrix_test_array.keys()
+        self.test_omic_list = list(set(self.test_omic_list).intersection(
+            self.training_omic_list))
+
+        try:
+            assert(len(self.test_omic_list) > 0)
+        except AssertionError:
+            raise Exception('in predict_labels_on_test_dataset: test_omic_list is empty!'\
+                            '\n either no common omic with trining_omic_list or error!')
+
         self.fit_classification_test_model()
 
         self.activities_test = self._predict_survival_nodes(self.dataset.matrix_test_array)
