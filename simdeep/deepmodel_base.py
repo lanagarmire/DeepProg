@@ -10,8 +10,7 @@ from keras.models import Sequential
 from keras.models import load_model
 from keras.models import Model
 
-from keras.regularizers import ActivityRegularizer
-from keras.regularizers import WeightRegularizer
+from keras import regularizers
 
 from simdeep.extract_data import LoadData
 
@@ -217,10 +216,8 @@ class DeepBase(object):
             input_dim = shape[1]
 
         model.add(Dense(dim,
-                        activity_regularizer=ActivityRegularizer(
-                        l2=self.A_l2_constant),
-                        W_regularizer=WeightRegularizer(
-                            l1=self.W_l1_constant),
+                        activity_regularizer=regularizers.l2(self.A_l2_constant),
+                        kernel_regularizer=regularizers.l1(self.W_l1_constant),
                         name=name,
                         activation=self.activation,
                         input_dim=input_dim))

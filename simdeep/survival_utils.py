@@ -70,6 +70,35 @@ class RankNorm():
 
         return np.matrix(X)
 
+class SampleReducer():
+    """
+    """
+    def __init__(self, perc_sample_to_keep=0.90):
+        """
+        """
+        assert(isinstance(perc_sample_to_keep, float))
+        assert(0.0 < perc_sample_to_keep < 1.0)
+        self.perc_sample_to_keep = perc_sample_to_keep
+
+    def sample_to_keep(self, datasets, index=None):
+        """
+        """
+        nb_samples = len(datasets.values()[0][index])
+        scores = np.zeros(nb_samples)
+        threshold = int(nb_samples * self.perc_sample_to_keep)
+
+        for key in datasets:
+            scores_array = np.array([vector.sum() for vector in datasets[key][index]])
+            scores = scores + scores_array
+
+        scores = [(pos, score) for pos, score in enumerate(scores)]
+
+        scores.sort(key=lambda x:x[1], reverse=True)
+        to_keep = [pos for pos, score in scores[:threshold]]
+        to_remove = [pos for pos, score in scores[threshold:]]
+
+        return to_keep, to_remove
+
 class VarianceReducer():
     """
     """

@@ -23,6 +23,7 @@ from simdeep.survival_utils import MadScaler
 from simdeep.survival_utils import RankNorm
 from simdeep.survival_utils import CorrelationReducer
 from simdeep.survival_utils import VarianceReducer
+from simdeep.survival_utils import SampleReducer
 
 from simdeep.survival_utils import save_matrix
 
@@ -373,8 +374,26 @@ class LoadData():
             if self.verbose:
                 print('{0} loaded of dim:{1}'.format(f_name, matrix.shape))
 
+        self._discard_training_samples()
+
         if self.verbose:
             print('data loaded in {0} s'.format(time() - t))
+
+    def _discard_training_samples(self):
+        """
+        """
+        if self.normalization['DISCARD_TRAINING_SAMPLES']:
+            sample_reducer = SampleReducer(1.0 - self.normalization['DISCARD_TRAINING_SAMPLES'])
+            index = range(len(self.sample_ids))
+            to_keep, to_remove = sample_reducer.sample_to_keep(self.matrix_array, index)
+
+            self.sample_ids = np.asarray(self.sample_ids)[to_keep].tolist()
+
+            for key in self.matrix_array:
+                self.matrix_array[key] = self.matrix_array[key][to_keep]
+
+            if self.verbose:
+                print('{0} training samples discarded'.format(len(to_remove)))
 
     def reorder_ref_dataset(self, new_sample_ids):
         """
@@ -398,6 +417,13 @@ class LoadData():
 
         cv = self.cross_validation_instance
         train, test = [(tn, tt) for tn, tt in cv.split(self.sample_ids)][self.test_fold]
+
+        if self.normalization['PERC_SAMPLE_TO_KEEP']:
+            sample_reducer = SampleReducer(self.normalization['PERC_SAMPLE_TO_KEEP'])
+            to_keep, to_remove = sample_reducer.sample_to_keep(self.matrix_array, train)
+
+            test = list(train[to_remove]) + list(test)
+            train = train[to_keep]
 
         for key in self.matrix_array:
             self.matrix_cv_array[key] = self.matrix_array[key][test]
