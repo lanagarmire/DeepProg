@@ -22,6 +22,7 @@ setup(name='garmire_simdeep',
           'scikit-learn>=0.19.1',
           'rpy2',
           'theano',
-          'keras'
+          'keras',
+          'simplejson'
       ],
       )
