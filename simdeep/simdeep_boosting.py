@@ -1,9 +1,9 @@
 from simdeep.simdeep_analysis import SimDeep
 from simdeep.extract_data import LoadData
 
-from coxph_from_r import coxph
-from coxph_from_r import c_index
-from coxph_from_r import c_index_multiple
+from simdeep.coxph_from_r import coxph
+from simdeep.coxph_from_r import c_index
+from simdeep.coxph_from_r import c_index_multiple
 
 from sklearn.model_selection import KFold
 

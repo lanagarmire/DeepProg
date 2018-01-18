@@ -17,9 +17,9 @@ from scipy.stats import rankdata
 from sklearn.metrics import pairwise_distances
 
 from collections import defaultdict
-from coxph_from_r import coxph
 
-from coxph_from_r import c_index
+from simdeep.coxph_from_r import coxph
+from simdeep.coxph_from_r import c_index
 
 from scipy.stats import kruskal
 from scipy.stats import ranksums

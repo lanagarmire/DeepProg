@@ -37,11 +37,11 @@ from simdeep.survival_utils import _process_parallel_feature_importance_per_clus
 
 from simdeep.survival_utils import select_best_classif_params
 
-from coxph_from_r import coxph
-from coxph_from_r import c_index
-from coxph_from_r import c_index_multiple
+from simdeep.coxph_from_r import coxph
+from simdeep.coxph_from_r import c_index
+from simdeep.coxph_from_r import c_index_multiple
 
-from coxph_from_r import surv_median
+from simdeep.coxph_from_r import surv_median
 
 from collections import Counter
 
