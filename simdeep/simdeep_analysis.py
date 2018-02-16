@@ -141,7 +141,7 @@ class SimDeep(DeepBase):
             w_reg = 0.001
             data_split = 0.2
             activation = 'tanh'
-            nb_epoch = 10
+            epochs = 10
             loss = 'binary_crossentropy'
             optimizer = 'sgd'
         """
@@ -1230,7 +1230,7 @@ class SimDeep(DeepBase):
                                seed=self.seed,
                                verbose=False,
                                dropout=0.1,
-                               nb_epoch=50)
+                               epochs=50)
 
         autoencoder.matrix_train_array = dataset.matrix_ref_array
         autoencoder.construct_supervized_network(labels_proba)
@@ -1261,8 +1261,12 @@ class SimDeep(DeepBase):
             survival_node_ids = self._look_for_survival_nodes(
                 activities=matrix_ref, survival=dataset.survival)
 
-            matrix_ref = matrix_ref.T[survival_node_ids].T
-            matrix_test = matrix_test.T[survival_node_ids].T
+            if len(survival_node_ids) > 1:
+                matrix_ref = matrix_ref.T[survival_node_ids].T
+                matrix_test = matrix_test.T[survival_node_ids].T
+            else:
+                print('not enough survival nodes to construct kernel for key: {0}' \
+                      'using all the matrix for {0}'.format(key))
 
             matrix_ref_list.append(matrix_ref)
             matrix_test_list.append(matrix_test)

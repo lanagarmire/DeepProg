@@ -27,7 +27,7 @@ from simdeep.config import CLASS_SELECTION
 from simdeep.config import PATH_TO_SAVE_MODEL
 from simdeep.config import NB_CLUSTERS
 from simdeep.config import NORMALIZATION
-from simdeep.config import NB_EPOCH
+from simdeep.config import EPOCHS
 from simdeep.config import NEW_DIM
 from simdeep.config import NB_SELECTED_FEATURES
 from simdeep.config import PVALUE_THRESHOLD
@@ -104,7 +104,7 @@ class SimDeepBoosting():
                  split_n_fold=3,
                  path_results=PATH_RESULTS,
                  nb_clusters=NB_CLUSTERS,
-                 nb_epoch=NB_EPOCH,
+                 epochs=EPOCHS,
                  normalization=NORMALIZATION,
                  nb_selected_features=NB_SELECTED_FEATURES,
                  cluster_method=CLUSTER_METHOD,
@@ -159,7 +159,7 @@ class SimDeepBoosting():
         ######## deepprob instance parameters ########
         self.nb_clusters = nb_clusters
         self.normalization = normalization
-        self.nb_epoch = nb_epoch
+        self.epochs = epochs
         self.new_dim = new_dim
         self.nb_selected_features = nb_selected_features
         self.pvalue_thres = pvalue_thres
@@ -172,7 +172,7 @@ class SimDeepBoosting():
 
         parameters = {
             'nb_clusters': self.nb_clusters,
-            'nb_epoch': self.nb_epoch,
+            'epochs': self.epochs,
             'nb_selected_features': self.nb_selected_features,
             'new_dim': self.new_dim,
             'pvalue_thres': self.pvalue_thres,

@@ -16,7 +16,7 @@ from simdeep.extract_data import LoadData
 
 from time import time
 
-from simdeep.config import NB_EPOCH
+from simdeep.config import EPOCHS
 from simdeep.config import LEVEL_DIMS_IN
 from simdeep.config import LEVEL_DIMS_OUT
 from simdeep.config import NEW_DIM
@@ -44,7 +44,7 @@ class DeepBase(object):
     def __init__(self,
                  dataset=None,
                  verbose=True,
-                 nb_epoch=NB_EPOCH,
+                 epochs=EPOCHS,
                  level_dims_in=LEVEL_DIMS_IN,
                  level_dims_out=LEVEL_DIMS_OUT,
                  new_dim=NEW_DIM,
@@ -67,7 +67,7 @@ class DeepBase(object):
             w_reg = 0.001
             data_split = 0.2
             activation = 'tanh'
-            nb_epoch = 10
+            epochs = 10
             loss = 'binary_crossentropy'
             optimizer = 'sgd'
             path_model where to save/load the models
@@ -80,7 +80,7 @@ class DeepBase(object):
 
         self.matrix_train_array = {}
 
-        self.nb_epoch = nb_epoch
+        self.epochs = epochs
         self.level_dims_in = level_dims_in
         self.level_dims_out = level_dims_out
         self.new_dim = new_dim
@@ -258,7 +258,7 @@ class DeepBase(object):
             model.fit(x=matrix_train,
                        y=matrix_out,
                        verbose=verbose,
-                       nb_epoch=self.nb_epoch,
+                       epochs=self.epochs,
                        validation_split=self.data_split,
                        shuffle=True)
 

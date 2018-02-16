@@ -3,8 +3,12 @@ from sklearn.decomposition import PCA
 from colour import Color
 import numpy as np
 
+import matplotlib
+matplotlib.use('Agg')
+
 import seaborn as sns
-import matplotlib.pyplot as plt
+
+import pylab as plt
 import mpld3
 
 sns.set(color_codes=True)

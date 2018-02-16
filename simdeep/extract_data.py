@@ -17,6 +17,8 @@ from simdeep.config import FILL_UNKOWN_FEATURE_WITH_0
 from simdeep.config import CROSS_VALIDATION_INSTANCE
 from simdeep.config import TEST_FOLD
 
+from simdeep.config import SURVIVAL_FLAG
+
 from simdeep.survival_utils import load_data_from_tsv
 from simdeep.survival_utils import load_survival_file
 from simdeep.survival_utils import MadScaler
@@ -93,6 +95,7 @@ class LoadData():
             stack_multi_omic=STACK_MULTI_OMIC,
             fill_unkown_feature_with_0=FILL_UNKOWN_FEATURE_WITH_0,
             normalization=NORMALIZATION,
+            survival_flag=SURVIVAL_FLAG,
             _parameters={},
             verbose=True,
     ):
@@ -117,6 +120,7 @@ class LoadData():
         self.survival_tsv = survival_tsv
         self.training_tsv = training_tsv
         self.fill_unkown_feature_with_0 = fill_unkown_feature_with_0
+        self.survival_flag = survival_flag
         self.feature_array = {}
         self.matrix_array = {}
 
@@ -461,7 +465,8 @@ class LoadData():
 
     def load_survival(self):
         """ """
-        survival = load_survival_file(self.survival_tsv, path_data=self.path_data)
+        survival = load_survival_file(self.survival_tsv, path_data=self.path_data,
+                                      survival_flag=self.survival_flag)
         matrix = []
 
         retained_samples = []
@@ -488,7 +493,8 @@ class LoadData():
 
     def load_survival_test(self):
         """ """
-        survival = load_survival_file(self.survival_tsv_test, path_data=self.path_data)
+        survival = load_survival_file(self.survival_tsv_test, path_data=self.path_data,
+                                      survival_flag=self.survival_flag)
         matrix = []
 
         retained_samples = []

@@ -130,7 +130,7 @@ DATA_SPLIT = None
 # activation function
 ACTIVATION = 'tanh'
 # Number of epoch
-NB_EPOCH = 10
+EPOCHS = 10
 # Loss function to minimize
 LOSS = 'binary_crossentropy'
 # Optimizer (sgd for Stochastic Gradient Descent)

@@ -173,7 +173,10 @@ class RankCorrNorm():
         self.dataset = dataset
 
 
-def load_survival_file(f_name, path_data=PATH_DATA, sep=DEFAULTSEP):
+def load_survival_file(f_name,
+                       path_data=PATH_DATA,
+                       sep=DEFAULTSEP,
+                       survival_flag=SURVIVAL_FLAG):
     """ """
     if f_name in SEPARATOR:
         sep = SEPARATOR[f_name]
@@ -183,16 +186,16 @@ def load_survival_file(f_name, path_data=PATH_DATA, sep=DEFAULTSEP):
     with open(path_data + f_name, 'r') as f_surv:
         first_line = f_surv.readline().strip(' \n\r\t').split(sep)
 
-        for field in SURVIVAL_FLAG.values():
+        for field in survival_flag.values():
             try:
                 assert(field in first_line)
             except Exception as e:
                 raise Exception("{0} not in {1}".format(
                     field, first_line))
 
-        patient_id = first_line.index(SURVIVAL_FLAG['patient_id'])
-        surv_id = first_line.index(SURVIVAL_FLAG['survival'])
-        event_id = first_line.index(SURVIVAL_FLAG['event'])
+        patient_id = first_line.index(survival_flag['patient_id'])
+        surv_id = first_line.index(survival_flag['survival'])
+        event_id = first_line.index(survival_flag['event'])
 
         for line in f_surv:
             line = line.strip('\n').split(sep)
