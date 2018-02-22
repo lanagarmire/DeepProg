@@ -1266,8 +1266,15 @@ class SimDeep(DeepBase):
                 matrix_test = matrix_test.T[survival_node_ids].T
             else:
                 print('not enough survival nodes to construct kernel for key: {0}' \
-                      'using all the matrix for {0}'.format(key))
+                      'skipping the {0} matrix'.format(key))
+                continue
 
+            matrix_ref_list.append(matrix_ref)
+            matrix_test_list.append(matrix_test)
+
+        if not matrix_ref_list:
+            print('matrix_ref_list / matrix_test_list empty!' \
+                  'take the last OMIC ({0}) matrix as ref'.format(key))
             matrix_ref_list.append(matrix_ref)
             matrix_test_list.append(matrix_test)
 

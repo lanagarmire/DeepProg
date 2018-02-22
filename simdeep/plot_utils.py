@@ -149,9 +149,6 @@ def plot_kernel_plots(
     """
     fig, ax = plt.subplots(figsize=(7, 7))
 
-    # activities_test = hstack([self.dataset.matrix_test_array[omic]
-    #                           for omic in self.test_omic_list])
-
     color_dict = make_color_dict_from_r(labels)
     labels_c_test = np.array([color_dict[label] for label in test_labels])
 

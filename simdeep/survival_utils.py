@@ -185,7 +185,6 @@ def load_survival_file(f_name,
 
     with open(path_data + f_name, 'r') as f_surv:
         first_line = f_surv.readline().strip(' \n\r\t').split(sep)
-
         for field in survival_flag.values():
             try:
                 assert(field in first_line)

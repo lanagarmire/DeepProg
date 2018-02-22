@@ -41,7 +41,7 @@ LOAD_EXISTING_MODELS = False
 #################### Paths to data file ################
 # path to the folder containing the data
 
-PROJECT_NAME = '360 HCC'
+PROJECT_NAME = 'test_dummy_dataset'
 PATH_DATA = PATH_THIS_FILE + "/../examples/data/"
 # PATH_DATA = "/home/opoirion/data/survival_analysis_multiple/"
 
@@ -84,7 +84,7 @@ SEPARATOR = {
 PATH_TO_SAVE_MODEL = '/home/opoirion/data/survival_analysis_multiple/models/'
 
 # Path to generate png images
-PATH_RESULTS = '/home/opoirion/code/d3visualisation/sijia/'
+PATH_RESULTS = '/home/opoirion/code/d3visualisation/deepprog_test/'
 
 ######## Cross-validation on the training set ############
 CROSS_VALIDATION_INSTANCE = KFold(n_splits=5, shuffle=True, random_state=1)

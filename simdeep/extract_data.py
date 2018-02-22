@@ -399,20 +399,19 @@ class LoadData():
             if self.verbose:
                 print('{0} training samples discarded'.format(len(to_remove)))
 
-    def reorder_ref_dataset(self, new_sample_ids):
+    def reorder_matrix_array(self, new_sample_ids):
         """
         """
         assert(set(new_sample_ids) == set(self.sample_ids))
         index_dict = {sample: pos for pos, sample in enumerate(self.sample_ids)}
         index = [index_dict[sample] for sample in new_sample_ids]
 
-        self.sample_ids = np.asarray(self.sample_ids)[index].T
+        self.sample_ids = np.asarray(self.sample_ids)[index].tolist()
 
-        for key in self.matrix_train_array:
-            self.matrix_train_array[key] = self.matrix_train_array[key][index]
+        for key in self.matrix_array:
+            self.matrix_array[key] = self.matrix_array[key][index]
 
-        for key in self.matrix_ref_array:
-            self.matrix_train_array[key] = self.matrix_train_array[key][index]
+        self.survival = self.survival[index]
 
     def create_a_cv_split(self):
         """ """

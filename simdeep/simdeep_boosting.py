@@ -24,7 +24,6 @@ from simdeep.config import NB_THREADS
 from simdeep.config import NB_ITER
 from simdeep.config import NB_FOLDS
 from simdeep.config import CLASS_SELECTION
-from simdeep.config import PATH_TO_SAVE_MODEL
 from simdeep.config import NB_CLUSTERS
 from simdeep.config import NORMALIZATION
 from simdeep.config import EPOCHS
@@ -33,17 +32,20 @@ from simdeep.config import NB_SELECTED_FEATURES
 from simdeep.config import PVALUE_THRESHOLD
 from simdeep.config import CLUSTER_METHOD
 from simdeep.config import CLASSIFICATION_METHOD
+from simdeep.config import TRAINING_TSV
+from simdeep.config import SURVIVAL_TSV
+from simdeep.config import PATH_DATA
+from simdeep.config import SURVIVAL_FLAG
+
+from simdeep.deepmodel_base import DeepBase
 
 import simplejson
 
 from distutils.dir_util import mkpath
 
 from os.path import isdir
-from os.path import isfile
 
 from rpy2.rinterface import NALogicalType
-
-import cPickle
 
 import gc
 
@@ -73,7 +75,7 @@ def main():
                                    SURVIVAL_TSV_TEST,
                                    fname_key='dummy')
     boosting.predict_labels_on_test_dataset()
-    boosting.plot_predicted_labels_for_test_sets()
+    boosting.plot_supervised_kernel_for_test_sets()
 
     boosting.collect_pvalue_on_training_dataset()
     boosting.collect_pvalue_on_test_fold()
@@ -111,6 +113,10 @@ class SimDeepBoosting():
                  pvalue_thres=PVALUE_THRESHOLD,
                  classification_method=CLASSIFICATION_METHOD,
                  new_dim=NEW_DIM,
+                 training_tsv=TRAINING_TSV,
+                 survival_tsv=SURVIVAL_TSV,
+                 survival_flag=SURVIVAL_FLAG,
+                 path_data=PATH_DATA,
                  **kwargs):
         """ """
         assert(class_selection in ['max', 'mean', 'weighted_mean', 'weighted_max'])
@@ -126,6 +132,15 @@ class SimDeepBoosting():
         self.project_name = project_name
         self._project_name = project_name
         self.path_results = '{0}/{1}'.format(path_results, project_name)
+        self.training_tsv = training_tsv
+        self.survival_tsv = survival_tsv
+        self.survival_flag = survival_flag
+        self.path_data = path_data
+        self.dataset = None
+
+        self.encoder_for_kde_plot_dict = {}
+        self.kde_survival_node_ids = {}
+        self.kde_train_matrices = {}
 
         if not isdir(self.path_results):
             try:
@@ -191,13 +206,15 @@ class SimDeepBoosting():
         self.log['normalization'] = normalization
         self.log['nb clusters'] = nb_clusters
         self.log['success'] = False
+        self.log['survival_tsv'] = self.survival_tsv
+        self.log['training_tsv'] = self.training_tsv
+        self.log['path_data'] = self.path_data
 
-        if 'survival_tsv' in kwargs:
-            self.log['survival_tsv'] = kwargs['survival_tsv']
-        if 'path_data' in kwargs:
-            self.log['path_data'] = kwargs['path_data']
-        if 'training_tsv' in kwargs:
-            self.log['training_tsv'] = kwargs['training_tsv']
+        kwargs['survival_tsv'] = self.survival_tsv
+        kwargs['training_tsv'] = self.training_tsv
+        kwargs['path_data'] = self.path_data
+        kwargs['survival_flag'] = self.survival_flag
+
         if 'fill_unkown_feature_with_0' in kwargs:
             self.log['fill_unkown_feature_with_0'] = kwargs['fill_unkown_feature_with_0']
 
@@ -231,13 +248,6 @@ class SimDeepBoosting():
                                **kwargs)
 
             self.datasets.append(dataset)
-
-        self.dataset = LoadData(
-            cross_validation_instance=None,
-            verbose=True,
-            normalization=self.normalization,
-            _parameters=parameters,
-            **kwargs)
 
     def __del__(self):
         """
@@ -752,16 +762,6 @@ class SimDeepBoosting():
 
         return cindex
 
-    def plot_predicted_labels_for_test_sets(self):
-        """
-        """
-        print('#### plotting labels....')
-
-        self.models[0].plot_kernel_for_test_sets(
-            test_labels_proba=self.test_labels_proba,
-            test_labels=self.test_labels,
-            key='_' + self.test_fname_key)
-
     def plot_supervised_predicted_labels_for_test_sets(
             self,
             define_as_main_kernel=False,
@@ -769,18 +769,6 @@ class SimDeepBoosting():
         """
         """
         print('#### plotting supervised labels....')
-        # print('## reloading training / test set...')
-
-        # if not self.dataset.matrix_array:
-        #     self.dataset.load_array()
-        #     self.dataset.normalize_training_array()
-        #     self.dataset.load_survival()
-
-        # self.dataset.load_new_test_dataset(self.test_tsv_dict,
-        #                                    self.test_survival_file,
-        #                                    normalization=self.test_normalization)
-
-        # self.dataset.reorder_ref_dataset(self.sample_ids_full)
 
         self.models[0].plot_supervised_kernel_for_test_sets(
             define_as_main_kernel=define_as_main_kernel,
@@ -788,6 +776,153 @@ class SimDeepBoosting():
             test_labels_proba=self.test_labels_proba,
             test_labels=self.test_labels,
             key='_' + self.test_fname_key)
+
+    def plot_supervised_kernel_for_test_sets(self):
+        """
+        """
+        from simdeep.plot_utils import plot_kernel_plots
+
+        if self.verbose:
+            print('plotting survival features using autoencoder...')
+
+        encoder_key = self._create_autoencoder_for_kernel_plot()
+        activities, activities_test = self._predict_kde_matrices(
+            encoder_key, self.dataset.matrix_test_array)
+
+        html_name = '{0}/{1}_{2}_supervised_kdeplot.html'.format(
+            self.path_results,
+            self.project_name,
+            self.test_fname_key)
+
+        plot_kernel_plots(
+            test_labels=self.test_labels,
+            test_labels_proba=self.test_labels_proba,
+            labels=self.full_labels,
+            activities=activities,
+            activities_test=activities_test,
+            dataset=self.dataset,
+            path_html=html_name)
+
+    def _predict_kde_survival_nodes_for_train_matrices(self, encoder_key):
+        """
+        """
+        self.kde_survival_node_ids = {}
+        encoder_array = self.encoder_for_kde_plot_dict[encoder_key]
+
+        for key in encoder_array:
+            encoder = encoder_array[key]
+            matrix_ref = encoder.predict(self.dataset.matrix_ref_array[key])
+
+            survival_node_ids = self.models[0]._look_for_survival_nodes(
+                activities=matrix_ref, survival=self.dataset.survival)
+
+            self.kde_survival_node_ids[key] = survival_node_ids
+            self.kde_train_matrices[key] = matrix_ref
+
+    def _predict_kde_matrices(self, encoder_key,
+                              matrix_test_array):
+        """
+        """
+        matrix_test_list = []
+        matrix_ref_list = []
+
+        encoder_array = self.encoder_for_kde_plot_dict[encoder_key]
+
+        for key in matrix_test_array:
+            encoder = encoder_array[key]
+            matrix_test = encoder.predict(matrix_test_array[key])
+            matrix_ref = self.kde_train_matrices[key]
+
+            survival_node_ids = self.kde_survival_node_ids[key]
+
+            if len(survival_node_ids) > 1:
+                matrix_test = matrix_test.T[survival_node_ids].T
+                matrix_ref = matrix_ref.T[survival_node_ids].T
+            else:
+                if self.verbose:
+                    print('not enough survival nodes to construct kernel for key: {0}' \
+                          'skipping the {0} matrix'.format(key))
+                continue
+
+            matrix_ref_list.append(matrix_ref)
+            matrix_test_list.append(matrix_test)
+
+        if not matrix_ref_list:
+            if self.verbose:
+                print('\n<!><!><!><!><!><!><!><!><!><!><!><!><!><!><!><!><!>\n' \
+                      ' matrix_ref_list / matrix_test_list empty!' \
+                      'take the last OMIC ({0}) matrix as ref \n' \
+                      '<!><!><!><!><!><!><!><!><!><!><!><!><!><!><!><!><!><!>\n'.format(key))
+            matrix_ref_list.append(matrix_ref)
+            matrix_test_list.append(matrix_test)
+
+        return hstack(matrix_ref_list), hstack(matrix_test_list)
+
+    def _create_autoencoder_for_kernel_plot(self):
+        """
+        """
+        key_normalization = {
+            key: self.test_normalization[key]
+            for key in self.test_normalization
+            if self.test_normalization[key]
+        }
+
+        encoder_key = str(key_normalization)
+
+        if encoder_key in self.encoder_for_kde_plot_dict:
+            if self.verbose:
+                print('loading test data for plotting...')
+
+            self.dataset.load_new_test_dataset(
+                tsv_dict=self.test_tsv_dict,
+                path_survival_file=self.test_survival_file,
+                normalization=self.test_normalization)
+
+            return encoder_key
+
+        self.dataset = LoadData(
+            cross_validation_instance=None,
+            training_tsv=self.training_tsv,
+            survival_tsv=self.survival_tsv,
+            survival_flag=self.survival_flag,
+            path_data=self.path_data,
+            verbose=False,
+            normalization=self.test_normalization
+        )
+
+        if self.verbose:
+            print('preparing data for plotting...')
+
+        self.dataset.load_array()
+        self.dataset.load_survival()
+        self.dataset.reorder_matrix_array(self.sample_ids_full)
+        self.dataset.create_a_cv_split()
+        self.dataset.normalize_training_array()
+        self.dataset.load_new_test_dataset(
+            tsv_dict=self.test_tsv_dict,
+            path_survival_file=self.test_survival_file,
+            normalization=self.test_normalization)
+
+        if self.verbose:
+            print('fitting autoencoder for plotting...')
+
+        autoencoder = DeepBase(dataset=self.dataset,
+                               seed=self.seed,
+                               verbose=False,
+                               dropout=0.1,
+                               epochs=50)
+
+        autoencoder.matrix_train_array = self.dataset.matrix_ref_array
+        autoencoder.construct_supervized_network(self.full_labels_proba)
+
+        self.encoder_for_kde_plot_dict[encoder_key] = autoencoder.encoder_array
+
+        if self.verbose:
+            print('fitting done!')
+
+        self._predict_kde_survival_nodes_for_train_matrices(encoder_key)
+
+        return encoder_key
 
     def load_new_test_dataset(self, tsv_dict,
                               path_survival_file,
@@ -799,6 +934,10 @@ class SimDeepBoosting():
         pool = None
         self.test_tsv_dict = tsv_dict
         self.test_survival_file = path_survival_file
+
+        if normalization is None:
+            normalization = self.normalization
+
         self.test_normalization = normalization
 
         if debug:
@@ -915,36 +1054,6 @@ class SimDeepBoosting():
 
         with open('{0}/{1}.log.json'.format(self.path_results, self._project_name), 'w') as f:
             f.write(simplejson.dumps(self.log, indent=2))
-
-def save_model(boosting, path_to_save_model=PATH_TO_SAVE_MODEL):
-    """ """
-    assert(isdir(path_to_save_model))
-    boosting._convert_logs()
-
-    t = time()
-
-
-    with open('{0}/{1}.pickle'.format(
-            path_to_save_model,
-            boosting._project_name), 'w') as f_pick:
-        cPickle.dump(boosting, f_pick)
-
-    print('model saved in %2.1f s at %s/%s.pickle' % (
-        time() - t, path_to_save_model, boosting._project_name))
-
-def load_model(project_name, path_model=PATH_TO_SAVE_MODEL):
-    """ """
-    t = time()
-    project_name = project_name.replace('.pickle', '') + '.pickle'
-
-    assert(isfile('{0}/{1}'.format(path_model, project_name)))
-
-    with open('{0}/{1}'.format(path_model, project_name), 'r') as f_pick:
-        boosting = cPickle.load(f_pick)
-
-    print('model loaded in %2.1f s' % (time() - t))
-
-    return boosting
 
 
 def _highest_proba(proba):
