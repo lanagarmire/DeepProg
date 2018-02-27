@@ -508,8 +508,8 @@ class SimDeep(DeepBase):
             features_scored = mapf(_process_parallel_feature_importance_per_cluster, input_list)
             features_scored = [feat for feat_list in features_scored for feat in feat_list]
 
-            for label, feature, pvalue in features_scored:
-                self.feature_scores_per_cluster[label].append((feature, pvalue))
+            for label, feature, median_diff, pvalue in features_scored:
+                self.feature_scores_per_cluster[label].append((feature, median_diff, pvalue))
 
             for label in self.feature_scores_per_cluster:
                 self.feature_scores_per_cluster[label].sort(key=lambda x:x[1])
@@ -520,11 +520,11 @@ class SimDeep(DeepBase):
         with open('{0}/{1}_features_scores_per_clusters.tsv'.format(
             self.path_results, self.project_name), 'w') as f_file:
 
-            f_file.write('cluster id;feature;p-value\n')
+            f_file.write('cluster id;feature;median diff;p-value\n')
 
             for label in self.feature_scores_per_cluster:
-                for feature, pvalue in self.feature_scores_per_cluster[label]:
-                    f_file.write('{0};{1};{2}\n'.format(label, feature, pvalue))
+                for feature, median_diff, pvalue in self.feature_scores_per_cluster[label]:
+                    f_file.write('{0};{1};{2};{3}\n'.format(label, feature, median_diff, pvalue))
 
             print('{0}/{1}_features_scores_per_clusters.tsv written'.format(
                 self.path_results, self.project_name))
@@ -689,6 +689,14 @@ class SimDeep(DeepBase):
             self.labels_proba = self.clustering.predict_proba(self.activities_train)
         else:
             self.labels_proba = np.array([self.labels, self.labels]).T
+
+        if self.labels_proba.shape[1] < self.nb_clusters:
+            missing_columns = self.nb_clusters - self.labels_proba.shape[1]
+
+            for i in range(missing_columns):
+                self.labels_proba = hstack([
+                    self.labels_proba, np.zeros(
+                        shape=(self.labels_proba, 1))])
 
         if self.verbose:
             print("clustering done, labels ordered according to survival:")
@@ -883,6 +891,14 @@ class SimDeep(DeepBase):
         self.test_labels = self.classifier_test.predict(matrix_test)
         self.test_labels_proba = self.classifier_test.predict_proba(matrix_test)
 
+        if self.test_labels_proba.shape[1] < self.nb_clusters:
+            missing_columns = self.nb_clusters - self.test_labels_proba.shape[1]
+
+            for i in range(missing_columns):
+                self.test_labels_proba = hstack([
+                    self.test_labels_proba, np.zeros(
+                        shape=(self.test_labels_proba, 1))])
+
     def _predict_labels(self, activities, matrix_array):
         """ """
         matrix_test = self._return_test_matrix_for_classification(
@@ -890,6 +906,14 @@ class SimDeep(DeepBase):
 
         labels = self.classifier.predict(matrix_test)
         labels_proba = self.classifier.predict_proba(matrix_test)
+
+        if labels_proba.shape[1] < self.nb_clusters:
+            missing_columns = self.nb_clusters - labels_proba.shape[1]
+
+            for i in range(missing_columns):
+                labels_proba = hstack([
+                    labels_proba, np.zeros(
+                        shape=(labels_proba.shape[0], 1))])
 
         return labels, labels_proba
 

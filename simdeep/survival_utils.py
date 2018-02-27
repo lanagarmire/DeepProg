@@ -403,9 +403,10 @@ def _process_parallel_feature_importance_per_cluster(inp):
                       if comp != cluster])
 
         score, pvalue = ranksums(array, array_comp)
+        median_diff = np.median(array) - np.median(array_comp)
 
         if pvalue < 0.05 and np.median(array) > np.median(array_comp):
-            results.append((cluster, feature, pvalue))
+            results.append((cluster, feature, median_diff, pvalue))
 
     return results
 

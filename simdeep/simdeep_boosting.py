@@ -6,6 +6,7 @@ from simdeep.coxph_from_r import c_index
 from simdeep.coxph_from_r import c_index_multiple
 
 from sklearn.model_selection import KFold
+# from sklearn.preprocessing import OneHotEncoder
 
 from multiprocessing.pool import Pool
 
@@ -52,7 +53,8 @@ import gc
 from time import time
 
 from numpy import hstack
-from simdeep.survival_utils import _process_parallel_feature_importance_per_cluster
+from simdeep.survival_utils import \
+    _process_parallel_feature_importance_per_cluster
 
 
 ################# Variable ################
@@ -146,7 +148,7 @@ class SimDeepBoosting():
             try:
                 mkpath(self.path_results)
             except Exception as e:
-                print('cannot find or create the current result path: {0}'\
+                print('cannot find or create the current result path: {0}' \
                       '\n consider changing it as option' \
                       .format(self.path_results))
 
@@ -527,7 +529,6 @@ class SimDeepBoosting():
         """
         """
         print('predict labels on full datasets...')
-
         self._get_probas_for_full_models()
         self._reorder_survival_full()
 
@@ -624,7 +625,7 @@ class SimDeepBoosting():
 
         for model in self.models:
             for sample, proba in zip(model.dataset.sample_ids_full, model.full_labels_proba):
-                proba_dict[sample].append([proba.tolist()])
+                proba_dict[sample].append([np.nan_to_num(proba).tolist()])
 
         labels, probas = self._do_class_selection(hstack(proba_dict.values()),
                                                  weights=self.cindex_test_folds)
@@ -691,9 +692,14 @@ class SimDeepBoosting():
         """
         days_full, dead_full = np.asarray(self.survival_full).T
         days_test, dead_test = np.asarray(self.models[0].dataset.survival_test).T
+        labels_test_categorical = self._labels_proba_to_labels(self.test_labels_proba)
+
 
         cindex = c_index(self.full_labels, dead_full, days_full,
                          self.test_labels, dead_test, days_test)
+
+        cindex_cat = c_index(self.full_labels, dead_full, days_full,
+                         labels_test_categorical, dead_test, days_test)
 
         cindex_proba = c_index(self.full_labels_proba.T[0], dead_full, days_full,
                                self.test_labels_proba.T[0], dead_test, days_test)
@@ -701,9 +707,11 @@ class SimDeepBoosting():
         if self.verbose:
             print('c-index for boosting test dataset:{0}'.format(cindex))
             print('c-index proba for boosting test dataset:{0}'.format(cindex_proba))
+            print('c-index cat for boosting test dataset:{0}'.format(cindex_cat))
 
         self.log['c-index test boosting {0}'.format(self.test_fname_key)] = cindex
         self.log['c-index proba test boosting {0}'.format(self.test_fname_key)] = cindex_proba
+        self.log['c-index cat test boosting {0}'.format(self.test_fname_key)] = cindex_cat
 
         return cindex
 
@@ -712,9 +720,13 @@ class SimDeepBoosting():
         return c-index using labels as predicat
         """
         days_full, dead_full = np.asarray(self.survival_full).T
+        labels_categorical = self._labels_proba_to_labels(self.full_labels_proba)
 
         cindex = c_index(self.full_labels, dead_full, days_full,
                          self.full_labels, dead_full, days_full)
+
+        cindex_cat = c_index(labels_categorical, dead_full, days_full,
+                             labels_categorical, dead_full, days_full)
 
         cindex_proba = c_index(self.full_labels_proba.T[0], dead_full, days_full,
                                self.full_labels_proba.T[0], dead_full, days_full)
@@ -722,9 +734,11 @@ class SimDeepBoosting():
         if self.verbose:
             print('c-index for boosting full dataset:{0}'.format(cindex))
             print('c-index proba for boosting full dataset:{0}'.format(cindex_proba))
+            print('c-index cat for boosting full dataset:{0}'.format(cindex_cat))
 
         self.log['c-index full boosting {0}'.format(self.test_fname_key)] = cindex
         self.log['c-index proba full boosting {0}'.format(self.test_fname_key)] = cindex_proba
+        self.log['c-index cat full boosting {0}'.format(self.test_fname_key)] = cindex_cat
 
         return cindex
 
@@ -913,6 +927,12 @@ class SimDeepBoosting():
                                epochs=50)
 
         autoencoder.matrix_train_array = self.dataset.matrix_ref_array
+
+        # label_encoded = OneHotEncoder().fit_transform(
+        #     self.full_labels.reshape(-1, 1)).todense()
+
+        # autoencoder.construct_supervized_network(label_encoded)
+
         autoencoder.construct_supervized_network(self.full_labels_proba)
 
         self.encoder_for_kde_plot_dict[encoder_key] = autoencoder.encoder_array
@@ -988,8 +1008,8 @@ class SimDeepBoosting():
             features_scored = mapf(_process_parallel_feature_importance_per_cluster, input_list)
             features_scored = [feat for feat_list in features_scored for feat in feat_list]
 
-            for label, feature, pvalue in features_scored:
-                self.feature_scores_per_cluster[label].append((feature, pvalue))
+            for label, feature, median_diff, pvalue in features_scored:
+                self.feature_scores_per_cluster[label].append((feature, median_diff, pvalue))
 
             for label in self.feature_scores_per_cluster:
                 self.feature_scores_per_cluster[label].sort(key=lambda x:x[1])
@@ -1000,11 +1020,11 @@ class SimDeepBoosting():
         with open('{0}/{1}_features_scores_per_clusters.tsv'.format(
             self.path_results, self._project_name), 'w') as f_file:
 
-            f_file.write('cluster id;feature;p-value\n')
+            f_file.write('cluster id;feature;median diff;p-value\n')
 
             for label in self.feature_scores_per_cluster:
-                for feature, pvalue in self.feature_scores_per_cluster[label]:
-                    f_file.write('{0};{1};{2}\n'.format(label, feature, pvalue))
+                for feature, median_diff, pvalue in self.feature_scores_per_cluster[label]:
+                    f_file.write('{0};{1};{2};{3}\n'.format(label, feature, median_diff, pvalue))
 
             print('{0}/{1}_features_scores_per_clusters.tsv written'.format(
                 self.path_results, self._project_name))
