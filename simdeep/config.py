@@ -81,10 +81,10 @@ SEPARATOR = {
     }
 
 # Path where to save load the Keras models
-PATH_TO_SAVE_MODEL = '/home/opoirion/data/survival_analysis_multiple/models/'
+PATH_TO_SAVE_MODEL = './'
 
 # Path to generate png images
-PATH_RESULTS = '/home/opoirion/code/d3visualisation/deepprog_test/'
+PATH_RESULTS = './'
 
 ######## Cross-validation on the training set ############
 CROSS_VALIDATION_INSTANCE = KFold(n_splits=5, shuffle=True, random_state=1)

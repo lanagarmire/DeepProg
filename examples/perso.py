@@ -7,8 +7,8 @@ def main():
     simDeep.load_training_dataset()
     simDeep.fit()
 
-    simDeep.load_test_dataset_v2()
-    simDeep.predict_labels_on_test_dataset_v2()
+    simDeep.load_test_dataset()
+    simDeep.predict_labels_on_test_dataset()
 
 
 if __name__ == "__main__":

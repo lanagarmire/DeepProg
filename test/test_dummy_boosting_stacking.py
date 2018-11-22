@@ -25,7 +25,7 @@ def test_instance():
     SURVIVAL_TSV = 'survival_dummy.tsv'
 
     PROJECT_NAME = 'stacked_bossted_TestProject'
-    NB_EPOCH = 10
+    EPOCHS = 10
     SEED = 3
     nb_it = 5
     nb_threads = 2
@@ -40,7 +40,7 @@ def test_instance():
         path_data=PATH_DATA,
         project_name=PROJECT_NAME,
         path_results=PATH_DATA,
-        nb_epoch=NB_EPOCH,
+        epochs=EPOCHS,
         normalization={'TRAIN_CORR_REDUCTION':True},
         seed=SEED)
 

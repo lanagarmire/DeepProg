@@ -26,7 +26,7 @@ def test_instance():
     SURVIVAL_TSV = 'survival_dummy.tsv'
 
     PROJECT_NAME = 'TestProject'
-    NB_EPOCH = 3
+    EPOCHS = 3
 
     dataset = LoadData(path_data=PATH_DATA,
                    survival_tsv=SURVIVAL_TSV,
@@ -35,7 +35,7 @@ def test_instance():
     simdeep = SimDeep(dataset=dataset,
                       project_name=PROJECT_NAME,
                       path_results=PATH_DATA,
-                      nb_epoch=NB_EPOCH,
+                      epochs=EPOCHS,
                       seed=4)
     simdeep.load_training_dataset()
     simdeep.fit()

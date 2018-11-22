@@ -6,7 +6,7 @@ from simdeep.extract_data import LoadData
 from simdeep.simdeep_analysis import SimDeep
 
 from simdeep.config import PATH_DATA
-from simdeep.config import PATH_MODEL
+from simdeep.config import PATH_TO_SAVE_MODEL
 
 
 def main():
@@ -18,8 +18,8 @@ def main():
     print 'path to access the .tsv files:', path_data
 
     # Defining the path to save the autoencoder
-    path_model = PATH_MODEL
-    print 'path where the models will be saved:', path_model
+    path_to_save_model = PATH_TO_SAVE_MODEL
+    print 'path where the models will be saved:', path_to_save_model
 
     # the dataset to be used
     # Here we will combine only two omics to create the autoencoder:
@@ -40,13 +40,13 @@ def main():
                        survival_tsv=survival_file)
 
     simDeep = SimDeep(dataset=dataset,
-                      path_model=path_model)
+                      path_to_save_model=path_to_save_model)
     # dataset must be loaded
     simDeep.load_training_dataset()
     # model construction
     simDeep.fit()
     # Finally, saving the model
-    simDeep.save_encoder('encoder_example.h5')
+    simDeep.save_encoders('encoder_example.h5')
 
 
 if __name__ == "__main__":

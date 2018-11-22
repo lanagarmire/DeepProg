@@ -81,7 +81,7 @@ class TestPackage(unittest.TestCase):
         SURVIVAL_TSV = 'survival_dummy.tsv'
 
         PROJECT_NAME = 'TestProject'
-        NB_EPOCH = 3
+        EPOCHS = 3
 
         dataset = LoadData(path_data=PATH_DATA,
                        survival_tsv=SURVIVAL_TSV,
@@ -90,8 +90,8 @@ class TestPackage(unittest.TestCase):
         simdeep = SimDeep(dataset=dataset,
                           project_name=PROJECT_NAME,
                           path_results=PATH_DATA,
-                          nb_epoch=NB_EPOCH,
-                          seed=5)
+                          epochs=EPOCHS,
+                          seed=4)
         simdeep.load_training_dataset()
         simdeep.fit()
         simdeep.predict_labels_on_full_dataset()
@@ -128,7 +128,7 @@ class TestPackage(unittest.TestCase):
         SURVIVAL_TSV = 'survival_dummy.tsv'
 
         PROJECT_NAME = 'TestProject'
-        NB_EPOCH = 3
+        EPOCHS = 3
         SEED = 3
         nb_it = 3
         nb_threads = 2
@@ -141,7 +141,7 @@ class TestPackage(unittest.TestCase):
             path_data=PATH_DATA,
             project_name=PROJECT_NAME,
             path_results=PATH_DATA,
-            nb_epoch=NB_EPOCH,
+            epochs=EPOCHS,
             normalization={'TRAIN_CORR_REDUCTION':True},
             seed=SEED)
 
