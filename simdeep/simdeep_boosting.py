@@ -147,7 +147,7 @@ class SimDeepBoosting():
         if not isdir(self.path_results):
             try:
                 mkpath(self.path_results)
-            except Exception as e:
+            except Exception:
                 print('cannot find or create the current result path: {0}' \
                       '\n consider changing it as option' \
                       .format(self.path_results))

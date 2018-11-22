@@ -24,8 +24,6 @@ from simdeep.coxph_from_r import c_index
 from scipy.stats import kruskal
 from scipy.stats import ranksums
 
-from scipy.spatial.distance import correlation
-
 from os.path import isdir
 from os import mkdir
 
@@ -188,7 +186,7 @@ def load_survival_file(f_name,
         for field in survival_flag.values():
             try:
                 assert(field in first_line)
-            except Exception as e:
+            except Exception:
                 raise Exception("{0} not in {1}".format(
                     field, first_line))
 
@@ -316,7 +314,6 @@ def _load_data_from_tsv_transposee(
     assert(f_matrix.shape[0] == len(sample_ids))
 
     f_tsv.close()
-    pool.join()
 
     return sample_ids, feature_ids, f_matrix
 

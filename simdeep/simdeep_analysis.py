@@ -975,7 +975,7 @@ class SimDeep(DeepBase):
                              days[labels_old == label])
             self._label_ordered_dict[label] = mean
 
-        label_ordered = [label for label, mean in
+        label_ordered = [label for label, _ in
                          sorted(self._label_ordered_dict.items(), key=lambda x:x[1])]
 
         self._label_ordered_dict = {old_label: new_label
