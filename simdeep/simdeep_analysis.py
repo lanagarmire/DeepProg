@@ -295,7 +295,7 @@ class SimDeep(DeepBase):
 
         self.look_for_survival_nodes()
 
-        self.training_omic_list = self.encoder_array.keys()
+        self.training_omic_list = list(self.encoder_array.keys())
         self.predict_labels()
 
         self.used_normalization = {key: self.dataset.normalization[key]
@@ -370,7 +370,7 @@ class SimDeep(DeepBase):
         """
         nbdays, isdead = self.dataset.survival_test.T.tolist()
 
-        self.test_omic_list = self.dataset.matrix_test_array.keys()
+        self.test_omic_list = list(self.dataset.matrix_test_array.keys())
         self.test_omic_list = list(set(self.test_omic_list).intersection(
             self.training_omic_list))
 
@@ -449,9 +449,9 @@ class SimDeep(DeepBase):
                 yield feature_list[i], matrix[i], labels
 
         if use_ref:
-            key_array = self.dataset.matrix_ref_array.keys()
+            key_array = list(self.dataset.matrix_ref_array.keys())
         else:
-            key_array = self.dataset.matrix_train_array.keys()
+            key_array = list(self.dataset.matrix_train_array.keys())
 
         for key in key_array:
             if use_ref:
@@ -465,7 +465,7 @@ class SimDeep(DeepBase):
 
             input_list = generator(labels, feature_list, matrix.T)
 
-            features_scored = mapf(_process_parallel_feature_importance, input_list)
+            features_scored = list(mapf(_process_parallel_feature_importance, input_list))
             features_scored.sort(key=lambda x:x[1])
 
             self.feature_scores[key] = features_scored
@@ -489,9 +489,9 @@ class SimDeep(DeepBase):
                 yield feature_list[i], matrix[i], labels
 
         if use_ref:
-            key_array = self.dataset.matrix_ref_array.keys()
+            key_array = list(self.dataset.matrix_ref_array.keys())
         else:
-            key_array = self.dataset.matrix_train_array.keys()
+            key_array = list(self.dataset.matrix_train_array.keys())
 
         for key in key_array:
             if use_ref:
@@ -762,7 +762,7 @@ class SimDeep(DeepBase):
         activities_array = {}
 
         if keys is None:
-            keys = matrix_array.keys()
+            keys = list(matrix_array.keys())
 
         for key in keys:
             encoder = self.encoder_array[key]
@@ -786,7 +786,7 @@ class SimDeep(DeepBase):
         linked with survival through coxph regression
         """
         if not keys:
-            keys = self.encoder_array.keys()
+            keys = list(self.encoder_array.keys())
 
         for key in keys:
             valid_node_ids = self._look_for_nodes(key)
@@ -807,7 +807,7 @@ class SimDeep(DeepBase):
         high c-index scores using label from the retained test fold
         """
         if not keys:
-            keys = self.encoder_array.keys()
+            keys = list(self.encoder_array.keys())
 
         for key in keys:
             encoder = self.encoder_array[key]
@@ -1016,7 +1016,7 @@ class SimDeep(DeepBase):
 
         pvalue_list = mapf(_process_parallel_coxph, input_list)
 
-        pvalue_list = filter(lambda x: not np.isnan(x[1]), pvalue_list)
+        pvalue_list = list(filter(lambda x: not np.isnan(x[1]), pvalue_list))
         pvalue_list.sort(key=lambda x:x[1], reverse=True)
 
         valid_node_ids = [node_id for node_id, pvalue in pvalue_list

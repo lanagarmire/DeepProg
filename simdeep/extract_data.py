@@ -128,7 +128,7 @@ class LoadData():
         self.matrix_train_array = {}
 
         self.sample_ids = []
-        self.data_type = training_tsv.keys()
+        self.data_type = list(training_tsv.keys())
 
         self.survival = None
         self.survival_tsv_test = None
@@ -188,7 +188,7 @@ class LoadData():
             arrays['STACKED'] = hstack(
                 arrays.values())
 
-            for key in arrays.keys():
+            for key in list(arrays.keys()):
                 arrays.pop(key) if key != 'STACKED' else True
 
         if not features:
@@ -196,7 +196,7 @@ class LoadData():
 
         features['STACKED'] = [feat for key in features
                                for feat in features[key]]
-        for key in features.keys():
+        for key in list(features.keys()):
             features.pop(key) if key != 'STACKED' else True
 
         self.feature_ref_index['STACKED'] = {feature: pos for pos, feature

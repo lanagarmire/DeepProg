@@ -633,7 +633,7 @@ class SimDeepBoosting():
         self.full_labels = np.asarray(labels)
         self.full_labels_proba = probas
 
-        self.sample_ids_full = proba_dict.keys()
+        self.sample_ids_full = list(proba_dict.keys())
 
     def _compute_test_coxph(self, fname_base, nbdays,
                             isdead, labels, labels_proba,
@@ -973,7 +973,7 @@ class SimDeepBoosting():
 
         inputs = [(model, tsv_dict, path_survival_file, normalization)
                   for model in self.models]
-        self.models = map_func(_predict_new_dataset, inputs)
+        self.models = list(map_func(_predict_new_dataset, inputs))
 
         if fname_key:
             self.project_name = '{0}_{1}'.format(self._project_name, fname_key)

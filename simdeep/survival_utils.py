@@ -63,7 +63,7 @@ class RankNorm():
     def fit_transform(self, X):
         """ """
         X = np.asarray(X)
-        shape = map(float, X.shape)
+        shape = list(map(float, X.shape))
 
         for i in xrange(len(X)):
             X[i] = rankdata(X[i]) / shape[1]
@@ -243,7 +243,7 @@ def _load_data_from_tsv(
             line[1:] = [0 if (l.isalpha() or not l) else l
                         for l in line[1:MAX_FEATURE]]
 
-        f_matrix.append(map(f_type, line[1:MAX_FEATURE]))
+        f_matrix.append(list(map(f_type, line[1:MAX_FEATURE])))
 
     f_matrix = np.array(f_matrix)
 
@@ -307,7 +307,7 @@ def _load_data_from_tsv_transposee(
 
         for feature in features:
             feature_ids.append('{0}_{1}'.format(key, feature))
-            f_matrix.append(map(f_type, line[1:]))
+            f_matrix.append(list(map(f_type, line[1:])))
 
 
     f_matrix = np.array(f_matrix).T
