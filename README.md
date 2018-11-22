@@ -15,6 +15,9 @@ The omic data and the survival files should be in tsv (Tabular Separated Values)
 
 ```R
 install.package("survival")
+install.package("glmnet")
+source("https://bioconductor.org/biocLite.R")
+biocLite("survcomp")
 ```
 
 * numpy, scipy
