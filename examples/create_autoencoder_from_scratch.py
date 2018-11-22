@@ -15,11 +15,11 @@ def main():
     # Defining the path for the data
     # (we will the default path defined in config.py) but can be overloaded
     path_data = PATH_DATA
-    print 'path to access the .tsv files:', path_data
+    print('path to access the .tsv files: '+ path_data)
 
     # Defining the path to save the autoencoder
     path_to_save_model = PATH_TO_SAVE_MODEL
-    print 'path where the models will be saved:', path_to_save_model
+    print('path where the models will be saved:' + path_to_save_model)
 
     # the dataset to be used
     # Here we will combine only two omics to create the autoencoder:

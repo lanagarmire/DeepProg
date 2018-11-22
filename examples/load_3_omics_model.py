@@ -29,7 +29,7 @@ def main():
         assert(isfile(path_data + "rna.tsv"))
         assert(isfile(path_data + "mir.tsv"))
     except AssertionError:
-        print 'gz files in {0} must be decompressed !\n exiting...'.format(path_data)
+        print('gz files in {0} must be decompressed !\n exiting...'.format(path_data))
         exit(1)
 
     # Tsv files used in the original study in the appropriate order

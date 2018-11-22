@@ -346,7 +346,7 @@ class LoadData():
         self.feature_array = {}
         self.matrix_array = {}
 
-        data = self.data_type[0]
+        data = list(self.data_type)[0]
         f_name = self.training_tsv[data]
 
         self.sample_ids, feature_ids, matrix = load_data_from_tsv(

@@ -3,7 +3,12 @@ from simdeep.config import PATH_TO_SAVE_MODEL
 from os.path import isfile
 from os.path import isdir
 
-import cPickle
+from sys import version_info
+
+if version_info > (3, 0, 0):
+    import pickle as cPickle
+else:
+    import cPickle
 
 from time import time
 
