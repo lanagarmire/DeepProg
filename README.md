@@ -13,6 +13,14 @@ The omic data and the survival files should be in tsv (Tabular Separated Values)
 * R
 * the R "survival" package installed. (Launch R then:)
 
+```bash
+pip install theano --user
+pip install keras --user
+
+#If you want to use theano instead of tensorflow configure:
+nano ~/.keras/keras.json
+```
+
 ```R
 install.package("survival")
 install.package("glmnet")
