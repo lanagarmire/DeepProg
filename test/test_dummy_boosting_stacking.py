@@ -55,11 +55,9 @@ def test_instance():
         {'RNA': 'rna_test_dummy.tsv'},
         'survival_test_dummy.tsv',
         'dummy',
-        debug=True,
         normalization={'TRAIN_NORM_SCALE':True},
     )
 
-    boosting.predict_labels_on_test_dataset()
     boosting.predict_labels_on_test_dataset()
     boosting.compute_c_indexes_for_test_dataset()
     boosting.compute_clusters_consistency_for_test_labels()

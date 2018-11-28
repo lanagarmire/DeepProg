@@ -30,7 +30,7 @@ biocLite("survcomp")
 
 * numpy, scipy
 * scikit-learn (>=0.18)
-* rpy2
+* rpy2 (for python2 rpy2 can be install with: pip install rpy2==2.8.6)
 
 ## installation (local)
 
