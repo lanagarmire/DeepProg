@@ -43,7 +43,7 @@ class MadScaler():
         """ """
         X = np.asarray(X)
 
-        for i in xrange(len(X)):
+        for i in range(len(X)):
             med = np.median(X[i])
             mad = np.median(np.abs(X[i] - med))
             X[i] = (X[i] - med) / mad
@@ -63,7 +63,7 @@ class RankNorm():
         X = np.asarray(X)
         shape = list(map(float, X.shape))
 
-        for i in xrange(len(X)):
+        for i in range(len(X)):
             X[i] = rankdata(X[i]) / shape[1]
 
         return np.matrix(X)
