@@ -186,7 +186,7 @@ class LoadData():
 
         if arrays is not None:
             arrays['STACKED'] = hstack(
-                arrays.values())
+                tuple(arrays.values()))
 
             for key in list(arrays.keys()):
                 arrays.pop(key) if key != 'STACKED' else True
@@ -270,7 +270,7 @@ class LoadData():
             if not isinstance(self.sample_ids_test, type(None)):
                 try:
                     assert(self.sample_ids_test == sample_ids)
-                except Exception as e:
+                except Exception:
                     raise Exception('Assertion error when loading test sample ids!')
             else:
                 self.sample_ids_test = sample_ids

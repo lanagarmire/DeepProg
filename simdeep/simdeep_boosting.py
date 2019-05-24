@@ -46,7 +46,10 @@ from distutils.dir_util import mkpath
 
 from os.path import isdir
 
-from rpy2.rinterface import NALogicalType
+try:
+    from rpy2.rinterface import NALogicalType
+except Exception:
+    from rpy2.rinterface_lib.na_values import NALogicalType
 
 import gc
 
