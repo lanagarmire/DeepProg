@@ -175,8 +175,11 @@ class LoadData():
     def __del__(self):
         """
         """
-        import gc
-        gc.collect()
+        try:
+            import gc
+            gc.collect()
+        except Exception:
+               pass
 
     def _stack_multiomics(self, arrays=None, features=None):
         """
