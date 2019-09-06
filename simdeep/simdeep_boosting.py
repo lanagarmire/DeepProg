@@ -627,8 +627,14 @@ class SimDeepBoosting():
         proba_dict = defaultdict(list)
 
         for model in self.models:
+            sample_set = set()
+
             for sample, proba in zip(model.dataset.sample_ids_full, model.full_labels_proba):
+                if sample in sample_set:
+                    continue
+
                 proba_dict[sample].append([np.nan_to_num(proba).tolist()])
+                sample_set.add(sample)
 
         labels, probas = self._do_class_selection(hstack(proba_dict.values()),
                                                  weights=self.cindex_test_folds)
