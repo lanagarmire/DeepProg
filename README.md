@@ -123,11 +123,8 @@ gzip -d *.gz
 
 ```python
 from simdeep.simdeep_boosting import SimDeepBoosting
-from simdeep.extract_data import LoadData # class to load and define the datasets
 from collections import OrderedDict
 
-
-dataset = LoadData()
 
 path_data = "../examples/data/"
 # Tsv files used in the original study in the appropriate order
@@ -181,12 +178,9 @@ boosting.predict_labels_on_test_dataset()
 ```
 
 
-* Finally, two example scripts are availables in ./examples/ which will assist you to build a model from scratch and load and use the original model
+* Finally, two example scripts are availables in ./examples/ which will assist you to build a model from scratch with test and real data
 
 
 ## contact and credentials
 * Developer: Olivier Poirion (PhD)
 * contact: opoirion@hawaii.edu, o.poirion@gmail.com
-
-* Developer: Kumardeep Chaudhary (PhD)
-* contact: kumardee@hawaii.edu , ckumardeep@gmail.com
