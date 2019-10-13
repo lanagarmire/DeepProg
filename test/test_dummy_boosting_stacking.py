@@ -24,14 +24,14 @@ def test_instance():
     TRAINING_TSV = {'RNA': 'rna_dummy.tsv', 'METH': 'meth_dummy.tsv'}
     SURVIVAL_TSV = 'survival_dummy.tsv'
 
-    PROJECT_NAME = 'stacked_bossted_TestProject'
+    PROJECT_NAME = 'stacked_TestProject'
     EPOCHS = 10
     SEED = 3
     nb_it = 5
     nb_threads = 2
 
     boosting = SimDeepBoosting(
-        stack_multi_omic=True,
+        # stack_multi_omic=True,
         nb_threads=nb_threads,
         nb_it=nb_it,
         split_n_fold=3,
@@ -41,7 +41,7 @@ def test_instance():
         project_name=PROJECT_NAME,
         path_results=PATH_DATA,
         epochs=EPOCHS,
-        normalization={'TRAIN_CORR_REDUCTION':True},
+        # normalization={'TRAIN_CORR_REDUCTION':True},
         seed=SEED)
 
     boosting.fit()
@@ -51,11 +51,14 @@ def test_instance():
     boosting.collect_cindex_for_test_fold()
     boosting.collect_cindex_for_full_dataset()
 
+    boosting.compute_feature_scores_per_cluster()
+    boosting.write_feature_score_per_cluster()
+
     boosting.load_new_test_dataset(
-        {'RNA': 'rna_test_dummy.tsv'},
-        'survival_test_dummy.tsv',
+        {'METH': 'meth_dummy.tsv'},
+        'survival_dummy.tsv',
         'dummy',
-        normalization={'TRAIN_NORM_SCALE':True},
+        # normalization={'TRAIN_NORM_SCALE':True},
     )
 
     boosting.predict_labels_on_test_dataset()

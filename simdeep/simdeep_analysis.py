@@ -46,7 +46,7 @@ from simdeep.coxph_from_r import surv_median
 from collections import Counter
 
 from sklearn.metrics import silhouette_score
-from sklearn.metrics import calinski_harabaz_score
+from sklearn.metrics import calinski_harabasz_score as calinski_harabaz_score
 
 from sklearn.model_selection import GridSearchCV
 
@@ -517,17 +517,28 @@ class SimDeep(DeepBase):
     def write_feature_score_per_cluster(self):
         """
         """
-        with open('{0}/{1}_features_scores_per_clusters.tsv'.format(
-            self.path_results, self.project_name), 'w') as f_file:
+        f_file_name = '{0}/{1}_features_scores_per_clusters.tsv'.format(
+            self.path_results, self._project_name)
+        f_anti_name = '{0}/{1}_features_anticorrelated_scores_per_clusters.tsv'.format(
+            self.path_results, self._project_name)
 
-            f_file.write('cluster id;feature;median diff;p-value\n')
+        f_file = open(f_file_name, 'w')
+        f_anti_file = open(f_anti_name, 'w')
 
-            for label in self.feature_scores_per_cluster:
-                for feature, median_diff, pvalue in self.feature_scores_per_cluster[label]:
-                    f_file.write('{0};{1};{2};{3}\n'.format(label, feature, median_diff, pvalue))
+        f_file.write('cluster id;feature;median diff;p-value\n')
 
-            print('{0}/{1}_features_scores_per_clusters.tsv written'.format(
-                self.path_results, self.project_name))
+        for label in self.feature_scores_per_cluster:
+            for feature, median_diff, pvalue in self.feature_scores_per_cluster[label]:
+                if median_diff > 0:
+                    f_to_write = f_file
+                else:
+                    f_to_write = f_anti_file
+
+                f_to_write.write('{0};{1};{2};{3}\n'.format(label, feature, median_diff, pvalue))
+
+        print('{0} written'.format(f_file_name))
+        print('{0} written'.format(f_anti_name))
+
 
     def write_feature_scores(self):
         """

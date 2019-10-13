@@ -1,14 +1,14 @@
-# Survival Integration of Multi-omics using Deep-Learning (SimDeep)
+# Survival Integration of Multi-omics using Deep-Learning (DeepProg)
 
-This package allows to combine multi-omics data together with survival. Using autoencoder, the pipeline creates new features and identify those linked with survival, using CoxPH regression. Then, using K-means it clusters the samples. Finally, using the labels inferred, the pipeline create a supervised model to label samples from a new omic dataset. The original study of this package is "Deep Learning based multi-omics integration robustly predicts survivals in liver cancer" from K. Chaudhary, O. Poirion, Lianqun Liu, and L. X. Garmire.
+This package allows to combine multi-omics data together with survival. Using autoencoders, the pipeline creates new features and identify those linked with survival, using CoxPH regression.
 The omic data used in the original study are RNA-Seq, MiR and Methylation. However, this approach can beextended to any combination of omic data.
 
 The current package contains the omic data used in the study and a copy of the model computed. However, it is very easy to recreate a new model from scratch using any combination of omic data.
-
 The omic data and the survival files should be in tsv (Tabular Separated Values) format and examples are provided. The deep-learning framework uses Keras, which is a embedding of Theano.
 
 
 ## Requirements
+* Python 2 or 3
 * [theano](http://deeplearning.net/software/theano/install.html) (the used version is 0.8.2)
 * R
 * the R "survival" package installed. (Launch R then:)
@@ -30,7 +30,7 @@ biocLite("survcomp")
 
 * numpy, scipy
 * scikit-learn (>=0.18)
-* rpy2 (for python2 rpy2 can be install with: pip install rpy2==2.8.6)
+* rpy2 2.8.6 (for python2 rpy2 can be install with: pip install rpy2==2.8.6)
 
 ## installation (local)
 
@@ -44,7 +44,7 @@ pip install -r requirements.txt --user
 * test if simdeep is functional (all the software are correctly installed):
 
 ```bash
-  python test/test_ssrge.py -v # OR
+  python test/test_dummy_boosting_stacking.py -v # OR
   nosetests test -v # Improved version of python unit testing
   ```
 
@@ -119,43 +119,64 @@ gzip -d *.gz
 
 ```
 
-* Then it is very easy to build a new model or to load the already compiled model:
+* Then it is  easy to build a new model:
 
 ```python
-from simdeep.simdeep_analysis import SimDeep
+from simdeep.simdeep_boosting import SimDeepBoosting
 from simdeep.extract_data import LoadData # class to load and define the datasets
 from collections import OrderedDict
 
 
 dataset = LoadData()
 
-path_data = "../data/"
+path_data = "../examples/data/"
 # Tsv files used in the original study in the appropriate order
 tsv_files = OrderedDict([
-          ('MIR', 'mir.tsv'),
-          ('METH', 'meth.tsv'),
-          ('RNA', 'rna.tsv'),
+          ('MIR', 'mir_dummy.tsv'),
+          ('METH', 'meth_dummy.tsv'),
+          ('RNA', 'rna_dummy.tsv'),
 ])
 
 # File with survival event
-survival_tsv = 'survival.tsv'
+survival_tsv = 'survival_dummy.tsv'
 
-dataset = LoadData(
-        path_data=path_data,
-        training_tsv=tsv_files,
-        survival_tsv=survival_tsv,
-)
+project_name = 'stacked_TestProject'
+epochs = 10
+seed = 3
+nb_it = 5
+nb_threads = 2
 
-# Instanciate a SimDeep instance
-simDeep = SimDeep(dataset=dataset)
-# load the training dataset
-simDeep.load_training_dataset()
-# Load the full model
-simDeep.load_encoder('encoder_seed_s0_full.h5')
-# identify nodes linked to survival
-simDeep.look_for_survival_nodes()
-# predict labels of the training set using kmeans
-simDeep.predict_labels()
+boosting = SimDeepBoosting(
+    nb_threads=nb_threads,
+    nb_it=nb_it,
+    split_n_fold=3,
+    survival_tsv=tsv_files,
+    training_tsv=survival_tsv,
+    path_data=path_data,
+    project_name=project_name,
+    path_results=path_data,
+    epochs=epochs,
+    seed=seed)
+
+# Fit the model
+boosting.fit()
+# Predict and write the labels
+boosting.predict_labels_on_full_dataset()
+# Compute internal metrics
+boosting.compute_clusters_consistency_for_full_labels()
+# COmpute the feature importance
+boosting.compute_feature_scores_per_cluster()
+# Write the feature importance
+boosting.write_feature_score_per_cluster()
+
+boosting.load_new_test_dataset(
+    {'RNA': 'rna_test_dummy.tsv'},
+    'survival_test_dummy.tsv',
+    TEST dataset',
+    )
+
+# Predict the labels on the test dataset
+boosting.predict_labels_on_test_dataset()
 
 ```
 
