@@ -172,7 +172,7 @@ class DeepBase(object):
                 model,
                 X_shape,
             self.new_dim,
-            name='new dim')
+            name='new_dim')
 
         if self.dropout:
             model.add(Dropout(self.dropout))
@@ -193,13 +193,13 @@ class DeepBase(object):
                         model,
                         X_shape,
                         matrix_out.shape[1],
-                        name='final layer')
+                        name='final_layer')
         else:
             model = self._add_dense_layer(
                 model,
                 X_shape,
                 X_shape[1],
-                name='final layer')
+                name='final_layer')
 
         self.model_array[key] = model
 
@@ -220,7 +220,8 @@ class DeepBase(object):
                         kernel_regularizer=regularizers.l1(self.W_l1_constant),
                         name=name,
                         activation=self.activation,
-                        input_dim=input_dim))
+                        input_dim=input_dim,
+        ))
         return model
 
     def compile_models(self):
@@ -268,7 +269,9 @@ class DeepBase(object):
         self._define_encoders()
 
     def _define_encoders(self):
-        """ """
+        """
+        Define the encoder output layers by using the middle layer of the autoencoders
+        """
         for key in self.model_array:
             model = self.model_array[key]
             matrix_train = self.matrix_train_array[key]
@@ -278,14 +281,16 @@ class DeepBase(object):
             inp = Input(shape=(X_shape[1],))
             encoder = model.layers[0](inp)
 
-            if model.layers[0].name != 'new dim':
+            if model.layers[0].name != 'new_dim':
 
                 for layer in model.layers[1:]:
                     encoder = layer(encoder)
-                    if layer.name == 'new dim':
+                    if layer.name == 'new_dim':
                         break
 
             encoder = Model(inp, encoder)
+            encoder.compile(optimizer=self.optimizer, loss=self.loss)
+
             self.encoder_array[key] = encoder
 
     def save_encoders(self, fname='encoder.h5'):

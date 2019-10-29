@@ -18,7 +18,7 @@ def test_instance():
     EPOCHS = 10
     SEED = 3
     nb_it = 5
-    nb_threads = 2
+    nb_threads = 1
 
     boosting = SimDeepBoosting(
         # stack_multi_omic=True,
@@ -47,6 +47,7 @@ def test_instance():
         {'RNA': 'rna_dummy.tsv'},
         'survival_dummy.tsv',
         'dummy',
+        debug=False
     )
 
     boosting.predict_labels_on_test_dataset()

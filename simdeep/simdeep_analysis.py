@@ -46,7 +46,11 @@ from simdeep.coxph_from_r import surv_median
 from collections import Counter
 
 from sklearn.metrics import silhouette_score
-from sklearn.metrics import calinski_harabasz_score as calinski_harabaz_score
+
+try:
+    from sklearn.metrics import calinski_harabasz_score as calinski_harabaz_score
+except Exception:
+    from sklearn.metrics import calinski_harabaz_score
 
 from sklearn.model_selection import GridSearchCV
 
@@ -785,7 +789,8 @@ class SimDeep(DeepBase):
                           ' returning None')
                 return None
 
-            activities = encoder.predict(matrix)
+
+            activities = encoder.predict(x=matrix)
             activities_array[key] = activities.T[self.valid_node_ids_array[key]].T
 
         return hstack([activities_array[key]

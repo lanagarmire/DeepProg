@@ -279,21 +279,24 @@ class SimDeepBoosting():
         """
         self._fit(_partial_fit_model_pool, debug=debug)
 
-    def fit(self, debug=False):
+    def fit(self, debug=False, verbose=False):
         """
         """
-        self._fit(_partial_fit_model_pool, debug=debug)
+        self._fit(_partial_fit_model_pool, debug=debug,
+                  verbose=verbose)
 
-    def _fit(self, _fit_func, debug=False):
+    def _fit(self, _fit_func, debug=False, verbose=False):
         """ """
         print('fit models...')
         pool = None
         start_time = time()
 
-        if debug:
+        if debug or self.nb_threads<2:
             map_func = map
-            for dataset in self.datasets:
-                dataset.verbose = True
+
+            if verbose:
+                for dataset in self.datasets:
+                    dataset.verbose = True
         else:
             pool = Pool(self.nb_threads)
             map_func = pool.map
@@ -957,7 +960,8 @@ class SimDeepBoosting():
                               path_survival_file,
                               fname_key=None,
                               normalization=None,
-                              debug=False):
+                              debug=False,
+                              verbose=False):
         """
         """
         pool = None
@@ -969,11 +973,13 @@ class SimDeepBoosting():
 
         self.test_normalization = normalization
 
-        if debug:
+        if debug or self.nb_threads<2:
             map_func = map
-            for model in self.models:
-                model.verbose = True
-                model.dataset.verbose = True
+
+            if verbose:
+                for model in self.models:
+                    model.verbose = True
+                    model.dataset.verbose = True
         else:
             pool = Pool(self.nb_threads)
             map_func = pool.map
