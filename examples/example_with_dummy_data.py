@@ -20,6 +20,9 @@ def test_instance():
     nb_it = 5
     nb_threads = 2
 
+    import ray
+    ray.init(num_cpus=3)
+
     boosting = SimDeepBoosting(
         # stack_multi_omic=True,
         nb_threads=nb_threads,
@@ -31,6 +34,7 @@ def test_instance():
         project_name=PROJECT_NAME,
         path_results=PATH_DATA,
         epochs=EPOCHS,
+        distribute=True,
         seed=SEED)
 
     boosting.fit()

@@ -1308,6 +1308,24 @@ class SimDeep(DeepBase):
 
         return hstack(matrix_ref_list), hstack(matrix_test_list)
 
+
+    def _get_probas_for_full_model(self):
+        """
+        return sample and proba
+        """
+        return list(zip(self.dataset.sample_ids_full, self.full_labels_proba))
+
+    def _get_survival_full(self):
+        """
+        """
+        return self.dataset.survival_full
+
+    def _get_sample_ids_full(self):
+        """
+        """
+        return self.dataset.sample_ids_full
+
+
     def _partial_fit_model_pool(self):
         """
         """

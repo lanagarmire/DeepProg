@@ -270,13 +270,26 @@ class SimDeepBoosting():
 
         gc.collect()
 
-    def _from_models(self, fname):
+    def _from_models(self, fname, *args, **kwargs):
         """
         """
         if self.distribute:
-            return self.ray.get([getattr(model, fname).remote() for model in self.models])
+            return self.ray.get([getattr(model, fname).remote(*args, **kwargs)
+                                 for model in self.models])
         else:
-            return [getattr(model, fname)() for model in self.models]
+            return [getattr(model, fname)(*args, **kwargs)
+                    for model in self.models]
+
+
+    def _from_model(self, model, fname, *args, **kwargs):
+        """
+        """
+        if self.distribute:
+            return self.ray.get(getattr(model, fname).remote(
+                *args, **kwargs))
+        else:
+            return getattr(model, fname)(*args, **kwargs)
+
 
     def _do_class_selection(self, inputs, **kwargs):
         """
@@ -300,7 +313,6 @@ class SimDeepBoosting():
         """
         if self.distribute:
             self._fit_distributed()
-
         else:
             self._fit(debug=debug, verbose=verbose)
 
@@ -313,10 +325,9 @@ class SimDeepBoosting():
         from simdeep.simdeep_distributed import SimDeepDistributed
         import ray
         assert(ray.is_initialized())
+        self.ray = ray
 
         try:
-            ray.init(num_cpus=self.nb_threads)
-
             self.models = [SimDeepDistributed.remote(
                 nb_clusters=self.nb_clusters,
                 nb_selected_features=self.nb_selected_features,
@@ -334,7 +345,6 @@ class SimDeepBoosting():
 
             results = ray.get([model._partial_fit_model_pool.remote() for model in self.models])
 
-            import ipdb;ipdb.set_trace()
             print("Results: {0}".format(results))
             self.models = [model for model, is_fitted in zip(self.models, results) if is_fitted]
 
@@ -534,10 +544,10 @@ class SimDeepBoosting():
         """
         self.cindex_test_folds = []
 
-        for model in self.models:
-            model.predict_labels_on_test_fold()
-            cindex = model.compute_c_indexes_for_test_fold_dataset()
+        self._from_models('predict_labels_on_test_fold')
+        cindexes = self._from_models('compute_c_indexes_for_test_fold_dataset')
 
+        for cindex in cindexes:
             if isinstance(cindex, NALogicalType):
                 cindex = np.nan
 
@@ -551,14 +561,12 @@ class SimDeepBoosting():
 
         return self.cindex_test_folds
 
+
     def collect_cindex_for_full_dataset(self):
         """
         """
-        cindexes_list = []
-
-        for model in self.models:
-            model.predict_labels_on_test_fold()
-            cindexes_list.append(model.compute_c_indexes_for_full_dataset())
+        self._from_models('predict_labels_on_test_fold')
+        cindexes_list = self._from_models('compute_c_indexes_for_full_dataset')
 
         if self.verbose:
             print('c-index results for full dataset: mean {0} std {1}'.format(
@@ -568,13 +576,11 @@ class SimDeepBoosting():
 
         return cindexes_list
 
+
     def collect_cindex_for_training_dataset(self):
         """
         """
-        cindexes_list = []
-
-        for model in self.models:
-            cindexes_list.append(model.compute_c_indexes_for_training_dataset())
+        cindexes_list = self._from_models('compute_c_indexes_for_training_dataset')
 
         if self.verbose:
             print('C-index results for training dataset: mean {0} std {1}'.format(
@@ -587,10 +593,7 @@ class SimDeepBoosting():
     def collect_cindex_for_test_dataset(self):
         """
         """
-        cindexes_list = []
-
-        for model in self.models:
-            cindexes_list.append(model.compute_c_indexes_for_test_dataset())
+        cindexes_list = self._from_models('compute_c_indexes_for_test_dataset')
 
         if self.verbose:
             print('C-index results for test: mean {0} std {1}'.format(
@@ -622,12 +625,12 @@ class SimDeepBoosting():
         self.log['pvalue proba full'] = pvalue_proba
         self.log['pvalue cat full'] = pvalue_cat
 
-        self.models[0]._write_labels(
-            self.sample_ids_full,
-            self.full_labels,
-            '{0}_full_labels'.format(self._project_name),
-            labels_proba=self.full_labels_proba.T[0],
-            nbdays=nbdays, isdead=isdead)
+        self._from_model(self.models[0], '_write_labels',
+                          self.sample_ids_full,
+                          self.full_labels,
+                          '{0}_full_labels'.format(self._project_name),
+                          labels_proba=self.full_labels_proba.T[0],
+                          nbdays=nbdays, isdead=isdead)
 
         return pvalue, pvalue_proba
 
@@ -673,8 +676,9 @@ class SimDeepBoosting():
     def _reorder_survival_full(self):
         """
         """
-        survival_old = self.models[0].dataset.survival_full
-        sample_ids = self.models[0].dataset.sample_ids_full
+        survival_old = self._from_model(self.models[0], '_get_survival_full')
+        sample_ids = self._from_model(self.models[0], '_get_sample_ids_full')
+
         surv_dict = {sample: surv for sample, surv in zip(sample_ids, survival_old)}
 
         self.survival_full = np.asarray([np.asarray(surv_dict[sample])[0]
@@ -698,10 +702,10 @@ class SimDeepBoosting():
         """
         proba_dict = defaultdict(list)
 
-        for model in self.models:
+        for sample_proba in self._from_models('_get_probas_for_full_model'):
             sample_set = set()
 
-            for sample, proba in zip(model.dataset.sample_ids_full, model.full_labels_proba):
+            for sample, proba in sample_proba:
                 if sample in sample_set:
                     continue
 
