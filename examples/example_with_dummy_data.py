@@ -18,7 +18,7 @@ def test_instance():
     EPOCHS = 10
     SEED = 3
     nb_it = 5
-    nb_threads = 1
+    nb_threads = 2
 
     boosting = SimDeepBoosting(
         # stack_multi_omic=True,
@@ -35,23 +35,23 @@ def test_instance():
 
     boosting.fit()
     boosting.predict_labels_on_full_dataset()
-    boosting.compute_clusters_consistency_for_full_labels()
-    boosting.evalutate_cluster_performance()
-    boosting.collect_cindex_for_test_fold()
-    boosting.collect_cindex_for_full_dataset()
+    # boosting.compute_clusters_consistency_for_full_labels()
+    # boosting.evalutate_cluster_performance()
+    # boosting.collect_cindex_for_test_fold()
+    # boosting.collect_cindex_for_full_dataset()
 
-    boosting.compute_feature_scores_per_cluster()
-    boosting.write_feature_score_per_cluster()
+    # boosting.compute_feature_scores_per_cluster()
+    # boosting.write_feature_score_per_cluster()
 
-    boosting.load_new_test_dataset(
-        {'RNA': 'rna_dummy.tsv'},
-        'survival_dummy.tsv',
-        'dummy',
-    )
+    # boosting.load_new_test_dataset(
+    #     {'RNA': 'rna_dummy.tsv'},
+    #     'survival_dummy.tsv',
+    #     'dummy',
+    # )
 
-    boosting.predict_labels_on_test_dataset()
-    boosting.compute_c_indexes_for_test_dataset()
-    boosting.compute_clusters_consistency_for_test_labels()
+    # boosting.predict_labels_on_test_dataset()
+    # boosting.compute_c_indexes_for_test_dataset()
+    # boosting.compute_clusters_consistency_for_test_labels()
 
 
 if __name__ == '__main__':

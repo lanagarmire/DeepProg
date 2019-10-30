@@ -59,6 +59,7 @@ from numpy import hstack
 from simdeep.survival_utils import \
     _process_parallel_feature_importance_per_cluster
 
+import ray
 
 ################# Variable ################
 MODEL_THRES = 0.05
@@ -102,6 +103,7 @@ class SimDeepBoosting():
                  nb_it=NB_ITER,
                  nb_fold=NB_FOLDS,
                  do_KM_plot=True,
+                 distribute=False,
                  nb_threads=NB_THREADS,
                  class_selection=CLASS_SELECTION,
                  model_thres=MODEL_THRES,
@@ -128,7 +130,7 @@ class SimDeepBoosting():
         self.class_selection = class_selection
 
         self._instance_weights = None
-
+        self.distribute = distribute
         self.model_thres = model_thres
         self.models = []
         self.verbose = verbose
@@ -191,22 +193,21 @@ class SimDeepBoosting():
         self.test_fname_key = ''
 
         parameters = {
-            'nb_clusters': self.nb_clusters,
             'epochs': self.epochs,
-            'nb_selected_features': self.nb_selected_features,
             'new_dim': self.new_dim,
-            'pvalue_thres': self.pvalue_thres,
-            'cluster_method': self.cluster_method,
-            'path_results': self.path_results,
-            'project_name': self.project_name,
-            'classification_method': self.classification_method,
         }
 
         self.datasets = []
         self.seed = seed
 
+        self.log['parameters'] = {}
+
+        for arg in self.__dict__:
+            self.log['parameters'][arg] = str(self.__dict__[arg])
+
         self.log['seed'] = seed
         self.log['parameters'] = parameters.copy()
+
         self.log['nb_it'] = nb_it
         self.log['normalization'] = normalization
         self.log['nb clusters'] = nb_clusters
@@ -223,15 +224,22 @@ class SimDeepBoosting():
         if 'fill_unkown_feature_with_0' in kwargs:
             self.log['fill_unkown_feature_with_0'] = kwargs['fill_unkown_feature_with_0']
 
+        self.ray = None
+
+        self._init_datasets(nb_it, split_n_fold, parameters, **kwargs)
+
+    def _init_datasets(self, nb_it, split_n_fold, parameters, **kwargs):
+        """
+        """
         if self.seed:
-            np.random.seed(seed)
+            np.random.seed(self.seed)
 
         max_seed = 1000
         min_seed = 0
 
-        if seed > max_seed:
-            min_seed = seed - max_seed
-            max_seed = seed
+        if self.seed > max_seed:
+            min_seed = self.seed - max_seed
+            max_seed = self.seed
 
         random_states = np.random.randint(min_seed, max_seed, nb_it)
 
@@ -262,6 +270,14 @@ class SimDeepBoosting():
 
         gc.collect()
 
+    def _from_models(self, fname):
+        """
+        """
+        if self.distribute:
+            return self.ray.get([getattr(model, fname).remote() for model in self.models])
+        else:
+            return [getattr(model, fname)() for model in self.models]
+
     def _do_class_selection(self, inputs, **kwargs):
         """
         """
@@ -277,33 +293,50 @@ class SimDeepBoosting():
     def partial_fit(self, debug=False):
         """
         """
-        self._fit(_partial_fit_model_pool, debug=debug)
+        self._fit(debug=debug)
 
     def fit(self, debug=False, verbose=False):
         """
         """
-        self._fit(_partial_fit_model_pool, debug=debug,
-                  verbose=verbose)
+        if self.distribute:
+            self._fit_distributed()
 
-    def _fit(self, _fit_func, debug=False, verbose=False):
+        else:
+            self._fit(debug=debug, verbose=verbose)
+
+
+    def _fit_distributed(self):
         """ """
         print('fit models...')
-        pool = None
         start_time = time()
 
-        if debug or self.nb_threads<2:
-            map_func = map
-
-            if verbose:
-                for dataset in self.datasets:
-                    dataset.verbose = True
-        else:
-            pool = Pool(self.nb_threads)
-            map_func = pool.map
+        from simdeep.simdeep_distributed import SimDeepDistributed
+        import ray
+        assert(ray.is_initialized())
 
         try:
-            self.models = map_func(_fit_func,  self.datasets)
-            self.models = [model for model in self.models if model != None]
+            ray.init(num_cpus=self.nb_threads)
+
+            self.models = [SimDeepDistributed.remote(
+                nb_clusters=self.nb_clusters,
+                nb_selected_features=self.nb_selected_features,
+                pvalue_thres=self.pvalue_thres,
+                dataset=dataset,
+                load_existing_models=False,
+                verbose=dataset.verbose,
+                _isboosting=True,
+                do_KM_plot=False,
+                path_results=self.path_results,
+                project_name=self.project_name,
+                classification_method=self.classification_method,
+                deep_model_additional_args=dataset._parameters)
+                           for dataset in self.datasets]
+
+            results = ray.get([model._partial_fit_model_pool.remote() for model in self.models])
+
+            import ipdb;ipdb.set_trace()
+            print("Results: {0}".format(results))
+            self.models = [model for model, is_fitted in zip(self.models, results) if is_fitted]
 
             nb_models = len(self.models)
 
@@ -312,8 +345,49 @@ class SimDeepBoosting():
 
             assert(nb_models)
 
-            if nb_models > 1:
-                assert(len(set([model.train_pvalue for model in self.models])) > 1)
+        except Exception as e:
+            self.log['failure'] = str(e)
+            raise e
+
+        else:
+            self.log['success'] = True
+            self.log['fitting time (s)'] = time() - start_time
+
+            if self.class_selection in ['weighted_mean', 'weighted_max']:
+                self.collect_cindex_for_test_fold()
+
+    def _fit(self, debug=False, verbose=False):
+        """ """
+        print('fit models...')
+        start_time = time()
+
+        try:
+            self.models = [SimDeep(
+                nb_clusters=self.nb_clusters,
+                nb_selected_features=self.nb_selected_features,
+                pvalue_thres=self.pvalue_thres,
+                dataset=dataset,
+                load_existing_models=False,
+                verbose=dataset.verbose,
+                _isboosting=True,
+                do_KM_plot=False,
+                path_results=self.path_results,
+                project_name=self.project_name,
+                classification_method=self.classification_method,
+                deep_model_additional_args=dataset._parameters)
+                           for dataset in self.datasets]
+
+            results = [model._partial_fit_model_pool() for model in self.models]
+
+            print("Results: {0}".format(results))
+            self.models = [model for model, is_fitted in zip(self.models, results) if is_fitted]
+
+            nb_models = len(self.models)
+
+            print('{0} models fitted'.format(nb_models))
+            self.log['nb. models fitted'] = nb_models
+
+            assert(nb_models)
 
         except Exception as e:
             self.log['failure'] = str(e)
@@ -321,11 +395,6 @@ class SimDeepBoosting():
 
         else:
             self.log['success'] = True
-
-        finally:
-            if pool is not None:
-                pool.close()
-                pool.join()
             self.log['fitting time (s)'] = time() - start_time
 
             if self.class_selection in ['weighted_mean', 'weighted_max']:
@@ -1185,6 +1254,8 @@ def _weighted_max(proba, weights):
 
     return np.asarray(labels), np.asarray(probas)
 
+
+@ray.remote
 def _partial_fit_model_pool(dataset):
     """ """
     parameters = dataset._parameters
