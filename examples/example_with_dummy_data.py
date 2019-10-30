@@ -47,7 +47,6 @@ def test_instance():
         {'RNA': 'rna_dummy.tsv'},
         'survival_dummy.tsv',
         'dummy',
-        debug=False
     )
 
     boosting.predict_labels_on_test_dataset()

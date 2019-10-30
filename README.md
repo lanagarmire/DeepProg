@@ -4,7 +4,7 @@ This package allows to combine multi-omics data together with survival. Using au
 The omic data used in the original study are RNA-Seq, MiR and Methylation. However, this approach can beextended to any combination of omic data.
 
 The current package contains the omic data used in the study and a copy of the model computed. However, it is very easy to recreate a new model from scratch using any combination of omic data.
-The omic data and the survival files should be in tsv (Tabular Separated Values) format and examples are provided. The deep-learning framework uses Keras, which is a embedding of Theano.
+The omic data and the survival files should be in tsv (Tabular Separated Values) format and examples are provided. The deep-learning framework uses Keras, which is a embedding of Theano / tensorflow/ CNTK.
 
 
 ## Requirements
@@ -31,6 +31,22 @@ biocLite("survcomp")
 * numpy, scipy
 * scikit-learn (>=0.18)
 * rpy2 2.8.6 (for python2 rpy2 can be install with: pip install rpy2==2.8.6)
+
+### Support for CNTK / tensorflow
+* We originally used Keras with theano as backend plateform. However, [Tensorflow](https://www.tensorflow.org/) or [CNTK](https://docs.microsoft.com/en-us/cognitive-toolkit/) are more recent DL framework that can be faster or more stable than theano. Because keras supports these 3 backends, it is possible to use them as alternative to theano. To change backend, please configure the `$HOME/.keras/keras.json` file. (See official instruction [here](https://keras.io/backend/)).
+
+The default configuration file looks like this:
+
+```json
+{
+    "image_data_format": "channels_last",
+    "epsilon": 1e-07,
+    "floatx": "float32",
+    "backend": "tensorflow"
+}
+```
+
+* For tensorflow backend, we recommand to use only one thread as option `nb_threads=1`
 
 ## installation (local)
 
@@ -141,7 +157,7 @@ project_name = 'stacked_TestProject'
 epochs = 10
 seed = 3
 nb_it = 5
-nb_threads = 2
+nb_threads = 1 # We recommand to use only 1 threads with tensorflow as backend
 
 boosting = SimDeepBoosting(
     nb_threads=nb_threads,
