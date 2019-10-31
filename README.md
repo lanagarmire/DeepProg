@@ -107,17 +107,19 @@ sample_test_3  43   0
 
 ```
 
-These example files are set as default in the config.py file. We will use them as a demo:
+These example files are set as default in the config.py file. We will use them as a demo.
+In a first example, we show how to construct a single model that creates an autoencoder / preprocessing for each omic
 
 ```python
 
+# SimDeep class can be used to build one model with one autoencoder for each omic
 from simdeep.simdeep_analysis import SimDeep
 
 help(SimDeep) # to see all the functions
 
 simDeep = SimDeep() # instantiate the model
 simDeep.load_training_dataset() # load the training dataset
-simDeep.fit() # fit the model
+simDeep.fit() # fit the model 
 
 simDeep.load_test_dataset()# Load the test dataset
 
@@ -135,8 +137,8 @@ simDeep.save_encoder('dummy_encoder.h5')
 
 ```
 
-* The tsv dataset used in the original study and a copy of the model generated are available in the package
-* These data are in `./data/` and must be decompressed:
+The tsv dataset used in the original study and a copy of the model generated for HCC cancer are available as example in the package.
+These data are in `./data/` and must be decompressed:
 
 ```bash
 cd data
@@ -144,10 +146,13 @@ gzip -d *.gz
 
 ```
 
-* Then it is  easy to build a new model:
+To build a full DeepProg model constituted of an ensemble models each originated from a subset of the data, we need to use the `SimDeepBoosting` class:
 
 ```python
 from simdeep.simdeep_boosting import SimDeepBoosting
+
+help(SimDeepBoosting)
+
 from collections import OrderedDict
 
 
@@ -163,10 +168,10 @@ tsv_files = OrderedDict([
 survival_tsv = 'survival_dummy.tsv'
 
 project_name = 'stacked_TestProject'
-epochs = 10
-seed = 3
-nb_it = 5
-nb_threads = 1 # We recommand to use only 1 threads with tensorflow as backend
+epochs = 10 # Autoencoder epochs. Other hyperparameters can be fine-tuned. See the example files
+seed = 3 # random seed used for reproducibility
+nb_it = 5 # This is the number of models to be fitted using only a subset of the training data
+nb_threads = 2 # These treads define the number of threads to be used to compute survival function
 
 boosting = SimDeepBoosting(
     nb_threads=nb_threads,
@@ -207,10 +212,10 @@ boosting.compute_clusters_consistency_for_test_labels()
 # [EXPERIMENTAL] method to plot the test dataset amongst the class kernel densities
 boosting.plot_supervised_kernel_for_test_sets()
 ```
-* Use of ray framework for parallel computation.
+* Use of ray framework for distributed computation.
 
 ```python
-# Instanciate a ray instance
+# Instanciate a ray object that will create multiple workers
 import ray
 ray.init(num_cpus=3)
 # More options can be used (e.g. remote clusters, AWS, memory,...etc...)
