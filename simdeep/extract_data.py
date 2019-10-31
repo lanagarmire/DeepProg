@@ -96,7 +96,7 @@ class LoadData():
             fill_unkown_feature_with_0=FILL_UNKOWN_FEATURE_WITH_0,
             normalization=NORMALIZATION,
             survival_flag=SURVIVAL_FLAG,
-            _parameters={},
+            _autoencoder_parameters={},
             verbose=True,
     ):
         """
@@ -168,7 +168,7 @@ class LoadData():
         self.dim_reducer = CorrelationReducer()
         self.variance_reducer = VarianceReducer()
 
-        self._parameters = _parameters
+        self._autoencoder_parameters = _autoencoder_parameters
         self.normalization = defaultdict(bool, normalization)
         self.normalization_test = None
 

@@ -80,8 +80,8 @@ def make_color_dict_from_r(labels):
     cin = Color('red')
     cout = Color('#56f442')
 
-    gradient = map(lambda x:x.get_rgb(),
-                   cin.range_to(cout, len(labels_set)))
+    gradient = list(map(lambda x:x.get_rgb(),
+                   cin.range_to(cout, len(labels_set))))
 
     len_color = len(gradient)
 

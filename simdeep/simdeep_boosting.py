@@ -8,8 +8,6 @@ from simdeep.coxph_from_r import c_index_multiple
 from sklearn.model_selection import KFold
 # from sklearn.preprocessing import OneHotEncoder
 
-from multiprocessing.pool import Pool
-
 from collections import Counter
 from collections import defaultdict
 from itertools import combinations
@@ -37,6 +35,20 @@ from simdeep.config import TRAINING_TSV
 from simdeep.config import SURVIVAL_TSV
 from simdeep.config import PATH_DATA
 from simdeep.config import SURVIVAL_FLAG
+from simdeep.config import NODES_SELECTION
+from simdeep.config import CINDEX_THRESHOLD
+
+# Parameter for autoencoder
+from simdeep.config import LEVEL_DIMS_IN
+from simdeep.config import LEVEL_DIMS_OUT
+from simdeep.config import LOSS
+from simdeep.config import OPTIMIZER
+from simdeep.config import ACT_REG
+from simdeep.config import W_REG
+from simdeep.config import DROPOUT
+from simdeep.config import ACTIVATION
+from simdeep.config import PATH_TO_SAVE_MODEL
+from simdeep.config import DATA_SPLIT
 
 from simdeep.deepmodel_base import DeepBase
 
@@ -102,6 +114,7 @@ class SimDeepBoosting():
                  nb_it=NB_ITER,
                  nb_fold=NB_FOLDS,
                  do_KM_plot=True,
+                 distribute=False,
                  nb_threads=NB_THREADS,
                  class_selection=CLASS_SELECTION,
                  model_thres=MODEL_THRES,
@@ -122,13 +135,25 @@ class SimDeepBoosting():
                  survival_tsv=SURVIVAL_TSV,
                  survival_flag=SURVIVAL_FLAG,
                  path_data=PATH_DATA,
-                 **kwargs):
+                 level_dims_in=LEVEL_DIMS_IN,
+                 level_dims_out=LEVEL_DIMS_OUT,
+                 loss=LOSS,
+                 optimizer=OPTIMIZER,
+                 act_reg=ACT_REG,
+                 w_reg=W_REG,
+                 dropout=DROPOUT,
+                 data_split=DATA_SPLIT,
+                 node_selection=NODES_SELECTION,
+                 cindex_thres=CINDEX_THRESHOLD,
+                 activation=ACTIVATION,
+                 path_to_save_model=PATH_TO_SAVE_MODEL,
+                 **additional_dataset_args):
         """ """
         assert(class_selection in ['max', 'mean', 'weighted_mean', 'weighted_max'])
         self.class_selection = class_selection
 
         self._instance_weights = None
-
+        self.distribute = distribute
         self.model_thres = model_thres
         self.models = []
         self.verbose = verbose
@@ -142,6 +167,8 @@ class SimDeepBoosting():
         self.survival_flag = survival_flag
         self.path_data = path_data
         self.dataset = None
+        self.cindex_thres = cindex_thres
+        self.node_selection = node_selection
 
         self.encoder_for_kde_plot_dict = {}
         self.kde_survival_node_ids = {}
@@ -176,7 +203,7 @@ class SimDeepBoosting():
         self.feature_train_array = None
         self.matrix_full_array = None
 
-        ######## deepprob instance parameters ########
+        ######## deepprog instance parameters ########
         self.nb_clusters = nb_clusters
         self.normalization = normalization
         self.epochs = epochs
@@ -190,23 +217,32 @@ class SimDeepBoosting():
 
         self.test_fname_key = ''
 
-        parameters = {
-            'nb_clusters': self.nb_clusters,
+        autoencoder_parameters = {
             'epochs': self.epochs,
-            'nb_selected_features': self.nb_selected_features,
             'new_dim': self.new_dim,
-            'pvalue_thres': self.pvalue_thres,
-            'cluster_method': self.cluster_method,
-            'path_results': self.path_results,
-            'project_name': self.project_name,
-            'classification_method': self.classification_method,
+            'level_dims_in': level_dims_in,
+            'level_dims_out': level_dims_out,
+            'loss': loss,
+            'optimizer': optimizer,
+            'act_reg': act_reg,
+            'w_reg': w_reg,
+            'dropout': dropout,
+            'data_split': data_split,
+            'activation': activation,
+            'path_to_save_model': path_to_save_model,
         }
 
         self.datasets = []
         self.seed = seed
 
+        self.log['parameters'] = {}
+
+        for arg in self.__dict__:
+            self.log['parameters'][arg] = str(self.__dict__[arg])
+
         self.log['seed'] = seed
-        self.log['parameters'] = parameters.copy()
+        self.log['parameters'].update(autoencoder_parameters)
+
         self.log['nb_it'] = nb_it
         self.log['normalization'] = normalization
         self.log['nb clusters'] = nb_clusters
@@ -215,23 +251,34 @@ class SimDeepBoosting():
         self.log['training_tsv'] = self.training_tsv
         self.log['path_data'] = self.path_data
 
-        kwargs['survival_tsv'] = self.survival_tsv
-        kwargs['training_tsv'] = self.training_tsv
-        kwargs['path_data'] = self.path_data
-        kwargs['survival_flag'] = self.survival_flag
+        additional_dataset_args['survival_tsv'] = self.survival_tsv
+        additional_dataset_args['training_tsv'] = self.training_tsv
+        additional_dataset_args['path_data'] = self.path_data
+        additional_dataset_args['survival_flag'] = self.survival_flag
 
-        if 'fill_unkown_feature_with_0' in kwargs:
-            self.log['fill_unkown_feature_with_0'] = kwargs['fill_unkown_feature_with_0']
+        if 'fill_unkown_feature_with_0' in additional_dataset_args:
+            self.log['fill_unkown_feature_with_0'] = additional_dataset_args['fill_unkown_feature_with_0']
 
+        self.ray = None
+
+        self._init_datasets(nb_it, split_n_fold,
+                            autoencoder_parameters,
+                            **additional_dataset_args)
+
+    def _init_datasets(self, nb_it, split_n_fold,
+                       autoencoder_parameters,
+                       **additional_dataset_args):
+        """
+        """
         if self.seed:
-            np.random.seed(seed)
+            np.random.seed(self.seed)
 
         max_seed = 1000
         min_seed = 0
 
-        if seed > max_seed:
-            min_seed = seed - max_seed
-            max_seed = seed
+        if self.seed > max_seed:
+            min_seed = self.seed - max_seed
+            max_seed = self.seed
 
         random_states = np.random.randint(min_seed, max_seed, nb_it)
 
@@ -244,13 +291,13 @@ class SimDeepBoosting():
             else:
                 split = None
 
-            parameters['seed'] = random_states[it]
+            autoencoder_parameters['seed'] = random_states[it]
 
             dataset = LoadData(cross_validation_instance=split,
                                verbose=False,
                                normalization=self.normalization,
-                               _parameters=parameters.copy(),
-                               **kwargs)
+                               _autoencoder_parameters=autoencoder_parameters.copy(),
+                               **additional_dataset_args)
 
             self.datasets.append(dataset)
 
@@ -261,6 +308,52 @@ class SimDeepBoosting():
             del model
 
         gc.collect()
+
+    def _from_models(self, fname, *args, **kwargs):
+        """
+        """
+        if self.distribute:
+            return self.ray.get([getattr(model, fname).remote(*args, **kwargs)
+                                 for model in self.models])
+        else:
+            return [getattr(model, fname)(*args, **kwargs)
+                    for model in self.models]
+
+
+    def _from_model(self, model, fname, *args, **kwargs):
+        """
+        """
+        if self.distribute:
+            return self.ray.get(getattr(model, fname).remote(
+                *args, **kwargs))
+        else:
+            return getattr(model, fname)(*args, **kwargs)
+
+    def _from_model_attr(self, model, atname):
+        """
+        """
+        if self.distribute:
+            return self.ray.get(model._get_attibute.remote(atname))
+        else:
+            return model._get_attibute(atname)
+
+    def _from_models_attr(self, atname):
+        """
+        """
+        if self.distribute:
+            return self.ray.get([model._get_attibute.remote(atname)
+                                 for model in self.models])
+        else:
+            return [model._get_attibute(atname) for model in self.models]
+
+    def _from_model_dataset(self, model, atname):
+        """
+        """
+        if self.distribute:
+            return self.ray.get(model._get_from_dataset.remote(atname))
+        else:
+            return model._get_from_dataset(atname)
+
 
     def _do_class_selection(self, inputs, **kwargs):
         """
@@ -277,33 +370,49 @@ class SimDeepBoosting():
     def partial_fit(self, debug=False):
         """
         """
-        self._fit(_partial_fit_model_pool, debug=debug)
+        self._fit(debug=debug)
 
     def fit(self, debug=False, verbose=False):
         """
         """
-        self._fit(_partial_fit_model_pool, debug=debug,
-                  verbose=verbose)
+        if self.distribute:
+            self._fit_distributed()
+        else:
+            self._fit(debug=debug, verbose=verbose)
 
-    def _fit(self, _fit_func, debug=False, verbose=False):
+
+    def _fit_distributed(self):
         """ """
         print('fit models...')
-        pool = None
         start_time = time()
 
-        if debug or self.nb_threads<2:
-            map_func = map
-
-            if verbose:
-                for dataset in self.datasets:
-                    dataset.verbose = True
-        else:
-            pool = Pool(self.nb_threads)
-            map_func = pool.map
+        from simdeep.simdeep_distributed import SimDeepDistributed
+        import ray
+        assert(ray.is_initialized())
+        self.ray = ray
 
         try:
-            self.models = map_func(_fit_func,  self.datasets)
-            self.models = [model for model in self.models if model != None]
+            self.models = [SimDeepDistributed.remote(
+                nb_clusters=self.nb_clusters,
+                nb_selected_features=self.nb_selected_features,
+                pvalue_thres=self.pvalue_thres,
+                dataset=dataset,
+                load_existing_models=False,
+                verbose=dataset.verbose,
+                _isboosting=True,
+                do_KM_plot=False,
+                path_results=self.path_results,
+                project_name=self.project_name,
+                classification_method=self.classification_method,
+                cindex_thres=self.cindex_thres,
+                node_selection=self.node_selection,
+                deep_model_additional_args=dataset._autoencoder_parameters)
+                           for dataset in self.datasets]
+
+            results = ray.get([model._partial_fit_model_pool.remote() for model in self.models])
+
+            print("Results: {0}".format(results))
+            self.models = [model for model, is_fitted in zip(self.models, results) if is_fitted]
 
             nb_models = len(self.models)
 
@@ -312,8 +421,51 @@ class SimDeepBoosting():
 
             assert(nb_models)
 
-            if nb_models > 1:
-                assert(len(set([model.train_pvalue for model in self.models])) > 1)
+        except Exception as e:
+            self.log['failure'] = str(e)
+            raise e
+
+        else:
+            self.log['success'] = True
+            self.log['fitting time (s)'] = time() - start_time
+
+            if self.class_selection in ['weighted_mean', 'weighted_max']:
+                self.collect_cindex_for_test_fold()
+
+    def _fit(self, debug=False, verbose=False):
+        """ """
+        print('fit models...')
+        start_time = time()
+
+        try:
+            self.models = [SimDeep(
+                nb_clusters=self.nb_clusters,
+                nb_selected_features=self.nb_selected_features,
+                pvalue_thres=self.pvalue_thres,
+                dataset=dataset,
+                load_existing_models=False,
+                verbose=dataset.verbose,
+                _isboosting=True,
+                do_KM_plot=False,
+                path_results=self.path_results,
+                project_name=self.project_name,
+                cindex_thres=self.cindex_thres,
+                node_selection=self.node_selection,
+                classification_method=self.classification_method,
+                deep_model_additional_args=dataset._autoencoder_parameters)
+                           for dataset in self.datasets]
+
+            results = [model._partial_fit_model_pool() for model in self.models]
+
+            print("Results: {0}".format(results))
+            self.models = [model for model, is_fitted in zip(self.models, results) if is_fitted]
+
+            nb_models = len(self.models)
+
+            print('{0} models fitted'.format(nb_models))
+            self.log['nb. models fitted'] = nb_models
+
+            assert(nb_models)
 
         except Exception as e:
             self.log['failure'] = str(e)
@@ -321,11 +473,6 @@ class SimDeepBoosting():
 
         else:
             self.log['success'] = True
-
-        finally:
-            if pool is not None:
-                pool.close()
-                pool.join()
             self.log['fitting time (s)'] = time() - start_time
 
             if self.class_selection in ['weighted_mean', 'weighted_max']:
@@ -335,7 +482,7 @@ class SimDeepBoosting():
         """
         """
         print('predict labels on test datasets...')
-        test_labels_proba = np.asarray([model.test_labels_proba for model in self.models])
+        test_labels_proba = np.asarray(self._from_models_attr('test_labels_proba'))
 
         res = self._do_class_selection(test_labels_proba, weights=self.cindex_test_folds)
         self.test_labels, self.test_labels_proba = res
@@ -344,7 +491,7 @@ class SimDeepBoosting():
         for key, value in Counter(self.test_labels).items():
             print('class: {0}, number of samples :{1}'.format(key, value))
 
-        nbdays, isdead = self.models[0].dataset.survival_test.T.tolist()
+        nbdays, isdead = self._from_model_dataset(self.models[0], "survival_test").T.tolist()
         pvalue, pvalue_proba, pvalue_cat = self._compute_test_coxph(
             'KM_plot_boosting_test',
             nbdays, isdead,
@@ -355,8 +502,10 @@ class SimDeepBoosting():
         self.log['pvalue proba test {0}'.format(self.test_fname_key)] = pvalue_proba
         self.log['pvalue cat test {0}'.format(self.test_fname_key)] = pvalue_cat
 
-        self.models[0]._write_labels(
-            self.models[0].dataset.sample_ids_test,
+        sample_id_test = self._from_model_dataset(self.models[0], 'sample_ids_test')
+
+        self._from_model(self.models[0], '_write_labels',
+            sample_id_test,
             self.test_labels,
             '{0}_test_labels'.format(self.project_name),
             labels_proba=self.test_labels_proba.T[0],
@@ -369,8 +518,11 @@ class SimDeepBoosting():
         """
         print('predict labels on test fold datasets...')
 
-        pvalues, pvalues_proba = zip(*[(model.cv_pvalue, model.cv_pvalue_proba)
-                                       for model in self.models])
+        pvalues, pvalues_proba = [], []
+
+        for model in self.models:
+            pvalues.append(self._from_model_attr(model, 'cp_pvalue'))
+            pvalues_proba.append(self._from_model_attr(model, 'cp_pvalue_proba'))
 
         pvalue_gmean, pvalue_proba_gmean = gmean(pvalues), gmean(pvalues_proba)
 
@@ -390,8 +542,8 @@ class SimDeepBoosting():
         pvalues, pvalues_proba = [], []
 
         for model in self.models:
-            pvalues.append(model.train_pvalue)
-            pvalues_proba.append(model.train_pvalue_proba)
+            pvalues.append(self._from_model_attr(model, 'train_pvalue'))
+            pvalues_proba.append(self._from_model_attr(model, 'train_pvalue_proba'))
 
         pvalue_gmean, pvalue_proba_gmean = gmean(pvalues), gmean(pvalues_proba)
 
@@ -409,8 +561,12 @@ class SimDeepBoosting():
         """
         print('collect pvalues on test datasets...')
 
-        pvalues, pvalues_proba = zip(*[(model.test_pvalue, model.test_pvalue_proba)
-                                       for model in self.models])
+        pvalues, pvalues_proba = [], []
+
+        for model in self.models:
+            pvalues.append(self._from_model_attr(model, 'test_pvalue'))
+            pvalues_proba.append(self._from_model_attr(model, 'test_pvalue_proba'))
+
         pvalue_gmean, pvalue_proba_gmean = gmean(pvalues), gmean(pvalues_proba)
 
         if self.verbose:
@@ -428,8 +584,7 @@ class SimDeepBoosting():
         """
         print('collect pvalues on full datasets...')
 
-        pvalues, pvalues_proba = zip(*[(model.full_pvalue, model.full_pvalue_proba)
-                                       for model in self.models])
+        pvalues, pvalues_proba = zip(*self._from_models('_get_pvalues_and_pvalues_proba'))
         pvalue_gmean, pvalue_proba_gmean = gmean(pvalues), gmean(pvalues_proba)
 
         if self.verbose:
@@ -448,8 +603,9 @@ class SimDeepBoosting():
         self.log['number of features per omics'] = {}
 
         for model in self.models:
-            for key in model.valid_node_ids_array:
-                counter[key].append(len(model.valid_node_ids_array[key]))
+            valid_node_ids_array = self._from_model_attr(model, 'valid_node_ids_array')
+            for key in valid_node_ids_array:
+                counter[key].append(len(valid_node_ids_array[key]))
 
         if self.verbose:
             for key in counter:
@@ -465,10 +621,10 @@ class SimDeepBoosting():
         """
         self.cindex_test_folds = []
 
-        for model in self.models:
-            model.predict_labels_on_test_fold()
-            cindex = model.compute_c_indexes_for_test_fold_dataset()
+        self._from_models('predict_labels_on_test_fold')
+        cindexes = self._from_models('compute_c_indexes_for_test_fold_dataset')
 
+        for cindex in cindexes:
             if isinstance(cindex, NALogicalType):
                 cindex = np.nan
 
@@ -482,14 +638,12 @@ class SimDeepBoosting():
 
         return self.cindex_test_folds
 
+
     def collect_cindex_for_full_dataset(self):
         """
         """
-        cindexes_list = []
-
-        for model in self.models:
-            model.predict_labels_on_test_fold()
-            cindexes_list.append(model.compute_c_indexes_for_full_dataset())
+        self._from_models('predict_labels_on_test_fold')
+        cindexes_list = self._from_models('compute_c_indexes_for_full_dataset')
 
         if self.verbose:
             print('c-index results for full dataset: mean {0} std {1}'.format(
@@ -499,13 +653,11 @@ class SimDeepBoosting():
 
         return cindexes_list
 
+
     def collect_cindex_for_training_dataset(self):
         """
         """
-        cindexes_list = []
-
-        for model in self.models:
-            cindexes_list.append(model.compute_c_indexes_for_training_dataset())
+        cindexes_list = self._from_models('compute_c_indexes_for_training_dataset')
 
         if self.verbose:
             print('C-index results for training dataset: mean {0} std {1}'.format(
@@ -518,10 +670,7 @@ class SimDeepBoosting():
     def collect_cindex_for_test_dataset(self):
         """
         """
-        cindexes_list = []
-
-        for model in self.models:
-            cindexes_list.append(model.compute_c_indexes_for_test_dataset())
+        cindexes_list = self._from_models('compute_c_indexes_for_test_dataset')
 
         if self.verbose:
             print('C-index results for test: mean {0} std {1}'.format(
@@ -553,12 +702,12 @@ class SimDeepBoosting():
         self.log['pvalue proba full'] = pvalue_proba
         self.log['pvalue cat full'] = pvalue_cat
 
-        self.models[0]._write_labels(
-            self.sample_ids_full,
-            self.full_labels,
-            '{0}_full_labels'.format(self._project_name),
-            labels_proba=self.full_labels_proba.T[0],
-            nbdays=nbdays, isdead=isdead)
+        self._from_model(self.models[0], '_write_labels',
+                          self.sample_ids_full,
+                          self.full_labels,
+                          '{0}_full_labels'.format(self._project_name),
+                          labels_proba=self.full_labels_proba.T[0],
+                          nbdays=nbdays, isdead=isdead)
 
         return pvalue, pvalue_proba
 
@@ -568,11 +717,11 @@ class SimDeepBoosting():
         scores = []
 
         for model_1, model_2 in combinations(self.models, 2):
-            full_labels_1_old = model_1.full_labels
-            full_labels_2_old = model_2.full_labels
+            full_labels_1_old = self._from_model_attr(model_1, 'full_labels')
+            full_labels_2_old = self._from_model_attr(model_2, 'full_labels')
 
-            full_ids_1 = model_1.dataset.sample_ids_full
-            full_ids_2 = model_2.dataset.sample_ids_full
+            full_ids_1 = self._from_model_dataset(model_1, 'sample_ids_full')
+            full_ids_2 = self._from_model_dataset(model_2, 'sample_ids_full')
 
             full_labels_1 = _reorder_labels(full_labels_1_old, full_ids_1)
             full_labels_2 = _reorder_labels(full_labels_2_old, full_ids_2)
@@ -592,8 +741,10 @@ class SimDeepBoosting():
         scores = []
 
         for model_1, model_2 in combinations(self.models, 2):
-            scores.append(adjusted_rand_score(model_1.test_labels,
-                                              model_2.test_labels))
+            scores.append(adjusted_rand_score(
+                self._from_model_attr(model_1, 'test_labels'),
+                self._from_model_attr(model_2, 'test_labels'),
+            ))
         print('Adj. Rand scores for test label: mean: {0} std: {1}'.format(
             np.mean(scores), np.std(scores)))
 
@@ -604,8 +755,9 @@ class SimDeepBoosting():
     def _reorder_survival_full(self):
         """
         """
-        survival_old = self.models[0].dataset.survival_full
-        sample_ids = self.models[0].dataset.sample_ids_full
+        survival_old = self._from_model_dataset(self.models[0], 'survival_full')
+        sample_ids = self._from_model_dataset(self.models[0], 'sample_ids_full')
+
         surv_dict = {sample: surv for sample, surv in zip(sample_ids, survival_old)}
 
         self.survival_full = np.asarray([np.asarray(surv_dict[sample])[0]
@@ -614,12 +766,12 @@ class SimDeepBoosting():
     def _reorder_matrix_full(self):
         """
         """
-        sample_ids = self.models[0].dataset.sample_ids_full
+        sample_ids = self._from_model_dataset(self.models[0], 'sample_ids_full')
         index_dict = {sample: ids for ids, sample in enumerate(sample_ids)}
         index = [index_dict[sample] for sample in self.sample_ids_full]
 
-        self.feature_train_array = self.models[0].dataset.feature_train_array
-        self.matrix_full_array = self.models[0].dataset.matrix_full_array
+        self.feature_train_array = self._from_model_dataset(self.models[0], 'feature_train_array')
+        self.matrix_full_array = self._from_model_dataset(self.models[0], 'matrix_full_array')
 
         for key in self.matrix_full_array:
             self.matrix_full_array[key] = self.matrix_full_array[key][index]
@@ -629,17 +781,17 @@ class SimDeepBoosting():
         """
         proba_dict = defaultdict(list)
 
-        for model in self.models:
+        for sample_proba in self._from_models('_get_probas_for_full_model'):
             sample_set = set()
 
-            for sample, proba in zip(model.dataset.sample_ids_full, model.full_labels_proba):
+            for sample, proba in sample_proba:
                 if sample in sample_set:
                     continue
 
                 proba_dict[sample].append([np.nan_to_num(proba).tolist()])
                 sample_set.add(sample)
 
-        labels, probas = self._do_class_selection(hstack(proba_dict.values()),
+        labels, probas = self._do_class_selection(hstack(list(proba_dict.values())),
                                                  weights=self.cindex_test_folds)
 
         self.full_labels = np.asarray(labels)
@@ -703,9 +855,12 @@ class SimDeepBoosting():
         return c-index using labels as predicat
         """
         days_full, dead_full = np.asarray(self.survival_full).T
-        days_test, dead_test = np.asarray(self.models[0].dataset.survival_test).T
+        days_test, dead_test = self._from_model_dataset(self.models[0], 'survival_test').T
         labels_test_categorical = self._labels_proba_to_labels(self.test_labels_proba)
 
+        if isinstance(days_test, np.matrix):
+            days_test = np.asarray(days_test)[0]
+            dead_test = np.asarray(dead_test)[0]
 
         cindex = c_index(self.full_labels, dead_full, days_full,
                          self.test_labels, dead_test, days_test)
@@ -761,11 +916,13 @@ class SimDeepBoosting():
         print('not funtionnal!')
         return
 
-        matrix_array_train = self.models[0].dataset.matrix_ref_array
-        matrix_array_test = self.models[0].dataset.matrix_test_array
+        matrix_array_train = self._from_model_dataset(self.models[0], 'matrix_ref_array')
+        matrix_array_test = self._from_model_dataset(self.models[0], 'matrix_test_array')
 
-        nbdays, isdead = self.models[0].dataset.survival.T.tolist()
-        nbdays_test, isdead_test = self.models[0].dataset.survival_test.T.tolist()
+        nbdays, isdead = self._from_model_dataset(self.models[0],
+                                                  'survival').T.tolist()
+        nbdays_test, isdead_test = self._from_model_dataset(self.models[0],
+                                                            'survival_test').T.tolist()
 
         activities_train, activities_test = [], []
 
@@ -796,12 +953,12 @@ class SimDeepBoosting():
         """
         print('#### plotting supervised labels....')
 
-        self.models[0].plot_supervised_kernel_for_test_sets(
-            define_as_main_kernel=define_as_main_kernel,
-            use_main_kernel=use_main_kernel,
-            test_labels_proba=self.test_labels_proba,
-            test_labels=self.test_labels,
-            key='_' + self.test_fname_key)
+        self._from_model(self.models[0], "plot_supervised_kernel_for_test_sets",
+                         define_as_main_kernel=define_as_main_kernel,
+                         use_main_kernel=use_main_kernel,
+                         test_labels_proba=self.test_labels_proba,
+                         test_labels=self.test_labels,
+                         key='_' + self.test_fname_key)
 
     def plot_supervised_kernel_for_test_sets(self):
         """
@@ -839,7 +996,7 @@ class SimDeepBoosting():
             encoder = encoder_array[key]
             matrix_ref = encoder.predict(self.dataset.matrix_ref_array[key])
 
-            survival_node_ids = self.models[0]._look_for_survival_nodes(
+            survival_node_ids = self._from_model(self.models[0], '_look_for_survival_nodes',
                 activities=matrix_ref, survival=self.dataset.survival)
 
             self.kde_survival_node_ids[key] = survival_node_ids
@@ -964,7 +1121,6 @@ class SimDeepBoosting():
                               verbose=False):
         """
         """
-        pool = None
         self.test_tsv_dict = tsv_dict
         self.test_survival_file = path_survival_file
 
@@ -974,28 +1130,26 @@ class SimDeepBoosting():
         self.test_normalization = normalization
 
         if debug or self.nb_threads<2:
-            map_func = map
-
-            if verbose:
-                for model in self.models:
-                    model.verbose = True
-                    model.dataset.verbose = True
-        else:
-            pool = Pool(self.nb_threads)
-            map_func = pool.map
+            pass
+        # for model in self.models:
+        # model.verbose = True
+        # model.dataset.verbose = True
 
         self.test_fname_key = fname_key
 
-        inputs = [(model, tsv_dict, path_survival_file, normalization)
-                  for model in self.models]
-        self.models = list(map_func(_predict_new_dataset, inputs))
+        print("Loading new test dataset...")
+        t_start = time()
+
+        self._from_models('_predict_new_dataset',
+                          tsv_dict=tsv_dict,
+                          path_survival_file=path_survival_file,
+                          normalization=normalization)
+
+        print("Test dataset loaded in {0} s".format(time() - t_start))
 
         if fname_key:
             self.project_name = '{0}_{1}'.format(self._project_name, fname_key)
 
-        if pool is not None:
-            pool.close()
-            pool.join()
 
     def compute_feature_scores_per_cluster(self):
         """
@@ -1057,7 +1211,7 @@ class SimDeepBoosting():
     def evalutate_cluster_performance(self):
         """
         """
-        bic_scores = np.array([model.bic_score for model in self.models])
+        bic_scores = np.array([self._from_model_attr(model, 'bic_score') for model in self.models])
 
         if bic_scores[0] is not None:
             bic = np.nanmean(bic_scores)
@@ -1067,14 +1221,17 @@ class SimDeepBoosting():
         else:
             bic = np.nan
 
-        silhouette_scores = np.array([model.silhouette_score for model in self.models])
+        silhouette_scores = np.array([self._from_model_attr(model, 'silhouette_score')
+                                      for model in self.models])
         silhouette = silhouette_scores.mean()
         print('silhouette score: mean: {0} std :{1}'.format(silhouette,
                                                             silhouette_scores.std()
         ))
         self.log['silhouette'] = silhouette
 
-        calinski_scores = np.array([model.calinski_score for model in self.models])
+        calinski_scores = np.array([self._from_model_attr(model, 'calinski_score')
+                                    for model in self.models])
+
         calinski = calinski_scores.mean()
         print('calinski harabasz score: mean: {0} std :{1}'.format(calinski_scores.mean(),
                                                                    calinski_scores.std()
@@ -1161,6 +1318,7 @@ def _weighted_mean(proba, weights):
 
     return np.asarray(labels), np.asarray(probas)
 
+
 def _weighted_max(proba, weights):
     """
     """
@@ -1185,50 +1343,6 @@ def _weighted_max(proba, weights):
 
     return np.asarray(labels), np.asarray(probas)
 
-def _partial_fit_model_pool(dataset):
-    """ """
-    parameters = dataset._parameters
-
-    model = SimDeep(dataset=dataset,
-                    load_existing_models=False,
-                    verbose=dataset.verbose,
-                    _isboosting=True,
-                    do_KM_plot=False,
-                    **parameters)
-
-    try:
-        model.load_training_dataset()
-        model.fit()
-
-        if len(set(model.labels)) < 1:
-            raise Exception('only one class!')
-
-        if model.train_pvalue > MODEL_THRES:
-            raise Exception('pvalue: {0} not significant!'.format(model.train_pvalue))
-
-    except Exception as e:
-        print('model with random state:{1} didn\'t converge:{0}'.format(str(e), model.seed))
-        return None
-
-    else:
-        print('model with random state:{0} fitted'.format(model.seed))
-
-    model.predict_labels_on_test_fold()
-    model.predict_labels_on_full_dataset()
-    model.evalutate_cluster_performance()
-
-    return model
-
-def _predict_new_dataset(inputs):
-    """
-    """
-    model, tsv_dict, path_survival_file, normalization = inputs
-
-    model.load_new_test_dataset(tsv_dict, path_survival_file,
-                                normalization=normalization)
-    model.predict_labels_on_test_dataset()
-
-    return model
 
 def _reorder_labels(labels, sample_ids):
     """

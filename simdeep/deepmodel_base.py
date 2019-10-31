@@ -2,15 +2,30 @@ import numpy as np
 
 from simdeep.config import SEED
 
-from keras.layers import Dense
-from keras.layers import Dropout
-from keras.layers import Input
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
-from keras.models import Sequential
-from keras.models import load_model
-from keras.models import Model
+import warnings
 
-from keras import regularizers
+try:
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        import tensorflow as tf
+        tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
+except Exception:
+    pass
+
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore")
+    from keras.layers import Dense
+    from keras.layers import Dropout
+    from keras.layers import Input
+
+    from keras.models import Sequential
+    from keras.models import load_model
+    from keras.models import Model
+
+    from keras import regularizers
 
 from simdeep.extract_data import LoadData
 
@@ -31,12 +46,16 @@ from simdeep.config import DATA_SPLIT
 
 from os.path import isfile
 
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+
 
 def main():
     """ """
     simdeep = DeepBase(seed=2)
     simdeep.load_training_dataset()
     simdeep.construct_autoencoders()
+    simdeep.encoder_predict('METH', simdeep.matrix_train_array['METH'])
 
 
 class DeepBase(object):
@@ -75,6 +94,7 @@ class DeepBase(object):
         if dataset is None:
             dataset = LoadData()
 
+        self.session = None
         self.dataset = dataset
         self.verbose = verbose
 
@@ -130,6 +150,9 @@ class DeepBase(object):
         self.dataset.normalize_training_array()
 
         self.matrix_train_array = self.dataset.matrix_train_array
+
+        for key in self.matrix_train_array:
+            self.matrix_train_array[key] = self.matrix_train_array[key].astype('float32')
 
     def load_test_dataset(self):
         """
@@ -233,6 +256,7 @@ class DeepBase(object):
             model = self.model_array[key]
             if self.verbose:
                 print('compiling deep model...')
+
             model.compile(optimizer=self.optimizer, loss=self.loss)
 
             if self.verbose:
@@ -257,16 +281,29 @@ class DeepBase(object):
                 verbose = 2
 
             model.fit(x=matrix_train,
-                       y=matrix_out,
-                       verbose=verbose,
-                       epochs=self.epochs,
-                       validation_split=self.data_split,
-                       shuffle=True)
+                      y=matrix_out,
+                      verbose=verbose,
+                      epochs=self.epochs,
+                      validation_split=self.data_split,
+                      shuffle=True)
 
             if self.verbose:
                 print('fitting done for model {0}!'.format(key))
 
         self._define_encoders()
+
+    def encoder_predict(self, key, matrix):
+        """
+        Predict the output value using the matrix as input for the encoder from key
+        """
+        return self.encoder_array[key].predict(x=matrix)
+
+    def encoder_input_shape(self, key):
+        """
+        Predict the output value using the matrix as input for the encoder from key
+        """
+        return self.encoder_array[key].input_shape
+
 
     def _define_encoders(self):
         """

@@ -63,11 +63,10 @@ import warnings
 
 from multiprocessing import Pool
 
-import gc
-
 
 ################ VARIABLE ############################################
 _CLASSIFICATION_METHOD_LIST = ['ALL_FEATURES', 'SURVIVAL_FEATURES']
+MODEL_THRES = 0.05
 ######################################################################
 
 
@@ -128,7 +127,8 @@ class SimDeep(DeepBase):
                  do_KM_plot=True,
                  verbose=True,
                  _isboosting=False,
-                 **kwargs):
+                 dataset=None,
+                 deep_model_additional_args={}):
         """
         ### AUTOENCODER PARAMETERS ###:
             dataset=None      ExtractData instance (load the dataset),
@@ -191,6 +191,7 @@ class SimDeep(DeepBase):
         self.used_features_for_classif = None
 
         self._isboosting = _isboosting
+        self._is_fitted = False
 
         self.valid_node_ids_array = {}
         self.activities_array = {}
@@ -233,15 +234,12 @@ class SimDeep(DeepBase):
 
         self.path_to_save_model = path_to_save_model
 
-        kwargs['path_to_save_model'] = self.path_to_save_model
+        deep_model_additional_args['path_to_save_model'] = self.path_to_save_model
 
-        DeepBase.__init__(self, verbose=self.verbose, **kwargs)
-
-    def __del__(self):
-        """
-        """
-        del self.dataset
-        gc.collect()
+        DeepBase.__init__(self,
+                          verbose=self.verbose,
+                          dataset=dataset,
+                          **deep_model_additional_args)
 
     def _look_for_nodes(self, key):
         """
@@ -780,17 +778,16 @@ class SimDeep(DeepBase):
             keys = list(matrix_array.keys())
 
         for key in keys:
-            encoder = self.encoder_array[key]
             matrix = matrix_array[key]
 
-            if encoder.input_shape[1] != matrix.shape[1]:
+            if self.encoder_input_shape(key)[1] != matrix.shape[1]:
                 if self.verbose:
                     print('matrix doesnt have the input dimension of the encoder'\
                           ' returning None')
                 return None
 
 
-            activities = encoder.predict(x=matrix)
+            activities = self.encoder_predict(key, matrix)
             activities_array[key] = activities.T[self.valid_node_ids_array[key]].T
 
         return hstack([activities_array[key]
@@ -808,10 +805,9 @@ class SimDeep(DeepBase):
             valid_node_ids = self._look_for_nodes(key)
             self.valid_node_ids_array[key] = valid_node_ids
 
-            encoder = self.encoder_array[key]
             matrix_train = self.matrix_train_array[key]
 
-            activities = encoder.predict(matrix_train)
+            activities = self.encoder_predict(key, matrix_train)
             self.activities_array[key] = activities.T[valid_node_ids].T
 
         self.activities_train = hstack([self.activities_array[key]
@@ -826,10 +822,9 @@ class SimDeep(DeepBase):
             keys = list(self.encoder_array.keys())
 
         for key in keys:
-            encoder = self.encoder_array[key]
             matrix_train = self.matrix_train_array[key]
 
-            activities = encoder.predict(matrix_train)
+            activities = self.encoder_predict(key, matrix_train)
 
             valid_node_ids = self._look_for_prediction_nodes(key)
             self.pred_node_ids_array[key] = valid_node_ids
@@ -849,10 +844,9 @@ class SimDeep(DeepBase):
         activities_test = {}
 
         for key in self.dataset.matrix_test_array:
-            encoder = self.encoder_array[key]
             node_ids = self.pred_node_ids_array[key]
-            activities_test[key] = encoder.predict(
-                self.dataset.matrix_test_array[key]).T[node_ids].T
+            activities_test[key] = self.encoder_predict(
+                key, self.dataset.matrix_test_array[key]).T[node_ids].T
 
         activities_test = hstack(activities_test.values())
         activities_train = hstack([self.activities_pred_array[key]
@@ -877,9 +871,8 @@ class SimDeep(DeepBase):
 
         for key in self.dataset.matrix_cv_array:
             node_ids = self.pred_node_ids_array[key]
-            encoder = self.encoder_array[key]
-            activities_cv[key] = encoder.predict(
-                self.dataset.matrix_cv_array[key]).T[node_ids].T
+            activities_cv[key] = self.encoder_predict(
+                key, self.dataset.matrix_cv_array[key]).T[node_ids].T
 
         activities_cv = hstack(activities_cv.values())
         cindex = c_index_multiple(self.activities_for_pred_train, dead, days,
@@ -1014,9 +1007,8 @@ class SimDeep(DeepBase):
             mapf = map
 
         if key is not None:
-            encoder = self.encoder_array[key]
             matrix_train = self.matrix_train_array[key]
-            activities = np.nan_to_num(encoder.predict(matrix_train))
+            activities = np.nan_to_num(self.encoder_predict(key, matrix_train))
         else:
             assert(activities is not None)
 
@@ -1054,13 +1046,11 @@ class SimDeep(DeepBase):
         nbdays, isdead = self.dataset.survival.T.tolist()
         nbdays_cv, isdead_cv = self.dataset.survival_cv.T.tolist()
 
-        encoder = self.encoder_array[key]
-
         matrix_train = self.matrix_train_array[key]
         matrix_cv = self.dataset.matrix_cv_array[key]
 
-        activities_train = encoder.predict(matrix_train)
-        activities_cv = encoder.predict(matrix_cv)
+        activities_train = self.encoder_predict(key, matrix_train)
+        activities_cv = self.encoder_predict(key, matrix_cv)
 
         input_list = iter((node_id,
                            activities_train.T[node_id], isdead, nbdays,
@@ -1072,8 +1062,8 @@ class SimDeep(DeepBase):
         score_list = filter(lambda x: not np.isnan(x[1]), score_list)
         score_list.sort(key=lambda x:x[1], reverse=True)
 
-        valid_node_ids = [node_id for node_id, pvalue in score_list
-                               if pvalue > self.cindex_thres]
+        valid_node_ids = [node_id for node_id, cindex in score_list
+                               if cindex > self.cindex_thres]
 
         scores = [score for node_id, score in score_list
                   if score > self.cindex_thres]
@@ -1153,10 +1143,9 @@ class SimDeep(DeepBase):
             if key not in self.pred_node_ids_array:
                 continue
 
-            encoder = self.encoder_array[key]
             node_ids = self.pred_node_ids_array[key]
 
-            activities.append(encoder.predict(matrix_array[key]).T[node_ids].T)
+            activities.append(self.encoder_predict(key, matrix_array[key]).T[node_ids].T)
 
         return hstack(activities)
 
@@ -1294,9 +1283,8 @@ class SimDeep(DeepBase):
         encoder_array = self.encoder_for_kde_plot_dict[encoder_key]
 
         for key in encoder_array:
-            encoder = encoder_array[key]
-            matrix_ref = encoder.predict(dataset.matrix_ref_array[key])
-            matrix_test = encoder.predict(dataset.matrix_test_array[key])
+            matrix_ref = self.encoder_predict(key, dataset.matrix_ref_array[key])
+            matrix_test = self.encoder_predict(key, dataset.matrix_test_array[key])
 
             survival_node_ids = self._look_for_survival_nodes(
                 activities=matrix_ref, survival=dataset.survival)
@@ -1319,6 +1307,71 @@ class SimDeep(DeepBase):
             matrix_test_list.append(matrix_test)
 
         return hstack(matrix_ref_list), hstack(matrix_test_list)
+
+
+    def _get_probas_for_full_model(self):
+        """
+        return sample and proba
+        """
+        return list(zip(self.dataset.sample_ids_full, self.full_labels_proba))
+
+
+    def _get_pvalues_and_pvalues_proba(self):
+        """
+        """
+        return self.full_pvalue, self.full_pvalue_proba
+
+    def _get_from_dataset(self, attr):
+        """
+        """
+        return getattr(self.dataset, attr)
+
+    def _get_attibute(self, attr):
+        """
+        """
+        return getattr(self, attr)
+
+
+    def _partial_fit_model_pool(self):
+        """
+        """
+        try:
+            self.load_training_dataset()
+            self.fit()
+
+            if len(set(self.labels)) < 1:
+                raise Exception('only one class!')
+
+            if self.train_pvalue > MODEL_THRES:
+                raise Exception('pvalue: {0} not significant!'.format(self.train_pvalue))
+
+        except Exception as e:
+            print('model with random state:{1} didn\'t converge:{0}'.format(str(e), self.seed))
+            return False
+
+        else:
+            print('model with random state:{0} fitted'.format(self.seed))
+            self._is_fitted = True
+
+        self.predict_labels_on_test_fold()
+        self.predict_labels_on_full_dataset()
+        self.evalutate_cluster_performance()
+
+        return self._is_fitted
+
+    def _predict_new_dataset(self,
+                             tsv_dict,
+                             path_survival_file,
+                             normalization):
+        """
+        """
+        self.load_new_test_dataset(
+            tsv_dict,
+            path_survival_file,
+            normalization=normalization)
+
+        self.predict_labels_on_test_dataset()
+
 
 
 if __name__ == "__main__":
