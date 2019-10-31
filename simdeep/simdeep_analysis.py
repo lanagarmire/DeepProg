@@ -1315,15 +1315,21 @@ class SimDeep(DeepBase):
         """
         return list(zip(self.dataset.sample_ids_full, self.full_labels_proba))
 
-    def _get_survival_full(self):
-        """
-        """
-        return self.dataset.survival_full
 
-    def _get_sample_ids_full(self):
+    def _get_pvalues_and_pvalues_proba(self):
         """
         """
-        return self.dataset.sample_ids_full
+        return self.full_pvalue, self.full_pvalue_proba
+
+    def _get_from_dataset(self, attr):
+        """
+        """
+        return getattr(self.dataset, attr)
+
+    def _get_attibute(self, attr):
+        """
+        """
+        return getattr(self, attr)
 
 
     def _partial_fit_model_pool(self):
@@ -1352,6 +1358,19 @@ class SimDeep(DeepBase):
         self.evalutate_cluster_performance()
 
         return self._is_fitted
+
+    def _predict_new_dataset(self,
+                             tsv_dict,
+                             path_survival_file,
+                             normalization):
+        """
+        """
+        self.load_new_test_dataset(
+            tsv_dict,
+            path_survival_file,
+            normalization=normalization)
+
+        self.predict_labels_on_test_dataset()
 
 
 

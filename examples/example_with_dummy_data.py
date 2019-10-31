@@ -39,13 +39,14 @@ def test_instance():
 
     boosting.fit()
     boosting.predict_labels_on_full_dataset()
-    # boosting.compute_clusters_consistency_for_full_labels()
-    # boosting.evalutate_cluster_performance()
-    # boosting.collect_cindex_for_test_fold()
-    # boosting.collect_cindex_for_full_dataset()
 
-    # boosting.compute_feature_scores_per_cluster()
-    # boosting.write_feature_score_per_cluster()
+    boosting.compute_clusters_consistency_for_full_labels()
+    boosting.evalutate_cluster_performance()
+    boosting.collect_cindex_for_test_fold()
+    boosting.collect_cindex_for_full_dataset()
+
+    boosting.compute_feature_scores_per_cluster()
+    boosting.write_feature_score_per_cluster()
 
     # boosting.load_new_test_dataset(
     #     {'RNA': 'rna_dummy.tsv'},
