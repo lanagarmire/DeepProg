@@ -57,6 +57,9 @@ def main():
         'survival': 'days',
         'event': 'event'}
 
+    import ray
+    ray.init(num_cpus=3)
+
     # Instanciate a DeepProg instance
     boosting = SimDeepBoosting(
         nb_threads=nb_threads,
@@ -69,6 +72,7 @@ def main():
         path_results=path_data,
         epochs=EPOCHS,
         survival_flag=survival_flag,
+        distribute=True,
         seed=SEED)
 
     boosting.fit()
@@ -105,6 +109,9 @@ def main():
     # boosting.test_labels
     # boosting.test_labels_proba
     # ... etc...
+
+    # Close clusters and free memory
+    ray.shutdown()
 
 
 if __name__ == "__main__":
