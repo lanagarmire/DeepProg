@@ -297,6 +297,15 @@ class SimDeepBoosting():
         else:
             return model._get_attibute(atname)
 
+    def _from_models_attr(self, atname):
+        """
+        """
+        if self.distribute:
+            return self.ray.get([model._get_attibute.remote(atname)
+                                 for model in self.models])
+        else:
+            return [model._get_attibute(atname) for model in self.models]
+
     def _from_model_dataset(self, model, atname):
         """
         """
@@ -429,7 +438,7 @@ class SimDeepBoosting():
         """
         """
         print('predict labels on test datasets...')
-        test_labels_proba = np.asarray(self._from_models('test_labels_proba'))
+        test_labels_proba = np.asarray(self._from_models_attr('test_labels_proba'))
 
         res = self._do_class_selection(test_labels_proba, weights=self.cindex_test_folds)
         self.test_labels, self.test_labels_proba = res
@@ -449,8 +458,10 @@ class SimDeepBoosting():
         self.log['pvalue proba test {0}'.format(self.test_fname_key)] = pvalue_proba
         self.log['pvalue cat test {0}'.format(self.test_fname_key)] = pvalue_cat
 
+        sample_id_test = self._from_model_dataset(self.models[0], 'sample_ids_test')
+
         self._from_model(self.models[0], '_write_labels',
-            self.models[0].dataset.sample_ids_test,
+            sample_id_test,
             self.test_labels,
             '{0}_test_labels'.format(self.project_name),
             labels_proba=self.test_labels_proba.T[0],
@@ -1078,10 +1089,15 @@ class SimDeepBoosting():
 
         self.test_fname_key = fname_key
 
+        print("Loading new test dataset...")
+        t_start = time()
+
         self._from_models('_predict_new_dataset',
                           tsv_dict=tsv_dict,
                           path_survival_file=path_survival_file,
                           normalization=normalization)
+
+        print("Test dataset loaded in {0} s".format(time() - t_start))
 
         if fname_key:
             self.project_name = '{0}_{1}'.format(self._project_name, fname_key)

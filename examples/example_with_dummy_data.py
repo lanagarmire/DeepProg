@@ -48,15 +48,15 @@ def test_instance():
     boosting.compute_feature_scores_per_cluster()
     boosting.write_feature_score_per_cluster()
 
-    # boosting.load_new_test_dataset(
-    #     {'RNA': 'rna_dummy.tsv'},
-    #     'survival_dummy.tsv',
-    #     'dummy',
-    # )
+    boosting.load_new_test_dataset(
+        {'RNA': 'rna_dummy.tsv'},
+        'survival_dummy.tsv',
+        'dummy',
+    )
 
-    # boosting.predict_labels_on_test_dataset()
-    # boosting.compute_c_indexes_for_test_dataset()
-    # boosting.compute_clusters_consistency_for_test_labels()
+    boosting.predict_labels_on_test_dataset()
+    boosting.compute_c_indexes_for_test_dataset()
+    boosting.compute_clusters_consistency_for_test_labels()
 
 
 if __name__ == '__main__':
