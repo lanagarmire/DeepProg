@@ -15,28 +15,20 @@ def test_instance():
     SURVIVAL_TSV = 'survival_dummy.tsv'
 
     PROJECT_NAME = 'TestProject'
-    SEED = 3
-    nb_it = 5 # Number of models to be built
-    nb_threads = 2 # Number of processes to be used to fit individual survival models
-
-    ################ AUTOENCODER PARAMETERS ################
     EPOCHS = 10
-    ## Additional parameters for the autoencoders can be defined, see config.py file for details
-    # LEVEL_DIMS_IN = [250]
-    # LEVEL_DIMS_OUT = [250]
-    # LOSS = 'binary_crossentropy'
-    # OPTIMIZER = 'adam'
-    # ACT_REG = 0
-    # W_REG = 0
-    # DROPOUT = 0.5
-    # DATA_SPLIT = 0
-    # ACTIVATION = 'tanh'
-    # PATH_TO_SAVE_MODEL = '/home/username/deepprog'
-    # PVALUE_THRESHOLD = 0.01
-    # NB_SELECTED_FEATURES = 10
-    #########################################################
+    SEED = 3
+    nb_it = 5
+    nb_threads = 2
+
+    # Import cluster scheduler
+    import ray
+    ray.init(num_cpus=3)
+    # More options can be used (e.g. remote clusters, AWS, memory,...etc...)
+    # ray can be used locally to maximize the use of CPUs on the local machine
+    # See ray API: https://ray.readthedocs.io/en/latest/index.html
 
     boosting = SimDeepBoosting(
+        # stack_multi_omic=True,
         nb_threads=nb_threads,
         nb_it=nb_it,
         split_n_fold=3,
@@ -46,20 +38,8 @@ def test_instance():
         project_name=PROJECT_NAME,
         path_results=PATH_DATA,
         epochs=EPOCHS,
-        seed=SEED,
-        # level_dims_in=LEVEL_DIMS_IN,
-        # level_dims_out=LEVEL_DIMS_OUT,
-        # loss=LOSS,
-        # optimizer=OPTIMIZER,
-        # act_reg=ACT_REG,
-        # w_reg=W_REG,
-        # dropout=DROPOUT,
-        # data_split=DATA_SPLIT,
-        # activation=ACTIVATION,
-        # path_to_save_model=PATH_TO_SAVE_MODEL,
-        # pvalue_threshold=PVALUE_THRESHOLD,
-        # nb_selected_features=NB_SELECTED_FEATURES,
-    )
+        distribute=True, # Option to use ray cluster scheduler
+        seed=SEED)
 
     boosting.fit()
     boosting.predict_labels_on_full_dataset()
@@ -70,8 +50,9 @@ def test_instance():
     boosting.collect_cindex_for_full_dataset()
 
     boosting.compute_feature_scores_per_cluster()
-    boosting.write_feature_score_per_cluster()
     boosting.collect_number_of_features_per_omic()
+
+    boosting.write_feature_score_per_cluster()
 
     boosting.load_new_test_dataset(
         {'RNA': 'rna_dummy.tsv'}, # OMIC file of the test set. It doesnt have to be the same as for training
@@ -98,6 +79,9 @@ def test_instance():
 
     # Experimental method to plot the test dataset amongst the class kernel densities
     boosting.plot_supervised_kernel_for_test_sets()
+
+    # Close clusters and free memory
+    ray.shutdown()
 
 
 if __name__ == '__main__':

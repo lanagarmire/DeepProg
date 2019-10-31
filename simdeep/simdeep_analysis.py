@@ -1062,8 +1062,8 @@ class SimDeep(DeepBase):
         score_list = filter(lambda x: not np.isnan(x[1]), score_list)
         score_list.sort(key=lambda x:x[1], reverse=True)
 
-        valid_node_ids = [node_id for node_id, pvalue in score_list
-                               if pvalue > self.cindex_thres]
+        valid_node_ids = [node_id for node_id, cindex in score_list
+                               if cindex > self.cindex_thres]
 
         scores = [score for node_id, score in score_list
                   if score > self.cindex_thres]

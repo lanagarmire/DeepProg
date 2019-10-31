@@ -35,6 +35,20 @@ from simdeep.config import TRAINING_TSV
 from simdeep.config import SURVIVAL_TSV
 from simdeep.config import PATH_DATA
 from simdeep.config import SURVIVAL_FLAG
+from simdeep.config import NODES_SELECTION
+from simdeep.config import CINDEX_THRESHOLD
+
+# Parameter for autoencoder
+from simdeep.config import LEVEL_DIMS_IN
+from simdeep.config import LEVEL_DIMS_OUT
+from simdeep.config import LOSS
+from simdeep.config import OPTIMIZER
+from simdeep.config import ACT_REG
+from simdeep.config import W_REG
+from simdeep.config import DROPOUT
+from simdeep.config import ACTIVATION
+from simdeep.config import PATH_TO_SAVE_MODEL
+from simdeep.config import DATA_SPLIT
 
 from simdeep.deepmodel_base import DeepBase
 
@@ -121,7 +135,19 @@ class SimDeepBoosting():
                  survival_tsv=SURVIVAL_TSV,
                  survival_flag=SURVIVAL_FLAG,
                  path_data=PATH_DATA,
-                 **kwargs):
+                 level_dims_in=LEVEL_DIMS_IN,
+                 level_dims_out=LEVEL_DIMS_OUT,
+                 loss=LOSS,
+                 optimizer=OPTIMIZER,
+                 act_reg=ACT_REG,
+                 w_reg=W_REG,
+                 dropout=DROPOUT,
+                 data_split=DATA_SPLIT,
+                 node_selection=NODES_SELECTION,
+                 cindex_thres=CINDEX_THRESHOLD,
+                 activation=ACTIVATION,
+                 path_to_save_model=PATH_TO_SAVE_MODEL,
+                 **additional_dataset_args):
         """ """
         assert(class_selection in ['max', 'mean', 'weighted_mean', 'weighted_max'])
         self.class_selection = class_selection
@@ -141,6 +167,8 @@ class SimDeepBoosting():
         self.survival_flag = survival_flag
         self.path_data = path_data
         self.dataset = None
+        self.cindex_thres = cindex_thres
+        self.node_selection = node_selection
 
         self.encoder_for_kde_plot_dict = {}
         self.kde_survival_node_ids = {}
@@ -175,7 +203,7 @@ class SimDeepBoosting():
         self.feature_train_array = None
         self.matrix_full_array = None
 
-        ######## deepprob instance parameters ########
+        ######## deepprog instance parameters ########
         self.nb_clusters = nb_clusters
         self.normalization = normalization
         self.epochs = epochs
@@ -189,9 +217,19 @@ class SimDeepBoosting():
 
         self.test_fname_key = ''
 
-        parameters = {
+        autoencoder_parameters = {
             'epochs': self.epochs,
             'new_dim': self.new_dim,
+            'level_dims_in': level_dims_in,
+            'level_dims_out': level_dims_out,
+            'loss': loss,
+            'optimizer': optimizer,
+            'act_reg': act_reg,
+            'w_reg': w_reg,
+            'dropout': dropout,
+            'data_split': data_split,
+            'activation': activation,
+            'path_to_save_model': path_to_save_model,
         }
 
         self.datasets = []
@@ -203,7 +241,7 @@ class SimDeepBoosting():
             self.log['parameters'][arg] = str(self.__dict__[arg])
 
         self.log['seed'] = seed
-        self.log['parameters'] = parameters.copy()
+        self.log['parameters'].update(autoencoder_parameters)
 
         self.log['nb_it'] = nb_it
         self.log['normalization'] = normalization
@@ -213,19 +251,23 @@ class SimDeepBoosting():
         self.log['training_tsv'] = self.training_tsv
         self.log['path_data'] = self.path_data
 
-        kwargs['survival_tsv'] = self.survival_tsv
-        kwargs['training_tsv'] = self.training_tsv
-        kwargs['path_data'] = self.path_data
-        kwargs['survival_flag'] = self.survival_flag
+        additional_dataset_args['survival_tsv'] = self.survival_tsv
+        additional_dataset_args['training_tsv'] = self.training_tsv
+        additional_dataset_args['path_data'] = self.path_data
+        additional_dataset_args['survival_flag'] = self.survival_flag
 
-        if 'fill_unkown_feature_with_0' in kwargs:
-            self.log['fill_unkown_feature_with_0'] = kwargs['fill_unkown_feature_with_0']
+        if 'fill_unkown_feature_with_0' in additional_dataset_args:
+            self.log['fill_unkown_feature_with_0'] = additional_dataset_args['fill_unkown_feature_with_0']
 
         self.ray = None
 
-        self._init_datasets(nb_it, split_n_fold, parameters, **kwargs)
+        self._init_datasets(nb_it, split_n_fold,
+                            autoencoder_parameters,
+                            **additional_dataset_args)
 
-    def _init_datasets(self, nb_it, split_n_fold, parameters, **kwargs):
+    def _init_datasets(self, nb_it, split_n_fold,
+                       autoencoder_parameters,
+                       **additional_dataset_args):
         """
         """
         if self.seed:
@@ -249,13 +291,13 @@ class SimDeepBoosting():
             else:
                 split = None
 
-            parameters['seed'] = random_states[it]
+            autoencoder_parameters['seed'] = random_states[it]
 
             dataset = LoadData(cross_validation_instance=split,
                                verbose=False,
                                normalization=self.normalization,
-                               _parameters=parameters.copy(),
-                               **kwargs)
+                               _autoencoder_parameters=autoencoder_parameters.copy(),
+                               **additional_dataset_args)
 
             self.datasets.append(dataset)
 
@@ -362,7 +404,9 @@ class SimDeepBoosting():
                 path_results=self.path_results,
                 project_name=self.project_name,
                 classification_method=self.classification_method,
-                deep_model_additional_args=dataset._parameters)
+                cindex_thres=self.cindex_thres,
+                node_selection=self.node_selection,
+                deep_model_additional_args=dataset._autoencoder_parameters)
                            for dataset in self.datasets]
 
             results = ray.get([model._partial_fit_model_pool.remote() for model in self.models])
@@ -405,8 +449,10 @@ class SimDeepBoosting():
                 do_KM_plot=False,
                 path_results=self.path_results,
                 project_name=self.project_name,
+                cindex_thres=self.cindex_thres,
+                node_selection=self.node_selection,
                 classification_method=self.classification_method,
-                deep_model_additional_args=dataset._parameters)
+                deep_model_additional_args=dataset._autoencoder_parameters)
                            for dataset in self.datasets]
 
             results = [model._partial_fit_model_pool() for model in self.models]
@@ -745,7 +791,7 @@ class SimDeepBoosting():
                 proba_dict[sample].append([np.nan_to_num(proba).tolist()])
                 sample_set.add(sample)
 
-        labels, probas = self._do_class_selection(hstack(proba_dict.values()),
+        labels, probas = self._do_class_selection(hstack(list(proba_dict.values())),
                                                  weights=self.cindex_test_folds)
 
         self.full_labels = np.asarray(labels)
@@ -811,6 +857,10 @@ class SimDeepBoosting():
         days_full, dead_full = np.asarray(self.survival_full).T
         days_test, dead_test = self._from_model_dataset(self.models[0], 'survival_test').T
         labels_test_categorical = self._labels_proba_to_labels(self.test_labels_proba)
+
+        if isinstance(days_test, np.matrix):
+            days_test = np.asarray(days_test)[0]
+            dead_test = np.asarray(dead_test)[0]
 
         cindex = c_index(self.full_labels, dead_full, days_full,
                          self.test_labels, dead_test, days_test)
@@ -903,12 +953,12 @@ class SimDeepBoosting():
         """
         print('#### plotting supervised labels....')
 
-        self.models[0].plot_supervised_kernel_for_test_sets(
-            define_as_main_kernel=define_as_main_kernel,
-            use_main_kernel=use_main_kernel,
-            test_labels_proba=self.test_labels_proba,
-            test_labels=self.test_labels,
-            key='_' + self.test_fname_key)
+        self._from_model(self.models[0], "plot_supervised_kernel_for_test_sets",
+                         define_as_main_kernel=define_as_main_kernel,
+                         use_main_kernel=use_main_kernel,
+                         test_labels_proba=self.test_labels_proba,
+                         test_labels=self.test_labels,
+                         key='_' + self.test_fname_key)
 
     def plot_supervised_kernel_for_test_sets(self):
         """
@@ -946,7 +996,7 @@ class SimDeepBoosting():
             encoder = encoder_array[key]
             matrix_ref = encoder.predict(self.dataset.matrix_ref_array[key])
 
-            survival_node_ids = self.models[0]._look_for_survival_nodes(
+            survival_node_ids = self._from_model(self.models[0], '_look_for_survival_nodes',
                 activities=matrix_ref, survival=self.dataset.survival)
 
             self.kde_survival_node_ids[key] = survival_node_ids

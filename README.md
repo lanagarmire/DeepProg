@@ -14,10 +14,11 @@ The omic data and the survival files should be in tsv (Tabular Separated Values)
 * the R "survival" package installed. (Launch R then:)
 
 ```bash
-pip install theano --user
+pip install theano --user # Original backend used
+pip install tensorflow --user # Alternative backend for keras supposely for efficient
 pip install keras --user
 
-#If you want to use theano instead of tensorflow configure:
+#If you want to use theano or CNTK
 nano ~/.keras/keras.json
 ```
 
@@ -30,7 +31,7 @@ biocLite("survcomp")
 
 * numpy, scipy
 * scikit-learn (>=0.18)
-* rpy2 2.8.6 (for python2 rpy2 can be install with: pip install rpy2==2.8.6)
+* rpy2 2.8.6 (for python2 rpy2 can be install with: pip install rpy2==2.8.6, for python3 pip3 install rpy2==2.8.6). It seems that newer version of rpy2 might not work due to a bug (not tested)
 
 ### Support for CNTK / tensorflow
 * We originally used Keras with theano as backend plateform. However, [Tensorflow](https://www.tensorflow.org/) or [CNTK](https://docs.microsoft.com/en-us/cognitive-toolkit/) are more recent DL framework that can be faster or more stable than theano. Because keras supports these 3 backends, it is possible to use them as alternative to theano. To change backend, please configure the `$HOME/.keras/keras.json` file. (See official instruction [here](https://keras.io/backend/)).
@@ -47,6 +48,14 @@ The default configuration file looks like this:
 ```
 
 * For tensorflow backend, we recommand to use only one thread as option `nb_threads=1`
+
+## Distributed computation
+* It is possible to use the python ray framework [https://github.com/ray-project/ray](https://github.com/ray-project/ray) to control the parallel computation of the multiple models. To use this framework, it is required to install it: `pip install ray --user`
+* Alternatively, it is also possible to create the model one by one without the need of the ray framework
+
+## Visualisation module (Experimental)
+* To visualise test sets projected into the multi-omic survival space, it is required to install `mpld3` module: `pip install mpld3 --user`
+* Note that the pip version of mpld3 installed on my computer presented a [bug](https://github.com/mpld3/mpld3/issues/434): `TypeError: array([1.]) is not JSON serializable `. However, the [newest](https://github.com/mpld3/mpld3) version of the mpld3 available from the github solved this issue. It is therefore recommended to install the newest version to avoid this issue.
 
 ## installation (local)
 
@@ -183,18 +192,46 @@ boosting.compute_feature_scores_per_cluster()
 boosting.write_feature_score_per_cluster()
 
 boosting.load_new_test_dataset(
-    {'RNA': 'rna_test_dummy.tsv'},
-    'survival_test_dummy.tsv',
-    TEST dataset',
-    )
+    {'RNA': 'rna_dummy.tsv'}, # OMIC file of the test set. It doesnt have to be the same as for training
+    'survival_dummy.tsv', # Survival file of the test set
+    'TEST_DATA_1', # Name of the test test to be used
+)
 
 # Predict the labels on the test dataset
 boosting.predict_labels_on_test_dataset()
+# Compute C-index
+boosting.compute_c_indexes_for_test_dataset()
+# See cluster consistency
+boosting.compute_clusters_consistency_for_test_labels()
 
+# [EXPERIMENTAL] method to plot the test dataset amongst the class kernel densities
+boosting.plot_supervised_kernel_for_test_sets()
+```
+* Use of ray framework for parallel computation.
+
+```
+# Instanciate a ray instance
+import ray
+ray.init(num_cpus=3)
+# More options can be used (e.g. remote clusters, AWS, memory,...etc...)
+# ray can be used locally to maximize the use of CPUs on the local machine
+# See ray API: https://ray.readthedocs.io/en/latest/index.html
+
+boosting = SimDeepBoosting(
+    ...
+    distribute=True, # Option to use ray cluster scheduler
+    ...
+)
+...
+# Processing
+...
+
+# Close clusters and free memory
+ray.shutdown()
 ```
 
 
-* Finally, two example scripts are availables in ./examples/ which will assist you to build a model from scratch with test and real data
+* Finally, example scripts are availables in ./examples/ which will assist you to build a model from scratch with test and real data
 
 
 ## contact and credentials
