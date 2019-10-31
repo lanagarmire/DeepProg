@@ -65,7 +65,7 @@ def test_instance():
     boosting.compute_clusters_consistency_for_test_labels()
 
     # Experimental method to plot the test dataset amongst the class kernel densities
-    # boosting.plot_supervised_kernel_for_test_sets()
+    boosting.plot_supervised_kernel_for_test_sets()
     boosting.plot_supervised_predicted_labels_for_test_sets()
 
     boosting.load_new_test_dataset(
@@ -79,7 +79,7 @@ def test_instance():
     boosting.compute_clusters_consistency_for_test_labels()
 
     # Experimental method to plot the test dataset amongst the class kernel densities
-    # boosting.plot_supervised_kernel_for_test_sets()
+    boosting.plot_supervised_kernel_for_test_sets()
     boosting.plot_supervised_predicted_labels_for_test_sets()
 
     # Close clusters and free memory
