@@ -8,8 +8,6 @@ from simdeep.coxph_from_r import c_index_multiple
 from sklearn.model_selection import KFold
 # from sklearn.preprocessing import OneHotEncoder
 
-from multiprocessing.pool import Pool
-
 from collections import Counter
 from collections import defaultdict
 from itertools import combinations
