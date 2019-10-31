@@ -209,7 +209,7 @@ boosting.plot_supervised_kernel_for_test_sets()
 ```
 * Use of ray framework for parallel computation.
 
-```
+```python
 # Instanciate a ray instance
 import ray
 ray.init(num_cpus=3)
