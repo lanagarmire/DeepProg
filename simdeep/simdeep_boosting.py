@@ -1051,6 +1051,9 @@ class SimDeepBoosting():
         }
 
         encoder_key = str(key_normalization)
+        encoder_key = 'omic:{0} normalisation: {1}'.format(
+            list(self.test_tsv_dict.keys()),
+            encoder_key)
 
         if encoder_key in self.encoder_for_kde_plot_dict:
             if self.verbose:

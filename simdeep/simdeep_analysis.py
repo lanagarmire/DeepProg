@@ -1227,7 +1227,11 @@ class SimDeep(DeepBase):
             labels_proba=None,
             dataset=None,
             key='',
-            **kwargs):
+            use_main_kernel=False,
+            test_labels=None,
+            test_labels_proba=None,
+            define_as_main_kernel=False,
+    ):
         """
         """
         if labels is None:
@@ -1250,9 +1254,13 @@ class SimDeep(DeepBase):
                                        activities=activities,
                                        activities_test=activities_test,
                                        key=key,
-                                       **kwargs)
+                                       use_main_kernel=use_main_kernel,
+                                       test_labels=test_labels,
+                                       test_labels_proba=test_labels_proba,
+                                       define_as_main_kernel=define_as_main_kernel,
+        )
 
-    def _create_autoencoder_for_kernel_plot(self, labels_proba, dataset):
+    def _create_autoencoder_for_kernel_plot(self, labels_proba, dataset, key):
         """
         """
         autoencoder = DeepBase(dataset=dataset,
@@ -1264,8 +1272,6 @@ class SimDeep(DeepBase):
         autoencoder.matrix_train_array = dataset.matrix_ref_array
         autoencoder.construct_supervized_network(labels_proba)
 
-        key = str(self.test_normalization)
-
         self.encoder_for_kde_plot_dict[key] = autoencoder.encoder_array
 
     def _predict_kde_matrix(self, labels_proba, dataset):
@@ -1275,10 +1281,13 @@ class SimDeep(DeepBase):
         matrix_test_list = []
 
         encoder_key = str(self.test_normalization)
+        encoder_key = 'omic:{0} normalisation: {1}'.format(
+            self.test_omic_list,
+            encoder_key)
 
         if encoder_key not in self.encoder_for_kde_plot_dict or \
            not dataset.fill_unkown_feature_with_0:
-            self._create_autoencoder_for_kernel_plot(labels_proba, dataset)
+            self._create_autoencoder_for_kernel_plot(labels_proba, dataset, encoder_key)
 
         encoder_array = self.encoder_for_kde_plot_dict[encoder_key]
 
