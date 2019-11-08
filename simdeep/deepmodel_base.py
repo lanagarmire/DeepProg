@@ -186,7 +186,7 @@ class DeepBase(object):
                 model,
                 X_shape,
                 dim,
-                name='hidden layer nb:{0}'.format(nb_hidden))
+                name='hidden_layer_nb_{0}'.format(nb_hidden))
 
             if self.dropout:
                 model.add(Dropout(self.dropout))
@@ -206,7 +206,7 @@ class DeepBase(object):
                 model,
                 X_shape,
                 dim,
-                name='hidden layer nb:{0}'.format(nb_hidden))
+                name='hidden_layer_nb_{0}'.format(nb_hidden))
 
             if self.dropout:
                 model.add(Dropout(self.dropout))
