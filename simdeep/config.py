@@ -167,5 +167,5 @@ CLASSIFIER = SVC
 ##########################################################
 
 #################### Other variables #####################
-SEED = None # for experiment reproducibility (if set to an integer)
+SEED = 2020 # for experiment reproducibility (if set to an integer)
 ##########################################################

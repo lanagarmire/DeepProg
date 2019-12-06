@@ -7,6 +7,9 @@ from sklearn.preprocessing import quantile_transform
 from simdeep.config import TRAINING_TSV
 from simdeep.config import SURVIVAL_TSV
 
+from simdeep.config import TEST_TSV
+from simdeep.config import SURVIVAL_TSV_TEST
+
 from simdeep.config import PATH_DATA
 from simdeep.config import STACK_MULTI_OMIC
 
@@ -90,6 +93,8 @@ class LoadData():
             path_data=PATH_DATA,
             training_tsv=TRAINING_TSV,
             survival_tsv=SURVIVAL_TSV,
+            test_tsv=TEST_TSV,
+            survival_tsv_test=SURVIVAL_TSV_TEST,
             cross_validation_instance=CROSS_VALIDATION_INSTANCE,
             test_fold=TEST_FOLD,
             stack_multi_omic=STACK_MULTI_OMIC,
@@ -124,14 +129,14 @@ class LoadData():
         self.feature_array = {}
         self.matrix_array = {}
 
-        self.test_tsv = None
+        self.test_tsv = test_tsv
         self.matrix_train_array = {}
 
         self.sample_ids = []
         self.data_type = list(training_tsv.keys())
 
         self.survival = None
-        self.survival_tsv_test = None
+        self.survival_tsv_test = survival_tsv_test
 
         self.matrix_full_array = {}
         self.sample_ids_full = []

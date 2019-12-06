@@ -76,14 +76,12 @@ def main():
     from simdeep.config import TEST_TSV
     from simdeep.config import SURVIVAL_TSV_TEST
 
-    sim_deep = SimDeep(seed=3)
+    sim_deep = SimDeep()
     sim_deep.load_training_dataset()
     sim_deep.fit()
 
     sim_deep.predict_labels_on_test_fold()
     sim_deep.predict_labels_on_full_dataset()
-
-    sim_deep.plot_cluster_labels()
 
     if SAVE_FITTED_MODELS:
         sim_deep.save_encoders()
@@ -97,12 +95,11 @@ def main():
 
     sim_deep.load_new_test_dataset(TEST_TSV,
                                    SURVIVAL_TSV_TEST,
-                                   # normalization={'TRAIN_NORM_SCALE': True},
                                    fname_key='dummy')
+
     sim_deep.compute_c_indexes_multiple_for_test_dataset()
     sim_deep.predict_labels_on_test_dataset()
     sim_deep.compute_c_indexes_for_test_dataset()
-    sim_deep.plot_kernel_for_test_sets()
 
 
 class SimDeep(DeepBase):
