@@ -9,6 +9,7 @@ The omic data and the survival files should be in tsv (Tabular Separated Values)
 
 ## Requirements
 * Python 2 or 3
+* Either theano, tensorflow or CNTK
 * [theano](http://deeplearning.net/software/theano/install.html) (the used version for the manuscript was 0.8.2)
 * [tensorflow](https://www.tensorflow.org/) as a more robust alternative to theano
 * [cntk](https://github.com/microsoft/CNTK) CNTK is anoter DL library that can present some advantages compared to tensorflow or theano. See [https://docs.microsoft.com/en-us/cognitive-toolkit/](https://docs.microsoft.com/en-us/cognitive-toolkit/)
@@ -20,8 +21,8 @@ The omic data and the survival files should be in tsv (Tabular Separated Values)
 
 
 ```bash
-pip install theano --user # Original backend used OR
-pip install tensorflow --user # Alternative backend for keras supposely for efficient
+pip install theano --user # Original backend used 
+pip install tensorflow --user # Alternative backend and default for keras. Tensorflow is well maintained by a large team. 
 pip install keras --user
 pip install rpy2==2.8.6 --user
 
