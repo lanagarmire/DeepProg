@@ -17,7 +17,7 @@ def test_instance():
     PROJECT_NAME = 'TestProject'
     EPOCHS = 10
     SEED = 3
-    nb_it = 5
+    nb_it = 10
     nb_threads = 2
 
     # Import cluster scheduler
@@ -28,7 +28,6 @@ def test_instance():
     # See ray API: https://ray.readthedocs.io/en/latest/index.html
 
     boosting = SimDeepBoosting(
-        # stack_multi_omic=True,
         nb_threads=nb_threads,
         nb_it=nb_it,
         split_n_fold=3,

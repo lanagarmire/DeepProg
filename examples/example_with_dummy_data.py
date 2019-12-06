@@ -31,9 +31,13 @@ def test_instance():
     # DROPOUT = 0.5
     # DATA_SPLIT = 0
     # ACTIVATION = 'tanh'
+    #########################################################
+
+    ################ ADDITIONAL PARAMETERS ##################
     # PATH_TO_SAVE_MODEL = '/home/username/deepprog'
     # PVALUE_THRESHOLD = 0.01
     # NB_SELECTED_FEATURES = 10
+    # STACK_MULTI_OMIC = False
     #########################################################
 
     boosting = SimDeepBoosting(
@@ -47,6 +51,7 @@ def test_instance():
         path_results=PATH_DATA,
         epochs=EPOCHS,
         seed=SEED,
+        # stack_multi_omic=STACK_MULTI_OMIC,
         # level_dims_in=LEVEL_DIMS_IN,
         # level_dims_out=LEVEL_DIMS_OUT,
         # loss=LOSS,
@@ -85,6 +90,7 @@ def test_instance():
 
     # Experimental method to plot the test dataset amongst the class kernel densities
     boosting.plot_supervised_kernel_for_test_sets()
+    boosting.plot_supervised_predicted_labels_for_test_sets()
 
     boosting.load_new_test_dataset(
         {'METH': 'meth_dummy.tsv'}, # OMIC file of the second test set.
@@ -98,6 +104,7 @@ def test_instance():
 
     # Experimental method to plot the test dataset amongst the class kernel densities
     boosting.plot_supervised_kernel_for_test_sets()
+    boosting.plot_supervised_predicted_labels_for_test_sets()
 
 
 if __name__ == '__main__':
