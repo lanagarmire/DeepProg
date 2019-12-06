@@ -9,6 +9,7 @@ The omic data and the survival files should be in tsv (Tabular Separated Values)
 
 ## Requirements
 * Python 2 or 3
+* Either theano, tensorflow or CNTK
 * [theano](http://deeplearning.net/software/theano/install.html) (the used version for the manuscript was 0.8.2)
 * [tensorflow](https://www.tensorflow.org/) as a more robust alternative to theano
 * [cntk](https://github.com/microsoft/CNTK) CNTK is anoter DL library that can present some advantages compared to tensorflow or theano. See [https://docs.microsoft.com/en-us/cognitive-toolkit/](https://docs.microsoft.com/en-us/cognitive-toolkit/)
@@ -20,8 +21,8 @@ The omic data and the survival files should be in tsv (Tabular Separated Values)
 
 
 ```bash
-pip install theano --user # Original backend used OR
-pip install tensorflow --user # Alternative backend for keras supposely for efficient
+pip install theano --user # Original backend used 
+pip install tensorflow --user # Alternative backend and default for keras. Tensorflow is well maintained by a large team. 
 pip install keras --user
 pip install rpy2==2.8.6 --user
 
@@ -53,20 +54,20 @@ The default configuration file looks like this:
 }
 ```
 
-## Distributed computation
+### Distributed computation
 * It is possible to use the python ray framework [https://github.com/ray-project/ray](https://github.com/ray-project/ray) to control the parallel computation of the multiple models. To use this framework, it is required to install it: `pip install ray --user`
 * Alternatively, it is also possible to create the model one by one without the need of the ray framework
 
-## Visualisation module (Experimental)
+### Visualisation module (Experimental)
 * To visualise test sets projected into the multi-omic survival space, it is required to install `mpld3` module: `pip install mpld3 --user`
 * Note that the pip version of mpld3 installed on my computer presented a [bug](https://github.com/mpld3/mpld3/issues/434): `TypeError: array([1.]) is not JSON serializable `. However, the [newest](https://github.com/mpld3/mpld3) version of the mpld3 available from the github solved this issue. It is therefore recommended to install the newest version to avoid this issue.
 
-## installation (local)
+### installation (local)
 
 ```bash
-git clone https://github.com/lanagarmire/SimDeep.git
+git clone https://github.com/lanagarmire/SimDeep.git # The downloading can take few minutes due to the size of th git project
 cd SimDeep
-pip install -r requirements.txt --user
+pip install -r requirements.txt --user # The installation should only take a short amount of time
 ```
 
 ## Usage
@@ -209,8 +210,8 @@ boosting = SimDeepBoosting(
     nb_threads=nb_threads,
     nb_it=nb_it,
     split_n_fold=3,
-    survival_tsv=tsv_files,
-    training_tsv=survival_tsv,
+    survival_tsv=survival_tsv,
+    training_tsv=tsv_files,
     path_data=path_data,
     project_name=project_name,
     path_results=path_data,
