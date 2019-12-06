@@ -54,15 +54,15 @@ The default configuration file looks like this:
 }
 ```
 
-## Distributed computation
+### Distributed computation
 * It is possible to use the python ray framework [https://github.com/ray-project/ray](https://github.com/ray-project/ray) to control the parallel computation of the multiple models. To use this framework, it is required to install it: `pip install ray --user`
 * Alternatively, it is also possible to create the model one by one without the need of the ray framework
 
-## Visualisation module (Experimental)
+### Visualisation module (Experimental)
 * To visualise test sets projected into the multi-omic survival space, it is required to install `mpld3` module: `pip install mpld3 --user`
 * Note that the pip version of mpld3 installed on my computer presented a [bug](https://github.com/mpld3/mpld3/issues/434): `TypeError: array([1.]) is not JSON serializable `. However, the [newest](https://github.com/mpld3/mpld3) version of the mpld3 available from the github solved this issue. It is therefore recommended to install the newest version to avoid this issue.
 
-## installation (local)
+### installation (local)
 
 ```bash
 git clone https://github.com/lanagarmire/SimDeep.git # The downloading can take few minutes due to the size of th git project
@@ -210,8 +210,8 @@ boosting = SimDeepBoosting(
     nb_threads=nb_threads,
     nb_it=nb_it,
     split_n_fold=3,
-    survival_tsv=tsv_files,
-    training_tsv=survival_tsv,
+    survival_tsv=survival_tsv,
+    training_tsv=tsv_files,
     path_data=path_data,
     project_name=project_name,
     path_results=path_data,
