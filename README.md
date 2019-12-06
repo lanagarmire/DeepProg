@@ -65,9 +65,9 @@ The default configuration file looks like this:
 ## installation (local)
 
 ```bash
-git clone https://github.com/lanagarmire/SimDeep.git
+git clone https://github.com/lanagarmire/SimDeep.git # The downloading can take few minutes due to the size of th git project
 cd SimDeep
-pip install -r requirements.txt --user
+pip install -r requirements.txt --user # The installation should only take a short amount of time
 ```
 
 ## Usage
