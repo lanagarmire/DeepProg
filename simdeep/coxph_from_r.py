@@ -62,7 +62,7 @@ def coxph(values,
     """
     input:
         :values: array    values of activities
-        :isdead: array <binary>    is dead?
+        :isdead: array <binary>    Event occured int boolean: 0/1
         :nbdays: array <int>
     return:
         pvalues from wald test

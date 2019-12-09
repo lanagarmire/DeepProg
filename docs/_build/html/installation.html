@@ -1,0 +1,302 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Installation &mdash; DeepProg  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="&lt;no title&gt;" href="LICENSE.html" />
+    <link rel="prev" title="Welcome to DeepProg’s documentation!" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> DeepProg
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#requirements">Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#tested-versions">Tested versions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#python-packages-installation">Python packages installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#support-for-cntk-tensorflow">Support for CNTK / tensorflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#r-installation">R installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#distributed-computation">Distributed computation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#visualisation-module-experimental">Visualisation module (Experimental)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#installation-of-the-package">installation of the package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#test-usr-bin-byobu-reconnect-sockets">Test. /usr/bin/byobu-reconnect-sockets</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">DeepProg</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Installation</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/installation.md.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="installation">
+<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
+<p>Here we describe how to install the DeepProg package. We assume that the installation will be done locally, using the <code class="docutils literal notranslate"><span class="pre">--user</span></code> flag from pip. Alternatively, the package can be installed using a virtual environment or globally with sudo. Both python2.7 or python3.6 (or higher) can be used. We only tested the installation on a linux environment but it should also work on a OSX environment.</p>
+<div class="section" id="requirements">
+<h2>Requirements<a class="headerlink" href="#requirements" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Python 2 or 3</li>
+<li><a class="reference external" href="http://deeplearning.net/software/theano/install.html">theano</a> (the used version for the manuscript was 0.8.2)</li>
+<li><a class="reference external" href="https://www.tensorflow.org/">tensorflow</a> as a more robust alternative to theano</li>
+<li><a class="reference external" href="https://github.com/microsoft/CNTK">cntk</a> CNTK is anoter DL library that can present some advantages compared to tensorflow or theano. See <a class="reference external" href="https://docs.microsoft.com/en-us/cognitive-toolkit/">https://docs.microsoft.com/en-us/cognitive-toolkit/</a></li>
+<li>R</li>
+<li>the R “survival” package installed.</li>
+<li>numpy, scipy</li>
+<li>scikit-learn (&gt;=0.18)</li>
+<li>rpy2 2.8.6 (for python2 rpy2 can be install with: pip install rpy2==2.8.6, for python3 pip3 install rpy2==2.8.6). <strong>It seems that newer version of rpy2 might not work due to a bug</strong>. Thus, we highly recommand to install the 2.8.6 version for now.</li>
+</ul>
+</div>
+<div class="section" id="tested-versions">
+<h2>Tested versions<a class="headerlink" href="#tested-versions" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>python: 2.7.15, 3.6.6</li>
+<li>R: 3.5.0</li>
+<li>Numpy: 1.16.5</li>
+<li>Scipy: 1.2.2</li>
+<li>scikit-learn: 0.20.3</li>
+<li>keras: 2.3.1</li>
+<li>tensorflow: 1.14.0</li>
+<li>theano: 1.0.2</li>
+<li>rpy2: <strong>2.8.6</strong></li>
+</ul>
+</div>
+<div class="section" id="python-packages-installation">
+<h2>Python packages installation<a class="headerlink" href="#python-packages-installation" title="Permalink to this headline">¶</a></h2>
+<p>The required python packages can be installed using pip:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install theano --user <span class="c1"># Original backend used OR</span>
+pip install tensorflow --user <span class="c1"># Alternative backend for keras supposely for efficient</span>
+pip install keras --user
+pip install <span class="nv">rpy2</span><span class="o">==</span><span class="m">2</span>.8.6 --user
+</pre></div>
+</div>
+</div>
+<div class="section" id="support-for-cntk-tensorflow">
+<h2>Support for CNTK / tensorflow<a class="headerlink" href="#support-for-cntk-tensorflow" title="Permalink to this headline">¶</a></h2>
+<p>We originally used Keras with theano as backend plateform. However, <a class="reference external" href="https://www.tensorflow.org/">Tensorflow</a> or <a class="reference external" href="https://docs.microsoft.com/en-us/cognitive-toolkit/">CNTK</a> are more recent DL framework that can be faster or more stable than theano. Because keras supports these 3 backends, it is possible to use them as alternative to theano. To CNTK, please refer to the official <a class="reference external" href="https://docs.microsoft.com/en-us/cognitive-toolkit/setup-cntk-on-your-machine">guidelines</a> . To change backend, please configure the <code class="docutils literal notranslate"><span class="pre">$HOME/.keras/keras.json</span></code> file. (See official instruction <a class="reference external" href="https://keras.io/backend/">here</a>).</p>
+<p>The default configuration file: <code class="docutils literal notranslate"> <span class="pre">~/.keras/keras.json</span></code> looks like this:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="nt">&quot;image_data_format&quot;</span><span class="p">:</span> <span class="s2">&quot;channels_last&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;epsilon&quot;</span><span class="p">:</span> <span class="mf">1e-07</span><span class="p">,</span>
+    <span class="nt">&quot;floatx&quot;</span><span class="p">:</span> <span class="s2">&quot;float32&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;backend&quot;</span><span class="p">:</span> <span class="s2">&quot;tensorflow&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="r-installation">
+<h2>R installation<a class="headerlink" href="#r-installation" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-R notranslate"><div class="highlight"><pre><span></span><span class="nf">install.package</span><span class="p">(</span><span class="s">&quot;survival&quot;</span><span class="p">)</span>
+<span class="nf">install.package</span><span class="p">(</span><span class="s">&quot;glmnet&quot;</span><span class="p">)</span>
+<span class="nf">source</span><span class="p">(</span><span class="s">&quot;https://bioconductor.org/biocLite.R&quot;</span><span class="p">)</span>
+<span class="nf">biocLite</span><span class="p">(</span><span class="s">&quot;survcomp&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="distributed-computation">
+<h2>Distributed computation<a class="headerlink" href="#distributed-computation" title="Permalink to this headline">¶</a></h2>
+<p>It is possible to use the python ray framework <a class="reference external" href="https://github.com/ray-project/ray">https://github.com/ray-project/ray</a> to control the parallel computation of the multiple models. To use this framework, it is required to install it: <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">ray</span> <span class="pre">--user</span></code>.
+Alternatively, it is also possible to create the model one by one without the need of the ray framework</p>
+</div>
+<div class="section" id="visualisation-module-experimental">
+<h2>Visualisation module (Experimental)<a class="headerlink" href="#visualisation-module-experimental" title="Permalink to this headline">¶</a></h2>
+<p>To visualise test sets projected into the multi-omic survival space, it is required to install <code class="docutils literal notranslate"><span class="pre">mpld3</span></code> module: <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">mpld3</span> <span class="pre">--user</span></code>.
+Note that the pip version of mpld3 installed on my computer presented a <a class="reference external" href="https://github.com/mpld3/mpld3/issues/434">bug</a>: <code class="docutils literal notranslate"><span class="pre">TypeError:</span> <span class="pre">array([1.])</span> <span class="pre">is</span> <span class="pre">not</span> <span class="pre">JSON</span> <span class="pre">serializable</span> </code>. However, the <a class="reference external" href="https://github.com/mpld3/mpld3">newest</a> version of the mpld3 available from the github solved this issue. It is therefore recommended to install the newest version to avoid this issue.</p>
+</div>
+<div class="section" id="installation-of-the-package">
+<h2>installation of the package<a class="headerlink" href="#installation-of-the-package" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/lanagarmire/SimDeep.git
+<span class="nb">cd</span> SimDeep
+pip install -r requirements.txt --user
+</pre></div>
+</div>
+</div>
+<div class="section" id="test-usr-bin-byobu-reconnect-sockets">
+<h2>Test. /usr/bin/byobu-reconnect-sockets<a class="headerlink" href="#test-usr-bin-byobu-reconnect-sockets" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>test if simdeep is functional (all the software are correctly installed):</li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>  python test/test_dummy_boosting_stacking.py -v <span class="c1"># OR</span>
+  nosetests <span class="nb">test</span> -v <span class="c1"># Improved version of python unit testing</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="LICENSE.html" class="btn btn-neutral float-right" title="&lt;no title&gt;" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="index.html" class="btn btn-neutral float-left" title="Welcome to DeepProg’s documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Olivier Poirion
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

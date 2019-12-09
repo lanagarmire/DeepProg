@@ -1,0 +1,619 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>simdeep.survival_utils &mdash; DeepProg  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> DeepProg
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage.html">Tutorial: Simple DeepProg model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage_ensemble.html">Tutorial: Ensemble of DeepProg model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../LICENSE.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/simdeep.html">simdeep package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">DeepProg</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>simdeep.survival_utils</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for simdeep.survival_utils</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">re</span>
+
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">PATH_DATA</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">SURVIVAL_FLAG</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">SEPARATOR</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">ENTREZ_TO_ENSG_FILE</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">USE_INPUT_TRANSPOSE</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">DEFAULTSEP</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">CLASSIFIER</span>
+
+<span class="kn">import</span>  <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">rankdata</span>
+
+<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">pairwise_distances</span>
+
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+
+<span class="kn">from</span> <span class="nn">simdeep.coxph_from_r</span> <span class="kn">import</span> <span class="n">coxph</span>
+<span class="kn">from</span> <span class="nn">simdeep.coxph_from_r</span> <span class="kn">import</span> <span class="n">c_index</span>
+
+<span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">kruskal</span>
+<span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">ranksums</span>
+
+<span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">isdir</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">mkdir</span>
+
+
+<span class="c1">################ DEBUG ################</span>
+<span class="c1"># supposed to be None for normal usage</span>
+<span class="n">MAX_FEATURE</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="c1">#######################################</span>
+
+
+<div class="viewcode-block" id="MadScaler"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.survival_utils.MadScaler">[docs]</a><span class="k">class</span> <span class="nc">MadScaler</span><span class="p">():</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+<div class="viewcode-block" id="MadScaler.fit_transform"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.survival_utils.MadScaler.fit_transform">[docs]</a>    <span class="k">def</span> <span class="nf">fit_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)):</span>
+            <span class="n">med</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="n">mad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">med</span><span class="p">))</span>
+            <span class="n">X</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">med</span><span class="p">)</span> <span class="o">/</span> <span class="n">mad</span>
+
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">matrix</span><span class="p">(</span><span class="n">X</span><span class="p">))</span></div></div>
+
+<div class="viewcode-block" id="RankNorm"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.survival_utils.RankNorm">[docs]</a><span class="k">class</span> <span class="nc">RankNorm</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+
+<div class="viewcode-block" id="RankNorm.fit_transform"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.survival_utils.RankNorm.fit_transform">[docs]</a>    <span class="k">def</span> <span class="nf">fit_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="n">shape</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)):</span>
+            <span class="n">X</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">rankdata</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">/</span> <span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">matrix</span><span class="p">(</span><span class="n">X</span><span class="p">)</span></div></div>
+
+<div class="viewcode-block" id="SampleReducer"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.survival_utils.SampleReducer">[docs]</a><span class="k">class</span> <span class="nc">SampleReducer</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">perc_sample_to_keep</span><span class="o">=</span><span class="mf">0.90</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">perc_sample_to_keep</span><span class="p">,</span> <span class="nb">float</span><span class="p">))</span>
+        <span class="k">assert</span><span class="p">(</span><span class="mf">0.0</span> <span class="o">&lt;</span> <span class="n">perc_sample_to_keep</span> <span class="o">&lt;</span> <span class="mf">1.0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">perc_sample_to_keep</span> <span class="o">=</span> <span class="n">perc_sample_to_keep</span>
+
+<div class="viewcode-block" id="SampleReducer.sample_to_keep"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.survival_utils.SampleReducer.sample_to_keep">[docs]</a>    <span class="k">def</span> <span class="nf">sample_to_keep</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">datasets</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">nb_samples</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">datasets</span><span class="o">.</span><span class="n">values</span><span class="p">()[</span><span class="mi">0</span><span class="p">][</span><span class="n">index</span><span class="p">])</span>
+        <span class="n">scores</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">nb_samples</span><span class="p">)</span>
+        <span class="n">threshold</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">nb_samples</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">perc_sample_to_keep</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">datasets</span><span class="p">:</span>
+            <span class="n">scores_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">vector</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="k">for</span> <span class="n">vector</span> <span class="ow">in</span> <span class="n">datasets</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">index</span><span class="p">]])</span>
+            <span class="n">scores</span> <span class="o">=</span> <span class="n">scores</span> <span class="o">+</span> <span class="n">scores_array</span>
+
+        <span class="n">scores</span> <span class="o">=</span> <span class="p">[(</span><span class="n">pos</span><span class="p">,</span> <span class="n">score</span><span class="p">)</span> <span class="k">for</span> <span class="n">pos</span><span class="p">,</span> <span class="n">score</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">scores</span><span class="p">)]</span>
+
+        <span class="n">scores</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">to_keep</span> <span class="o">=</span> <span class="p">[</span><span class="n">pos</span> <span class="k">for</span> <span class="n">pos</span><span class="p">,</span> <span class="n">score</span> <span class="ow">in</span> <span class="n">scores</span><span class="p">[:</span><span class="n">threshold</span><span class="p">]]</span>
+        <span class="n">to_remove</span> <span class="o">=</span> <span class="p">[</span><span class="n">pos</span> <span class="k">for</span> <span class="n">pos</span><span class="p">,</span> <span class="n">score</span> <span class="ow">in</span> <span class="n">scores</span><span class="p">[</span><span class="n">threshold</span><span class="p">:]]</span>
+
+        <span class="k">return</span> <span class="n">to_keep</span><span class="p">,</span> <span class="n">to_remove</span></div></div>
+
+<div class="viewcode-block" id="VarianceReducer"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.survival_utils.VarianceReducer">[docs]</a><span class="k">class</span> <span class="nc">VarianceReducer</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nb_features</span><span class="o">=</span><span class="mi">200</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nb_features</span> <span class="o">=</span> <span class="n">nb_features</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">index_to_keep</span> <span class="o">=</span> <span class="p">[]</span>
+
+<div class="viewcode-block" id="VarianceReducer.fit"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.survival_utils.VarianceReducer.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataset</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nb_features</span> <span class="o">&gt;</span> <span class="n">dataset</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nb_features</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="n">variances</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">var</span><span class="p">(</span><span class="n">array</span><span class="p">)</span> <span class="k">for</span> <span class="n">array</span> <span class="ow">in</span> <span class="n">dataset</span><span class="o">.</span><span class="n">T</span><span class="p">]</span>
+        <span class="n">threshold</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">enumerate</span><span class="p">(</span><span class="n">variances</span><span class="p">),</span>
+                           <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                           <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">index_to_keep</span> <span class="o">=</span> <span class="p">[</span><span class="n">pos</span> <span class="k">for</span> <span class="n">pos</span><span class="p">,</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">threshold</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">nb_features</span><span class="p">]]</span></div>
+
+<div class="viewcode-block" id="VarianceReducer.transform"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.survival_utils.VarianceReducer.transform">[docs]</a>    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataset</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">dataset</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">index_to_keep</span><span class="p">]</span><span class="o">.</span><span class="n">T</span></div>
+
+<div class="viewcode-block" id="VarianceReducer.fit_transform"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.survival_utils.VarianceReducer.fit_transform">[docs]</a>    <span class="k">def</span> <span class="nf">fit_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataset</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span></div></div>
+
+<div class="viewcode-block" id="CorrelationReducer"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.survival_utils.CorrelationReducer">[docs]</a><span class="k">class</span> <span class="nc">CorrelationReducer</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">distance</span><span class="o">=</span><span class="s1">&#39;correlation&#39;</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">distance</span> <span class="o">=</span> <span class="n">distance</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">threshold</span> <span class="o">=</span> <span class="n">threshold</span>
+
+<div class="viewcode-block" id="CorrelationReducer.fit"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.survival_utils.CorrelationReducer.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataset</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span> <span class="o">=</span> <span class="n">dataset</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">threshold</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">threshold</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span></div>
+
+<div class="viewcode-block" id="CorrelationReducer.transform"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.survival_utils.CorrelationReducer.transform">[docs]</a>    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataset</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">threshold</span><span class="p">:</span>
+            <span class="n">dataset</span><span class="p">[</span><span class="n">dataset</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">threshold</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">return</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="n">pairwise_distances</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span>
+                                        <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="p">,</span>
+                                        <span class="bp">self</span><span class="o">.</span><span class="n">distance</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CorrelationReducer.fit_transform"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.survival_utils.CorrelationReducer.fit_transform">[docs]</a>    <span class="k">def</span> <span class="nf">fit_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataset</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="RankCorrNorm"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.survival_utils.RankCorrNorm">[docs]</a><span class="k">class</span> <span class="nc">RankCorrNorm</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataset</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span> <span class="o">=</span> <span class="n">dataset</span></div>
+
+
+<div class="viewcode-block" id="load_survival_file"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.survival_utils.load_survival_file">[docs]</a><span class="k">def</span> <span class="nf">load_survival_file</span><span class="p">(</span><span class="n">f_name</span><span class="p">,</span>
+                       <span class="n">path_data</span><span class="o">=</span><span class="n">PATH_DATA</span><span class="p">,</span>
+                       <span class="n">sep</span><span class="o">=</span><span class="n">DEFAULTSEP</span><span class="p">,</span>
+                       <span class="n">survival_flag</span><span class="o">=</span><span class="n">SURVIVAL_FLAG</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">f_name</span> <span class="ow">in</span> <span class="n">SEPARATOR</span><span class="p">:</span>
+        <span class="n">sep</span> <span class="o">=</span> <span class="n">SEPARATOR</span><span class="p">[</span><span class="n">f_name</span><span class="p">]</span>
+
+    <span class="n">survival</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path_data</span> <span class="o">+</span> <span class="n">f_name</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f_surv</span><span class="p">:</span>
+        <span class="n">first_line</span> <span class="o">=</span> <span class="n">f_surv</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39; </span><span class="se">\n\r\t</span><span class="s1">&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">sep</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">survival_flag</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">assert</span><span class="p">(</span><span class="n">field</span> <span class="ow">in</span> <span class="n">first_line</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{0}</span><span class="s2"> not in </span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">field</span><span class="p">,</span> <span class="n">first_line</span><span class="p">))</span>
+
+        <span class="n">patient_id</span> <span class="o">=</span> <span class="n">first_line</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">survival_flag</span><span class="p">[</span><span class="s1">&#39;patient_id&#39;</span><span class="p">])</span>
+        <span class="n">surv_id</span> <span class="o">=</span> <span class="n">first_line</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">survival_flag</span><span class="p">[</span><span class="s1">&#39;survival&#39;</span><span class="p">])</span>
+        <span class="n">event_id</span> <span class="o">=</span> <span class="n">first_line</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">survival_flag</span><span class="p">[</span><span class="s1">&#39;event&#39;</span><span class="p">])</span>
+
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f_surv</span><span class="p">:</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">sep</span><span class="p">)</span>
+            <span class="n">ids</span>  <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="n">patient_id</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">)</span>
+            <span class="n">ndays</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="n">surv_id</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">)</span>
+            <span class="n">isdead</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="n">event_id</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">)</span>
+
+            <span class="n">survival</span><span class="p">[</span><span class="n">ids</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">ndays</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">isdead</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">survival</span></div>
+
+<div class="viewcode-block" id="load_data_from_tsv"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.survival_utils.load_data_from_tsv">[docs]</a><span class="k">def</span> <span class="nf">load_data_from_tsv</span><span class="p">(</span><span class="n">use_transpose</span><span class="o">=</span><span class="n">USE_INPUT_TRANSPOSE</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">use_transpose</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">_load_data_from_tsv_transposee</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">_load_data_from_tsv</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+<span class="k">def</span> <span class="nf">_load_data_from_tsv</span><span class="p">(</span>
+        <span class="n">f_name</span><span class="p">,</span>
+        <span class="n">key</span><span class="p">,</span>
+        <span class="n">path_data</span><span class="o">=</span><span class="n">PATH_DATA</span><span class="p">,</span>
+        <span class="n">f_type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span>
+        <span class="n">sep</span><span class="o">=</span><span class="n">DEFAULTSEP</span><span class="p">,</span>
+        <span class="n">nan_to_num</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
+    <span class="n">f_short</span> <span class="o">=</span> <span class="n">key</span>
+
+    <span class="k">if</span> <span class="n">f_name</span> <span class="ow">in</span> <span class="n">SEPARATOR</span><span class="p">:</span>
+        <span class="n">sep</span> <span class="o">=</span> <span class="n">SEPARATOR</span><span class="p">[</span><span class="n">f_name</span><span class="p">]</span>
+
+    <span class="n">f_tsv</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">path_data</span> <span class="o">+</span> <span class="n">f_name</span><span class="p">)</span>
+    <span class="n">header</span> <span class="o">=</span> <span class="n">f_tsv</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="n">sep</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">sep</span><span class="p">)</span>
+
+    <span class="n">feature_ids</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;</span><span class="si">{0}</span><span class="s1">_</span><span class="si">{1}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">f_short</span><span class="p">,</span> <span class="n">head</span><span class="p">)</span>
+                   <span class="k">for</span> <span class="n">head</span> <span class="ow">in</span> <span class="n">header</span><span class="p">][:</span><span class="n">MAX_FEATURE</span><span class="p">]</span>
+    <span class="n">sample_ids</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">f_matrix</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f_tsv</span><span class="p">:</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="n">sep</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">sep</span><span class="p">)</span>
+        <span class="n">sample_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="n">nan_to_num</span><span class="p">:</span>
+            <span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span> <span class="k">if</span> <span class="p">(</span><span class="n">l</span><span class="o">.</span><span class="n">isalpha</span><span class="p">()</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">l</span><span class="p">)</span> <span class="k">else</span> <span class="n">l</span>
+                        <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="n">MAX_FEATURE</span><span class="p">]]</span>
+
+        <span class="n">f_matrix</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">f_type</span><span class="p">,</span> <span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="n">MAX_FEATURE</span><span class="p">])))</span>
+
+    <span class="n">f_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">f_matrix</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">f_matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">feature_ids</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">feature_ids</span> <span class="o">=</span> <span class="n">feature_ids</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+
+    <span class="k">assert</span><span class="p">(</span><span class="n">f_matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">feature_ids</span><span class="p">))</span>
+    <span class="k">assert</span><span class="p">(</span><span class="n">f_matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">sample_ids</span><span class="p">))</span>
+
+    <span class="n">f_tsv</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">sample_ids</span><span class="p">,</span> <span class="n">feature_ids</span><span class="p">,</span> <span class="n">f_matrix</span>
+
+<span class="k">def</span> <span class="nf">_format_sample_name</span><span class="p">(</span><span class="n">sample_ids</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">regex</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s1">&#39;_1_[A-Z][A-Z]&#39;</span><span class="p">)</span>
+
+    <span class="n">sample_ids</span> <span class="o">=</span> <span class="p">[</span><span class="n">regex</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">sample</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">))</span> <span class="k">for</span> <span class="n">sample</span> <span class="ow">in</span> <span class="n">sample_ids</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">sample_ids</span>
+
+<span class="k">def</span> <span class="nf">_load_data_from_tsv_transposee</span><span class="p">(</span>
+        <span class="n">f_name</span><span class="p">,</span>
+        <span class="n">key</span><span class="p">,</span>
+        <span class="n">path_data</span><span class="o">=</span><span class="n">PATH_DATA</span><span class="p">,</span>
+        <span class="n">f_type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span>
+        <span class="n">sep</span><span class="o">=</span><span class="n">DEFAULTSEP</span><span class="p">,</span>
+        <span class="n">nan_to_num</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">f_name</span> <span class="ow">in</span> <span class="n">SEPARATOR</span><span class="p">:</span>
+        <span class="n">sep</span> <span class="o">=</span> <span class="n">SEPARATOR</span><span class="p">[</span><span class="n">f_name</span><span class="p">]</span>
+
+    <span class="n">f_tsv</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">path_data</span> <span class="o">+</span> <span class="n">f_name</span><span class="p">)</span>
+    <span class="n">header</span> <span class="o">=</span> <span class="n">f_tsv</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="n">sep</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">sep</span><span class="p">)</span>
+
+    <span class="n">sample_ids</span> <span class="o">=</span> <span class="n">header</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+
+    <span class="n">sample_ids</span> <span class="o">=</span> <span class="n">_format_sample_name</span><span class="p">(</span><span class="n">sample_ids</span><span class="p">)</span>
+
+    <span class="n">feature_ids</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">f_matrix</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">if</span> <span class="n">f_name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s1">&#39;entrez&#39;</span><span class="p">):</span>
+        <span class="n">ensg_dict</span> <span class="o">=</span> <span class="n">load_entrezID_to_ensg</span><span class="p">()</span>
+        <span class="n">use_ensg</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">use_ensg</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f_tsv</span><span class="p">:</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="n">sep</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">sep</span><span class="p">)</span>
+        <span class="n">feature</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">nan_to_num</span><span class="p">:</span>
+            <span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span> <span class="k">if</span> <span class="p">(</span><span class="n">l</span><span class="o">.</span><span class="n">isalpha</span><span class="p">()</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">l</span><span class="p">)</span> <span class="k">else</span> <span class="n">l</span>
+                        <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">:]]</span>
+
+        <span class="k">if</span> <span class="n">use_ensg</span> <span class="ow">and</span> <span class="n">feature</span> <span class="ow">in</span> <span class="n">ensg_dict</span><span class="p">:</span>
+            <span class="n">features</span> <span class="o">=</span> <span class="n">ensg_dict</span><span class="p">[</span><span class="n">feature</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">features</span> <span class="o">=</span> <span class="p">[</span><span class="n">feature</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">feature</span> <span class="ow">in</span> <span class="n">features</span><span class="p">:</span>
+            <span class="n">feature_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{0}</span><span class="s1">_</span><span class="si">{1}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">feature</span><span class="p">))</span>
+            <span class="n">f_matrix</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">f_type</span><span class="p">,</span> <span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">:])))</span>
+
+
+    <span class="n">f_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">f_matrix</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+
+    <span class="k">assert</span><span class="p">(</span><span class="n">f_matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">feature_ids</span><span class="p">))</span>
+    <span class="k">assert</span><span class="p">(</span><span class="n">f_matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">sample_ids</span><span class="p">))</span>
+
+    <span class="n">f_tsv</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">sample_ids</span><span class="p">,</span> <span class="n">feature_ids</span><span class="p">,</span> <span class="n">f_matrix</span>
+
+<div class="viewcode-block" id="select_best_classif_params"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.survival_utils.select_best_classif_params">[docs]</a><span class="k">def</span> <span class="nf">select_best_classif_params</span><span class="p">(</span><span class="n">clf</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    select best classifier parameters based uniquely</span>
+<span class="sd">    on test errors</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">arr</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">fold</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">clf</span><span class="o">.</span><span class="n">cv</span><span class="p">):</span>
+        <span class="n">arr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">clf</span><span class="o">.</span><span class="n">cv_results_</span><span class="p">[</span>
+            <span class="s1">&#39;split</span><span class="si">{0}</span><span class="s1">_test_score&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">fold</span><span class="p">)])</span>
+
+    <span class="n">score</span> <span class="o">=</span> <span class="p">[</span><span class="n">ar</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="k">for</span> <span class="n">ar</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">arr</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="p">]</span>
+    <span class="n">index</span> <span class="o">=</span> <span class="n">score</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">score</span><span class="p">))</span>
+
+    <span class="n">params</span> <span class="o">=</span> <span class="n">clf</span><span class="o">.</span><span class="n">cv_results_</span><span class="p">[</span><span class="s1">&#39;params&#39;</span><span class="p">][</span><span class="n">index</span><span class="p">]</span>
+
+    <span class="n">clf</span> <span class="o">=</span> <span class="n">CLASSIFIER</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">clf</span><span class="p">,</span> <span class="n">params</span></div>
+
+<div class="viewcode-block" id="load_entrezID_to_ensg"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.survival_utils.load_entrezID_to_ensg">[docs]</a><span class="k">def</span> <span class="nf">load_entrezID_to_ensg</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">entrez_dict</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">open</span><span class="p">(</span><span class="n">ENTREZ_TO_ENSG_FILE</span><span class="p">):</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+        <span class="n">entrez_dict</span><span class="p">[</span><span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+
+    <span class="k">return</span> <span class="n">entrez_dict</span></div>
+
+<span class="k">def</span> <span class="nf">_process_parallel_coxph</span><span class="p">(</span><span class="n">inp</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">node_id</span><span class="p">,</span> <span class="n">activity</span><span class="p">,</span> <span class="n">isdead</span><span class="p">,</span> <span class="n">nbdays</span> <span class="o">=</span> <span class="n">inp</span>
+    <span class="n">pvalue</span> <span class="o">=</span> <span class="n">coxph</span><span class="p">(</span><span class="n">activity</span><span class="p">,</span> <span class="n">isdead</span><span class="p">,</span> <span class="n">nbdays</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">node_id</span><span class="p">,</span> <span class="n">pvalue</span>
+
+<span class="k">def</span> <span class="nf">_process_parallel_cindex</span><span class="p">(</span><span class="n">inp</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="p">(</span><span class="n">node_id</span><span class="p">,</span>
+     <span class="n">act_ref</span><span class="p">,</span> <span class="n">isdead_ref</span><span class="p">,</span> <span class="n">nbdays_ref</span><span class="p">,</span>
+     <span class="n">act_test</span><span class="p">,</span> <span class="n">isdead_test</span><span class="p">,</span> <span class="n">nbdays_test</span><span class="p">)</span> <span class="o">=</span> <span class="n">inp</span>
+
+    <span class="n">score</span> <span class="o">=</span> <span class="n">c_index</span><span class="p">(</span><span class="n">act_ref</span><span class="p">,</span> <span class="n">isdead_ref</span><span class="p">,</span> <span class="n">nbdays_ref</span><span class="p">,</span>
+                    <span class="n">act_test</span><span class="p">,</span> <span class="n">isdead_test</span><span class="p">,</span> <span class="n">nbdays_test</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">node_id</span><span class="p">,</span> <span class="n">score</span>
+
+<span class="k">def</span> <span class="nf">_process_parallel_feature_importance</span><span class="p">(</span><span class="n">inp</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">arrays</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+    <span class="n">feature</span><span class="p">,</span> <span class="n">array</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="n">inp</span>
+
+    <span class="k">for</span> <span class="n">label</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">labels</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">array</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)):</span>
+        <span class="n">arrays</span><span class="p">[</span><span class="n">label</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">score</span><span class="p">,</span> <span class="n">pvalue</span> <span class="o">=</span> <span class="n">kruskal</span><span class="p">(</span><span class="o">*</span><span class="n">arrays</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">feature</span><span class="p">,</span> <span class="mf">1.0</span>
+
+    <span class="k">return</span> <span class="n">feature</span><span class="p">,</span> <span class="n">pvalue</span>
+
+<span class="k">def</span> <span class="nf">_process_parallel_feature_importance_per_cluster</span><span class="p">(</span><span class="n">inp</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">arrays</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">feature</span><span class="p">,</span> <span class="n">array</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="n">inp</span>
+
+    <span class="k">for</span> <span class="n">label</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">labels</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">array</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)):</span>
+        <span class="n">arrays</span><span class="p">[</span><span class="n">label</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">cluster</span> <span class="ow">in</span> <span class="n">arrays</span><span class="p">:</span>
+        <span class="n">array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">arrays</span><span class="p">[</span><span class="n">cluster</span><span class="p">])</span>
+        <span class="n">array_comp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">a</span> <span class="k">for</span> <span class="n">comp</span> <span class="ow">in</span> <span class="n">arrays</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">arrays</span><span class="p">[</span><span class="n">comp</span><span class="p">]</span>
+                      <span class="k">if</span> <span class="n">comp</span> <span class="o">!=</span> <span class="n">cluster</span><span class="p">])</span>
+
+        <span class="n">score</span><span class="p">,</span> <span class="n">pvalue</span> <span class="o">=</span> <span class="n">ranksums</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">array_comp</span><span class="p">)</span>
+        <span class="n">median_diff</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">array</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">array_comp</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">pvalue</span> <span class="o">&lt;</span> <span class="mf">0.001</span><span class="p">:</span>
+            <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">cluster</span><span class="p">,</span> <span class="n">feature</span><span class="p">,</span> <span class="n">median_diff</span><span class="p">,</span> <span class="n">pvalue</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">results</span>
+
+<div class="viewcode-block" id="save_matrix"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.survival_utils.save_matrix">[docs]</a><span class="k">def</span> <span class="nf">save_matrix</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="n">feature_array</span><span class="p">,</span> <span class="n">sample_array</span><span class="p">,</span>
+                <span class="n">path_folder</span><span class="p">,</span> <span class="n">project_name</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">isdir</span><span class="p">(</span><span class="n">path_folder</span><span class="p">):</span>
+        <span class="n">mkdir</span><span class="p">(</span><span class="n">path_folder</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">key</span><span class="p">:</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="s1">&#39;_&#39;</span> <span class="o">+</span> <span class="n">key</span>
+
+    <span class="n">f_csv</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{0}</span><span class="s1">/</span><span class="si">{1}{2}</span><span class="s1">.tsv&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">path_folder</span><span class="p">,</span> <span class="n">project_name</span><span class="p">,</span> <span class="n">key</span><span class="p">),</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+
+    <span class="n">f_csv</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">sep</span> <span class="o">+</span> <span class="n">sep</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span><span class="n">x</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">feature_array</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">sample</span><span class="p">,</span> <span class="n">vector</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">sample_array</span><span class="p">,</span> <span class="n">matrix</span><span class="p">):</span>
+        <span class="n">vector</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">vector</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">f_csv</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{0}{1}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">sample</span><span class="p">,</span> <span class="n">sep</span><span class="p">)</span> <span class="o">+</span> <span class="n">sep</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">vector</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{0}</span><span class="s1">/</span><span class="si">{1}{2}</span><span class="s1">.tsv saved&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">path_folder</span><span class="p">,</span> <span class="n">project_name</span><span class="p">,</span> <span class="n">key</span><span class="p">))</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Olivier Poirion
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

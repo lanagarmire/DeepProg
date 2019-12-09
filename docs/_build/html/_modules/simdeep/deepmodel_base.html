@@ -1,0 +1,563 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>simdeep.deepmodel_base &mdash; DeepProg  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> DeepProg
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage.html">Tutorial: Simple DeepProg model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage_ensemble.html">Tutorial: Ensemble of DeepProg model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../LICENSE.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/simdeep.html">simdeep package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">DeepProg</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>simdeep.deepmodel_base</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for simdeep.deepmodel_base</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">SEED</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;TF_CPP_MIN_LOG_LEVEL&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;3&#39;</span>
+
+<span class="kn">import</span> <span class="nn">warnings</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="k">with</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">():</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
+        <span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
+        <span class="n">tf</span><span class="o">.</span><span class="n">compat</span><span class="o">.</span><span class="n">v1</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">set_verbosity</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">compat</span><span class="o">.</span><span class="n">v1</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">ERROR</span><span class="p">)</span>
+<span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+    <span class="k">pass</span>
+
+<span class="k">with</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">():</span>
+    <span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
+    <span class="kn">from</span> <span class="nn">keras.layers</span> <span class="kn">import</span> <span class="n">Dense</span>
+    <span class="kn">from</span> <span class="nn">keras.layers</span> <span class="kn">import</span> <span class="n">Dropout</span>
+    <span class="kn">from</span> <span class="nn">keras.layers</span> <span class="kn">import</span> <span class="n">Input</span>
+
+    <span class="kn">from</span> <span class="nn">keras.models</span> <span class="kn">import</span> <span class="n">Sequential</span>
+    <span class="kn">from</span> <span class="nn">keras.models</span> <span class="kn">import</span> <span class="n">load_model</span>
+    <span class="kn">from</span> <span class="nn">keras.models</span> <span class="kn">import</span> <span class="n">Model</span>
+
+    <span class="kn">from</span> <span class="nn">keras</span> <span class="kn">import</span> <span class="n">regularizers</span>
+
+<span class="kn">from</span> <span class="nn">simdeep.extract_data</span> <span class="kn">import</span> <span class="n">LoadData</span>
+
+<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">time</span>
+
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">EPOCHS</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">LEVEL_DIMS_IN</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">LEVEL_DIMS_OUT</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">NEW_DIM</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">LOSS</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">OPTIMIZER</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">ACT_REG</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">W_REG</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">DROPOUT</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">ACTIVATION</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">PATH_TO_SAVE_MODEL</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">DATA_SPLIT</span>
+
+<span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">isfile</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;TF_CPP_MIN_LOG_LEVEL&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;3&#39;</span>
+
+
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.deepmodel_base.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
+    <span class="n">simdeep</span> <span class="o">=</span> <span class="n">DeepBase</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">simdeep</span><span class="o">.</span><span class="n">load_training_dataset</span><span class="p">()</span>
+    <span class="n">simdeep</span><span class="o">.</span><span class="n">construct_autoencoders</span><span class="p">()</span>
+    <span class="n">simdeep</span><span class="o">.</span><span class="n">encoder_predict</span><span class="p">(</span><span class="s1">&#39;METH&#39;</span><span class="p">,</span> <span class="n">simdeep</span><span class="o">.</span><span class="n">matrix_train_array</span><span class="p">[</span><span class="s1">&#39;METH&#39;</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="DeepBase"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.deepmodel_base.DeepBase">[docs]</a><span class="k">class</span> <span class="nc">DeepBase</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">dataset</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                 <span class="n">epochs</span><span class="o">=</span><span class="n">EPOCHS</span><span class="p">,</span>
+                 <span class="n">level_dims_in</span><span class="o">=</span><span class="n">LEVEL_DIMS_IN</span><span class="p">,</span>
+                 <span class="n">level_dims_out</span><span class="o">=</span><span class="n">LEVEL_DIMS_OUT</span><span class="p">,</span>
+                 <span class="n">new_dim</span><span class="o">=</span><span class="n">NEW_DIM</span><span class="p">,</span>
+                 <span class="n">loss</span><span class="o">=</span><span class="n">LOSS</span><span class="p">,</span>
+                 <span class="n">optimizer</span><span class="o">=</span><span class="n">OPTIMIZER</span><span class="p">,</span>
+                 <span class="n">act_reg</span><span class="o">=</span><span class="n">ACT_REG</span><span class="p">,</span>
+                 <span class="n">w_reg</span><span class="o">=</span><span class="n">W_REG</span><span class="p">,</span>
+                 <span class="n">dropout</span><span class="o">=</span><span class="n">DROPOUT</span><span class="p">,</span>
+                 <span class="n">data_split</span><span class="o">=</span><span class="n">DATA_SPLIT</span><span class="p">,</span>
+                 <span class="n">activation</span><span class="o">=</span><span class="n">ACTIVATION</span><span class="p">,</span>
+                 <span class="n">seed</span><span class="o">=</span><span class="n">SEED</span><span class="p">,</span>
+                 <span class="n">path_to_save_model</span><span class="o">=</span><span class="n">PATH_TO_SAVE_MODEL</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        ### DEFAULT PARAMETER ###:</span>
+<span class="sd">            dataset=None      ExtractData instance (load the dataset),</span>
+<span class="sd">            level_dims = [500]</span>
+<span class="sd">            new_dim = 100</span>
+<span class="sd">            dropout = 0.5</span>
+<span class="sd">            act_reg = 0.0001</span>
+<span class="sd">            w_reg = 0.001</span>
+<span class="sd">            data_split = 0.2</span>
+<span class="sd">            activation = &#39;tanh&#39;</span>
+<span class="sd">            epochs = 10</span>
+<span class="sd">            loss = &#39;binary_crossentropy&#39;</span>
+<span class="sd">            optimizer = &#39;sgd&#39;</span>
+<span class="sd">            path_model where to save/load the models</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">dataset</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">dataset</span> <span class="o">=</span> <span class="n">LoadData</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span> <span class="o">=</span> <span class="n">dataset</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="n">verbose</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">matrix_train_array</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">epochs</span> <span class="o">=</span> <span class="n">epochs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">level_dims_in</span> <span class="o">=</span> <span class="n">level_dims_in</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">level_dims_out</span> <span class="o">=</span> <span class="n">level_dims_out</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">new_dim</span> <span class="o">=</span> <span class="n">new_dim</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loss</span> <span class="o">=</span> <span class="n">loss</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span> <span class="o">=</span> <span class="n">optimizer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dropout</span> <span class="o">=</span> <span class="n">dropout</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">path_to_save_model</span> <span class="o">=</span> <span class="n">path_to_save_model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">activation</span> <span class="o">=</span> <span class="n">activation</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_split</span> <span class="o">=</span> <span class="n">data_split</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">seed</span> <span class="o">=</span> <span class="n">seed</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">:</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">W_l1_constant</span> <span class="o">=</span> <span class="n">w_reg</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">A_l2_constant</span> <span class="o">=</span> <span class="n">act_reg</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">encoder_array</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_array</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_model_loaded</span> <span class="o">=</span> <span class="kc">False</span>
+
+<div class="viewcode-block" id="DeepBase.construct_autoencoders"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.deepmodel_base.DeepBase.construct_autoencoders">[docs]</a>    <span class="k">def</span> <span class="nf">construct_autoencoders</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        main class to create the autoencoder</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">create_autoencoders</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">compile_models</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fit_autoencoders</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="DeepBase.construct_supervized_network"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.deepmodel_base.DeepBase.construct_supervized_network">[docs]</a>    <span class="k">def</span> <span class="nf">construct_supervized_network</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">objective</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        main class to create the autoencoder</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">create_autoencoders</span><span class="p">(</span><span class="n">objective</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">compile_models</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fit_autoencoders</span><span class="p">(</span><span class="n">objective</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DeepBase.load_training_dataset"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.deepmodel_base.DeepBase.load_training_dataset">[docs]</a>    <span class="k">def</span> <span class="nf">load_training_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        load training dataset and surival</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">load_array</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">load_survival</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">create_a_cv_split</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">normalize_training_array</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">matrix_train_array</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">matrix_train_array</span>
+
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">matrix_train_array</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">matrix_train_array</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">matrix_train_array</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DeepBase.load_test_dataset"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.deepmodel_base.DeepBase.load_test_dataset">[docs]</a>    <span class="k">def</span> <span class="nf">load_test_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        load test dataset and test surival</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">load_matrix_test</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">load_survival_test</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="DeepBase.create_autoencoders"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.deepmodel_base.DeepBase.create_autoencoders">[docs]</a>    <span class="k">def</span> <span class="nf">create_autoencoders</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">matrix_out</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">matrix_train_array</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_create_autoencoder</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">matrix_train_array</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">key</span><span class="p">,</span> <span class="n">matrix_out</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_create_autoencoder</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">matrix_train</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">matrix_out</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Instantiate the  autoencoder architecture</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;creating autoencoder...&#39;</span><span class="p">)</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+
+        <span class="n">model</span> <span class="o">=</span> <span class="n">Sequential</span><span class="p">()</span>
+
+        <span class="n">X_shape</span> <span class="o">=</span> <span class="n">matrix_train</span><span class="o">.</span><span class="n">shape</span>
+
+        <span class="n">nb_hidden</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">level_dims_in</span><span class="p">:</span>
+            <span class="n">nb_hidden</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_add_dense_layer</span><span class="p">(</span>
+                <span class="n">model</span><span class="p">,</span>
+                <span class="n">X_shape</span><span class="p">,</span>
+                <span class="n">dim</span><span class="p">,</span>
+                <span class="n">name</span><span class="o">=</span><span class="s1">&#39;hidden_layer_nb_</span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">nb_hidden</span><span class="p">))</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dropout</span><span class="p">:</span>
+                <span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Dropout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dropout</span><span class="p">))</span>
+
+        <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_add_dense_layer</span><span class="p">(</span>
+                <span class="n">model</span><span class="p">,</span>
+                <span class="n">X_shape</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">new_dim</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="s1">&#39;new_dim&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dropout</span><span class="p">:</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Dropout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dropout</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">level_dims_out</span><span class="p">:</span>
+            <span class="n">nb_hidden</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_add_dense_layer</span><span class="p">(</span>
+                <span class="n">model</span><span class="p">,</span>
+                <span class="n">X_shape</span><span class="p">,</span>
+                <span class="n">dim</span><span class="p">,</span>
+                <span class="n">name</span><span class="o">=</span><span class="s1">&#39;hidden_layer_nb_</span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">nb_hidden</span><span class="p">))</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dropout</span><span class="p">:</span>
+                <span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Dropout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dropout</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">matrix_out</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_add_dense_layer</span><span class="p">(</span>
+                        <span class="n">model</span><span class="p">,</span>
+                        <span class="n">X_shape</span><span class="p">,</span>
+                        <span class="n">matrix_out</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;final_layer&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_add_dense_layer</span><span class="p">(</span>
+                <span class="n">model</span><span class="p">,</span>
+                <span class="n">X_shape</span><span class="p">,</span>
+                <span class="n">X_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                <span class="n">name</span><span class="o">=</span><span class="s1">&#39;final_layer&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_array</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">model</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;model for </span><span class="si">{1}</span><span class="s1"> created in </span><span class="si">{0}</span><span class="s1">s !&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t</span><span class="p">,</span> <span class="n">key</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">_add_dense_layer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        private function to add one layer</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">input_dim</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">model</span><span class="o">.</span><span class="n">layers</span><span class="p">:</span>
+            <span class="n">input_dim</span> <span class="o">=</span> <span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Dense</span><span class="p">(</span><span class="n">dim</span><span class="p">,</span>
+                        <span class="n">activity_regularizer</span><span class="o">=</span><span class="n">regularizers</span><span class="o">.</span><span class="n">l2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">A_l2_constant</span><span class="p">),</span>
+                        <span class="n">kernel_regularizer</span><span class="o">=</span><span class="n">regularizers</span><span class="o">.</span><span class="n">l1</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">W_l1_constant</span><span class="p">),</span>
+                        <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+                        <span class="n">activation</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">activation</span><span class="p">,</span>
+                        <span class="n">input_dim</span><span class="o">=</span><span class="n">input_dim</span><span class="p">,</span>
+        <span class="p">))</span>
+        <span class="k">return</span> <span class="n">model</span>
+
+<div class="viewcode-block" id="DeepBase.compile_models"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.deepmodel_base.DeepBase.compile_models">[docs]</a>    <span class="k">def</span> <span class="nf">compile_models</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        define the optimizer and the loss function</span>
+<span class="sd">        compile the model and ready to fit the data!</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_array</span><span class="p">:</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_array</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;compiling deep model...&#39;</span><span class="p">)</span>
+
+            <span class="n">model</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">optimizer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span><span class="p">,</span> <span class="n">loss</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">loss</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;compilation done for key </span><span class="si">{0}</span><span class="s1">!&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="DeepBase.fit_autoencoders"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.deepmodel_base.DeepBase.fit_autoencoders">[docs]</a>    <span class="k">def</span> <span class="nf">fit_autoencoders</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">objective</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        fit the autoencoder using the training matrix</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_array</span><span class="p">:</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_array</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+            <span class="n">matrix_train</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">matrix_train_array</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">objective</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">matrix_out</span> <span class="o">=</span> <span class="n">matrix_train</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">matrix_out</span> <span class="o">=</span> <span class="n">objective</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+                <span class="n">verbose</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">verbose</span> <span class="o">=</span> <span class="mi">2</span>
+
+            <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">matrix_train</span><span class="p">,</span>
+                      <span class="n">y</span><span class="o">=</span><span class="n">matrix_out</span><span class="p">,</span>
+                      <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>
+                      <span class="n">epochs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">epochs</span><span class="p">,</span>
+                      <span class="n">validation_split</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data_split</span><span class="p">,</span>
+                      <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;fitting done for model </span><span class="si">{0}</span><span class="s1">!&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_define_encoders</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="DeepBase.encoder_predict"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.deepmodel_base.DeepBase.encoder_predict">[docs]</a>    <span class="k">def</span> <span class="nf">encoder_predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">matrix</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Predict the output value using the matrix as input for the encoder from key</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoder_array</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">matrix</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DeepBase.encoder_input_shape"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.deepmodel_base.DeepBase.encoder_input_shape">[docs]</a>    <span class="k">def</span> <span class="nf">encoder_input_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Predict the output value using the matrix as input for the encoder from key</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoder_array</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">input_shape</span></div>
+
+
+    <span class="k">def</span> <span class="nf">_define_encoders</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Define the encoder output layers by using the middle layer of the autoencoders</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_array</span><span class="p">:</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_array</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+            <span class="n">matrix_train</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">matrix_train_array</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+
+            <span class="n">X_shape</span> <span class="o">=</span> <span class="n">matrix_train</span><span class="o">.</span><span class="n">shape</span>
+
+            <span class="n">inp</span> <span class="o">=</span> <span class="n">Input</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">X_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],))</span>
+            <span class="n">encoder</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">layers</span><span class="p">[</span><span class="mi">0</span><span class="p">](</span><span class="n">inp</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">layers</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">!=</span> <span class="s1">&#39;new_dim&#39;</span><span class="p">:</span>
+
+                <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">layers</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+                    <span class="n">encoder</span> <span class="o">=</span> <span class="n">layer</span><span class="p">(</span><span class="n">encoder</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">layer</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;new_dim&#39;</span><span class="p">:</span>
+                        <span class="k">break</span>
+
+            <span class="n">encoder</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">inp</span><span class="p">,</span> <span class="n">encoder</span><span class="p">)</span>
+            <span class="n">encoder</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">optimizer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span><span class="p">,</span> <span class="n">loss</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">loss</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">encoder_array</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">encoder</span>
+
+<div class="viewcode-block" id="DeepBase.save_encoders"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.deepmodel_base.DeepBase.save_encoders">[docs]</a>    <span class="k">def</span> <span class="nf">save_encoders</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fname</span><span class="o">=</span><span class="s1">&#39;encoder.h5&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Save a keras model in the self.path_to_save_model directory</span>
+<span class="sd">        :fname: str    the name of the file to save the model</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoder_array</span><span class="p">:</span>
+            <span class="n">encoder</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoder_array</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+            <span class="n">encoder</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{0}</span><span class="s1">/</span><span class="si">{1}</span><span class="s1">_</span><span class="si">{2}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path_to_save_model</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">fname</span><span class="p">))</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;model saved for key:</span><span class="si">{0}</span><span class="s1">!&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="DeepBase.load_encoders"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.deepmodel_base.DeepBase.load_encoders">[docs]</a>    <span class="k">def</span> <span class="nf">load_encoders</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fname</span><span class="o">=</span><span class="s1">&#39;encoder.h5&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Load a keras model from the self.path_to_save_model directory</span>
+<span class="sd">        :fname: str    the name of the file to load</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">matrix_train_array</span><span class="p">:</span>
+            <span class="n">file_path</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{0}</span><span class="s1">/</span><span class="si">{1}</span><span class="s1">_</span><span class="si">{2}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path_to_save_model</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">fname</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">assert</span><span class="p">(</span><span class="n">isfile</span><span class="p">(</span><span class="n">file_path</span><span class="p">))</span>
+            <span class="k">except</span> <span class="ne">AssertionError</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;try loading autoencoder for </span><span class="si">{0}</span><span class="s1"> but file not found&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">file_path</span><span class="p">))</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;no encoder loaded&#39;</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">encoder_array</span> <span class="o">=</span> <span class="p">{}</span>
+                    <span class="k">return</span>
+
+            <span class="n">t</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+            <span class="n">encoder</span> <span class="o">=</span> <span class="n">load_model</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;model </span><span class="si">{1}</span><span class="s1"> loaded in </span><span class="si">{0}</span><span class="s1"> s!&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t</span><span class="p">,</span> <span class="n">key</span><span class="p">))</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">encoder_array</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">encoder</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">is_model_loaded</span> <span class="o">=</span> <span class="kc">True</span></div></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Olivier Poirion
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

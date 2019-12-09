@@ -48,42 +48,6 @@ QUANTILE_OPTION = {'n_quantiles': 100,
 ###############################################################
 
 
-def main():
-    """ """
-    training_tsv = {
-        # 'RNA': 'rna_validation_hoshida.tsv',
-        'CNV': 'cnv_360.tsv',
-        'MIR': 'mir_360.tsv',
-        'METH': 'meth_360.tsv',
-        'RNA': 'rna_360.tsv',
-    }
-    survival_tsv = "survival_event_360.txt"
-    path_data = "/home/opoirion/data/survival_analysis_multiple/"
-
-    load_data = LoadData(
-        training_tsv=training_tsv,
-        survival_tsv=survival_tsv,
-        path_data=path_data,
-        cross_validation_instance=None,
-        normalization={'TRAIN_RANK_NORM': True,
-                       'TRAIN_CORR_REDUCTION': True,
-        })
-    load_data.load_array()
-    load_data.load_survival()
-    load_data.create_a_cv_split()
-
-    load_data.normalize_training_array()
-    load_data.save_ref_matrix(
-        path_folder='/home/opoirion/data/survival_analysis_multiple/hcc_rank_corr_norm/',
-        project_name='rank_corr')
-    return
-
-    load_data.load_new_test_dataset(
-        {'METH': '../../../../data/survival_analysis_multiple/meth_validation.tsv'},
-        '../../../../data/survival_analysis_multiple/survival_event_meth.txt',
-        normalization={'TRAIN_CORR_REDUCTION': True})
-
-
 class LoadData():
     """
     """
@@ -740,7 +704,3 @@ class LoadData():
                 project_name=project_name,
                 key=key
             )
-
-
-if __name__ == '__main__':
-    main()

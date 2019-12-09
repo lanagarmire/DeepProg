@@ -1,0 +1,423 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Tutorial: Ensemble of DeepProg model &mdash; DeepProg  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="License" href="LICENSE.html" />
+    <link rel="prev" title="Usage and tutorial" href="usage.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> DeepProg
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage and tutorial</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Tutorial: Ensemble of DeepProg model</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#instanciation">Instanciation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#fitting">Fitting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#evaluate-the-models">Evaluate the models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#predicting-on-test-dataset">Predicting on test dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#distributed-computation">Distributed computation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#more-examples">More examples</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="LICENSE.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/simdeep.html">simdeep package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">DeepProg</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Tutorial: Ensemble of DeepProg model</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/usage_ensemble.md.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="tutorial-ensemble-of-deepprog-model">
+<h1>Tutorial: Ensemble of DeepProg model<a class="headerlink" href="#tutorial-ensemble-of-deepprog-model" title="Permalink to this headline">¶</a></h1>
+<p>Secondly, we will build a more complex DeepProg model constituted of an ensemble of sub-models, each originated from a subset of the data. For that purpose, we need to use the <code class="docutils literal notranslate"><span class="pre">SimDeepBoosting</span></code> class:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">simdeep.simdeep_boosting</span> <span class="kn">import</span> <span class="n">SimDeepBoosting</span>
+
+<span class="n">help</span><span class="p">(</span><span class="n">SimDeepBoosting</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Similarly, to the SimDeep class, we define our training dataset</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Location of the input matrices and survival file</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">PATH_DATA</span>
+
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+
+<span class="c1"># Example tsv files</span>
+<span class="n">tsv_files</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">([</span>
+          <span class="p">(</span><span class="s1">&#39;MIR&#39;</span><span class="p">,</span> <span class="s1">&#39;mir_dummy.tsv&#39;</span><span class="p">),</span>
+          <span class="p">(</span><span class="s1">&#39;METH&#39;</span><span class="p">,</span> <span class="s1">&#39;meth_dummy.tsv&#39;</span><span class="p">),</span>
+          <span class="p">(</span><span class="s1">&#39;RNA&#39;</span><span class="p">,</span> <span class="s1">&#39;rna_dummy.tsv&#39;</span><span class="p">),</span>
+<span class="p">])</span>
+
+<span class="c1"># File with survival event</span>
+<span class="n">survival_tsv</span> <span class="o">=</span> <span class="s1">&#39;survival_dummy.tsv&#39;</span>
+</pre></div>
+</div>
+<div class="section" id="instanciation">
+<h2>Instanciation<a class="headerlink" href="#instanciation" title="Permalink to this headline">¶</a></h2>
+<p>Then, we define arguments specific to DeepProg and instanciate an instance of the class</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">project_name</span> <span class="o">=</span> <span class="s1">&#39;stacked_TestProject&#39;</span>
+<span class="n">epochs</span> <span class="o">=</span> <span class="mi">10</span> <span class="c1"># Autoencoder epochs. Other hyperparameters can be fine-tuned. See the example files</span>
+<span class="n">seed</span> <span class="o">=</span> <span class="mi">3</span> <span class="c1"># random seed used for reproducibility</span>
+<span class="n">nb_it</span> <span class="o">=</span> <span class="mi">5</span> <span class="c1"># This is the number of models to be fitted using only a subset of the training data</span>
+<span class="n">nb_threads</span> <span class="o">=</span> <span class="mi">2</span> <span class="c1"># These treads define the number of threads to be used to compute survival function</span>
+<span class="n">PATH_RESULTS</span> <span class="o">=</span> <span class="s2">&quot;./&quot;</span>
+
+<span class="n">boosting</span> <span class="o">=</span> <span class="n">SimDeepBoosting</span><span class="p">(</span>
+    <span class="n">nb_threads</span><span class="o">=</span><span class="n">nb_threads</span><span class="p">,</span>
+    <span class="n">nb_it</span><span class="o">=</span><span class="n">nb_it</span><span class="p">,</span>
+    <span class="n">split_n_fold</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+    <span class="n">survival_tsv</span><span class="o">=</span><span class="n">survival_tsv</span><span class="p">,</span>
+    <span class="n">training_tsv</span><span class="o">=</span><span class="n">tsv_files</span><span class="p">,</span>
+    <span class="n">path_data</span><span class="o">=</span><span class="n">PATH_DATA</span><span class="p">,</span>
+    <span class="n">project_name</span><span class="o">=</span><span class="n">project_name</span><span class="p">,</span>
+    <span class="n">path_results</span><span class="o">=</span><span class="n">PATH_RESULTS</span><span class="p">,</span>
+    <span class="n">epochs</span><span class="o">=</span><span class="n">epochs</span><span class="p">,</span>
+    <span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Here, we define a DeepProg model that will create 5 SimDeep instances each based on a subset of the original training dataset.the number of instance is defined by he <code class="docutils literal notranslate"><span class="pre">nb_it</span></code> argument. Other arguments related to the autoencoders construction can be defined during the class instanciation, such as <code class="docutils literal notranslate"><span class="pre">epochs</span></code>.</p>
+</div>
+<div class="section" id="fitting">
+<h2>Fitting<a class="headerlink" href="#fitting" title="Permalink to this headline">¶</a></h2>
+<p>Once the model is defined we can fit it</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Fit the model</span>
+<span class="n">boosting</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
+<span class="c1"># Predict and write the labels</span>
+<span class="n">boosting</span><span class="o">.</span><span class="n">predict_labels_on_full_dataset</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Some output files are generated in the output folder:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>stacked_TestProject
+├── stacked_TestProject_full_labels.tsv
+├── stacked_TestProject_KM_plot_boosting_full.png
+├── stacked_TestProject_proba_KM_plot_boosting_full.png
+├── stacked_TestProject_test_fold_labels.tsv
+└── stacked_TestProject_training_set_labels.tsv
+</pre></div>
+</div>
+<p>The inferred labels, labels probability, survival time, and event are written in the <code class="docutils literal notranslate"><span class="pre">stacked_TestProject_full_labels.tsv</span></code> file:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sample_test_48  <span class="m">1</span>       <span class="m">0</span>.474781026865  <span class="m">332</span>.0   <span class="m">1</span>.0
+sample_test_49  <span class="m">1</span>       <span class="m">0</span>.142554926379  <span class="m">120</span>.0   <span class="m">0</span>.0
+sample_test_46  <span class="m">1</span>       <span class="m">0</span>.355333486034  <span class="m">355</span>.0   <span class="m">1</span>.0
+sample_test_47  <span class="m">0</span>       <span class="m">0</span>.618825352398  <span class="m">48</span>.0    <span class="m">1</span>.0
+sample_test_44  <span class="m">1</span>       <span class="m">0</span>.346797097671  <span class="m">179</span>.0   <span class="m">0</span>.0
+sample_test_45  <span class="m">1</span>       <span class="m">0</span>.0254692404734 <span class="m">360</span>.0   <span class="m">0</span>.0
+sample_test_42  <span class="m">1</span>       <span class="m">0</span>.441997226254  <span class="m">346</span>.0   <span class="m">1</span>.0
+sample_test_43  <span class="m">1</span>       <span class="m">0</span>.0783603292911 <span class="m">335</span>.0   <span class="m">0</span>.0
+sample_test_40  <span class="m">1</span>       <span class="m">0</span>.380182410315  <span class="m">149</span>.0   <span class="m">0</span>.0
+sample_test_41  <span class="m">0</span>       <span class="m">0</span>.953659261728  <span class="m">155</span>.0   <span class="m">1</span>.0
+</pre></div>
+</div>
+<p>Note that the label probablity corresponds to the probability to belongs to the subtype with the lowest survival rate.
+Two KM plots are also generated, one using the cluster labels:</p>
+<p><img alt="KM plot 3" src="_images/stacked_TestProject_KM_plot_boosting_full.png" /></p>
+<p>and one using the cluster label probability dichotomized:</p>
+<p><img alt="KM plot 4" src="_images/stacked_TestProject_proba_KM_plot_boosting_full.png" /></p>
+<p>We can also compute the feature importance per cluster:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># oOmpute the feature importance</span>
+<span class="n">boosting</span><span class="o">.</span><span class="n">compute_feature_scores_per_cluster</span><span class="p">()</span>
+<span class="c1"># Write the feature importance</span>
+<span class="n">boosting</span><span class="o">.</span><span class="n">write_feature_score_per_cluster</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>The results are updated in the output folder:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>stacked_TestProject
+├── stacked_TestProject_features_anticorrelated_scores_per_clusters.tsv
+├── stacked_TestProject_features_scores_per_clusters.tsv
+├── stacked_TestProject_full_labels.tsv
+├── stacked_TestProject_KM_plot_boosting_full.png
+├── stacked_TestProject_proba_KM_plot_boosting_full.png
+├── stacked_TestProject_test_fold_labels.tsv
+└── stacked_TestProject_training_set_labels.tsv
+</pre></div>
+</div>
+</div>
+<div class="section" id="evaluate-the-models">
+<h2>Evaluate the models<a class="headerlink" href="#evaluate-the-models" title="Permalink to this headline">¶</a></h2>
+<p>DeepProg allows to compute specific metrics relative to the ensemble of models:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Compute internal metrics</span>
+<span class="n">boosting</span><span class="o">.</span><span class="n">compute_clusters_consistency_for_full_labels</span><span class="p">()</span>
+
+<span class="c1"># Collect c-index</span>
+<span class="n">boosting</span><span class="o">.</span><span class="n">compute_c_indexes_for_full_dataset</span><span class="p">()</span>
+<span class="c1"># Evaluate cluster performance</span>
+<span class="n">boosting</span><span class="o">.</span><span class="n">evalutate_cluster_performance</span><span class="p">()</span>
+<span class="c1"># Collect more c-indexes</span>
+<span class="n">boosting</span><span class="o">.</span><span class="n">collect_cindex_for_test_fold</span><span class="p">()</span>
+<span class="n">boosting</span><span class="o">.</span><span class="n">collect_cindex_for_full_dataset</span><span class="p">()</span>
+<span class="n">boosting</span><span class="o">.</span><span class="n">collect_cindex_for_training_dataset</span><span class="p">()</span>
+
+<span class="c1"># See Ave. number of significant features per omic across OMIC models</span>
+<span class="n">boosting</span><span class="o">.</span><span class="n">collect_number_of_features_per_omic</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="predicting-on-test-dataset">
+<h2>Predicting on test dataset<a class="headerlink" href="#predicting-on-test-dataset" title="Permalink to this headline">¶</a></h2>
+<p>We can then load and evaluate a first test dataset</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">boosting</span><span class="o">.</span><span class="n">load_new_test_dataset</span><span class="p">(</span>
+    <span class="p">{</span><span class="s1">&#39;RNA&#39;</span><span class="p">:</span> <span class="s1">&#39;rna_dummy.tsv&#39;</span><span class="p">},</span> <span class="c1"># OMIC file of the test set. It doesnt have to be the same as for training</span>
+    <span class="s1">&#39;survival_dummy.tsv&#39;</span><span class="p">,</span> <span class="c1"># Survival file of the test set</span>
+    <span class="s1">&#39;TEST_DATA_1&#39;</span><span class="p">,</span> <span class="c1"># Name of the test test to be used</span>
+<span class="p">)</span>
+
+<span class="c1"># Predict the labels on the test dataset</span>
+<span class="n">boosting</span><span class="o">.</span><span class="n">predict_labels_on_test_dataset</span><span class="p">()</span>
+<span class="c1"># Compute C-index</span>
+<span class="n">boosting</span><span class="o">.</span><span class="n">compute_c_indexes_for_test_dataset</span><span class="p">()</span>
+<span class="c1"># See cluster consistency</span>
+<span class="n">boosting</span><span class="o">.</span><span class="n">compute_clusters_consistency_for_test_labels</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>We can load an evaluate a second test dataset</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">boosting</span><span class="o">.</span><span class="n">load_new_test_dataset</span><span class="p">(</span>
+    <span class="p">{</span><span class="s1">&#39;MIR&#39;</span><span class="p">:</span> <span class="s1">&#39;mir_dummy.tsv&#39;</span><span class="p">},</span> <span class="c1"># OMIC file of the test set. It doesnt have to be the same as for training</span>
+    <span class="s1">&#39;survival_dummy.tsv&#39;</span><span class="p">,</span> <span class="c1"># Survival file of the test set</span>
+    <span class="s1">&#39;TEST_DATA_2&#39;</span><span class="p">,</span> <span class="c1"># Name of the test test to be used</span>
+<span class="p">)</span>
+
+<span class="c1"># Predict the labels on the test dataset</span>
+<span class="n">boosting</span><span class="o">.</span><span class="n">predict_labels_on_test_dataset</span><span class="p">()</span>
+<span class="c1"># Compute C-index</span>
+<span class="n">boosting</span><span class="o">.</span><span class="n">compute_c_indexes_for_test_dataset</span><span class="p">()</span>
+<span class="c1"># See cluster consistency</span>
+<span class="n">boosting</span><span class="o">.</span><span class="n">compute_clusters_consistency_for_test_labels</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>The output folder is updated with the new output files</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>stacked_TestProject
+├── stacked_TestProject_features_anticorrelated_scores_per_clusters.tsv
+├── stacked_TestProject_features_scores_per_clusters.tsv
+├── stacked_TestProject_full_labels.tsv
+├── stacked_TestProject_KM_plot_boosting_full.png
+├── stacked_TestProject_proba_KM_plot_boosting_full.png
+├── stacked_TestProject_TEST_DATA_1_KM_plot_boosting_test.png
+├── stacked_TestProject_TEST_DATA_1_proba_KM_plot_boosting_test.png
+├── stacked_TestProject_TEST_DATA_1_test_labels.tsv
+├── stacked_TestProject_TEST_DATA_2_KM_plot_boosting_test.png
+├── stacked_TestProject_TEST_DATA_2_proba_KM_plot_boosting_test.png
+├── stacked_TestProject_TEST_DATA_2_test_labels.tsv
+├── stacked_TestProject_test_fold_labels.tsv
+├── stacked_TestProject_test_labels.tsv
+└── stacked_TestProject_training_set_labels.tsv
+</pre></div>
+</div>
+</div>
+<div class="section" id="distributed-computation">
+<h2>Distributed computation<a class="headerlink" href="#distributed-computation" title="Permalink to this headline">¶</a></h2>
+<p>Because SimDeepBoosting constructs an ensemble of models, it is well suited to distribute the individual construction of each SimDeep instance. To do such a task, we implemented the use of the ray framework that allow DeepProg to distribute the creation of each submodel on different clusters/nodes/CPUs. The configuration of the nodes / clusters, or local CPUs to be used needs to be done when instanciating a new ray object with the ray <a class="reference external" href="https://ray.readthedocs.io/en/latest/">API</a>. It is however quite straightforward to define the number of instances launched on a local machine such as in the example below in which 3 instances are used.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Instanciate a ray object that will create multiple workers</span>
+<span class="kn">import</span> <span class="nn">ray</span>
+<span class="n">ray</span><span class="o">.</span><span class="n">init</span><span class="p">(</span><span class="n">num_cpus</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="c1"># More options can be used (e.g. remote clusters, AWS, memory,...etc...)</span>
+<span class="c1"># ray can be used locally to maximize the use of CPUs on the local machine</span>
+<span class="c1"># See ray API: https://ray.readthedocs.io/en/latest/index.html</span>
+
+<span class="n">boosting</span> <span class="o">=</span> <span class="n">SimDeepBoosting</span><span class="p">(</span>
+    <span class="o">...</span>
+    <span class="n">distribute</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="c1"># Additional option to use ray cluster scheduler</span>
+    <span class="o">...</span>
+<span class="p">)</span>
+<span class="o">...</span>
+<span class="c1"># Processing</span>
+<span class="o">...</span>
+
+<span class="c1"># Close clusters and free memory</span>
+<span class="n">ray</span><span class="o">.</span><span class="n">shutdown</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="more-examples">
+<h2>More examples<a class="headerlink" href="#more-examples" title="Permalink to this headline">¶</a></h2>
+<p>More example scripts are availables in ./examples/ which will assist you to build a model from scratch with test and real data:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>examples
+├── create_autoencoder_from_scratch.py <span class="c1"># Construct a simple deeprog model on the dummy example dataset</span>
+├── example_with_dummy_data_distributed.py <span class="c1"># Process the dummy example dataset using ray</span>
+├── example_with_dummy_data.py <span class="c1"># Process the dummy example dataset</span>
+└── load_3_omics_model.py <span class="c1"># Process the example HCC dataset</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="LICENSE.html" class="btn btn-neutral float-right" title="License" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="usage.html" class="btn btn-neutral float-left" title="Usage and tutorial" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Olivier Poirion
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
