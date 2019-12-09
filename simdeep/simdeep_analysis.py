@@ -62,6 +62,9 @@ import warnings
 
 from multiprocessing import Pool
 
+from os.path import isdir
+from os import mkdir
+
 
 ################ VARIABLE ############################################
 _CLASSIFICATION_METHOD_LIST = ['ALL_FEATURES', 'SURVIVAL_FEATURES']
@@ -113,6 +116,10 @@ class SimDeep(DeepBase):
         self.classifier_grid = GridSearchCV(CLASSIFIER(), HYPER_PARAMETERS, cv=5)
         self.cluster_array = cluster_array
         self.path_results = path_results
+
+        if self.path_results and not isdir(self.path_results):
+            mkdir(self.path_results)
+
         self.mixture_params = mixture_params
 
         self.project_name = project_name

@@ -127,7 +127,7 @@ dataset = LoadData(training_tsv=TRAINING_TSV,
         path_data=PATH_DATA)
 
 # Defining the result path in which will be created an output folder
-PATH_RESULTS = "./"
+PATH_RESULTS = "./TEST_DUMMY/"
 
 # instantiate the model with the dummy example training dataset defined in the config file
 simDeep = SimDeep(
@@ -136,7 +136,35 @@ simDeep = SimDeep(
 
 simDeep.load_training_dataset() # load the training dataset
 simDeep.fit() # fit the model
+```
 
+At that point, the model is fitted and some output files are available in the output folder:
+
+```bash
+TEST_DUMMY
+├── test_dummy_dataset_KM_plot_training_dataset.png
+└── test_dummy_dataset_training_set_labels.tsv
+```
+
+The tsv file contains the label and the label probability for each sample:
+
+```bash
+sample_test_0   1       7.22678272919e-12
+sample_test_1   1       4.48594196888e-09
+sample_test_4   1       1.53363205571e-06
+sample_test_5   1       6.72170409655e-08
+sample_test_6   0       0.9996581662
+sample_test_7   1       3.38139255666e-08
+```
+
+And we also have the visualisation of a Kaplan-Meier Curve:
+
+![KM plot](./img/test_dummy_dataset_KM_plot_training_dataset.png)
+
+Now we are ready to use a test dataset and to infer the class label for the test samples.
+The test dataset do not need to have the same input omic matrices than the training dataset and not even the sample features for a given omic. However, it needs to have at least some features in common.
+
+```python
 # Defining test datasets
 from simdeep.config import TEST_TSV
 from simdeep.config import SURVIVAL_TSV_TEST
@@ -152,4 +180,4 @@ simDeep.predict_labels_on_test_dataset() # Perform the classification analysis a
 print(simDeep.test_labels)
 print(simDeep.test_labels_proba)
 
-simDeep.save_encoder('dummy_encoder.h5')
+```

@@ -69,7 +69,7 @@ TRAINING_TSV = {
 }
 
 TEST_TSV = {
-    'GE': 'rna_test_dummy.tsv',
+    'MIR': 'mir_test_dummy.tsv',
 }
 
 DEFAULTSEP = '\t'

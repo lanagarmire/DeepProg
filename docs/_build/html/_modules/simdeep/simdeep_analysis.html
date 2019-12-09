@@ -210,6 +210,9 @@
 
 <span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="kn">import</span> <span class="n">Pool</span>
 
+<span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">isdir</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">mkdir</span>
+
 
 <span class="c1">################ VARIABLE ############################################</span>
 <span class="n">_CLASSIFICATION_METHOD_LIST</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;ALL_FEATURES&#39;</span><span class="p">,</span> <span class="s1">&#39;SURVIVAL_FEATURES&#39;</span><span class="p">]</span>
@@ -261,6 +264,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">classifier_grid</span> <span class="o">=</span> <span class="n">GridSearchCV</span><span class="p">(</span><span class="n">CLASSIFIER</span><span class="p">(),</span> <span class="n">HYPER_PARAMETERS</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cluster_array</span> <span class="o">=</span> <span class="n">cluster_array</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">path_results</span> <span class="o">=</span> <span class="n">path_results</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">path_results</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">isdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path_results</span><span class="p">):</span>
+            <span class="n">mkdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path_results</span><span class="p">)</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">mixture_params</span> <span class="o">=</span> <span class="n">mixture_params</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">project_name</span> <span class="o">=</span> <span class="n">project_name</span>

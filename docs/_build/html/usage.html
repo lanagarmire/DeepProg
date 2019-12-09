@@ -273,7 +273,7 @@ sample_test_3  <span class="m">43</span>   <span class="m">0</span>
         <span class="n">path_data</span><span class="o">=</span><span class="n">PATH_DATA</span><span class="p">)</span>
 
 <span class="c1"># Defining the result path in which will be created an output folder</span>
-<span class="n">PATH_RESULTS</span> <span class="o">=</span> <span class="s2">&quot;./&quot;</span>
+<span class="n">PATH_RESULTS</span> <span class="o">=</span> <span class="s2">&quot;./TEST_DUMMY/&quot;</span>
 
 <span class="c1"># instantiate the model with the dummy example training dataset defined in the config file</span>
 <span class="n">simDeep</span> <span class="o">=</span> <span class="n">SimDeep</span><span class="p">(</span>
@@ -282,8 +282,28 @@ sample_test_3  <span class="m">43</span>   <span class="m">0</span>
 
 <span class="n">simDeep</span><span class="o">.</span><span class="n">load_training_dataset</span><span class="p">()</span> <span class="c1"># load the training dataset</span>
 <span class="n">simDeep</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span> <span class="c1"># fit the model</span>
-
-<span class="c1"># Defining test datasets</span>
+</pre></div>
+</div>
+<p>At that point, the model is fitted and some output files are available in the output folder:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>TEST_DUMMY
+├── test_dummy_dataset_KM_plot_training_dataset.png
+└── test_dummy_dataset_training_set_labels.tsv
+</pre></div>
+</div>
+<p>The tsv file contains the label and the label probability for each sample:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sample_test_0   <span class="m">1</span>       <span class="m">7</span>.22678272919e-12
+sample_test_1   <span class="m">1</span>       <span class="m">4</span>.48594196888e-09
+sample_test_4   <span class="m">1</span>       <span class="m">1</span>.53363205571e-06
+sample_test_5   <span class="m">1</span>       <span class="m">6</span>.72170409655e-08
+sample_test_6   <span class="m">0</span>       <span class="m">0</span>.9996581662
+sample_test_7   <span class="m">1</span>       <span class="m">3</span>.38139255666e-08
+</pre></div>
+</div>
+<p>And we also have the visualisation of a Kaplan-Meier Curve:</p>
+<p><img alt="KM plot" src="_images/test_dummy_dataset_KM_plot_training_dataset.png" /></p>
+<p>Now we are ready to use a test dataset and to infer the class label for the test samples.
+The test dataset do not need to have the same input omic matrices than the training dataset and not even the sample features for a given omic. However, it needs to have at least some features in common.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Defining test datasets</span>
 <span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">TEST_TSV</span>
 <span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">SURVIVAL_TSV_TEST</span>
 
@@ -297,8 +317,6 @@ sample_test_3  <span class="m">43</span>   <span class="m">0</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="n">simDeep</span><span class="o">.</span><span class="n">test_labels</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">simDeep</span><span class="o">.</span><span class="n">test_labels_proba</span><span class="p">)</span>
-
-<span class="n">simDeep</span><span class="o">.</span><span class="n">save_encoder</span><span class="p">(</span><span class="s1">&#39;dummy_encoder.h5&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
