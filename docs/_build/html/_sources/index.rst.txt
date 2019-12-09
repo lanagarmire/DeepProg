@@ -11,6 +11,7 @@ Welcome to DeepProg's documentation!
 
    installation.md
    usage.md
+   usage_ensemble.md
    LICENSE.rst
    ./api/simdeep.rst
 

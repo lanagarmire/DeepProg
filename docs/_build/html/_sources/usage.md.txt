@@ -1,4 +1,4 @@
-# Usage and tutorial
+# Tutorial: Simple DeepProg model
 
 The principle of DeepProg can be summarized as follow:
 * Loading of multiple samples x OMIC matrices
@@ -132,7 +132,9 @@ PATH_RESULTS = "./TEST_DUMMY/"
 # instantiate the model with the dummy example training dataset defined in the config file
 simDeep = SimDeep(
         dataset=dataset,
-        path_results=PATH_RESULTS)
+        path_results=PATH_RESULTS,
+        path_to_save_modelPATH_RESULTS, # This result path can be used to save the autoencoder
+        )
 
 simDeep.load_training_dataset() # load the training dataset
 simDeep.fit() # fit the model
@@ -180,4 +182,29 @@ simDeep.predict_labels_on_test_dataset() # Perform the classification analysis a
 print(simDeep.test_labels)
 print(simDeep.test_labels_proba)
 
+```
+
+The assigned class and class probabilities for the test samples are now available in the output folder:
+
+```bash
+TEST_DUMMY
+├── test_dummy_dataset_dummy_KM_plot_test.png
+├── test_dummy_dataset_dummy_test_labels.tsv
+├── test_dummy_dataset_KM_plot_training_dataset.png
+└── test_dummy_dataset_training_set_labels.tsv
+
+head test_dummy_dataset_training_set_labels.tsv
+
+
+
+```
+
+And a KM plot is also constructed using the test labels
+
+![KM plot test](./img/test_dummy_dataset_dummy_KM_plot_test.png)
+
+Finally, it is possible to save the keras model:
+
+```python
+simDeep.save_encoders('dummy_encoder.h5')
 ```

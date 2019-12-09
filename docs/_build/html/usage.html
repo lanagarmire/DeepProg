@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Usage and tutorial &mdash; DeepProg  documentation</title>
+  <title>Tutorial: Simple DeepProg model &mdash; DeepProg  documentation</title>
   
 
   
@@ -35,7 +35,7 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="License" href="LICENSE.html" />
+    <link rel="next" title="Tutorial: Ensemble of DeepProg model" href="usage_ensemble.html" />
     <link rel="prev" title="Installation" href="installation.html" /> 
 </head>
 
@@ -82,12 +82,13 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Usage and tutorial</a><ul>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Tutorial: Simple DeepProg model</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#input-parameters">Input parameters</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#input-matrices">Input matrices</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#creating-a-simple-deepprog-model-with-one-autoencoder-for-each-omic">Creating a simple DeepProg model with one autoencoder for each omic</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="usage_ensemble.html">Tutorial: Ensemble of DeepProg model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="LICENSE.html">License</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/simdeep.html">simdeep package</a></li>
 </ul>
@@ -135,7 +136,7 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-      <li>Usage and tutorial</li>
+      <li>Tutorial: Simple DeepProg model</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -154,8 +155,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="usage-and-tutorial">
-<h1>Usage and tutorial<a class="headerlink" href="#usage-and-tutorial" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="tutorial-simple-deepprog-model">
+<h1>Tutorial: Simple DeepProg model<a class="headerlink" href="#tutorial-simple-deepprog-model" title="Permalink to this headline">¶</a></h1>
 <p>The principle of DeepProg can be summarized as follow:</p>
 <ul class="simple">
 <li>Loading of multiple samples x OMIC matrices</li>
@@ -278,7 +279,9 @@ sample_test_3  <span class="m">43</span>   <span class="m">0</span>
 <span class="c1"># instantiate the model with the dummy example training dataset defined in the config file</span>
 <span class="n">simDeep</span> <span class="o">=</span> <span class="n">SimDeep</span><span class="p">(</span>
         <span class="n">dataset</span><span class="o">=</span><span class="n">dataset</span><span class="p">,</span>
-        <span class="n">path_results</span><span class="o">=</span><span class="n">PATH_RESULTS</span><span class="p">)</span>
+        <span class="n">path_results</span><span class="o">=</span><span class="n">PATH_RESULTS</span><span class="p">,</span>
+        <span class="n">path_to_save_modelPATH_RESULTS</span><span class="p">,</span> <span class="c1"># This result path can be used to save the autoencoder</span>
+        <span class="p">)</span>
 
 <span class="n">simDeep</span><span class="o">.</span><span class="n">load_training_dataset</span><span class="p">()</span> <span class="c1"># load the training dataset</span>
 <span class="n">simDeep</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span> <span class="c1"># fit the model</span>
@@ -319,6 +322,22 @@ The test dataset do not need to have the same input omic matrices than the train
 <span class="nb">print</span><span class="p">(</span><span class="n">simDeep</span><span class="o">.</span><span class="n">test_labels_proba</span><span class="p">)</span>
 </pre></div>
 </div>
+<p>The assigned class and class probabilities for the test samples are now available in the output folder:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>TEST_DUMMY
+├── test_dummy_dataset_dummy_KM_plot_test.png
+├── test_dummy_dataset_dummy_test_labels.tsv
+├── test_dummy_dataset_KM_plot_training_dataset.png
+└── test_dummy_dataset_training_set_labels.tsv
+
+head test_dummy_dataset_training_set_labels.tsv
+</pre></div>
+</div>
+<p>And a KM plot is also constructed using the test labels</p>
+<p><img alt="KM plot test" src="_images/test_dummy_dataset_dummy_KM_plot_test.png" /></p>
+<p>Finally, it is possible to save the keras model:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">simDeep</span><span class="o">.</span><span class="n">save_encoders</span><span class="p">(</span><span class="s1">&#39;dummy_encoder.h5&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
 </div>
 </div>
 
@@ -330,7 +349,7 @@ The test dataset do not need to have the same input omic matrices than the train
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="LICENSE.html" class="btn btn-neutral float-right" title="License" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="usage_ensemble.html" class="btn btn-neutral float-right" title="Tutorial: Ensemble of DeepProg model" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="installation.html" class="btn btn-neutral float-left" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

@@ -13,7 +13,7 @@ The omic data and the survival files should be in tsv (Tabular Separated Values)
 * [tensorflow](https://www.tensorflow.org/) as a more robust alternative to theano
 * [cntk](https://github.com/microsoft/CNTK) CNTK is anoter DL library that can present some advantages compared to tensorflow or theano. See [https://docs.microsoft.com/en-us/cognitive-toolkit/](https://docs.microsoft.com/en-us/cognitive-toolkit/)
 * R
-* the R "survival" package installed. 
+* the R "survival" package installed.
 * numpy, scipy
 * scikit-learn (>=0.18)
 * rpy2 2.8.6 (for python2 rpy2 can be install with: pip install rpy2==2.8.6, for python3 pip3 install rpy2==2.8.6). It seems that newer version of rpy2 might not work due to a bug (not tested)
@@ -136,7 +136,7 @@ data
 
 ```
 
-## Creating a simple DeepProg model with one autoencoder for each omic 
+## Creating a simple DeepProg model with one autoencoder for each omic
 First, we will build a model using the example dataset from `./examples/data/` (These example files are set as default in the config.py file). We will use them to show how to construct a single DeepProg model inferring a autoencoder for each omic
 
 ```python
@@ -156,7 +156,7 @@ dataset = LoadData(training_tsv=TRAINING_TSV, survival_tsv=SURVIVAL_TSV)
 
 simDeep = SimDeep(dataset=dataset) # instantiate the model with the dummy example training dataset defined in the config file
 simDeep.load_training_dataset() # load the training dataset
-simDeep.fit() # fit the model 
+simDeep.fit() # fit the model
 
 # Defining test datasets
 from simdeep.config import TEST_TSV
@@ -209,8 +209,8 @@ boosting = SimDeepBoosting(
     nb_threads=nb_threads,
     nb_it=nb_it,
     split_n_fold=3,
-    survival_tsv=tsv_files,
-    training_tsv=survival_tsv,
+    survival_tsv=survival_tsv,
+    training_tsv=tsv_files,
     path_data=path_data,
     project_name=project_name,
     path_results=path_data,
