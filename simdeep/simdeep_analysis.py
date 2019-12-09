@@ -1,5 +1,5 @@
 """
-SimDeep main class
+DeepProg class for one instance model
 """
 
 from sklearn.cluster import KMeans
@@ -23,7 +23,6 @@ from simdeep.config import CLUSTER_EVAL_METHOD
 from simdeep.config import CLUSTER_METHOD
 from simdeep.config import NB_THREADS_COXPH
 from simdeep.config import NB_SELECTED_FEATURES
-from simdeep.config import SAVE_FITTED_MODELS
 from simdeep.config import LOAD_EXISTING_MODELS
 from simdeep.config import NODES_SELECTION
 from simdeep.config import CLASSIFIER
@@ -70,40 +69,19 @@ MODEL_THRES = 0.05
 ######################################################################
 
 
-def main():
-    """
-    """
-    from simdeep.config import TEST_TSV
-    from simdeep.config import SURVIVAL_TSV_TEST
-
-    sim_deep = SimDeep()
-    sim_deep.load_training_dataset()
-    sim_deep.fit()
-
-    sim_deep.predict_labels_on_test_fold()
-    sim_deep.predict_labels_on_full_dataset()
-
-    if SAVE_FITTED_MODELS:
-        sim_deep.save_encoders()
-
-    sim_deep.compute_c_indexes_for_test_fold_dataset()
-    sim_deep.compute_c_indexes_for_full_dataset()
-
-    sim_deep.look_for_prediction_nodes()
-
-    sim_deep.compute_c_indexes_multiple_for_test_fold_dataset()
-
-    sim_deep.load_new_test_dataset(TEST_TSV,
-                                   SURVIVAL_TSV_TEST,
-                                   fname_key='dummy')
-
-    sim_deep.compute_c_indexes_multiple_for_test_dataset()
-    sim_deep.predict_labels_on_test_dataset()
-    sim_deep.compute_c_indexes_for_test_dataset()
-
-
 class SimDeep(DeepBase):
-    """ """
+    """
+    Instanciate a new DeepProg instance
+
+    Parameters:
+            :dataset: ExtractData instance. Default: None (create a new dataset using the config variable)
+            :f_matrix_train: dict <omic_name, sample x feature array>. Default: None. Created during model fitting
+            :f_matrix_test: dict <omic_name, sample x feature array>. Default: None. Created during model fitting
+            :f_matrix_train_out:dict <omic_name, sample x feature array>. Default: None. Created during model fitting
+            :f_matrix_test_out: dict <omic_name, sample x feature array>. Default: None. Created during model fitting
+
+
+    """
     def __init__(self,
                  nb_clusters=NB_CLUSTERS,
                  pvalue_thres=PVALUE_THRESHOLD,
@@ -127,24 +105,6 @@ class SimDeep(DeepBase):
                  dataset=None,
                  deep_model_additional_args={}):
         """
-        ### AUTOENCODER PARAMETERS ###:
-            dataset=None      ExtractData instance (load the dataset),
-            f_matrix_train=None
-            f_matrix_test=None
-            f_matrix_train_out=None
-            f_matrix_test_out=None
-
-            level_dims = [500]
-            level_dnn = [500]
-            new_dim = 100
-            dropout = 0.5
-            act_reg = 0.0001
-            w_reg = 0.001
-            data_split = 0.2
-            activation = 'tanh'
-            epochs = 10
-            loss = 'binary_crossentropy'
-            optimizer = 'sgd'
         """
         self.nb_clusters = nb_clusters
         self.pvalue_thres = pvalue_thres
@@ -1379,8 +1339,3 @@ class SimDeep(DeepBase):
             normalization=normalization)
 
         self.predict_labels_on_test_dataset()
-
-
-
-if __name__ == "__main__":
-    main()

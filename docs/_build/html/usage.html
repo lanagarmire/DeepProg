@@ -1,0 +1,356 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Usage and tutorial &mdash; DeepProg  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="License" href="LICENSE.html" />
+    <link rel="prev" title="Installation" href="installation.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> DeepProg
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Usage and tutorial</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#input-parameters">Input parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#input-matrices">Input matrices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#creating-a-simple-deepprog-model-with-one-autoencoder-for-each-omic">Creating a simple DeepProg model with one autoencoder for each omic</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="LICENSE.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/simdeep.html">simdeep package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">DeepProg</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Usage and tutorial</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/usage.md.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="usage-and-tutorial">
+<h1>Usage and tutorial<a class="headerlink" href="#usage-and-tutorial" title="Permalink to this headline">¶</a></h1>
+<p>The principle of DeepProg can be summarized as follow:</p>
+<ul class="simple">
+<li>Loading of multiple samples x OMIC matrices</li>
+<li>Preprocessing ,normalisation, and sub-sampling of the input matrices</li>
+<li>Matrix transformation using autoencoder</li>
+<li>Detection of survival features</li>
+<li>Survival feature agglomeration and clustering</li>
+<li>Creation of supervised models to predict the output of new samples</li>
+</ul>
+<div class="section" id="input-parameters">
+<h2>Input parameters<a class="headerlink" href="#input-parameters" title="Permalink to this headline">¶</a></h2>
+<p>All the default parameters are defined in the config file: <code class="docutils literal notranslate"><span class="pre">./simdeep/config.py</span></code> but can be passed dynamically. Three types of parameters must be defined:</p>
+<ul class="simple">
+<li>The training dataset (omics + survival input files)<ul>
+<li>In addition, the parameters of the test set, i.e. the omic dataset and the survival file</li>
+</ul>
+</li>
+<li>The parameters of the autoencoder (the default parameters works but it might be fine-tuned.</li>
+<li>The parameters of the classification procedures (default are still good)</li>
+</ul>
+</div>
+<div class="section" id="input-matrices">
+<h2>Input matrices<a class="headerlink" href="#input-matrices" title="Permalink to this headline">¶</a></h2>
+<p>As examples, we included two datasets:</p>
+<ul class="simple">
+<li>A dummy example dataset in the <code class="docutils literal notranslate"><span class="pre">example/data/</span></code> folder:</li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>examples
+├── data
+│   ├── meth_dummy.tsv
+│   ├── mir_dummy.tsv
+│   ├── rna_dummy.tsv
+│   ├── rna_test_dummy.tsv
+│   ├── survival_dummy.tsv
+│   └── survival_test_dummy.tsv
+</pre></div>
+</div>
+<ul class="simple">
+<li>And a real dataset in the <code class="docutils literal notranslate"><span class="pre">data</span></code> folder. This dataset derives from the TCGA HCC cancer dataset. This dataset needs to be decompressed before processing:</li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>data
+├── meth.tsv.gz
+├── mir.tsv.gz
+├── rna.tsv.gz
+└── survival.tsv
+</pre></div>
+</div>
+<p>An input matrix file should follow this format:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>head mir_dummy.tsv
+
+Samples        dummy_mir_0     dummy_mir_1     dummy_mir_2     dummy_mir_3 ...
+sample_test_0  <span class="m">0</span>.469656032287  <span class="m">0</span>.347987447237  <span class="m">0</span>.706633335508  <span class="m">0</span>.440068758445 ...
+sample_test_1  <span class="m">0</span>.0453108219657 <span class="m">0</span>.0234642968791 <span class="m">0</span>.593393816691  <span class="m">0</span>.981872970341 ...
+sample_test_2  <span class="m">0</span>.908784043793  <span class="m">0</span>.854397550009  <span class="m">0</span>.575879144667  <span class="m">0</span>.553333958713 ...
+...
+</pre></div>
+</div>
+<p>Also, if multiple matrices are used as input, they must keep the sample order. For example:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>head rna_dummy.tsv
+
+Samples        dummy_gene_0     dummy_gene_1     dummy_gene_2     dummy_gene_3 ...
+sample_test_0  <span class="m">0</span>.69656032287  <span class="m">0</span>.47987447237  <span class="m">0</span>.06633335508  <span class="m">0</span>.40068758445 ...
+sample_test_1  <span class="m">0</span>.53108219657 <span class="m">0</span>.234642968791 <span class="m">0</span>.93393816691  <span class="m">0</span>.81872970341 ...
+sample_test_2  <span class="m">0</span>.8784043793  <span class="m">0</span>.54397550009  <span class="m">0</span>.75879144667  <span class="m">0</span>.53333958713 ...
+...
+</pre></div>
+</div>
+<p>The  arguments <code class="docutils literal notranslate"><span class="pre">training_tsv</span></code> and <code class="docutils literal notranslate"><span class="pre">path_data</span></code> from the <code class="docutils literal notranslate"><span class="pre">extract_data</span></code> module are used to defined the input matrices.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># The keys/values of this dict represent the name of the omic and the corresponding input matrix</span>
+<span class="n">training_tsv</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;GE&#39;</span><span class="p">:</span> <span class="s1">&#39;rna_dummy.tsv&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;MIR&#39;</span><span class="p">:</span> <span class="s1">&#39;mir_dummy.tsv&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;METH&#39;</span><span class="p">:</span> <span class="s1">&#39;meth_dummy.tsv&#39;</span><span class="p">,</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>a survival file must have this format:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>head survival_dummy.tsv
+
+barcode        days recurrence
+sample_test_0  <span class="m">134</span>  <span class="m">1</span>
+sample_test_1  <span class="m">291</span>  <span class="m">0</span>
+sample_test_2  <span class="m">125</span>  <span class="m">1</span>
+sample_test_3  <span class="m">43</span>   <span class="m">0</span>
+...
+</pre></div>
+</div>
+<p>In addition, the fields corresponding to the patient IDs, the survival time, and the event should be defined using the <code class="docutils literal notranslate"><span class="pre">survival_flag</span></code> argument:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#Default value</span>
+<span class="n">survival_flag</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;patient_id&#39;</span><span class="p">:</span> <span class="s1">&#39;barcode&#39;</span><span class="p">,</span>
+                  <span class="s1">&#39;survival&#39;</span><span class="p">:</span> <span class="s1">&#39;days&#39;</span><span class="p">,</span>
+                 <span class="s1">&#39;event&#39;</span><span class="p">:</span> <span class="s1">&#39;recurrence&#39;</span><span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="creating-a-simple-deepprog-model-with-one-autoencoder-for-each-omic">
+<h2>Creating a simple DeepProg model with one autoencoder for each omic<a class="headerlink" href="#creating-a-simple-deepprog-model-with-one-autoencoder-for-each-omic" title="Permalink to this headline">¶</a></h2>
+<p>First, we will build a model using the example dataset from <code class="docutils literal notranslate"><span class="pre">./examples/data/</span></code> (These example files are set as default in the config.py file). We will use them to show how to construct a single DeepProg model inferring a autoencoder for each omic</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>
+<span class="c1"># SimDeep class can be used to build one model with one autoencoder for each omic</span>
+<span class="kn">from</span> <span class="nn">simdeep.simdeep_analysis</span> <span class="kn">import</span> <span class="n">SimDeep</span>
+<span class="kn">from</span> <span class="nn">simdeep.extract_data</span> <span class="kn">import</span> <span class="n">LoadData</span>
+
+<span class="n">help</span><span class="p">(</span><span class="n">SimDeep</span><span class="p">)</span> <span class="c1"># to see all the functions</span>
+<span class="n">help</span><span class="p">(</span><span class="n">LoadData</span><span class="p">)</span> <span class="c1"># to see all the functions related to loading datasets</span>
+
+<span class="c1"># Defining training datasets</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">TRAINING_TSV</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">SURVIVAL_TSV</span>
+<span class="c1"># Location of the input matrices and survival file</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">PATH_DATA</span>
+
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">LoadData</span><span class="p">(</span><span class="n">training_tsv</span><span class="o">=</span><span class="n">TRAINING_TSV</span><span class="p">,</span>
+        <span class="n">survival_tsv</span><span class="o">=</span><span class="n">SURVIVAL_TSV</span><span class="p">,</span>
+        <span class="n">path_data</span><span class="o">=</span><span class="n">PATH_DATA</span><span class="p">)</span>
+
+<span class="c1"># Defining the result path in which will be created an output folder</span>
+<span class="n">PATH_RESULTS</span> <span class="o">=</span> <span class="s2">&quot;./&quot;</span>
+
+<span class="c1"># instantiate the model with the dummy example training dataset defined in the config file</span>
+<span class="n">simDeep</span> <span class="o">=</span> <span class="n">SimDeep</span><span class="p">(</span>
+        <span class="n">dataset</span><span class="o">=</span><span class="n">dataset</span><span class="p">,</span>
+        <span class="n">path_results</span><span class="o">=</span><span class="n">PATH_RESULTS</span><span class="p">)</span>
+
+<span class="n">simDeep</span><span class="o">.</span><span class="n">load_training_dataset</span><span class="p">()</span> <span class="c1"># load the training dataset</span>
+<span class="n">simDeep</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span> <span class="c1"># fit the model</span>
+
+<span class="c1"># Defining test datasets</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">TEST_TSV</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">SURVIVAL_TSV_TEST</span>
+
+<span class="n">simDeep</span><span class="o">.</span><span class="n">load_new_test_dataset</span><span class="p">(</span><span class="n">TEST_TSV</span><span class="p">,</span> <span class="n">SURVIVAL_TSV_TEST</span><span class="p">,</span> <span class="n">fname_key</span><span class="o">=</span><span class="s1">&#39;dummy&#39;</span><span class="p">)</span>
+
+<span class="c1"># The test set is a dummy rna expression (generated randomly)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">simDeep</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">test_tsv</span><span class="p">)</span> <span class="c1"># Defined in the config file</span>
+<span class="c1"># The data type of the test set is also defined to match an existing type</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">simDeep</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">data_type</span><span class="p">)</span> <span class="c1"># Defined in the config file</span>
+<span class="n">simDeep</span><span class="o">.</span><span class="n">predict_labels_on_test_dataset</span><span class="p">()</span> <span class="c1"># Perform the classification analysis and label the set dataset</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">simDeep</span><span class="o">.</span><span class="n">test_labels</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">simDeep</span><span class="o">.</span><span class="n">test_labels_proba</span><span class="p">)</span>
+
+<span class="n">simDeep</span><span class="o">.</span><span class="n">save_encoder</span><span class="p">(</span><span class="s1">&#39;dummy_encoder.h5&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="LICENSE.html" class="btn btn-neutral float-right" title="License" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="installation.html" class="btn btn-neutral float-left" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Olivier Poirion
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

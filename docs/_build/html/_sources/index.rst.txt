@@ -8,56 +8,26 @@ Welcome to DeepProg's documentation!
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
 
+   installation.md
+   usage.md
+   LICENSE.rst
+   ./api/simdeep.rst
 
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
-
-
-project
-========
-
-$project will solve your problem of where to start with documentation,
-by providing a basic explanation of how to do it easily.
-
-Look how easy it is to use:
-
-    import project
-    # Get your stuff done
-    project.do_stuff()
-
-Features
---------
-
-- Be awesome
-- Make things faster
-
-Installation
-------------
-
-Install $project by running:
-
-    install project
 
 Contribute
 ----------
 
-- Issue Tracker: github.com/$project/$project/issues
-- Source Code: github.com/$project/$project
+- Issue Tracker: gitlab.com/grouumf/simdeep/issues
+- Source Code: gitlab.com/grouumf/simdeep
 
 Support
 -------
 
 If you are having issues, please let us know.
-We have a mailing list located at: project@google-groups.com
+You can reach us using the following email address: o.poirion@gmail.com
 
 License
 -------
 
-The project is licensed under the BSD license.
+The project is licensed under the MIT license.

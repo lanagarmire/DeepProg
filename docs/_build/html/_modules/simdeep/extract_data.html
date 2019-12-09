@@ -1,0 +1,896 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>simdeep.extract_data &mdash; DeepProg  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> DeepProg
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage.html">Usage and tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../LICENSE.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/simdeep.html">simdeep package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">DeepProg</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>simdeep.extract_data</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for simdeep.extract_data</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">Normalizer</span>
+<span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">RobustScaler</span>
+<span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">MinMaxScaler</span>
+<span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">quantile_transform</span>
+
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">TRAINING_TSV</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">SURVIVAL_TSV</span>
+
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">TEST_TSV</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">SURVIVAL_TSV_TEST</span>
+
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">PATH_DATA</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">STACK_MULTI_OMIC</span>
+
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">NORMALIZATION</span>
+
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">FILL_UNKOWN_FEATURE_WITH_0</span>
+
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">CROSS_VALIDATION_INSTANCE</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">TEST_FOLD</span>
+
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">SURVIVAL_FLAG</span>
+
+<span class="kn">from</span> <span class="nn">simdeep.survival_utils</span> <span class="kn">import</span> <span class="n">load_data_from_tsv</span>
+<span class="kn">from</span> <span class="nn">simdeep.survival_utils</span> <span class="kn">import</span> <span class="n">load_survival_file</span>
+<span class="kn">from</span> <span class="nn">simdeep.survival_utils</span> <span class="kn">import</span> <span class="n">MadScaler</span>
+<span class="kn">from</span> <span class="nn">simdeep.survival_utils</span> <span class="kn">import</span> <span class="n">RankNorm</span>
+<span class="kn">from</span> <span class="nn">simdeep.survival_utils</span> <span class="kn">import</span> <span class="n">CorrelationReducer</span>
+<span class="kn">from</span> <span class="nn">simdeep.survival_utils</span> <span class="kn">import</span> <span class="n">VarianceReducer</span>
+<span class="kn">from</span> <span class="nn">simdeep.survival_utils</span> <span class="kn">import</span> <span class="n">SampleReducer</span>
+
+<span class="kn">from</span> <span class="nn">simdeep.survival_utils</span> <span class="kn">import</span> <span class="n">save_matrix</span>
+
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+
+<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">time</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">hstack</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">vstack</span>
+
+
+<span class="c1">######################## VARIABLE ############################</span>
+<span class="n">QUANTILE_OPTION</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;n_quantiles&#39;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
+                   <span class="s1">&#39;output_distribution&#39;</span><span class="p">:</span><span class="s1">&#39;normal&#39;</span><span class="p">}</span>
+<span class="c1">###############################################################</span>
+
+
+<div class="viewcode-block" id="LoadData"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.extract_data.LoadData">[docs]</a><span class="k">class</span> <span class="nc">LoadData</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">path_data</span><span class="o">=</span><span class="n">PATH_DATA</span><span class="p">,</span>
+            <span class="n">training_tsv</span><span class="o">=</span><span class="n">TRAINING_TSV</span><span class="p">,</span>
+            <span class="n">survival_tsv</span><span class="o">=</span><span class="n">SURVIVAL_TSV</span><span class="p">,</span>
+            <span class="n">test_tsv</span><span class="o">=</span><span class="n">TEST_TSV</span><span class="p">,</span>
+            <span class="n">survival_tsv_test</span><span class="o">=</span><span class="n">SURVIVAL_TSV_TEST</span><span class="p">,</span>
+            <span class="n">cross_validation_instance</span><span class="o">=</span><span class="n">CROSS_VALIDATION_INSTANCE</span><span class="p">,</span>
+            <span class="n">test_fold</span><span class="o">=</span><span class="n">TEST_FOLD</span><span class="p">,</span>
+            <span class="n">stack_multi_omic</span><span class="o">=</span><span class="n">STACK_MULTI_OMIC</span><span class="p">,</span>
+            <span class="n">fill_unkown_feature_with_0</span><span class="o">=</span><span class="n">FILL_UNKOWN_FEATURE_WITH_0</span><span class="p">,</span>
+            <span class="n">normalization</span><span class="o">=</span><span class="n">NORMALIZATION</span><span class="p">,</span>
+            <span class="n">survival_flag</span><span class="o">=</span><span class="n">SURVIVAL_FLAG</span><span class="p">,</span>
+            <span class="n">_autoencoder_parameters</span><span class="o">=</span><span class="p">{},</span>
+            <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        class to extract data</span>
+<span class="sd">        :training_matrices: dict(matrice_type, path to the tsv file)</span>
+
+<span class="sd">        :path_data: str    path to the folder containing the data</span>
+<span class="sd">        :training_tsv: dict    dict(&#39;data type&#39;, &#39;name of the tsv file&#39;)</span>
+<span class="sd">        :survival_tsv: str    name of the tsv file containing the survival data</span>
+<span class="sd">                              of the training set</span>
+<span class="sd">        :survival_tsv_test: str    name of the tsv file containing the survival data</span>
+<span class="sd">                                   of the test set</span>
+<span class="sd">        :tsv_test: str    name of the file containing the test dataset</span>
+<span class="sd">        :data_type_test: str    name of the data type of the test set</span>
+<span class="sd">                                must match a key existing in training_tsv</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="n">verbose</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">do_stack_multi_omic</span> <span class="o">=</span> <span class="n">stack_multi_omic</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">path_data</span> <span class="o">=</span> <span class="n">path_data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">survival_tsv</span> <span class="o">=</span> <span class="n">survival_tsv</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">training_tsv</span> <span class="o">=</span> <span class="n">training_tsv</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fill_unkown_feature_with_0</span> <span class="o">=</span> <span class="n">fill_unkown_feature_with_0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">survival_flag</span> <span class="o">=</span> <span class="n">survival_flag</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">feature_array</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">matrix_array</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">test_tsv</span> <span class="o">=</span> <span class="n">test_tsv</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">matrix_train_array</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">sample_ids</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_type</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">training_tsv</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">survival</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">survival_tsv_test</span> <span class="o">=</span> <span class="n">survival_tsv_test</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">matrix_full_array</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sample_ids_full</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">survival_full</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">feature_test_array</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">matrix_test_array</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">sample_ids_cv</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">matrix_cv_array</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">survival_cv</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cv_loaded</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_full_loaded</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">matrix_ref_array</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">feature_ref_array</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">feature_ref_index</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">feature_train_array</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">feature_train_index</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">survival_test</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sample_ids_test</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">cross_validation_instance</span> <span class="o">=</span> <span class="n">cross_validation_instance</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">test_fold</span> <span class="o">=</span> <span class="n">test_fold</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">do_feature_reduction</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">normalizer</span> <span class="o">=</span> <span class="n">Normalizer</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mad_scaler</span> <span class="o">=</span> <span class="n">MadScaler</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">robust_scaler</span> <span class="o">=</span> <span class="n">RobustScaler</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">min_max_scaler</span> <span class="o">=</span> <span class="n">MinMaxScaler</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dim_reducer</span> <span class="o">=</span> <span class="n">CorrelationReducer</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">variance_reducer</span> <span class="o">=</span> <span class="n">VarianceReducer</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_autoencoder_parameters</span> <span class="o">=</span> <span class="n">_autoencoder_parameters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">normalization</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">bool</span><span class="p">,</span> <span class="n">normalization</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">normalization_test</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="fm">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">import</span> <span class="nn">gc</span>
+            <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+               <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">_stack_multiomics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arrays</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">features</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">do_stack_multi_omic</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="n">arrays</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">arrays</span><span class="p">[</span><span class="s1">&#39;STACKED&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">hstack</span><span class="p">(</span>
+                <span class="nb">tuple</span><span class="p">(</span><span class="n">arrays</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
+
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">arrays</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+                <span class="n">arrays</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="k">if</span> <span class="n">key</span> <span class="o">!=</span> <span class="s1">&#39;STACKED&#39;</span> <span class="k">else</span> <span class="kc">True</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">features</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="n">features</span><span class="p">[</span><span class="s1">&#39;STACKED&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">feat</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">features</span>
+                               <span class="k">for</span> <span class="n">feat</span> <span class="ow">in</span> <span class="n">features</span><span class="p">[</span><span class="n">key</span><span class="p">]]</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">features</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+            <span class="n">features</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="k">if</span> <span class="n">key</span> <span class="o">!=</span> <span class="s1">&#39;STACKED&#39;</span> <span class="k">else</span> <span class="kc">True</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">feature_ref_index</span><span class="p">[</span><span class="s1">&#39;STACKED&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">feature</span><span class="p">:</span> <span class="n">pos</span> <span class="k">for</span> <span class="n">pos</span><span class="p">,</span> <span class="n">feature</span>
+                                             <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">features</span><span class="p">[</span><span class="s1">&#39;STACKED&#39;</span><span class="p">])}</span>
+
+<div class="viewcode-block" id="LoadData.load_matrix_test_fold"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.extract_data.LoadData.load_matrix_test_fold">[docs]</a>    <span class="k">def</span> <span class="nf">load_matrix_test_fold</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">cross_validation_instance</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cv_loaded</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">matrix_array</span><span class="p">:</span>
+
+            <span class="n">matrix_test</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">matrix_cv_array</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="n">matrix_ref</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">matrix_array</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+            <span class="n">matrix_ref</span><span class="p">,</span> <span class="n">matrix_test</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform_matrices</span><span class="p">(</span>
+                <span class="n">matrix_ref</span><span class="p">,</span> <span class="n">matrix_test</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">matrix_cv_array</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">matrix_test</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stack_multiomics</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">matrix_cv_array</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cv_loaded</span> <span class="o">=</span> <span class="kc">True</span></div>
+
+<div class="viewcode-block" id="LoadData.load_matrix_test"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.extract_data.LoadData.load_matrix_test">[docs]</a>    <span class="k">def</span> <span class="nf">load_matrix_test</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">normalization</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">normalization</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">normalization_test</span> <span class="o">=</span> <span class="n">normalization</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">normalization_test</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalization</span>
+
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_tsv</span><span class="p">:</span>
+            <span class="n">sample_ids</span><span class="p">,</span> <span class="n">feature_ids</span><span class="p">,</span> <span class="n">matrix</span> <span class="o">=</span> <span class="n">load_data_from_tsv</span><span class="p">(</span>
+                <span class="n">f_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">test_tsv</span><span class="p">[</span><span class="n">key</span><span class="p">],</span>
+                <span class="n">key</span><span class="o">=</span><span class="n">key</span><span class="p">,</span>
+                <span class="n">path_data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">path_data</span><span class="p">)</span>
+
+            <span class="n">feature_ids_ref</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_array</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+            <span class="n">matrix_ref</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">matrix_array</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+            <span class="n">common_features</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">feature_ids</span><span class="p">)</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">feature_ids_ref</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;nb common features for the test set:</span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">common_features</span><span class="p">)))</span>
+
+            <span class="n">feature_ids_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">feat</span><span class="p">:</span> <span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">feat</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">feature_ids</span><span class="p">)}</span>
+            <span class="n">feature_ids_ref_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">feat</span><span class="p">:</span> <span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">feat</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">feature_ids_ref</span><span class="p">)}</span>
+
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">common_features</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">feature_ids_ref</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">fill_unkown_feature_with_0</span><span class="p">:</span>
+                <span class="n">missing_features</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">feature_ids_ref</span><span class="p">)</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">common_features</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;filling </span><span class="si">{0}</span><span class="s1"> with 0 for </span><span class="si">{1}</span><span class="s1"> additional features&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="n">key</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">missing_features</span><span class="p">)))</span>
+
+                <span class="n">matrix</span> <span class="o">=</span> <span class="n">hstack</span><span class="p">([</span><span class="n">matrix</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">sample_ids</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">missing_features</span><span class="p">)))])</span>
+
+                <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">feat</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">missing_features</span><span class="p">):</span>
+                    <span class="n">feature_ids_dict</span><span class="p">[</span><span class="n">feat</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">feature_ids</span><span class="p">)</span>
+
+                <span class="n">common_features</span> <span class="o">=</span> <span class="n">feature_ids_ref</span>
+
+            <span class="n">feature_index</span> <span class="o">=</span> <span class="p">[</span><span class="n">feature_ids_dict</span><span class="p">[</span><span class="n">feature</span><span class="p">]</span> <span class="k">for</span> <span class="n">feature</span> <span class="ow">in</span> <span class="n">common_features</span><span class="p">]</span>
+            <span class="n">feature_ref_index</span> <span class="o">=</span> <span class="p">[</span><span class="n">feature_ids_ref_dict</span><span class="p">[</span><span class="n">feature</span><span class="p">]</span> <span class="k">for</span> <span class="n">feature</span> <span class="ow">in</span> <span class="n">common_features</span><span class="p">]</span>
+
+            <span class="n">matrix_test</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">matrix</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="n">feature_index</span><span class="p">]</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+            <span class="n">matrix_ref</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">matrix_ref</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="n">feature_ref_index</span><span class="p">]</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">feature_test_array</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">common_features</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_ids_test</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">)):</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="k">assert</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_ids_test</span> <span class="o">==</span> <span class="n">sample_ids</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Assertion error when loading test sample ids!&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">sample_ids_test</span> <span class="o">=</span> <span class="n">sample_ids</span>
+
+            <span class="n">matrix_ref</span><span class="p">,</span> <span class="n">matrix_test</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform_matrices</span><span class="p">(</span>
+                <span class="n">matrix_ref</span><span class="p">,</span> <span class="n">matrix_test</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">normalization</span><span class="o">=</span><span class="n">normalization</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_define_test_features</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">normalization</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">matrix_test_array</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">matrix_test</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">matrix_ref_array</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">matrix_ref</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">feature_ref_array</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_test_array</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">feature_ref_index</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">feat</span><span class="p">:</span> <span class="n">pos</span> <span class="k">for</span> <span class="n">pos</span><span class="p">,</span> <span class="n">feat</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">common_features</span><span class="p">)}</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_define_ref_features</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">normalization</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stack_multiomics</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">matrix_test_array</span><span class="p">,</span>
+                               <span class="bp">self</span><span class="o">.</span><span class="n">feature_test_array</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stack_multiomics</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">matrix_ref_array</span><span class="p">,</span>
+                               <span class="bp">self</span><span class="o">.</span><span class="n">feature_ref_array</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="LoadData.load_new_test_dataset"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.extract_data.LoadData.load_new_test_dataset">[docs]</a>    <span class="k">def</span> <span class="nf">load_new_test_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tsv_dict</span><span class="p">,</span> <span class="n">path_survival_file</span><span class="p">,</span> <span class="n">normalization</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">normalization</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">normalization</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">bool</span><span class="p">,</span> <span class="n">normalization</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">normalization</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalization</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">test_tsv</span> <span class="o">=</span> <span class="n">tsv_dict</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">tsv_dict</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">training_tsv</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">test_tsv</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">survival_test</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sample_ids_test</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">survival_tsv_test</span> <span class="o">=</span> <span class="n">path_survival_file</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">matrix_test_array</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">matrix_ref_array</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">feature_test_array</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">feature_ref_array</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">feature_ref_index</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">load_matrix_test</span><span class="p">(</span><span class="n">normalization</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">load_survival_test</span><span class="p">()</span></div>
+
+    <span class="k">def</span> <span class="nf">_create_ref_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
+        <span class="n">features_test</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_test_array</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+
+        <span class="n">features_train</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_train_array</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        <span class="n">matrix_train</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">matrix_ref_array</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+
+        <span class="n">test_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">feat</span><span class="p">:</span> <span class="n">pos</span> <span class="k">for</span> <span class="n">pos</span><span class="p">,</span> <span class="n">feat</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">features_test</span><span class="p">)}</span>
+        <span class="n">train_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">feat</span><span class="p">:</span> <span class="n">pos</span> <span class="k">for</span> <span class="n">pos</span><span class="p">,</span> <span class="n">feat</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">features_train</span><span class="p">)}</span>
+
+        <span class="n">index</span> <span class="o">=</span> <span class="p">[</span><span class="n">train_dict</span><span class="p">[</span><span class="n">feat</span><span class="p">]</span> <span class="k">for</span> <span class="n">feat</span> <span class="ow">in</span> <span class="n">features_test</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">feature_ref_array</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_test_array</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">matrix_ref_array</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">matrix_train</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">feature_ref_index</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">test_dict</span>
+
+<div class="viewcode-block" id="LoadData.load_array"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.extract_data.LoadData.load_array">[docs]</a>    <span class="k">def</span> <span class="nf">load_array</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;loading data...&#39;</span><span class="p">)</span>
+
+        <span class="n">t</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">feature_array</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">matrix_array</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_type</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">f_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">training_tsv</span><span class="p">[</span><span class="n">data</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">sample_ids</span><span class="p">,</span> <span class="n">feature_ids</span><span class="p">,</span> <span class="n">matrix</span> <span class="o">=</span> <span class="n">load_data_from_tsv</span><span class="p">(</span>
+            <span class="n">f_name</span><span class="o">=</span><span class="n">f_name</span><span class="p">,</span>
+            <span class="n">key</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
+            <span class="n">path_data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">path_data</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{0}</span><span class="s1"> loaded of dim:</span><span class="si">{1}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">f_name</span><span class="p">,</span> <span class="n">matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">feature_array</span><span class="p">[</span><span class="n">data</span><span class="p">]</span> <span class="o">=</span> <span class="n">feature_ids</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">matrix_array</span><span class="p">[</span><span class="n">data</span><span class="p">]</span> <span class="o">=</span> <span class="n">matrix</span>
+
+        <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_type</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+            <span class="n">f_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">training_tsv</span><span class="p">[</span><span class="n">data</span><span class="p">]</span>
+            <span class="n">sample_ids</span><span class="p">,</span> <span class="n">feature_ids</span><span class="p">,</span> <span class="n">matrix</span> <span class="o">=</span> <span class="n">load_data_from_tsv</span><span class="p">(</span>
+                <span class="n">f_name</span><span class="o">=</span><span class="n">f_name</span><span class="p">,</span>
+                <span class="n">key</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
+                <span class="n">path_data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">path_data</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">assert</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_ids</span> <span class="o">==</span> <span class="n">sample_ids</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Assertion error: </span><span class="si">{0}</span><span class="s1"> when loading&#39;</span>\
+                                <span class="s1">&#39; the sample from the training set!&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">feature_array</span><span class="p">[</span><span class="n">data</span><span class="p">]</span> <span class="o">=</span> <span class="n">feature_ids</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">matrix_array</span><span class="p">[</span><span class="n">data</span><span class="p">]</span> <span class="o">=</span> <span class="n">matrix</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{0}</span><span class="s1"> loaded of dim:</span><span class="si">{1}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">f_name</span><span class="p">,</span> <span class="n">matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_discard_training_samples</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;data loaded in </span><span class="si">{0}</span><span class="s1"> s&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t</span><span class="p">))</span></div>
+
+    <span class="k">def</span> <span class="nf">_discard_training_samples</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalization</span><span class="p">[</span><span class="s1">&#39;DISCARD_TRAINING_SAMPLES&#39;</span><span class="p">]:</span>
+            <span class="n">sample_reducer</span> <span class="o">=</span> <span class="n">SampleReducer</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalization</span><span class="p">[</span><span class="s1">&#39;DISCARD_TRAINING_SAMPLES&#39;</span><span class="p">])</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_ids</span><span class="p">))</span>
+            <span class="n">to_keep</span><span class="p">,</span> <span class="n">to_remove</span> <span class="o">=</span> <span class="n">sample_reducer</span><span class="o">.</span><span class="n">sample_to_keep</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">matrix_array</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">sample_ids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_ids</span><span class="p">)[</span><span class="n">to_keep</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">matrix_array</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">matrix_array</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">matrix_array</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">to_keep</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{0}</span><span class="s1"> training samples discarded&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">to_remove</span><span class="p">)))</span>
+
+<div class="viewcode-block" id="LoadData.reorder_matrix_array"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.extract_data.LoadData.reorder_matrix_array">[docs]</a>    <span class="k">def</span> <span class="nf">reorder_matrix_array</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_sample_ids</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">new_sample_ids</span><span class="p">)</span> <span class="o">==</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_ids</span><span class="p">))</span>
+        <span class="n">index_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">sample</span><span class="p">:</span> <span class="n">pos</span> <span class="k">for</span> <span class="n">pos</span><span class="p">,</span> <span class="n">sample</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_ids</span><span class="p">)}</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="p">[</span><span class="n">index_dict</span><span class="p">[</span><span class="n">sample</span><span class="p">]</span> <span class="k">for</span> <span class="n">sample</span> <span class="ow">in</span> <span class="n">new_sample_ids</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">sample_ids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_ids</span><span class="p">)[</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">matrix_array</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">matrix_array</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">matrix_array</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">index</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">survival</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">survival</span><span class="p">[</span><span class="n">index</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="LoadData.create_a_cv_split"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.extract_data.LoadData.create_a_cv_split">[docs]</a>    <span class="k">def</span> <span class="nf">create_a_cv_split</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">cross_validation_instance</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="n">cv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cross_validation_instance</span>
+        <span class="n">train</span><span class="p">,</span> <span class="n">test</span> <span class="o">=</span> <span class="p">[(</span><span class="n">tn</span><span class="p">,</span> <span class="n">tt</span><span class="p">)</span> <span class="k">for</span> <span class="n">tn</span><span class="p">,</span> <span class="n">tt</span> <span class="ow">in</span> <span class="n">cv</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_ids</span><span class="p">)][</span><span class="bp">self</span><span class="o">.</span><span class="n">test_fold</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalization</span><span class="p">[</span><span class="s1">&#39;PERC_SAMPLE_TO_KEEP&#39;</span><span class="p">]:</span>
+            <span class="n">sample_reducer</span> <span class="o">=</span> <span class="n">SampleReducer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">normalization</span><span class="p">[</span><span class="s1">&#39;PERC_SAMPLE_TO_KEEP&#39;</span><span class="p">])</span>
+            <span class="n">to_keep</span><span class="p">,</span> <span class="n">to_remove</span> <span class="o">=</span> <span class="n">sample_reducer</span><span class="o">.</span><span class="n">sample_to_keep</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">matrix_array</span><span class="p">,</span> <span class="n">train</span><span class="p">)</span>
+
+            <span class="n">test</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">train</span><span class="p">[</span><span class="n">to_remove</span><span class="p">])</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">test</span><span class="p">)</span>
+            <span class="n">train</span> <span class="o">=</span> <span class="n">train</span><span class="p">[</span><span class="n">to_keep</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">matrix_array</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">matrix_cv_array</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">matrix_array</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">test</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">matrix_array</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">matrix_array</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">train</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">survival_cv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">survival</span><span class="o">.</span><span class="n">copy</span><span class="p">()[</span><span class="n">test</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">survival</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">survival</span><span class="p">[</span><span class="n">train</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">sample_ids_cv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_ids</span><span class="p">)[</span><span class="n">test</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sample_ids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_ids</span><span class="p">)[</span><span class="n">train</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="LoadData.load_matrix_full"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.extract_data.LoadData.load_matrix_full">[docs]</a>    <span class="k">def</span> <span class="nf">load_matrix_full</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_full_loaded</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">cross_validation_instance</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">matrix_full_array</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">matrix_train_array</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sample_ids_full</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_ids</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">survival_full</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">survival</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cv_loaded</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">load_matrix_test_fold</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">matrix_train_array</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">matrix_full_array</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">vstack</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">matrix_train_array</span><span class="p">[</span><span class="n">key</span><span class="p">],</span>
+                                                  <span class="bp">self</span><span class="o">.</span><span class="n">matrix_cv_array</span><span class="p">[</span><span class="n">key</span><span class="p">]])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">sample_ids_full</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_ids</span><span class="p">[:]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_ids_cv</span><span class="p">[:]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">survival_full</span> <span class="o">=</span> <span class="n">vstack</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">survival</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">survival_cv</span><span class="p">])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_full_loaded</span> <span class="o">=</span> <span class="kc">True</span></div>
+
+<div class="viewcode-block" id="LoadData.load_survival"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.extract_data.LoadData.load_survival">[docs]</a>    <span class="k">def</span> <span class="nf">load_survival</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
+        <span class="n">survival</span> <span class="o">=</span> <span class="n">load_survival_file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">survival_tsv</span><span class="p">,</span> <span class="n">path_data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">path_data</span><span class="p">,</span>
+                                      <span class="n">survival_flag</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">survival_flag</span><span class="p">)</span>
+        <span class="n">matrix</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">retained_samples</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">sample_removed</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">for</span> <span class="n">ids</span><span class="p">,</span> <span class="n">sample</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_ids</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">sample</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">survival</span><span class="p">:</span>
+                <span class="n">sample_removed</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">continue</span>
+
+            <span class="n">retained_samples</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ids</span><span class="p">)</span>
+            <span class="n">matrix</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">survival</span><span class="p">[</span><span class="n">sample</span><span class="p">])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">survival</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asmatrix</span><span class="p">(</span><span class="n">matrix</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">sample_removed</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">matrix_array</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">matrix_array</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">matrix_array</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">retained_samples</span><span class="p">]</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">sample_ids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_ids</span><span class="p">)[</span><span class="n">retained_samples</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{0}</span><span class="s1"> samples without survival removed&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">sample_removed</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="LoadData.load_survival_test"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.extract_data.LoadData.load_survival_test">[docs]</a>    <span class="k">def</span> <span class="nf">load_survival_test</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
+        <span class="n">survival</span> <span class="o">=</span> <span class="n">load_survival_file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">survival_tsv_test</span><span class="p">,</span> <span class="n">path_data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">path_data</span><span class="p">,</span>
+                                      <span class="n">survival_flag</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">survival_flag</span><span class="p">)</span>
+        <span class="n">matrix</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">retained_samples</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">sample_removed</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">for</span> <span class="n">ids</span><span class="p">,</span> <span class="n">sample</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_ids_test</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">sample</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">survival</span><span class="p">:</span>
+                <span class="n">sample_removed</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">continue</span>
+
+            <span class="n">retained_samples</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ids</span><span class="p">)</span>
+            <span class="n">matrix</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">survival</span><span class="p">[</span><span class="n">sample</span><span class="p">])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">survival_test</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asmatrix</span><span class="p">(</span><span class="n">matrix</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">sample_removed</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">matrix_test_array</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">matrix_test_array</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">matrix_test_array</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">retained_samples</span><span class="p">]</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">sample_ids_test</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_ids_test</span><span class="p">)[</span><span class="n">retained_samples</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{0}</span><span class="s1"> samples without survival removed&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">sample_removed</span><span class="p">))</span></div>
+
+    <span class="k">def</span> <span class="nf">_define_train_features</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">feature_train_array</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_array</span><span class="p">[</span><span class="n">key</span><span class="p">][:]</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalization</span><span class="p">[</span><span class="s1">&#39;TRAIN_CORR_REDUCTION&#39;</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">feature_train_array</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;</span><span class="si">{0}</span><span class="s1">_</span><span class="si">{1}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">sample</span><span class="p">)</span>
+                                             <span class="k">for</span> <span class="n">sample</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_ids</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalization</span><span class="p">[</span><span class="s1">&#39;NB_FEATURES_TO_KEEP&#39;</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">feature_train_array</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">feature_train_array</span><span class="p">[</span><span class="n">key</span><span class="p">])[</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">variance_reducer</span><span class="o">.</span><span class="n">index_to_keep</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">feature_ref_array</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_train_array</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">feature_train_index</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="nb">id</span> <span class="k">for</span> <span class="nb">id</span><span class="p">,</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">feature_train_array</span><span class="p">[</span><span class="n">key</span><span class="p">])}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">feature_ref_index</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_train_index</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">_define_test_features</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">normalization</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">normalization</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">normalization</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalization</span>
+
+        <span class="k">if</span> <span class="n">normalization</span><span class="p">[</span><span class="s1">&#39;TRAIN_CORR_REDUCTION&#39;</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">feature_test_array</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;</span><span class="si">{0}</span><span class="s1">_</span><span class="si">{1}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">sample</span><span class="p">)</span>
+                                             <span class="k">for</span> <span class="n">sample</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_ids</span><span class="p">]</span>
+
+        <span class="k">elif</span> <span class="n">normalization</span><span class="p">[</span><span class="s1">&#39;NB_FEATURES_TO_KEEP&#39;</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">feature_test_array</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">feature_test_array</span><span class="p">[</span><span class="n">key</span><span class="p">])[</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">variance_reducer</span><span class="o">.</span><span class="n">index_to_keep</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_define_ref_features</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">normalization</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">normalization</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">normalization</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalization</span>
+
+        <span class="k">if</span> <span class="n">normalization</span><span class="p">[</span><span class="s1">&#39;TRAIN_CORR_REDUCTION&#39;</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">feature_ref_array</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;</span><span class="si">{0}</span><span class="s1">_</span><span class="si">{1}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">sample</span><span class="p">)</span>
+                                           <span class="k">for</span> <span class="n">sample</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_ids</span><span class="p">]</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">feature_ref_index</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">feat</span><span class="p">:</span><span class="n">pos</span> <span class="k">for</span> <span class="n">pos</span><span class="p">,</span> <span class="n">feat</span> <span class="ow">in</span>
+                                           <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">feature_ref_array</span><span class="p">[</span><span class="n">key</span><span class="p">])}</span>
+
+        <span class="k">elif</span> <span class="n">normalization</span><span class="p">[</span><span class="s1">&#39;NB_FEATURES_TO_KEEP&#39;</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">feature_ref_index</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">feat</span><span class="p">:</span> <span class="n">pos</span> <span class="k">for</span> <span class="n">pos</span><span class="p">,</span> <span class="n">feat</span> <span class="ow">in</span>
+                                           <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">feature_ref_array</span><span class="p">[</span><span class="n">key</span><span class="p">])}</span>
+
+<div class="viewcode-block" id="LoadData.normalize_training_array"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.extract_data.LoadData.normalize_training_array">[docs]</a>    <span class="k">def</span> <span class="nf">normalize_training_array</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">matrix_array</span><span class="p">:</span>
+            <span class="n">matrix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">matrix_array</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="n">matrix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_normalize</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">matrix_train_array</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">matrix</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">matrix_ref_array</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">matrix_train_array</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_define_train_features</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stack_multiomics</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">matrix_train_array</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_train_array</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stack_multiomics</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">matrix_ref_array</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_ref_array</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stack_index</span><span class="p">()</span></div>
+
+    <span class="k">def</span> <span class="nf">_stack_index</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">do_stack_multi_omic</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="n">index</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;STACKED&#39;</span><span class="p">:{}}</span>
+        <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_train_index</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">feature</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_train_index</span><span class="p">[</span><span class="n">key</span><span class="p">]:</span>
+                <span class="n">index</span><span class="p">[</span><span class="s1">&#39;STACKED&#39;</span><span class="p">][</span><span class="n">feature</span><span class="p">]</span> <span class="o">=</span> <span class="n">count</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_train_index</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">feature</span><span class="p">]</span>
+
+            <span class="n">count</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">feature_train_index</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">feature_train_index</span> <span class="o">=</span> <span class="n">index</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">feature_ref_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_train_index</span>
+
+    <span class="k">def</span> <span class="nf">_normalize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">matrix</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;normalizing for </span><span class="si">{0}</span><span class="s1">...&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalization</span><span class="p">[</span><span class="s1">&#39;NB_FEATURES_TO_KEEP&#39;</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">variance_reducer</span><span class="o">.</span><span class="n">nb_features</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalization</span><span class="p">[</span><span class="s1">&#39;NB_FEATURES_TO_KEEP&#39;</span><span class="p">]</span>
+            <span class="n">matrix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">variance_reducer</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">matrix</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalization</span><span class="p">[</span><span class="s1">&#39;TRAIN_MIN_MAX&#39;</span><span class="p">]:</span>
+            <span class="n">matrix</span> <span class="o">=</span> <span class="n">MinMaxScaler</span><span class="p">()</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">matrix</span><span class="o">.</span><span class="n">T</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalization</span><span class="p">[</span><span class="s1">&#39;TRAIN_MAD_SCALE&#39;</span><span class="p">]:</span>
+            <span class="n">matrix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mad_scaler</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">matrix</span><span class="o">.</span><span class="n">T</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalization</span><span class="p">[</span><span class="s1">&#39;TRAIN_ROBUST_SCALE&#39;</span><span class="p">]</span> <span class="ow">or</span>\
+           <span class="bp">self</span><span class="o">.</span><span class="n">normalization</span><span class="p">[</span><span class="s1">&#39;TRAIN_ROBUST_SCALE_TWO_WAY&#39;</span><span class="p">]:</span>
+            <span class="n">matrix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">robust_scaler</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">matrix</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalization</span><span class="p">[</span><span class="s1">&#39;TRAIN_NORM_SCALE&#39;</span><span class="p">]:</span>
+            <span class="n">matrix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalizer</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">matrix</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalization</span><span class="p">[</span><span class="s1">&#39;TRAIN_QUANTILE_TRANSFORM&#39;</span><span class="p">]:</span>
+            <span class="n">matrix</span> <span class="o">=</span> <span class="n">quantile_transform</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="o">**</span><span class="n">QUANTILE_OPTION</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalization</span><span class="p">[</span><span class="s1">&#39;TRAIN_RANK_NORM&#39;</span><span class="p">]:</span>
+            <span class="n">matrix</span> <span class="o">=</span> <span class="n">RankNorm</span><span class="p">()</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span>
+                <span class="n">matrix</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalization</span><span class="p">[</span><span class="s1">&#39;TRAIN_CORR_REDUCTION&#39;</span><span class="p">]:</span>
+            <span class="n">args</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalization</span><span class="p">[</span><span class="s1">&#39;TRAIN_CORR_REDUCTION&#39;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">args</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="n">args</span> <span class="o">=</span> <span class="p">{}</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;dim reduction for </span><span class="si">{0}</span><span class="s1">...&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
+
+            <span class="n">reducer</span> <span class="o">=</span> <span class="n">CorrelationReducer</span><span class="p">(</span><span class="o">**</span><span class="n">args</span><span class="p">)</span>
+            <span class="n">matrix</span> <span class="o">=</span> <span class="n">reducer</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span>
+                <span class="n">matrix</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalization</span><span class="p">[</span><span class="s1">&#39;TRAIN_CORR_RANK_NORM&#39;</span><span class="p">]:</span>
+                <span class="n">matrix</span> <span class="o">=</span> <span class="n">RankNorm</span><span class="p">()</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span>
+                    <span class="n">matrix</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalization</span><span class="p">[</span><span class="s1">&#39;TRAIN_CORR_QUANTILE_NORM&#39;</span><span class="p">]:</span>
+                <span class="n">matrix</span> <span class="o">=</span> <span class="n">quantile_transform</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="o">**</span><span class="n">QUANTILE_OPTION</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalization</span><span class="p">[</span><span class="s1">&#39;TRAIN_CORR_NORM_SCALE&#39;</span><span class="p">]:</span>
+                <span class="n">matrix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalizer</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">matrix</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">matrix</span><span class="p">)</span>
+
+<div class="viewcode-block" id="LoadData.transform_matrices"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.extract_data.LoadData.transform_matrices">[docs]</a>    <span class="k">def</span> <span class="nf">transform_matrices</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">matrix_ref</span><span class="p">,</span> <span class="n">matrix</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">normalization</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">normalization</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">normalization</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalization</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Scaling/Normalising dataset...&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">normalization</span><span class="p">[</span><span class="s1">&#39;LOG_REF_MATRIX&#39;</span><span class="p">]:</span>
+            <span class="n">matrix_ref</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">matrix_ref</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">normalization</span><span class="p">[</span><span class="s1">&#39;LOG_TEST_MATRIX&#39;</span><span class="p">]:</span>
+            <span class="n">matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span>  <span class="n">matrix</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">normalization</span><span class="p">[</span><span class="s1">&#39;NB_FEATURES_TO_KEEP&#39;</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">variance_reducer</span><span class="o">.</span><span class="n">nb_features</span> <span class="o">=</span> <span class="n">normalization</span><span class="p">[</span><span class="s1">&#39;NB_FEATURES_TO_KEEP&#39;</span><span class="p">]</span>
+            <span class="n">matrix_ref</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">variance_reducer</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">matrix_ref</span><span class="p">)</span>
+            <span class="n">matrix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">variance_reducer</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">matrix</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">normalization</span><span class="p">[</span><span class="s1">&#39;TRAIN_MIN_MAX&#39;</span><span class="p">]:</span>
+            <span class="n">matrix_ref</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_max_scaler</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">matrix_ref</span><span class="o">.</span><span class="n">T</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+            <span class="n">matrix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_max_scaler</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">matrix</span><span class="o">.</span><span class="n">T</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+
+        <span class="k">if</span> <span class="n">normalization</span><span class="p">[</span><span class="s1">&#39;TRAIN_MAD_SCALE&#39;</span><span class="p">]:</span>
+            <span class="n">matrix_ref</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mad_scaler</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">matrix_ref</span><span class="o">.</span><span class="n">T</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+            <span class="n">matrix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mad_scaler</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">matrix</span><span class="o">.</span><span class="n">T</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+
+        <span class="k">if</span> <span class="n">normalization</span><span class="p">[</span><span class="s1">&#39;TRAIN_ROBUST_SCALE&#39;</span><span class="p">]:</span>
+            <span class="n">matrix_ref</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">robust_scaler</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">matrix_ref</span><span class="p">)</span>
+            <span class="n">matrix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">robust_scaler</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">matrix</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">normalization</span><span class="p">[</span><span class="s1">&#39;TRAIN_ROBUST_SCALE_TWO_WAY&#39;</span><span class="p">]:</span>
+            <span class="n">matrix_ref</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">robust_scaler</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">matrix_ref</span><span class="p">)</span>
+            <span class="n">matrix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">robust_scaler</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">matrix</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">normalization</span><span class="p">[</span><span class="s1">&#39;TRAIN_NORM_SCALE&#39;</span><span class="p">]:</span>
+            <span class="n">matrix_ref</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalizer</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">matrix_ref</span><span class="p">)</span>
+            <span class="n">matrix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalizer</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">matrix</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalization</span><span class="p">[</span><span class="s1">&#39;TRAIN_QUANTILE_TRANSFORM&#39;</span><span class="p">]:</span>
+            <span class="n">matrix_ref</span> <span class="o">=</span> <span class="n">quantile_transform</span><span class="p">(</span><span class="n">matrix_ref</span><span class="p">,</span> <span class="o">**</span><span class="n">QUANTILE_OPTION</span><span class="p">)</span>
+            <span class="n">matrix</span> <span class="o">=</span> <span class="n">quantile_transform</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="o">**</span><span class="n">QUANTILE_OPTION</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">normalization</span><span class="p">[</span><span class="s1">&#39;TRAIN_RANK_NORM&#39;</span><span class="p">]:</span>
+            <span class="n">matrix_ref</span> <span class="o">=</span> <span class="n">RankNorm</span><span class="p">()</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">matrix_ref</span><span class="p">)</span>
+            <span class="n">matrix</span> <span class="o">=</span> <span class="n">RankNorm</span><span class="p">()</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">matrix</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">normalization</span><span class="p">[</span><span class="s1">&#39;TRAIN_CORR_REDUCTION&#39;</span><span class="p">]:</span>
+            <span class="n">args</span> <span class="o">=</span> <span class="n">normalization</span><span class="p">[</span><span class="s1">&#39;TRAIN_CORR_REDUCTION&#39;</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">args</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="n">args</span> <span class="o">=</span> <span class="p">{}</span>
+
+            <span class="n">reducer</span> <span class="o">=</span> <span class="n">CorrelationReducer</span><span class="p">(</span><span class="o">**</span><span class="n">args</span><span class="p">)</span>
+            <span class="n">matrix_ref</span> <span class="o">=</span> <span class="n">reducer</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">matrix_ref</span><span class="p">)</span>
+            <span class="n">matrix</span> <span class="o">=</span> <span class="n">reducer</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">matrix</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">normalization</span><span class="p">[</span><span class="s1">&#39;TRAIN_CORR_RANK_NORM&#39;</span><span class="p">]:</span>
+                <span class="n">matrix_ref</span> <span class="o">=</span> <span class="n">RankNorm</span><span class="p">()</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">matrix_ref</span><span class="p">)</span>
+                <span class="n">matrix</span> <span class="o">=</span> <span class="n">RankNorm</span><span class="p">()</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">matrix</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalization</span><span class="p">[</span><span class="s1">&#39;TRAIN_CORR_QUANTILE_TRANSFORM&#39;</span><span class="p">]:</span>
+                <span class="n">matrix_ref</span> <span class="o">=</span> <span class="n">quantile_transform</span><span class="p">(</span><span class="n">matrix_ref</span><span class="p">,</span> <span class="o">**</span><span class="n">QUANTILE_OPTION</span><span class="p">)</span>
+                <span class="n">matrix</span> <span class="o">=</span> <span class="n">quantile_transform</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="o">**</span><span class="n">QUANTILE_OPTION</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalization</span><span class="p">[</span><span class="s1">&#39;TRAIN_CORR_NORM_SCALE&#39;</span><span class="p">]:</span>
+                <span class="n">matrix_ref</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalizer</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">matrix_ref</span><span class="p">)</span>
+                <span class="n">matrix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalizer</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">matrix</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">matrix_ref</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">matrix</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="LoadData.save_ref_matrix"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.extract_data.LoadData.save_ref_matrix">[docs]</a>    <span class="k">def</span> <span class="nf">save_ref_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path_folder</span><span class="p">,</span> <span class="n">project_name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">matrix_ref_array</span><span class="p">:</span>
+            <span class="n">save_matrix</span><span class="p">(</span>
+                <span class="n">matrix</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">matrix_ref_array</span><span class="p">[</span><span class="n">key</span><span class="p">],</span>
+                <span class="n">feature_array</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">feature_ref_array</span><span class="p">[</span><span class="n">key</span><span class="p">],</span>
+                <span class="n">sample_array</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_ids</span><span class="p">,</span>
+                <span class="n">path_folder</span><span class="o">=</span><span class="n">path_folder</span><span class="p">,</span>
+                <span class="n">project_name</span><span class="o">=</span><span class="n">project_name</span><span class="p">,</span>
+                <span class="n">key</span><span class="o">=</span><span class="n">key</span>
+            <span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Olivier Poirion
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

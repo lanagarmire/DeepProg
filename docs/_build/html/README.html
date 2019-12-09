@@ -1,0 +1,484 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Survival Integration of Multi-omics using Deep-Learning (DeepProg) &mdash; DeepProg  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> DeepProg
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">DeepProg</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Survival Integration of Multi-omics using Deep-Learning (DeepProg)</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/README.md.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="survival-integration-of-multi-omics-using-deep-learning-deepprog">
+<h1>Survival Integration of Multi-omics using Deep-Learning (DeepProg)<a class="headerlink" href="#survival-integration-of-multi-omics-using-deep-learning-deepprog" title="Permalink to this headline">¶</a></h1>
+<p>This package allows to combine multi-omics data together with survival. Using autoencoders, the pipeline creates new features and identify those linked with survival, using CoxPH regression.
+The omic data used in the original study are RNA-Seq, MiR and Methylation. However, this approach can be extended to any combination of omic data.</p>
+<p>The current package contains the omic data used in the study and a copy of the model computed. However, it is very easy to recreate a new model from scratch using any combination of omic data.
+The omic data and the survival files should be in tsv (Tabular Separated Values) format and examples are provided. The deep-learning framework uses Keras, which is a embedding of Theano / tensorflow/ CNTK.</p>
+<div class="section" id="requirements">
+<h2>Requirements<a class="headerlink" href="#requirements" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Python 2 or 3</li>
+<li><a class="reference external" href="http://deeplearning.net/software/theano/install.html">theano</a> (the used version for the manuscript was 0.8.2)</li>
+<li><a class="reference external" href="https://www.tensorflow.org/">tensorflow</a> as a more robust alternative to theano</li>
+<li><a class="reference external" href="https://github.com/microsoft/CNTK">cntk</a> CNTK is anoter DL library that can present some advantages compared to tensorflow or theano. See <a class="reference external" href="https://docs.microsoft.com/en-us/cognitive-toolkit/">https://docs.microsoft.com/en-us/cognitive-toolkit/</a></li>
+<li>R</li>
+<li>the R “survival” package installed.</li>
+<li>numpy, scipy</li>
+<li>scikit-learn (&gt;=0.18)</li>
+<li>rpy2 2.8.6 (for python2 rpy2 can be install with: pip install rpy2==2.8.6, for python3 pip3 install rpy2==2.8.6). It seems that newer version of rpy2 might not work due to a bug (not tested)</li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install theano --user <span class="c1"># Original backend used OR</span>
+pip install tensorflow --user <span class="c1"># Alternative backend for keras supposely for efficient</span>
+pip install keras --user
+pip install <span class="nv">rpy2</span><span class="o">==</span><span class="m">2</span>.8.6 --user
+
+<span class="c1">#If you want to use theano or CNTK</span>
+nano ~/.keras/keras.json
+</pre></div>
+</div>
+<ul class="simple">
+<li>R installation</li>
+</ul>
+<div class="highlight-R notranslate"><div class="highlight"><pre><span></span><span class="nf">install.package</span><span class="p">(</span><span class="s">&quot;survival&quot;</span><span class="p">)</span>
+<span class="nf">install.package</span><span class="p">(</span><span class="s">&quot;glmnet&quot;</span><span class="p">)</span>
+<span class="nf">source</span><span class="p">(</span><span class="s">&quot;https://bioconductor.org/biocLite.R&quot;</span><span class="p">)</span>
+<span class="nf">biocLite</span><span class="p">(</span><span class="s">&quot;survcomp&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="section" id="support-for-cntk-tensorflow">
+<h3>Support for CNTK / tensorflow<a class="headerlink" href="#support-for-cntk-tensorflow" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>We originally used Keras with theano as backend plateform. However, <a class="reference external" href="https://www.tensorflow.org/">Tensorflow</a> or <a class="reference external" href="https://docs.microsoft.com/en-us/cognitive-toolkit/">CNTK</a> are more recent DL framework that can be faster or more stable than theano. Because keras supports these 3 backends, it is possible to use them as alternative to theano. To change backend, please configure the <code class="docutils literal notranslate"><span class="pre">$HOME/.keras/keras.json</span></code> file. (See official instruction <a class="reference external" href="https://keras.io/backend/">here</a>).</li>
+</ul>
+<p>The default configuration file looks like this:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="nt">&quot;image_data_format&quot;</span><span class="p">:</span> <span class="s2">&quot;channels_last&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;epsilon&quot;</span><span class="p">:</span> <span class="mf">1e-07</span><span class="p">,</span>
+    <span class="nt">&quot;floatx&quot;</span><span class="p">:</span> <span class="s2">&quot;float32&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;backend&quot;</span><span class="p">:</span> <span class="s2">&quot;tensorflow&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="distributed-computation">
+<h2>Distributed computation<a class="headerlink" href="#distributed-computation" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>It is possible to use the python ray framework <a class="reference external" href="https://github.com/ray-project/ray">https://github.com/ray-project/ray</a> to control the parallel computation of the multiple models. To use this framework, it is required to install it: <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">ray</span> <span class="pre">--user</span></code></li>
+<li>Alternatively, it is also possible to create the model one by one without the need of the ray framework</li>
+</ul>
+</div>
+<div class="section" id="visualisation-module-experimental">
+<h2>Visualisation module (Experimental)<a class="headerlink" href="#visualisation-module-experimental" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>To visualise test sets projected into the multi-omic survival space, it is required to install <code class="docutils literal notranslate"><span class="pre">mpld3</span></code> module: <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">mpld3</span> <span class="pre">--user</span></code></li>
+<li>Note that the pip version of mpld3 installed on my computer presented a <a class="reference external" href="https://github.com/mpld3/mpld3/issues/434">bug</a>: <code class="docutils literal notranslate"><span class="pre">TypeError:</span> <span class="pre">array([1.])</span> <span class="pre">is</span> <span class="pre">not</span> <span class="pre">JSON</span> <span class="pre">serializable</span> </code>. However, the <a class="reference external" href="https://github.com/mpld3/mpld3">newest</a> version of the mpld3 available from the github solved this issue. It is therefore recommended to install the newest version to avoid this issue.</li>
+</ul>
+</div>
+<div class="section" id="installation-local">
+<h2>installation (local)<a class="headerlink" href="#installation-local" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/lanagarmire/SimDeep.git
+<span class="nb">cd</span> SimDeep
+pip install -r requirements.txt --user
+</pre></div>
+</div>
+</div>
+<div class="section" id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>test if simdeep is functional (all the software are correctly installed):</li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>  python test/test_dummy_boosting_stacking.py -v <span class="c1"># OR</span>
+  nosetests <span class="nb">test</span> -v <span class="c1"># Improved version of python unit testing</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li>All the default parameters are defined in the config file: <code class="docutils literal notranslate"><span class="pre">./simdeep/config.py</span></code> but can be passed dynamically. Three types of parameters must be defined:<ul>
+<li>The training dataset (omics + survival input files)<ul>
+<li>In addition, the parameters of the test set, i.e. the omic dataset and the survival file</li>
+</ul>
+</li>
+<li>The parameters of the autoencoder (the default parameters works but it might be fine-tuned.</li>
+<li>The parameters of the classification procedures (default are still good)</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="example-datasets-and-scripts">
+<h2>Example datasets and scripts<a class="headerlink" href="#example-datasets-and-scripts" title="Permalink to this headline">¶</a></h2>
+<p>An omic .tsv file must have this format:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>head mir_dummy.tsv
+
+Samples        dummy_mir_0     dummy_mir_1     dummy_mir_2     dummy_mir_3 ...
+sample_test_0  <span class="m">0</span>.469656032287  <span class="m">0</span>.347987447237  <span class="m">0</span>.706633335508  <span class="m">0</span>.440068758445 ...
+sample_test_1  <span class="m">0</span>.0453108219657 <span class="m">0</span>.0234642968791 <span class="m">0</span>.593393816691  <span class="m">0</span>.981872970341 ...
+sample_test_2  <span class="m">0</span>.908784043793  <span class="m">0</span>.854397550009  <span class="m">0</span>.575879144667  <span class="m">0</span>.553333958713 ...
+...
+</pre></div>
+</div>
+<p>a survival file must have this format:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>head survival_dummy.tsv
+
+Samples        days event
+sample_test_0  <span class="m">134</span>  <span class="m">1</span>
+sample_test_1  <span class="m">291</span>  <span class="m">0</span>
+sample_test_2  <span class="m">125</span>  <span class="m">1</span>
+sample_test_3  <span class="m">43</span>   <span class="m">0</span>
+...
+</pre></div>
+</div>
+<p>As examples, we included two datasets:</p>
+<ul class="simple">
+<li>A dummy example dataset in the <code class="docutils literal notranslate"><span class="pre">example/data/</span></code> folder:</li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>examples
+├── data
+│   ├── meth_dummy.tsv
+│   ├── mir_dummy.tsv
+│   ├── rna_dummy.tsv
+│   ├── rna_test_dummy.tsv
+│   ├── survival_dummy.tsv
+│   └── survival_test_dummy.tsv
+</pre></div>
+</div>
+<ul class="simple">
+<li>And a real dataset in the <code class="docutils literal notranslate"><span class="pre">data</span></code> folder. This dataset derives from the TCGA HCC cancer dataset. This dataset needs to be decompressed before processing:</li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>data
+├── meth.tsv.gz
+├── mir.tsv.gz
+├── rna.tsv.gz
+└── survival.tsv
+</pre></div>
+</div>
+</div>
+<div class="section" id="creating-a-simple-deepprog-model-with-one-autoencoder-for-each-omic">
+<h2>Creating a simple DeepProg model with one autoencoder for each omic<a class="headerlink" href="#creating-a-simple-deepprog-model-with-one-autoencoder-for-each-omic" title="Permalink to this headline">¶</a></h2>
+<p>First, we will build a model using the example dataset from <code class="docutils literal notranslate"><span class="pre">./examples/data/</span></code> (These example files are set as default in the config.py file). We will use them to show how to construct a single DeepProg model inferring a autoencoder for each omic</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>
+<span class="c1"># SimDeep class can be used to build one model with one autoencoder for each omic</span>
+<span class="kn">from</span> <span class="nn">simdeep.simdeep_analysis</span> <span class="kn">import</span> <span class="n">SimDeep</span>
+<span class="kn">from</span> <span class="nn">simdeep.extract_data</span> <span class="kn">import</span> <span class="n">LoadData</span>
+
+<span class="n">help</span><span class="p">(</span><span class="n">SimDeep</span><span class="p">)</span> <span class="c1"># to see all the functions</span>
+<span class="n">help</span><span class="p">(</span><span class="n">LoadData</span><span class="p">)</span> <span class="c1"># to see all the functions related to loading datasets</span>
+
+<span class="c1"># Defining training datasets</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">TRAINING_TSV</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">SURVIVAL_TSV</span>
+
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">LoadData</span><span class="p">(</span><span class="n">training_tsv</span><span class="o">=</span><span class="n">TRAINING_TSV</span><span class="p">,</span> <span class="n">survival_tsv</span><span class="o">=</span><span class="n">SURVIVAL_TSV</span><span class="p">)</span>
+
+<span class="n">simDeep</span> <span class="o">=</span> <span class="n">SimDeep</span><span class="p">(</span><span class="n">dataset</span><span class="o">=</span><span class="n">dataset</span><span class="p">)</span> <span class="c1"># instantiate the model with the dummy example training dataset defined in the config file</span>
+<span class="n">simDeep</span><span class="o">.</span><span class="n">load_training_dataset</span><span class="p">()</span> <span class="c1"># load the training dataset</span>
+<span class="n">simDeep</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span> <span class="c1"># fit the model</span>
+
+<span class="c1"># Defining test datasets</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">TEST_TSV</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">SURVIVAL_TSV_TEST</span>
+
+<span class="n">simDeep</span><span class="o">.</span><span class="n">load_new_test_dataset</span><span class="p">(</span><span class="n">TEST_TSV</span><span class="p">,</span> <span class="n">SURVIVAL_TSV_TEST</span><span class="p">,</span> <span class="n">fname_key</span><span class="o">=</span><span class="s1">&#39;dummy&#39;</span><span class="p">)</span>
+
+<span class="c1"># The test set is a dummy rna expression (generated randomly)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">simDeep</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">test_tsv</span><span class="p">)</span> <span class="c1"># Defined in the config file</span>
+<span class="c1"># The data type of the test set is also defined to match an existing type</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">simDeep</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">data_type</span><span class="p">)</span> <span class="c1"># Defined in the config file</span>
+<span class="n">simDeep</span><span class="o">.</span><span class="n">predict_labels_on_test_dataset</span><span class="p">()</span> <span class="c1"># Perform the classification analysis and label the set dataset</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">simDeep</span><span class="o">.</span><span class="n">test_labels</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">simDeep</span><span class="o">.</span><span class="n">test_labels_proba</span><span class="p">)</span>
+
+<span class="n">simDeep</span><span class="o">.</span><span class="n">save_encoder</span><span class="p">(</span><span class="s1">&#39;dummy_encoder.h5&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="creating-a-deepprog-model-using-an-ensemble-of-submodels">
+<h2>Creating a DeepProg model using an ensemble of submodels<a class="headerlink" href="#creating-a-deepprog-model-using-an-ensemble-of-submodels" title="Permalink to this headline">¶</a></h2>
+<p>Secondly, we will build a more complex DeepProg model constituted of an ensemble of sub-models each originated from a subset of the data. For that purpose, we need to use the <code class="docutils literal notranslate"><span class="pre">SimDeepBoosting</span></code> class:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">simdeep.simdeep_boosting</span> <span class="kn">import</span> <span class="n">SimDeepBoosting</span>
+
+<span class="n">help</span><span class="p">(</span><span class="n">SimDeepBoosting</span><span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+
+
+<span class="n">path_data</span> <span class="o">=</span> <span class="s2">&quot;../examples/data/&quot;</span>
+<span class="c1"># Example tsv files</span>
+<span class="n">tsv_files</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">([</span>
+          <span class="p">(</span><span class="s1">&#39;MIR&#39;</span><span class="p">,</span> <span class="s1">&#39;mir_dummy.tsv&#39;</span><span class="p">),</span>
+          <span class="p">(</span><span class="s1">&#39;METH&#39;</span><span class="p">,</span> <span class="s1">&#39;meth_dummy.tsv&#39;</span><span class="p">),</span>
+          <span class="p">(</span><span class="s1">&#39;RNA&#39;</span><span class="p">,</span> <span class="s1">&#39;rna_dummy.tsv&#39;</span><span class="p">),</span>
+<span class="p">])</span>
+
+<span class="c1"># File with survival event</span>
+<span class="n">survival_tsv</span> <span class="o">=</span> <span class="s1">&#39;survival_dummy.tsv&#39;</span>
+
+<span class="n">project_name</span> <span class="o">=</span> <span class="s1">&#39;stacked_TestProject&#39;</span>
+<span class="n">epochs</span> <span class="o">=</span> <span class="mi">10</span> <span class="c1"># Autoencoder epochs. Other hyperparameters can be fine-tuned. See the example files</span>
+<span class="n">seed</span> <span class="o">=</span> <span class="mi">3</span> <span class="c1"># random seed used for reproducibility</span>
+<span class="n">nb_it</span> <span class="o">=</span> <span class="mi">5</span> <span class="c1"># This is the number of models to be fitted using only a subset of the training data</span>
+<span class="n">nb_threads</span> <span class="o">=</span> <span class="mi">2</span> <span class="c1"># These treads define the number of threads to be used to compute survival function</span>
+
+<span class="n">boosting</span> <span class="o">=</span> <span class="n">SimDeepBoosting</span><span class="p">(</span>
+    <span class="n">nb_threads</span><span class="o">=</span><span class="n">nb_threads</span><span class="p">,</span>
+    <span class="n">nb_it</span><span class="o">=</span><span class="n">nb_it</span><span class="p">,</span>
+    <span class="n">split_n_fold</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+    <span class="n">survival_tsv</span><span class="o">=</span><span class="n">tsv_files</span><span class="p">,</span>
+    <span class="n">training_tsv</span><span class="o">=</span><span class="n">survival_tsv</span><span class="p">,</span>
+    <span class="n">path_data</span><span class="o">=</span><span class="n">path_data</span><span class="p">,</span>
+    <span class="n">project_name</span><span class="o">=</span><span class="n">project_name</span><span class="p">,</span>
+    <span class="n">path_results</span><span class="o">=</span><span class="n">path_data</span><span class="p">,</span>
+    <span class="n">epochs</span><span class="o">=</span><span class="n">epochs</span><span class="p">,</span>
+    <span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">)</span>
+
+<span class="c1"># Fit the model</span>
+<span class="n">boosting</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
+<span class="c1"># Predict and write the labels</span>
+<span class="n">boosting</span><span class="o">.</span><span class="n">predict_labels_on_full_dataset</span><span class="p">()</span>
+<span class="c1"># Compute internal metrics</span>
+<span class="n">boosting</span><span class="o">.</span><span class="n">compute_clusters_consistency_for_full_labels</span><span class="p">()</span>
+<span class="c1"># COmpute the feature importance</span>
+<span class="n">boosting</span><span class="o">.</span><span class="n">compute_feature_scores_per_cluster</span><span class="p">()</span>
+<span class="c1"># Write the feature importance</span>
+<span class="n">boosting</span><span class="o">.</span><span class="n">write_feature_score_per_cluster</span><span class="p">()</span>
+
+<span class="n">boosting</span><span class="o">.</span><span class="n">load_new_test_dataset</span><span class="p">(</span>
+    <span class="p">{</span><span class="s1">&#39;RNA&#39;</span><span class="p">:</span> <span class="s1">&#39;rna_dummy.tsv&#39;</span><span class="p">},</span> <span class="c1"># OMIC file of the test set. It doesnt have to be the same as for training</span>
+    <span class="s1">&#39;survival_dummy.tsv&#39;</span><span class="p">,</span> <span class="c1"># Survival file of the test set</span>
+    <span class="s1">&#39;TEST_DATA_1&#39;</span><span class="p">,</span> <span class="c1"># Name of the test test to be used</span>
+<span class="p">)</span>
+
+<span class="c1"># Predict the labels on the test dataset</span>
+<span class="n">boosting</span><span class="o">.</span><span class="n">predict_labels_on_test_dataset</span><span class="p">()</span>
+<span class="c1"># Compute C-index</span>
+<span class="n">boosting</span><span class="o">.</span><span class="n">compute_c_indexes_for_test_dataset</span><span class="p">()</span>
+<span class="c1"># See cluster consistency</span>
+<span class="n">boosting</span><span class="o">.</span><span class="n">compute_clusters_consistency_for_test_labels</span><span class="p">()</span>
+
+<span class="c1"># [EXPERIMENTAL] method to plot the test dataset amongst the class kernel densities</span>
+<span class="n">boosting</span><span class="o">.</span><span class="n">plot_supervised_kernel_for_test_sets</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="creating-a-distributed-deepprog-model-using-an-ensemble-of-submodels">
+<h2>Creating a distributed DeepProg model using an ensemble of submodels<a class="headerlink" href="#creating-a-distributed-deepprog-model-using-an-ensemble-of-submodels" title="Permalink to this headline">¶</a></h2>
+<p>We can allow DeepProg to distribute the creation of each submodel on different clusters/nodes/CPUs by using the ray framework.
+The configuration of the nodes / clusters, or local CPUs to be used needs to be done when instanciating a new ray object with the ray <a class="reference external" href="https://ray.readthedocs.io/en/latest/">API</a>. It is however quite straightforward to define the number of instances launched on a local machine such as in the example below in which 3 instances are used.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Instanciate a ray object that will create multiple workers</span>
+<span class="kn">import</span> <span class="nn">ray</span>
+<span class="n">ray</span><span class="o">.</span><span class="n">init</span><span class="p">(</span><span class="n">num_cpus</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="c1"># More options can be used (e.g. remote clusters, AWS, memory,...etc...)</span>
+<span class="c1"># ray can be used locally to maximize the use of CPUs on the local machine</span>
+<span class="c1"># See ray API: https://ray.readthedocs.io/en/latest/index.html</span>
+
+<span class="n">boosting</span> <span class="o">=</span> <span class="n">SimDeepBoosting</span><span class="p">(</span>
+    <span class="o">...</span>
+    <span class="n">distribute</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="c1"># Additional option to use ray cluster scheduler</span>
+    <span class="o">...</span>
+<span class="p">)</span>
+<span class="o">...</span>
+<span class="c1"># Processing</span>
+<span class="o">...</span>
+
+<span class="c1"># Close clusters and free memory</span>
+<span class="n">ray</span><span class="o">.</span><span class="n">shutdown</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="example-scripts">
+<h2>Example scripts<a class="headerlink" href="#example-scripts" title="Permalink to this headline">¶</a></h2>
+<p>Example scripts are availables in ./examples/ which will assist you to build a model from scratch with test and real data:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>examples
+├── create_autoencoder_from_scratch.py <span class="c1"># Construct a simple deeprog model on the dummy example dataset</span>
+├── example_with_dummy_data_distributed.py <span class="c1"># Process the dummy example dataset using ray</span>
+├── example_with_dummy_data.py <span class="c1"># Process the dummy example dataset</span>
+└── load_3_omics_model.py <span class="c1"># Process the example HCC dataset</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="contact-and-credentials">
+<h2>contact and credentials<a class="headerlink" href="#contact-and-credentials" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Developer: Olivier Poirion (PhD)</li>
+<li>contact: opoirion&#64;hawaii.edu, o.poirion&#64;gmail.com</li>
+</ul>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Olivier Poirion
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

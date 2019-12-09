@@ -1,0 +1,392 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>simdeep.plot_utils &mdash; DeepProg  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> DeepProg
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage.html">Usage and tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../LICENSE.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/simdeep.html">simdeep package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">DeepProg</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>simdeep.plot_utils</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for simdeep.plot_utils</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">sklearn.decomposition</span> <span class="kn">import</span> <span class="n">PCA</span>
+
+<span class="kn">from</span> <span class="nn">colour</span> <span class="kn">import</span> <span class="n">Color</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">import</span> <span class="nn">matplotlib</span>
+<span class="n">matplotlib</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s1">&#39;Agg&#39;</span><span class="p">)</span>
+
+<span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
+
+<span class="kn">import</span> <span class="nn">pylab</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">mpld3</span>
+
+<span class="n">sns</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">color_codes</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+
+<span class="n">CSS</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">table</span>
+<span class="s2">{</span>
+<span class="s2">  border-collapse: collapse;</span>
+<span class="s2">}</span>
+<span class="s2">th</span>
+<span class="s2">{</span>
+<span class="s2">  color: #ffffff;</span>
+<span class="s2">  background-color: #000000;</span>
+<span class="s2">}</span>
+<span class="s2">td</span>
+<span class="s2">{</span>
+<span class="s2">  background-color: #cccccc;</span>
+<span class="s2">}</span>
+<span class="s2">table, th, td</span>
+<span class="s2">{</span>
+<span class="s2">  font-family:Arial, Helvetica, sans-serif;</span>
+<span class="s2">  border: 1px solid black;</span>
+<span class="s2">  text-align: right;</span>
+<span class="s2">}</span>
+<span class="s2">&quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="SampleHTML"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.plot_utils.SampleHTML">[docs]</a><span class="k">class</span> <span class="nc">SampleHTML</span><span class="p">():</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">proba</span><span class="p">,</span> <span class="n">survival</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">nbdays</span><span class="p">,</span> <span class="n">isdead</span> <span class="o">=</span> <span class="n">survival</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">html</span> <span class="o">=</span>  <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">&lt;table border=&quot;1&quot; class=&quot;dataframe&quot;&gt;</span>
+<span class="s2">  &lt;thead&gt;</span>
+<span class="s2">    &lt;tr style=&quot;text-align: right;&quot;&gt;</span>
+<span class="s2">      &lt;th&gt;&lt;/th&gt;</span>
+<span class="s2">      &lt;th&gt;</span><span class="si">{0}</span><span class="s2">&lt;/th&gt;</span>
+<span class="s2">    &lt;/tr&gt;</span>
+<span class="s2">  &lt;/thead&gt;</span>
+<span class="s2">  &lt;tbody&gt;</span>
+<span class="s2">    &lt;tr&gt;</span>
+<span class="s2">      &lt;th&gt;Assigned class&lt;/th&gt;</span>
+<span class="s2">      &lt;td&gt;</span><span class="si">{1}</span><span class="s2">&lt;/td&gt;</span>
+<span class="s2">    &lt;/tr&gt;</span>
+<span class="s2">    &lt;tr&gt;</span>
+<span class="s2">      &lt;th&gt;class probability&lt;/th&gt;</span>
+<span class="s2">      &lt;td&gt;</span><span class="si">{2}</span><span class="s2">&lt;/td&gt;</span>
+<span class="s2">    &lt;/tr&gt;</span>
+<span class="s2">    &lt;tr&gt;</span>
+<span class="s2">      &lt;th&gt;nb days followed&lt;/th&gt;</span>
+<span class="s2">      &lt;td&gt;</span><span class="si">{3}</span><span class="s2">&lt;/td&gt;</span>
+<span class="s2">    &lt;/tr&gt;</span>
+<span class="s2">    &lt;tr&gt;</span>
+<span class="s2">      &lt;th&gt;is dead&lt;/th&gt;</span>
+<span class="s2">      &lt;td&gt;</span><span class="si">{4}</span><span class="s2">&lt;/td&gt;</span>
+<span class="s2">    &lt;/tr&gt;</span>
+<span class="s2">  &lt;/tbody&gt;</span>
+<span class="s2">&lt;/table&gt;</span>
+<span class="s2">                &quot;&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">proba</span><span class="p">,</span> <span class="n">nbdays</span><span class="p">,</span> <span class="n">isdead</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="make_color_dict_from_r"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.plot_utils.make_color_dict_from_r">[docs]</a><span class="k">def</span> <span class="nf">make_color_dict_from_r</span><span class="p">(</span><span class="n">labels</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
+    <span class="n">labels_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span>
+
+    <span class="n">cin</span> <span class="o">=</span> <span class="n">Color</span><span class="p">(</span><span class="s1">&#39;red&#39;</span><span class="p">)</span>
+    <span class="n">cout</span> <span class="o">=</span> <span class="n">Color</span><span class="p">(</span><span class="s1">&#39;#56f442&#39;</span><span class="p">)</span>
+
+    <span class="n">gradient</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span><span class="n">x</span><span class="o">.</span><span class="n">get_rgb</span><span class="p">(),</span>
+                   <span class="n">cin</span><span class="o">.</span><span class="n">range_to</span><span class="p">(</span><span class="n">cout</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">labels_set</span><span class="p">))))</span>
+
+    <span class="n">len_color</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">gradient</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">len_color</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">gradient</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">Color</span><span class="p">(</span><span class="s1">&#39;green&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">get_rgb</span><span class="p">()</span>
+        <span class="n">gradient</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">Color</span><span class="p">(</span><span class="s1">&#39;blue&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">get_rgb</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">len_color</span> <span class="o">&gt;</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="n">gradient</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">Color</span><span class="p">(</span><span class="s1">&#39;cyan&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">get_rgb</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">len_color</span> <span class="o">&gt;</span> <span class="mi">4</span><span class="p">:</span>
+        <span class="n">gradient</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">Color</span><span class="p">(</span><span class="s1">&#39;magenta&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">get_rgb</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">len_color</span> <span class="o">&gt;</span> <span class="mi">5</span><span class="p">:</span>
+        <span class="n">gradient</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="n">Color</span><span class="p">(</span><span class="s1">&#39;yellow&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">get_rgb</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">labels_set</span><span class="p">,</span> <span class="n">gradient</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="make_color_list"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.plot_utils.make_color_list">[docs]</a><span class="k">def</span> <span class="nf">make_color_list</span><span class="p">(</span><span class="n">id_list</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    According to an id_list define a color gradient</span>
+<span class="sd">    return {id:color}</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">assert</span><span class="p">([</span><span class="n">Color</span><span class="p">(</span><span class="n">idc</span><span class="p">)</span> <span class="k">for</span> <span class="n">idc</span> <span class="ow">in</span> <span class="n">id_list</span><span class="p">])</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">id_list</span>
+
+    <span class="n">color_dict</span> <span class="o">=</span> <span class="n">make_color_dict</span><span class="p">(</span><span class="n">id_list</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">color_dict</span><span class="p">[</span><span class="n">label</span><span class="p">]</span> <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">id_list</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="make_color_dict"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.plot_utils.make_color_dict">[docs]</a><span class="k">def</span> <span class="nf">make_color_dict</span><span class="p">(</span><span class="n">id_list</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    According to an id_list define a color gradient</span>
+<span class="sd">    return {id:color}</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">id_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">id_list</span><span class="p">))</span>
+
+    <span class="n">first_c</span> <span class="o">=</span> <span class="n">Color</span><span class="p">(</span><span class="s2">&quot;red&quot;</span><span class="p">)</span>
+    <span class="n">middle_c</span> <span class="o">=</span> <span class="n">Color</span><span class="p">(</span><span class="s2">&quot;green&quot;</span><span class="p">)</span>
+
+    <span class="n">m_length1</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">id_list</span><span class="p">)</span>
+
+    <span class="n">gradient</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">first_c</span><span class="o">.</span><span class="n">range_to</span><span class="p">(</span><span class="n">middle_c</span><span class="p">,</span> <span class="n">m_length1</span><span class="p">))</span>
+
+    <span class="n">color_dict</span> <span class="o">=</span>  <span class="p">{</span><span class="n">id_list</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span> <span class="n">gradient</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">get_hex_l</span><span class="p">()</span>
+                   <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">id_list</span><span class="p">))}</span>
+
+    <span class="k">return</span> <span class="n">color_dict</span></div>
+
+<div class="viewcode-block" id="plot_kernel_plots"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.plot_utils.plot_kernel_plots">[docs]</a><span class="k">def</span> <span class="nf">plot_kernel_plots</span><span class="p">(</span>
+        <span class="n">test_labels</span><span class="p">,</span>
+        <span class="n">test_labels_proba</span><span class="p">,</span>
+        <span class="n">labels</span><span class="p">,</span>
+        <span class="n">activities</span><span class="p">,</span>
+        <span class="n">activities_test</span><span class="p">,</span>
+        <span class="n">dataset</span><span class="p">,</span>
+        <span class="n">path_html</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    perform a html kernel plot</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">7</span><span class="p">))</span>
+
+    <span class="n">color_dict</span> <span class="o">=</span> <span class="n">make_color_dict_from_r</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span>
+    <span class="n">labels_c_test</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">color_dict</span><span class="p">[</span><span class="n">label</span><span class="p">]</span> <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">test_labels</span><span class="p">])</span>
+
+    <span class="n">decomp</span> <span class="o">=</span> <span class="n">PCA</span><span class="p">(</span><span class="n">n_components</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">X</span><span class="p">,</span> <span class="n">Y</span> <span class="o">=</span> <span class="n">decomp</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">activities</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+
+    <span class="n">X_test</span><span class="p">,</span> <span class="n">Y_test</span> <span class="o">=</span> <span class="n">decomp</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">activities_test</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+
+    <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">labels</span><span class="p">):</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+            <span class="n">X_test</span><span class="p">[</span><span class="n">test_labels</span> <span class="o">==</span> <span class="n">label</span><span class="p">],</span>
+            <span class="n">Y_test</span><span class="p">[</span><span class="n">test_labels</span> <span class="o">==</span> <span class="n">label</span><span class="p">],</span>
+            <span class="n">s</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span>
+            <span class="c1"># linewidths=2.0,</span>
+            <span class="n">alpha</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+           <span class="c1"># marker=&#39;square_cross&#39;,</span>
+            <span class="n">edgecolors</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span>
+            <span class="n">zorder</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+           <span class="n">color</span><span class="o">=</span><span class="n">labels_c_test</span><span class="p">[</span><span class="n">test_labels</span> <span class="o">==</span> <span class="n">label</span><span class="p">],</span>
+           <span class="n">label</span><span class="o">=</span><span class="s1">&#39;test cluster nb </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">label</span><span class="p">))</span>
+
+        <span class="n">sns</span><span class="o">.</span><span class="n">kdeplot</span><span class="p">(</span>
+            <span class="n">X</span><span class="p">[</span><span class="n">labels</span> <span class="o">==</span> <span class="n">label</span><span class="p">],</span>
+            <span class="n">Y</span><span class="p">[</span><span class="n">labels</span> <span class="o">==</span> <span class="n">label</span><span class="p">],</span>
+            <span class="n">shade</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">cmap</span><span class="o">=</span><span class="n">sns</span><span class="o">.</span><span class="n">dark_palette</span><span class="p">(</span><span class="n">color_dict</span><span class="p">[</span><span class="n">label</span><span class="p">],</span> <span class="n">as_cmap</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+            <span class="n">color</span><span class="o">=</span><span class="n">color_dict</span><span class="p">[</span><span class="n">label</span><span class="p">],</span>
+            <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
+            <span class="n">label</span><span class="o">=</span><span class="s1">&#39;cluster nb </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">label</span><span class="p">),</span>
+            <span class="n">zorder</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">shade_lowest</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span>
+        <span class="p">)</span>
+
+    <span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="n">SampleHTML</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="n">dataset</span><span class="o">.</span><span class="n">sample_ids_test</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+        <span class="n">label</span><span class="o">=</span><span class="n">test_labels</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+        <span class="n">survival</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">survival_test</span><span class="p">[</span><span class="n">i</span><span class="p">])[</span><span class="mi">0</span><span class="p">],</span>
+        <span class="n">proba</span><span class="o">=</span><span class="n">test_labels_proba</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">test_labels</span><span class="p">[</span><span class="n">i</span><span class="p">]])</span><span class="o">.</span><span class="n">html</span>
+              <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">test_labels</span><span class="p">))]</span>
+
+    <span class="n">scatter</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">Y_test</span><span class="p">,</span> <span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="n">mec</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span>
+                      <span class="n">ms</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">mew</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">3</span><span class="p">,)[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="n">tooltip</span> <span class="o">=</span> <span class="n">mpld3</span><span class="o">.</span><span class="n">plugins</span><span class="o">.</span><span class="n">PointHTMLTooltip</span><span class="p">(</span>
+        <span class="n">scatter</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">voffset</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">hoffset</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">css</span><span class="o">=</span><span class="n">CSS</span><span class="p">)</span>
+    <span class="n">mpld3</span><span class="o">.</span><span class="n">plugins</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">tooltip</span><span class="p">)</span>
+
+    <span class="n">mpld3</span><span class="o">.</span><span class="n">save_html</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">path_html</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;kde plot saved at:</span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">path_html</span><span class="p">))</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Olivier Poirion
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
