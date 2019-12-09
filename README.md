@@ -288,6 +288,9 @@ examples
 
 ```
 
+## License
+
+The project is licensed under the MIT license.
 
 ## contact and credentials
 * Developer: Olivier Poirion (PhD)
