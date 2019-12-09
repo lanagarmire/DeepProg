@@ -6,6 +6,8 @@ The omic data used in the original study are RNA-Seq, MiR and Methylation. Howev
 The current package contains the omic data used in the study and a copy of the model computed. However, it is very easy to recreate a new model from scratch using any combination of omic data.
 The omic data and the survival files should be in tsv (Tabular Separated Values) format and examples are provided. The deep-learning framework uses Keras, which is a embedding of Theano / tensorflow/ CNTK.
 
+A slightly more complete documentation with API description is also temporarly available at [http://opoirion.fr:8100](http://opoirion.fr:8100)
+
 
 ## Requirements
 * Python 2 or 3
@@ -21,8 +23,8 @@ The omic data and the survival files should be in tsv (Tabular Separated Values)
 
 
 ```bash
-pip install theano --user # Original backend used 
-pip install tensorflow --user # Alternative backend and default for keras. Tensorflow is well maintained by a large team. 
+pip install theano --user # Original backend used
+pip install tensorflow --user # Alternative backend and default for keras. Tensorflow is well maintained by a large team.
 pip install keras --user
 pip install rpy2==2.8.6 --user
 
