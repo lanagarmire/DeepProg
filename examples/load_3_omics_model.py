@@ -1,5 +1,5 @@
 """
-Load the 3-omics abd perform subtype detecion from the HCC dataset
+Load the 3-omics and perform subtype detecion from the HCC dataset
 
 tsv files used in the original study are available in the ./data folder of this project.
 However, theses files must be decompressed using this function in linux:

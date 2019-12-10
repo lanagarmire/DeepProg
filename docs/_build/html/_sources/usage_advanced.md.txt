@@ -8,11 +8,11 @@ Once a DeepProg model is fitted, it might be interessant to obtain different vis
 boosting.plot_supervised_predicted_labels_for_test_sets()
 ```
 
-This first method infers the OMIC matrics activities for the new features inferred by the autoencoders and project the samples into a 2D space created using the two first PCA components. The figure create a kernel density for each cluster and project the labels of the test set.
+The first method transforms the OMIC matrix activities into the new survival feature space inferred by the autoencoders and projects the samples into a 2D space using  PCA analysis. The figure creates a kernel density for each cluster and project the labels of the test set.
 
 ![kdplot 1](./img/stacked_TestProject_TEST_DATA_2_KM_plot_boosting_test_kde_2_cropped.png)
 
-A second more sophisticated method uses the new features inferred by the autoencoders to infer new features by reconstructing a supervised network that targets the inferred label. The new set of features are then projected into a 2D space using PCA components. This second method might be present more efficient visualisations of the different clusters
+A second more sophisticated method uses the new features inferred by the autoencoders to compute new features by constructing a supervised network targetting the inferred subtype labels. The new set of features are then projected into a 2D space using PCA analysis. This second method might present more efficient visualisations of the different clusters since it is uses a supervised algorithm.
 
 ```python
 boosting.plot_supervised_kernel_for_test_sets()
@@ -20,4 +20,4 @@ boosting.plot_supervised_kernel_for_test_sets()
 
 ![kdplot 2](./img/stacked_TestProject_TEST_DATA_2_KM_plot_boosting_test_kde_1_cropped.png)
 
-Note that these visualisation are not very efficient in that example dataset, since we have only a limited number of samples (40). However, they might become more usefull for real datasets.
+Note that these visualisation are not very efficient in that example dataset, since we have only a limited number of samples (40) and features. However, they might become more useful for real datasets.

@@ -1,0 +1,341 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Case study: Analyzing TCGA HCC dataset &mdash; DeepProg  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="License" href="LICENSE.html" />
+    <link rel="prev" title="Tutorial: Advanced usage of DeepProg model" href="usage_advanced.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> DeepProg
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Tutorial: Simple DeepProg model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage_ensemble.html">Tutorial: Ensemble of DeepProg model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage_advanced.html">Tutorial: Advanced usage of DeepProg model</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Case study: Analyzing TCGA HCC dataset</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#dataset-preparation">Dataset preparation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#model-fitting">Model fitting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#visualisation-and-analysis">Visualisation and analysis</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="LICENSE.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/simdeep.html">simdeep package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">DeepProg</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Case study: Analyzing TCGA HCC dataset</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/case_study.md.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="case-study-analyzing-tcga-hcc-dataset">
+<h1>Case study: Analyzing TCGA HCC dataset<a class="headerlink" href="#case-study-analyzing-tcga-hcc-dataset" title="Permalink to this headline">¶</a></h1>
+<p>In this example, we will use the RNA-Seq, miRNA, and DNA Methylation datsets from the TCGA HCC cancer dataset to perform subtype detection, identify subtype specific features, and fit supervised model that we will use to project the HCC samples using only the RNA-Seq OMIC layer. This real case dataset is available directly inside the <code class="docutils literal notranslate"><span class="pre">data</span></code> folder from the package.</p>
+<div class="section" id="dataset-preparation">
+<h2>Dataset preparation<a class="headerlink" href="#dataset-preparation" title="Permalink to this headline">¶</a></h2>
+<p>First, locate the data folder and the compressed matrices:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>data
+├── meth.tsv.gz
+├── mir.tsv.gz
+├── rna.tsv.gz
+└── survival.tsv
+</pre></div>
+</div>
+<p>go to that folder and extract these files using <code class="docutils literal notranslate"><span class="pre">gzip</span> <span class="pre">-d</span> <span class="pre">*.gz</span></code>. Now, we are ready to instanciate a DeepProg instance.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">simdeep.simdeep_boosting</span> <span class="kn">import</span> <span class="n">SimDeepBoosting</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">PATH_THIS_FILE</span>
+
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+
+<span class="k">assert</span><span class="p">(</span><span class="n">isfile</span><span class="p">(</span><span class="n">path_data</span> <span class="o">+</span> <span class="s2">&quot;meth.tsv&quot;</span><span class="p">))</span>
+<span class="k">assert</span><span class="p">(</span><span class="n">isfile</span><span class="p">(</span><span class="n">path_data</span> <span class="o">+</span> <span class="s2">&quot;rna.tsv&quot;</span><span class="p">))</span>
+<span class="k">assert</span><span class="p">(</span><span class="n">isfile</span><span class="p">(</span><span class="n">path_data</span> <span class="o">+</span> <span class="s2">&quot;mir.tsv&quot;</span><span class="p">))</span>
+
+<span class="n">tsv_files</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">([</span>
+    <span class="p">(</span><span class="s1">&#39;MIR&#39;</span><span class="p">,</span> <span class="s1">&#39;mir.tsv&#39;</span><span class="p">),</span>
+    <span class="p">(</span><span class="s1">&#39;METH&#39;</span><span class="p">,</span> <span class="s1">&#39;meth.tsv&#39;</span><span class="p">),</span>
+    <span class="p">(</span><span class="s1">&#39;RNA&#39;</span><span class="p">,</span> <span class="s1">&#39;rna.tsv&#39;</span><span class="p">),</span>
+<span class="p">])</span>
+
+<span class="c1"># The survival file located also in the same folder</span>
+<span class="n">survival_tsv</span> <span class="o">=</span> <span class="s1">&#39;survival.tsv&#39;</span>
+
+<span class="k">assert</span><span class="p">(</span><span class="n">isfile</span><span class="p">(</span><span class="n">path_data</span> <span class="o">+</span> <span class="s2">&quot;survival.tsv&quot;</span><span class="p">))</span>
+
+<span class="c1"># More attributes</span>
+<span class="n">PROJECT_NAME</span> <span class="o">=</span> <span class="s1">&#39;HCC_dataset&#39;</span> <span class="c1"># Name</span>
+<span class="n">EPOCHS</span> <span class="o">=</span> <span class="mi">10</span> <span class="c1"># autoencoder fitting epoch</span>
+<span class="n">SEED</span> <span class="o">=</span> <span class="mi">10045</span> <span class="c1"># random seed</span>
+<span class="n">nb_it</span> <span class="o">=</span> <span class="mi">10</span> <span class="c1"># Number of submodels to be fitted</span>
+<span class="n">nb_threads</span> <span class="o">=</span> <span class="mi">2</span> <span class="c1"># Number of python threads used to fit survival model</span>
+</pre></div>
+</div>
+<p>We need also to specify the columns to use from the survival file:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>head data/survival.tsv
+
+Samples days    event
+TCGA.2V.A95S.01 <span class="m">0</span>       <span class="m">0</span>
+TCGA.2Y.A9GS.01 <span class="m">724</span>     <span class="m">1</span>
+TCGA.2Y.A9GT.01 <span class="m">1624</span>    <span class="m">1</span>
+TCGA.2Y.A9GU.01 <span class="m">1939</span>    <span class="m">0</span>
+TCGA.2Y.A9GV.01 <span class="m">2532</span>    <span class="m">1</span>
+TCGA.2Y.A9GW.01 <span class="m">1271</span>    <span class="m">1</span>
+TCGA.2Y.A9GX.01 <span class="m">2442</span>    <span class="m">0</span>
+TCGA.2Y.A9GY.01 <span class="m">757</span>     <span class="m">1</span>
+TCGA.2Y.A9GZ.01 <span class="m">848</span>     <span class="m">1</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">survival_flag</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;patient_id&#39;</span><span class="p">:</span> <span class="s1">&#39;Samples&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;survival&#39;</span><span class="p">:</span> <span class="s1">&#39;days&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;event&#39;</span><span class="p">:</span> <span class="s1">&#39;event&#39;</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>Now we define a ray instance to distribute the fitting of the submodels</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>
+<span class="kn">import</span> <span class="nn">ray</span>
+<span class="n">ray</span><span class="o">.</span><span class="n">init</span><span class="p">(</span><span class="n">num_cpus</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="model-fitting">
+<h2>Model fitting<a class="headerlink" href="#model-fitting" title="Permalink to this headline">¶</a></h2>
+<p>We are now ready to instanciate a DeepProg instance and to fit a model</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Instanciate a DeepProg instance</span>
+<span class="n">boosting</span> <span class="o">=</span> <span class="n">SimDeepBoosting</span><span class="p">(</span>
+    <span class="n">nb_threads</span><span class="o">=</span><span class="n">nb_threads</span><span class="p">,</span>
+    <span class="n">nb_it</span><span class="o">=</span><span class="n">nb_it</span><span class="p">,</span>
+    <span class="n">split_n_fold</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+    <span class="n">survival_tsv</span><span class="o">=</span><span class="n">survival_tsv</span><span class="p">,</span>
+    <span class="n">training_tsv</span><span class="o">=</span><span class="n">tsv_files</span><span class="p">,</span>
+    <span class="n">path_data</span><span class="o">=</span><span class="n">path_data</span><span class="p">,</span>
+    <span class="n">project_name</span><span class="o">=</span><span class="n">PROJECT_NAME</span><span class="p">,</span>
+    <span class="n">path_results</span><span class="o">=</span><span class="n">path_data</span><span class="p">,</span>
+    <span class="n">epochs</span><span class="o">=</span><span class="n">EPOCHS</span><span class="p">,</span>
+    <span class="n">survival_flag</span><span class="o">=</span><span class="n">survival_flag</span><span class="p">,</span>
+    <span class="n">distribute</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+    <span class="n">seed</span><span class="o">=</span><span class="n">SEED</span><span class="p">)</span>
+
+<span class="n">boosting</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
+
+<span class="c1"># predict labels of the training</span>
+
+<span class="n">boosting</span><span class="o">.</span><span class="n">predict_labels_on_full_dataset</span><span class="p">()</span>
+<span class="n">boosting</span><span class="o">.</span><span class="n">compute_clusters_consistency_for_full_labels</span><span class="p">()</span>
+<span class="n">boosting</span><span class="o">.</span><span class="n">evalutate_cluster_performance</span><span class="p">()</span>
+<span class="n">boosting</span><span class="o">.</span><span class="n">collect_cindex_for_test_fold</span><span class="p">()</span>
+<span class="n">boosting</span><span class="o">.</span><span class="n">collect_cindex_for_full_dataset</span><span class="p">()</span>
+
+<span class="n">boosting</span><span class="o">.</span><span class="n">compute_feature_scores_per_cluster</span><span class="p">()</span>
+<span class="n">boosting</span><span class="o">.</span><span class="n">write_feature_score_per_cluster</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="visualisation-and-analysis">
+<h2>Visualisation and analysis<a class="headerlink" href="#visualisation-and-analysis" title="Permalink to this headline">¶</a></h2>
+<p>We should obtain subtypes with very significant survival differences, as we can see in the results located in the results folder</p>
+<p><img alt="HCC KM plot" src="_images/HCC_dataset_KM_plot_boosting_full.png" /></p>
+<p>Now we might want to project the training samples using only the RNA-Seq layer</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">boosting</span><span class="o">.</span><span class="n">load_new_test_dataset</span><span class="p">(</span>
+    <span class="p">{</span><span class="s1">&#39;RNA&#39;</span><span class="p">:</span> <span class="s1">&#39;rna.tsv&#39;</span><span class="p">},</span>
+    <span class="n">survival_tsv</span><span class="p">,</span>
+    <span class="s1">&#39;test_RNA_only&#39;</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">boosting</span><span class="o">.</span><span class="n">predict_labels_on_test_dataset</span><span class="p">()</span>
+<span class="n">boosting</span><span class="o">.</span><span class="n">compute_c_indexes_for_test_dataset</span><span class="p">()</span>
+<span class="n">boosting</span><span class="o">.</span><span class="n">compute_clusters_consistency_for_test_labels</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>We can use the visualisation functions to project our samples into a 2D space</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Experimental method to plot the test dataset amongst the class kernel densities</span>
+<span class="n">boosting</span><span class="o">.</span><span class="n">plot_supervised_kernel_for_test_sets</span><span class="p">()</span>
+<span class="n">boosting</span><span class="o">.</span><span class="n">plot_supervised_predicted_labels_for_test_sets</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Results for unsupervised projection</p>
+<p><img alt="Unsupervised KDE plot" src="_images/HCC_dataset_KM_plot_boosting_full_kde_unsupervised.png" /></p>
+<p>Results for supervised projection</p>
+<p><img alt="Supervised KDE plot" src="_images/HCC_dataset_KM_plot_boosting_full_kde_supervised.png" /></p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="LICENSE.html" class="btn btn-neutral float-right" title="License" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="usage_advanced.html" class="btn btn-neutral float-left" title="Tutorial: Advanced usage of DeepProg model" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Olivier Poirion
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
