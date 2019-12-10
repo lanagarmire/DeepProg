@@ -197,7 +197,7 @@
 <h2>Python packages installation<a class="headerlink" href="#python-packages-installation" title="Permalink to this headline">¶</a></h2>
 <p>The required python packages can be installed using pip:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install theano --user <span class="c1"># Original backend used OR</span>
-pip install tensorflow --user <span class="c1"># Alternative backend for keras supposely for efficient</span>
+pip install tensorflow --user <span class="c1"># Alternative backend for keras</span>
 pip install keras --user
 pip install <span class="nv">rpy2</span><span class="o">==</span><span class="m">2</span>.8.6 --user
 </pre></div>
@@ -205,7 +205,7 @@ pip install <span class="nv">rpy2</span><span class="o">==</span><span class="m"
 </div>
 <div class="section" id="support-for-cntk-tensorflow">
 <h2>Support for CNTK / tensorflow<a class="headerlink" href="#support-for-cntk-tensorflow" title="Permalink to this headline">¶</a></h2>
-<p>We originally used Keras with theano as backend plateform. However, <a class="reference external" href="https://www.tensorflow.org/">Tensorflow</a> or <a class="reference external" href="https://docs.microsoft.com/en-us/cognitive-toolkit/">CNTK</a> are more recent DL framework that can be faster or more stable than theano. Because keras supports these 3 backends, it is possible to use them as alternative to theano. To CNTK, please refer to the official <a class="reference external" href="https://docs.microsoft.com/en-us/cognitive-toolkit/setup-cntk-on-your-machine">guidelines</a> . To change backend, please configure the <code class="docutils literal notranslate"><span class="pre">$HOME/.keras/keras.json</span></code> file. (See official instruction <a class="reference external" href="https://keras.io/backend/">here</a>).</p>
+<p>We originally used Keras with theano as backend plateform. However, <a class="reference external" href="https://www.tensorflow.org/">Tensorflow</a> or <a class="reference external" href="https://docs.microsoft.com/en-us/cognitive-toolkit/">CNTK</a> are more recent DL framework that can be faster or more stable than theano. Because keras supports these 3 backends, it is possible to use them as alternative to theano. To install CNTK, please refer to the official <a class="reference external" href="https://docs.microsoft.com/en-us/cognitive-toolkit/setup-cntk-on-your-machine">guidelines</a> . To change backend, please configure the <code class="docutils literal notranslate"><span class="pre">$HOME/.keras/keras.json</span></code> file. (See official instruction <a class="reference external" href="https://keras.io/backend/">here</a>).</p>
 <p>The default configuration file: <code class="docutils literal notranslate"> <span class="pre">~/.keras/keras.json</span></code> looks like this:</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
     <span class="nt">&quot;image_data_format&quot;</span><span class="p">:</span> <span class="s2">&quot;channels_last&quot;</span><span class="p">,</span>

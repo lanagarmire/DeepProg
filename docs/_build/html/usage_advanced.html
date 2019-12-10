@@ -159,12 +159,16 @@
 <div class="section" id="visualisation">
 <h2>Visualisation<a class="headerlink" href="#visualisation" title="Permalink to this headline">¶</a></h2>
 <p>Once a DeepProg model is fitted, it might be interessant to obtain different visualisations of the samples for the training or the test sets, based on new survival features inferred by the autoencoders.For that purpose, we developped two methods to project the samples into a 2D space that can be called once a <code class="docutils literal notranslate"><span class="pre">SimDeepBoosting</span></code> or a <code class="docutils literal notranslate"><span class="pre">simDeep</span></code> is fitted.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">boosting</span><span class="o">.</span><span class="n">plot_supervised_predicted_labels_for_test_sets</span><span class="p">()</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># boosting class instance fitted using the ensemble tutorial</span>
+<span class="n">boosting</span><span class="o">.</span><span class="n">plot_supervised_predicted_labels_for_test_sets</span><span class="p">()</span>
 </pre></div>
 </div>
 <p>This first method infers the OMIC matrics activities for the new features inferred by the autoencoders and project the samples into a 2D space created using the two first PCA components. The figure create a kernel density for each cluster and project the labels of the test set.</p>
 <p><img alt="kdplot 1" src="_images/stacked_TestProject_TEST_DATA_2_KM_plot_boosting_test_kde_2_cropped.png" /></p>
 <p>A second more sophisticated method uses the new features inferred by the autoencoders to infer new features by reconstructing a supervised network that targets the inferred label. The new set of features are then projected into a 2D space using PCA components. This second method might be present more efficient visualisations of the different clusters</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">boosting</span><span class="o">.</span><span class="n">plot_supervised_kernel_for_test_sets</span><span class="p">()</span>
+</pre></div>
+</div>
 <p><img alt="kdplot 2" src="_images/stacked_TestProject_TEST_DATA_2_KM_plot_boosting_test_kde_1_cropped.png" /></p>
 <p>Note that these visualisation are not very efficient in that example dataset, since we have only a limited number of samples (40). However, they might become more usefull for real datasets.</p>
 </div>

@@ -31,13 +31,13 @@ The required python packages can be installed using pip:
 
 ```bash
 pip install theano --user # Original backend used OR
-pip install tensorflow --user # Alternative backend for keras supposely for efficient
+pip install tensorflow --user # Alternative backend for keras
 pip install keras --user
 pip install rpy2==2.8.6 --user
 ```
 
 ## Support for CNTK / tensorflow
-We originally used Keras with theano as backend plateform. However, [Tensorflow](https://www.tensorflow.org/) or [CNTK](https://docs.microsoft.com/en-us/cognitive-toolkit/) are more recent DL framework that can be faster or more stable than theano. Because keras supports these 3 backends, it is possible to use them as alternative to theano. To CNTK, please refer to the official [guidelines](https://docs.microsoft.com/en-us/cognitive-toolkit/setup-cntk-on-your-machine) . To change backend, please configure the `$HOME/.keras/keras.json` file. (See official instruction [here](https://keras.io/backend/)).
+We originally used Keras with theano as backend plateform. However, [Tensorflow](https://www.tensorflow.org/) or [CNTK](https://docs.microsoft.com/en-us/cognitive-toolkit/) are more recent DL framework that can be faster or more stable than theano. Because keras supports these 3 backends, it is possible to use them as alternative to theano. To install CNTK, please refer to the official [guidelines](https://docs.microsoft.com/en-us/cognitive-toolkit/setup-cntk-on-your-machine) . To change backend, please configure the `$HOME/.keras/keras.json` file. (See official instruction [here](https://keras.io/backend/)).
 
 The default configuration file: ` ~/.keras/keras.json` looks like this:
 
