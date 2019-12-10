@@ -90,11 +90,12 @@
 <li class="toctree-l2"><a class="reference internal" href="#distributed-computation">Distributed computation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#visualisation-module-experimental">Visualisation module (Experimental)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#installation-of-the-package">installation of the package</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#test-usr-bin-byobu-reconnect-sockets">Test. /usr/bin/byobu-reconnect-sockets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#test">Test</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="usage.html">Tutorial: Simple DeepProg model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="usage_ensemble.html">Tutorial: Ensemble of DeepProg model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage_advanced.html">Tutorial: Advanced usage of DeepProg model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="LICENSE.html">License</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/simdeep.html">simdeep package</a></li>
 </ul>
@@ -217,10 +218,10 @@ pip install <span class="nv">rpy2</span><span class="o">==</span><span class="m"
 </div>
 <div class="section" id="r-installation">
 <h2>R installation<a class="headerlink" href="#r-installation" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-R notranslate"><div class="highlight"><pre><span></span><span class="nf">install.package</span><span class="p">(</span><span class="s">&quot;survival&quot;</span><span class="p">)</span>
-<span class="nf">install.package</span><span class="p">(</span><span class="s">&quot;glmnet&quot;</span><span class="p">)</span>
-<span class="nf">source</span><span class="p">(</span><span class="s">&quot;https://bioconductor.org/biocLite.R&quot;</span><span class="p">)</span>
-<span class="nf">biocLite</span><span class="p">(</span><span class="s">&quot;survcomp&quot;</span><span class="p">)</span>
+<div class="highlight-R notranslate"><div class="highlight"><pre><span></span>install.package<span class="p">(</span><span class="s">&quot;survival&quot;</span><span class="p">)</span>
+install.package<span class="p">(</span><span class="s">&quot;glmnet&quot;</span><span class="p">)</span>
+<span class="kn">source</span><span class="p">(</span><span class="s">&quot;https://bioconductor.org/biocLite.R&quot;</span><span class="p">)</span>
+biocLite<span class="p">(</span><span class="s">&quot;survcomp&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -231,8 +232,13 @@ Alternatively, it is also possible to create the model one by one without the ne
 </div>
 <div class="section" id="visualisation-module-experimental">
 <h2>Visualisation module (Experimental)<a class="headerlink" href="#visualisation-module-experimental" title="Permalink to this headline">¶</a></h2>
-<p>To visualise test sets projected into the multi-omic survival space, it is required to install <code class="docutils literal notranslate"><span class="pre">mpld3</span></code> module: <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">mpld3</span> <span class="pre">--user</span></code>.
-Note that the pip version of mpld3 installed on my computer presented a <a class="reference external" href="https://github.com/mpld3/mpld3/issues/434">bug</a>: <code class="docutils literal notranslate"><span class="pre">TypeError:</span> <span class="pre">array([1.])</span> <span class="pre">is</span> <span class="pre">not</span> <span class="pre">JSON</span> <span class="pre">serializable</span> </code>. However, the <a class="reference external" href="https://github.com/mpld3/mpld3">newest</a> version of the mpld3 available from the github solved this issue. It is therefore recommended to install the newest version to avoid this issue.</p>
+<p>To visualise test sets projected into the multi-omic survival space, it is required to install <code class="docutils literal notranslate"><span class="pre">mpld3</span></code> module.
+Note that the pip version of mpld3 installed with pip on my computer presented a <a class="reference external" href="https://github.com/mpld3/mpld3/issues/434">bug</a>: <code class="docutils literal notranslate"><span class="pre">TypeError:</span> <span class="pre">array([1.])</span> <span class="pre">is</span> <span class="pre">not</span> <span class="pre">JSON</span> <span class="pre">serializable</span> </code>. However, the <a class="reference external" href="https://github.com/mpld3/mpld3">newest</a> version of the mpld3 available from the github solved this issue. Rather than executing <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">mpld3</span> <span class="pre">--user</span></code> It is therefore recommended to install the newest version to avoid this issue directly from the github repository:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/mpld3/mpld3
+<span class="nb">cd</span> mpld3
+pip install -e . --user
+</pre></div>
+</div>
 </div>
 <div class="section" id="installation-of-the-package">
 <h2>installation of the package<a class="headerlink" href="#installation-of-the-package" title="Permalink to this headline">¶</a></h2>
@@ -242,8 +248,8 @@ pip install -r requirements.txt --user
 </pre></div>
 </div>
 </div>
-<div class="section" id="test-usr-bin-byobu-reconnect-sockets">
-<h2>Test. /usr/bin/byobu-reconnect-sockets<a class="headerlink" href="#test-usr-bin-byobu-reconnect-sockets" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="test">
+<h2>Test<a class="headerlink" href="#test" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>test if simdeep is functional (all the software are correctly installed):</li>
 </ul>

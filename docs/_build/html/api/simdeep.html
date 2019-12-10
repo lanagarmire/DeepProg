@@ -83,6 +83,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../usage.html">Tutorial: Simple DeepProg model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../usage_ensemble.html">Tutorial: Ensemble of DeepProg model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage_advanced.html">Tutorial: Advanced usage of DeepProg model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../LICENSE.html">License</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">simdeep package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#submodules">Submodules</a></li>
@@ -422,7 +423,7 @@ return {id:color}</p>
 <p>Instanciate a new DeepProg instance</p>
 <dl class="docutils">
 <dt>Parameters:</dt>
-<dd><table class="first last docutils field-list" frame="void" rules="none">
+<dd><table class="first docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
@@ -432,14 +433,10 @@ return {id:color}</p>
 </tr>
 <tr class="field-odd field"><th class="field-name">f_matrix_test:</th><td class="field-body">dict &lt;omic_name, sample x feature array&gt;. Default: None. Created during model fitting</td>
 </tr>
-<tr class="field-even field"><th class="field-name" colspan="2">f_matrix_train_out:dict &lt;omic_name, sample x feature array&gt;. Default:</th></tr>
-<tr class="field-even field"><td>&#160;</td><td class="field-body">None. Created during model fitting</td>
-</tr>
-<tr class="field-odd field"><th class="field-name" colspan="2">f_matrix_test_out:</th></tr>
-<tr class="field-odd field"><td>&#160;</td><td class="field-body">dict &lt;omic_name, sample x feature array&gt;. Default: None. Created during model fitting</td>
-</tr>
 </tbody>
 </table>
+<p class="last">:f_matrix_train_out:dict &lt;omic_name, sample x feature array&gt;. Default: None. Created during model fitting
+:f_matrix_test_out: dict &lt;omic_name, sample x feature array&gt;. Default: None. Created during model fitting</p>
 </dd>
 </dl>
 <dl class="method">

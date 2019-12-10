@@ -35,7 +35,7 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="License" href="LICENSE.html" />
+    <link rel="next" title="Tutorial: Advanced usage of DeepProg model" href="usage_advanced.html" />
     <link rel="prev" title="Tutorial: Simple DeepProg model" href="usage.html" /> 
 </head>
 
@@ -92,6 +92,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#more-examples">More examples</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="usage_advanced.html">Tutorial: Advanced usage of DeepProg model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="LICENSE.html">License</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/simdeep.html">simdeep package</a></li>
 </ul>
@@ -333,6 +334,10 @@ Two KM plots are also generated, one using the cluster labels:</p>
 └── stacked_TestProject_training_set_labels.tsv
 </pre></div>
 </div>
+<p>file: stacked_TestProject_TEST_DATA_1_KM_plot_boosting_test.png</p>
+<p><img alt="test KM plot 1" src="_images/stacked_TestProject_TEST_DATA_1_KM_plot_boosting_test.png" /></p>
+<p>file: stacked_TestProject_TEST_DATA_2_KM_plot_boosting_test.png</p>
+<p><img alt="test KM plot 2" src="_images/stacked_TestProject_TEST_DATA_2_KM_plot_boosting_test.png" /></p>
 </div>
 <div class="section" id="distributed-computation">
 <h2>Distributed computation<a class="headerlink" href="#distributed-computation" title="Permalink to this headline">¶</a></h2>
@@ -346,7 +351,7 @@ Two KM plots are also generated, one using the cluster labels:</p>
 
 <span class="n">boosting</span> <span class="o">=</span> <span class="n">SimDeepBoosting</span><span class="p">(</span>
     <span class="o">...</span>
-    <span class="n">distribute</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="c1"># Additional option to use ray cluster scheduler</span>
+    <span class="n">distribute</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="c1"># Additional option to use ray cluster scheduler</span>
     <span class="o">...</span>
 <span class="p">)</span>
 <span class="o">...</span>
@@ -379,7 +384,7 @@ Two KM plots are also generated, one using the cluster labels:</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="LICENSE.html" class="btn btn-neutral float-right" title="License" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="usage_advanced.html" class="btn btn-neutral float-right" title="Tutorial: Advanced usage of DeepProg model" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="usage.html" class="btn btn-neutral float-left" title="Tutorial: Simple DeepProg model" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

@@ -200,6 +200,13 @@ stacked_TestProject
 └── stacked_TestProject_training_set_labels.tsv
 
 ```
+file: stacked_TestProject_TEST_DATA_1_KM_plot_boosting_test.png
+
+![test KM plot 1](./img/stacked_TestProject_TEST_DATA_1_KM_plot_boosting_test.png)
+
+file: stacked_TestProject_TEST_DATA_2_KM_plot_boosting_test.png
+
+![test KM plot 2](./img/stacked_TestProject_TEST_DATA_2_KM_plot_boosting_test.png)
 
 ## Distributed computation
 

@@ -65,8 +65,14 @@ It is possible to use the python ray framework [https://github.com/ray-project/r
 Alternatively, it is also possible to create the model one by one without the need of the ray framework
 
 ## Visualisation module (Experimental)
-To visualise test sets projected into the multi-omic survival space, it is required to install `mpld3` module: `pip install mpld3 --user`.
-Note that the pip version of mpld3 installed on my computer presented a [bug](https://github.com/mpld3/mpld3/issues/434): `TypeError: array([1.]) is not JSON serializable `. However, the [newest](https://github.com/mpld3/mpld3) version of the mpld3 available from the github solved this issue. It is therefore recommended to install the newest version to avoid this issue.
+To visualise test sets projected into the multi-omic survival space, it is required to install `mpld3` module.
+Note that the pip version of mpld3 installed with pip on my computer presented a [bug](https://github.com/mpld3/mpld3/issues/434): `TypeError: array([1.]) is not JSON serializable `. However, the [newest](https://github.com/mpld3/mpld3) version of the mpld3 available from the github solved this issue. Rather than executing `pip install mpld3 --user` It is therefore recommended to install the newest version to avoid this issue directly from the github repository:
+
+```bash
+git clone https://github.com/mpld3/mpld3
+cd mpld3
+pip install -e . --user
+```
 
 ## installation of the package
 
@@ -76,7 +82,7 @@ cd SimDeep
 pip install -r requirements.txt --user
 ```
 
-## Test. /usr/bin/byobu-reconnect-sockets
+## Test
 * test if simdeep is functional (all the software are correctly installed):
 
 ```bash

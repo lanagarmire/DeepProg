@@ -12,8 +12,15 @@ Welcome to DeepProg's documentation!
    installation.md
    usage.md
    usage_ensemble.md
+   usage_advanced.md
    LICENSE.rst
    ./api/simdeep.rst
+
+
+Access
+------
+
+The package is currently only available for reviewers and will become accessible for everyone upon acceptance of the paper. The package is accessible at this link: https://gitlab.com/Grouumf/SimDeep. To access the package, it is required to log with the user name: **guest_opoirion** and the password: **guest2020**
 
 
 Contribute
@@ -27,6 +34,11 @@ Support
 
 If you are having issues, please let us know.
 You can reach us using the following email address: o.poirion@gmail.com
+
+Citation
+--------
+
+This package refers to our preprint paper: [Multi-omics-based pan-cancer prognosis prediction using an ensemble of deep-learning and machine-learning models](https://www.medrxiv.org/content/10.1101/19010082v1)
 
 License
 -------

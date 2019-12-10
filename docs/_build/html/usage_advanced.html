@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Search &mdash; DeepProg  documentation</title>
+  <title>Tutorial: Advanced usage of DeepProg model &mdash; DeepProg  documentation</title>
   
 
   
@@ -25,7 +25,6 @@
         <script type="text/javascript" src="_static/underscore.js"></script>
         <script type="text/javascript" src="_static/doctools.js"></script>
         <script type="text/javascript" src="_static/language_data.js"></script>
-        <script type="text/javascript" src="_static/searchtools.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -35,7 +34,9 @@
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="#" /> 
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="License" href="LICENSE.html" />
+    <link rel="prev" title="Tutorial: Ensemble of DeepProg model" href="usage_ensemble.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -62,7 +63,7 @@
 
           
 <div role="search">
-  <form id="rtd-search-form" class="wy-form" action="#" method="get">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
@@ -79,11 +80,14 @@
               
             
             
-              <ul>
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="usage.html">Tutorial: Simple DeepProg model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="usage_ensemble.html">Tutorial: Ensemble of DeepProg model</a></li>
-<li class="toctree-l1"><a class="reference internal" href="usage_advanced.html">Tutorial: Advanced usage of DeepProg model</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Tutorial: Advanced usage of DeepProg model</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#visualisation">Visualisation</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="LICENSE.html">License</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/simdeep.html">simdeep package</a></li>
 </ul>
@@ -131,12 +135,14 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-      <li>Search</li>
+      <li>Tutorial: Advanced usage of DeepProg model</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
+            <a href="_sources/usage_advanced.md.txt" rel="nofollow"> View page source</a>
+          
         
       </li>
     
@@ -148,24 +154,36 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <noscript>
-  <div id="fallback" class="admonition warning">
-    <p class="last">
-      Please activate JavaScript to enable the search
-      functionality.
-    </p>
-  </div>
-  </noscript>
+  <div class="section" id="tutorial-advanced-usage-of-deepprog-model">
+<h1>Tutorial: Advanced usage of DeepProg model<a class="headerlink" href="#tutorial-advanced-usage-of-deepprog-model" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="visualisation">
+<h2>Visualisation<a class="headerlink" href="#visualisation" title="Permalink to this headline">¶</a></h2>
+<p>Once a DeepProg model is fitted, it might be interessant to obtain different visualisations of the samples for the training or the test sets, based on new survival features inferred by the autoencoders.For that purpose, we developped two methods to project the samples into a 2D space that can be called once a <code class="docutils literal notranslate"><span class="pre">SimDeepBoosting</span></code> or a <code class="docutils literal notranslate"><span class="pre">simDeep</span></code> is fitted.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">boosting</span><span class="o">.</span><span class="n">plot_supervised_predicted_labels_for_test_sets</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>This first method infers the OMIC matrics activities for the new features inferred by the autoencoders and project the samples into a 2D space created using the two first PCA components. The figure create a kernel density for each cluster and project the labels of the test set.</p>
+<p><img alt="kdplot 1" src="_images/stacked_TestProject_TEST_DATA_2_KM_plot_boosting_test_kde_2_cropped.png" /></p>
+<p>A second more sophisticated method uses the new features inferred by the autoencoders to infer new features by reconstructing a supervised network that targets the inferred label. The new set of features are then projected into a 2D space using PCA components. This second method might be present more efficient visualisations of the different clusters</p>
+<p><img alt="kdplot 2" src="_images/stacked_TestProject_TEST_DATA_2_KM_plot_boosting_test_kde_1_cropped.png" /></p>
+<p>Note that these visualisation are not very efficient in that example dataset, since we have only a limited number of samples (40). However, they might become more usefull for real datasets.</p>
+</div>
+</div>
 
-  
-  <div id="search-results">
-  
-  </div>
 
            </div>
            
           </div>
           <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="LICENSE.html" class="btn btn-neutral float-right" title="License" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="usage_ensemble.html" class="btn btn-neutral float-left" title="Tutorial: Ensemble of DeepProg model" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
   
 
   <hr/>
@@ -198,14 +216,7 @@
   
   
     
-  
-  <script type="text/javascript">
-    jQuery(function() { Search.loadIndex("searchindex.js"); });
-  </script>
-  
-  <script type="text/javascript" id="searchindexloader"></script>
    
-
 
 </body>
 </html>
