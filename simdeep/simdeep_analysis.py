@@ -74,14 +74,29 @@ MODEL_THRES = 0.05
 
 class SimDeep(DeepBase):
     """
-    Instanciate a new DeepProg instance
+    Instanciate a new DeepProg instance.
+    The default parameters are defined in the config.py file
 
     Parameters:
-            :dataset: ExtractData instance. Default: None (create a new dataset using the config variable)
-            :f_matrix_train: dict <omic_name, sample x feature array>. Default: None. Created during model fitting
-            :f_matrix_test: dict <omic_name, sample x feature array>. Default: None. Created during model fitting
-            :f_matrix_train_out:dict <omic_name, sample x feature array>. Default: None. Created during model fitting
-            :f_matrix_test_out: dict <omic_name, sample x feature array>. Default: None. Created during model fitting
+             :dataset: ExtractData instance. Default None (create a new dataset using the config variable)
+
+             :nb_clusters: Number of clusters to search (default NB_CLUSTERS)
+
+             :pvalue_thres: Pvalue threshold to include a feature  (default PVALUE_THRESHOLD)
+             :cindex_thres: C-index threshold to include a feature. This parameter is used only if `node_selection` is set to "C-index" (default CINDEX_THRESHOLD)
+             :cluster_method: Cluster method to use. possible choice ['mixture', 'kmeans']. (default CLUSTER_METHOD)
+             :cluster_eval_method: Cluster evaluation method to use in case the `cluster_array` parameter is a list of possible K. Possible choice ['bic', 'silhouette', 'calinski'] (default CLUSTER_EVAL_METHOD)
+             :classifier_type: Type of classifier to use. Possible choice ['svm', 'clustering']. If 'clustering' is selected, The predict method of the clustering algoritm is used  (default CLASSIFIER_TYPE)
+             :project_name: Name of the project. This name will be used to save the output files and create the output folder (default PROJECT_NAME)
+             :path_results: Result folder path used to save the output files (default PATH_RESULTS)
+             :cluster_array: Array of possible number of clusters to try. If set, `nb_clusters` is ignored (default CLUSTER_ARRAY)
+             :nb_selected_features: Number of selected features to construct classifiers (default NB_SELECTED_FEATURES)
+             :mixture_params: Dictionary of parameters used to instanciate the Gaussian mixture algorithm (default MIXTURE_PARAMS)
+             :node_selection: Mehtod to select new features. possible choice ['Cox-PH', 'C-index']. (default NODES_SELECTION)
+             :nb_threads_coxph: Number of python processes to use to compute individual survival models in parallel (default NB_THREADS_COXPH)
+             :classification_method: Possible choice  ['ALL_FEATURES', 'SURVIVAL_FEATURES']. If 'SURVIVAL_FEATURES' is selected, the classifiers are built using survival features  (default CLASSIFICATION_METHOD)
+             :load_existing_models: (default LOAD_EXISTING_MODELS)
+             :path_to_save_model: (default PATH_TO_SAVE_MODEL)
 
 
     """

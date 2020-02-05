@@ -84,6 +84,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../usage.html">Tutorial: Simple DeepProg model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../usage_ensemble.html">Tutorial: Ensemble of DeepProg model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../usage_advanced.html">Tutorial: Advanced usage of DeepProg model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../case_study.html">Case study: Analyzing TCGA HCC dataset</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../LICENSE.html">License</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">simdeep package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#submodules">Submodules</a></li>
@@ -420,23 +421,57 @@ return {id:color}</p>
 <dt id="simdeep.simdeep_analysis.SimDeep">
 <em class="property">class </em><code class="descclassname">simdeep.simdeep_analysis.</code><code class="descname">SimDeep</code><span class="sig-paren">(</span><em>nb_clusters=2</em>, <em>pvalue_thres=0.01</em>, <em>cindex_thres=0.65</em>, <em>cluster_method='mixture'</em>, <em>cluster_eval_method='silhouette'</em>, <em>classifier_type='svm'</em>, <em>project_name='test_dummy_dataset'</em>, <em>path_results='./'</em>, <em>cluster_array=[]</em>, <em>nb_selected_features=10</em>, <em>mixture_params={'covariance_type': 'diag'</em>, <em>'max_iter': 1000</em>, <em>'n_init': 100}</em>, <em>node_selection='Cox-PH'</em>, <em>nb_threads_coxph=10</em>, <em>classification_method='ALL_FEATURES'</em>, <em>load_existing_models=False</em>, <em>path_to_save_model='./'</em>, <em>do_KM_plot=True</em>, <em>verbose=True</em>, <em>_isboosting=False</em>, <em>dataset=None</em>, <em>deep_model_additional_args={}</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/simdeep_analysis.html#SimDeep"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.simdeep_analysis.SimDeep" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#simdeep.deepmodel_base.DeepBase" title="simdeep.deepmodel_base.DeepBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">simdeep.deepmodel_base.DeepBase</span></code></a></p>
-<p>Instanciate a new DeepProg instance</p>
+<p>Instanciate a new DeepProg instance.
+The default parameters are defined in the config.py file</p>
 <dl class="docutils">
 <dt>Parameters:</dt>
-<dd><table class="first docutils field-list" frame="void" rules="none">
+<dd><table class="first last docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">dataset:</th><td class="field-body">ExtractData instance. Default: None (create a new dataset using the config variable)</td>
+<tr class="field-odd field"><th class="field-name">dataset:</th><td class="field-body">ExtractData instance. Default None (create a new dataset using the config variable)</td>
 </tr>
-<tr class="field-even field"><th class="field-name">f_matrix_train:</th><td class="field-body">dict &lt;omic_name, sample x feature array&gt;. Default: None. Created during model fitting</td>
+<tr class="field-even field"><th class="field-name">nb_clusters:</th><td class="field-body">Number of clusters to search (default NB_CLUSTERS)</td>
 </tr>
-<tr class="field-odd field"><th class="field-name">f_matrix_test:</th><td class="field-body">dict &lt;omic_name, sample x feature array&gt;. Default: None. Created during model fitting</td>
+<tr class="field-odd field"><th class="field-name">pvalue_thres:</th><td class="field-body">Pvalue threshold to include a feature  (default PVALUE_THRESHOLD)</td>
+</tr>
+<tr class="field-even field"><th class="field-name">cindex_thres:</th><td class="field-body">C-index threshold to include a feature. This parameter is used only if <cite>node_selection</cite> is set to “C-index” (default CINDEX_THRESHOLD)</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">cluster_method:</th><td class="field-body">Cluster method to use. possible choice [‘mixture’, ‘kmeans’]. (default CLUSTER_METHOD)</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">cluster_eval_method:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">Cluster evaluation method to use in case the <cite>cluster_array</cite> parameter is a list of possible K. Possible choice [‘bic’, ‘silhouette’, ‘calinski’] (default CLUSTER_EVAL_METHOD)</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">classifier_type:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">Type of classifier to use. Possible choice [‘svm’, ‘clustering’]. If ‘clustering’ is selected, The predict method of the clustering algoritm is used  (default CLASSIFIER_TYPE)</td>
+</tr>
+<tr class="field-even field"><th class="field-name">project_name:</th><td class="field-body">Name of the project. This name will be used to save the output files and create the output folder (default PROJECT_NAME)</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">path_results:</th><td class="field-body">Result folder path used to save the output files (default PATH_RESULTS)</td>
+</tr>
+<tr class="field-even field"><th class="field-name">cluster_array:</th><td class="field-body">Array of possible number of clusters to try. If set, <cite>nb_clusters</cite> is ignored (default CLUSTER_ARRAY)</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">nb_selected_features:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">Number of selected features to construct classifiers (default NB_SELECTED_FEATURES)</td>
+</tr>
+<tr class="field-even field"><th class="field-name">mixture_params:</th><td class="field-body">Dictionary of parameters used to instanciate the Gaussian mixture algorithm (default MIXTURE_PARAMS)</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">node_selection:</th><td class="field-body">Mehtod to select new features. possible choice [‘Cox-PH’, ‘C-index’]. (default NODES_SELECTION)</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">nb_threads_coxph:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">Number of python processes to use to compute individual survival models in parallel (default NB_THREADS_COXPH)</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">classification_method:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">Possible choice  [‘ALL_FEATURES’, ‘SURVIVAL_FEATURES’]. If ‘SURVIVAL_FEATURES’ is selected, the classifiers are built using survival features  (default CLASSIFICATION_METHOD)</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">load_existing_models:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">(default LOAD_EXISTING_MODELS)</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">path_to_save_model:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">(default PATH_TO_SAVE_MODEL)</td>
 </tr>
 </tbody>
 </table>
-<p class="last">:f_matrix_train_out:dict &lt;omic_name, sample x feature array&gt;. Default: None. Created during model fitting
-:f_matrix_test_out: dict &lt;omic_name, sample x feature array&gt;. Default: None. Created during model fitting</p>
 </dd>
 </dl>
 <dl class="method">

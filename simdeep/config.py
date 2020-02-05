@@ -9,7 +9,7 @@ PATH_THIS_FILE = pathsplit(abspath(__file__))[0]
 
 #################### SimDeep variable ##################
 NB_CLUSTERS = 2 # Number of clusters
-CLUSTER_METHOD = 'mixture'
+CLUSTER_METHOD = 'mixture' # possible choice: ['mixture', 'kmeans']
 CLUSTER_EVAL_METHOD = 'silhouette' # possible choice: ['bic', 'silhouette', 'calinski']
 CLASSIFIER_TYPE = 'svm'
 NODES_SELECTION = 'Cox-PH' # possible choice: ['Cox-PH', 'C-index']
