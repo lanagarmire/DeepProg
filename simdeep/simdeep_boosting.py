@@ -307,7 +307,11 @@ class SimDeepBoosting():
         for model in self.models:
             del model
 
-        gc.collect()
+        try:
+            gc.collect()
+        except Exception as e:
+            print('Warning: Exception {0} from garbage collector. continuing... '.format(
+                e))
 
     def _from_models(self, fname, *args, **kwargs):
         """
