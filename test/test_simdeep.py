@@ -39,12 +39,16 @@ class TestPackage(unittest.TestCase):
     def test_3_coxph_function(self):
         """test if the coxph function works """
         from simdeep.coxph_from_r import coxph
-        pvalue = coxph(
-            np.random.randint(0,2,50),
-            np.random.randint(0,2,50),
-            np.random.randint(50,365,50),
-        )
+
+        isdead = [0, 1, 1, 1, 0, 1, 0, 0, 1, 0]
+        nbdays = [24, 10, 25, 50, 14, 10 ,100, 10, 50, 10]
+        values = [0, 1, 1, 0 , 1, 2, 0, 1, 0, 0]
+
+
+        pvalue = coxph(values, isdead, nbdays, isfactor=True)
+
         self.assertTrue(isinstance(pvalue, float))
+        self.assertTrue(pvalue < 0.05)
 
     def test_4_keras_model_instantiation(self):
         """
@@ -83,6 +87,9 @@ class TestPackage(unittest.TestCase):
         PROJECT_NAME = 'TestProject'
         EPOCHS = 3
 
+        deep_model_additional_args = {
+        "epochs":EPOCHS, "seed":4}
+
         dataset = LoadData(path_data=PATH_DATA,
                        survival_tsv=SURVIVAL_TSV,
                        training_tsv=TRAINING_TSV)
@@ -90,8 +97,8 @@ class TestPackage(unittest.TestCase):
         simdeep = SimDeep(dataset=dataset,
                           project_name=PROJECT_NAME,
                           path_results=PATH_DATA,
-                          epochs=EPOCHS,
-                          seed=4)
+                          deep_model_additional_args=deep_model_additional_args,
+        )
         simdeep.load_training_dataset()
         simdeep.fit()
         simdeep.predict_labels_on_full_dataset()

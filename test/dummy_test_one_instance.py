@@ -32,11 +32,14 @@ def test_instance():
                    survival_tsv=SURVIVAL_TSV,
                    training_tsv=TRAINING_TSV)
 
+    deep_model_additional_args = {
+        "epochs":EPOCHS, "seed":4}
+
     simdeep = SimDeep(dataset=dataset,
                       project_name=PROJECT_NAME,
                       path_results=PATH_DATA,
-                      epochs=EPOCHS,
-                      seed=4)
+                      deep_model_additional_args=deep_model_additional_args,
+                      )
     simdeep.load_training_dataset()
     simdeep.fit()
     simdeep.predict_labels_on_full_dataset()
