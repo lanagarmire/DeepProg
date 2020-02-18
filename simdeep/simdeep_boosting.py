@@ -626,7 +626,11 @@ class SimDeepBoosting():
         self.cindex_test_folds = []
 
         self._from_models('predict_labels_on_test_fold')
-        cindexes = self._from_models('compute_c_indexes_for_test_fold_dataset')
+        try:
+            cindexes = self._from_models('compute_c_indexes_for_test_fold_dataset')
+        except Exception as e:
+            print('Exception while computing the c-index for test fold: {0}'.format(e))
+            return np.nan
 
         for cindex in cindexes:
             if isinstance(cindex, NALogicalType):
@@ -647,7 +651,12 @@ class SimDeepBoosting():
         """
         """
         self._from_models('predict_labels_on_test_fold')
-        cindexes_list = self._from_models('compute_c_indexes_for_full_dataset')
+
+        try:
+            cindexes_list = self._from_models('compute_c_indexes_for_full_dataset')
+        except Exception as e:
+            print('Exception while computing the c-index for full dataset: {0}'.format(e))
+            return np.nan
 
         if self.verbose:
             print('c-index results for full dataset: mean {0} std {1}'.format(
@@ -661,7 +670,12 @@ class SimDeepBoosting():
     def collect_cindex_for_training_dataset(self):
         """
         """
-        cindexes_list = self._from_models('compute_c_indexes_for_training_dataset')
+        try:
+            cindexes_list = self._from_models('compute_c_indexes_for_training_dataset')
+        except Exception as e:
+            print('Exception while computing the c-index for training dataset: {0}'.format(e))
+            self.log['c-indexes train (mean)'] = np.nan
+            return np.nan
 
         if self.verbose:
             print('C-index results for training dataset: mean {0} std {1}'.format(
@@ -674,7 +688,12 @@ class SimDeepBoosting():
     def collect_cindex_for_test_dataset(self):
         """
         """
-        cindexes_list = self._from_models('compute_c_indexes_for_test_dataset')
+        try:
+            cindexes_list = self._from_models('compute_c_indexes_for_test_dataset')
+        except Exception as e:
+            print('Exception while computing the c-index for test dataset: {0}'.format(e))
+            self.log['C-index test {0}'.format(self.test_fname_key)] = np.nan
+            return np.nan
 
         if self.verbose:
             print('C-index results for test: mean {0} std {1}'.format(

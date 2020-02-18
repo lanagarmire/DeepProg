@@ -17,7 +17,7 @@ def test_instance():
     PROJECT_NAME = 'TestProject'
     EPOCHS = 10
     SEED = 3
-    nb_it = 10
+    nb_it = 5
     nb_threads = 2
 
     # Import cluster scheduler

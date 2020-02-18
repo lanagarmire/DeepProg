@@ -1063,8 +1063,12 @@ class SimDeep(DeepBase):
         days, dead = np.asarray(self.dataset.survival).T
         days_full, dead_full = np.asarray(self.dataset.survival_full).T
 
-        cindex = c_index(self.labels, dead, days,
-                       self.full_labels, dead_full, days_full)
+        try:
+            cindex = c_index(self.labels, dead, days,
+                             self.full_labels, dead_full, days_full)
+        except Exception as e:
+            print('Exception while computing the c-index: {0}'.format(e))
+            cindex = np.nan
 
         if self.verbose:
             print('c-index for full dataset:{0}'.format(cindex))
@@ -1077,8 +1081,12 @@ class SimDeep(DeepBase):
         """
         days, dead = np.asarray(self.dataset.survival).T
 
-        cindex = c_index(self.labels, dead, days,
-                       self.labels, dead, days)
+        try:
+            cindex = c_index(self.labels, dead, days,
+                             self.labels, dead, days)
+        except Exception as e:
+            print('Exception while computing the c-index: {0}'.format(e))
+            cindex = np.nan
 
         if self.verbose:
             print('c-index for training dataset:{0}'.format(cindex))
@@ -1092,8 +1100,12 @@ class SimDeep(DeepBase):
         days, dead = np.asarray(self.dataset.survival).T
         days_test, dead_test = np.asarray(self.dataset.survival_test).T
 
-        cindex = c_index(self.labels, dead, days,
-                         self.test_labels, dead_test, days_test)
+        try:
+            cindex = c_index(self.labels, dead, days,
+                             self.test_labels, dead_test, days_test)
+        except Exception as e:
+            print('Exception while computing the c-index: {0}'.format(e))
+            cindex = np.nan
 
         if self.verbose:
             print('c-index for test dataset:{0}'.format(cindex))
@@ -1107,8 +1119,12 @@ class SimDeep(DeepBase):
         days, dead = np.asarray(self.dataset.survival).T
         days_cv, dead_cv= np.asarray(self.dataset.survival_cv).T
 
-        cindex =  c_index(self.labels, dead, days,
-                          self.cv_labels, dead_cv, days_cv)
+        try:
+            cindex =  c_index(self.labels, dead, days,
+                              self.cv_labels, dead_cv, days_cv)
+        except Exception as e:
+            print('Exception while computing the c-index: {0}'.format(e))
+            cindex = np.nan
 
         if self.verbose:
             print('c-index for test fold dataset:{0}'.format(cindex))
