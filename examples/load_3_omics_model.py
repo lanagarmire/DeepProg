@@ -49,7 +49,7 @@ def main():
     PROJECT_NAME = 'HCC_dataset'
     EPOCHS = 10
     SEED = 10045
-    nb_it = 10
+    nb_it = 3
     nb_threads = 2
 
     survival_flag = {
@@ -59,6 +59,14 @@ def main():
 
     import ray
     ray.init(num_cpus=3)
+
+    normalization = {
+        'NB_FEATURES_TO_KEEP': 100, # variance selection features. 0 is all the feature
+        'TRAIN_RANK_NORM': True,
+        'TRAIN_CORR_REDUCTION': True,
+        'TRAIN_CORR_RANK_NORM': True,
+        'TRAIN_ROBUST_SCALE': False,
+    }
 
     # Instanciate a DeepProg instance
     boosting = SimDeepBoosting(
@@ -72,7 +80,11 @@ def main():
         path_results=path_data,
         epochs=EPOCHS,
         survival_flag=survival_flag,
-        distribute=True,
+        distribute=False,
+        cluster_method="coxPH",
+        use_autoencoders=True,
+        feature_surv_analysis=True,
+        normalization=normalization,
         seed=SEED)
 
     boosting.fit()

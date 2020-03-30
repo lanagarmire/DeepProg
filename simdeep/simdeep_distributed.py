@@ -20,6 +20,9 @@ from simdeep.config import LOAD_EXISTING_MODELS
 from simdeep.config import NODES_SELECTION
 from simdeep.config import PATH_TO_SAVE_MODEL
 
+from simdeep.config import USE_AUTOENCODERS
+from simdeep.config import FEATURE_SURV_ANALYSIS
+
 
 @ray.remote
 class SimDeepDistributed(SimDeep):
@@ -28,6 +31,8 @@ class SimDeepDistributed(SimDeep):
             nb_clusters=NB_CLUSTERS,
             pvalue_thres=PVALUE_THRESHOLD,
             cindex_thres=CINDEX_THRESHOLD,
+            use_autoencoders=USE_AUTOENCODERS,
+            feature_surv_analysis=FEATURE_SURV_ANALYSIS,
             cluster_method=CLUSTER_METHOD,
             cluster_eval_method=CLUSTER_EVAL_METHOD,
             classifier_type=CLASSIFIER_TYPE,
@@ -58,6 +63,8 @@ class SimDeepDistributed(SimDeep):
             classifier_type=classifier_type,
             project_name=project_name,
             path_results=path_results,
+            use_autoencoders=use_autoencoders,
+            feature_surv_analysis=feature_surv_analysis,
             cluster_array=cluster_array,
             nb_selected_features=nb_selected_features,
             mixture_params=mixture_params,

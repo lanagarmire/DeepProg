@@ -229,6 +229,47 @@ def c_index_multiple(
 
     return c_index[0][0]
 
+
+def predict_with_coxph_glmnet(
+        matrix,
+        isdead,
+        nbdays,
+        matrix_test,
+        alpha=0.5,
+        lambda_val=None):
+    """
+    """
+    rob.r('set.seed(2020)')
+
+    if matrix.shape[1] < 2:
+        return np.nan
+
+    nbdays[nbdays == 0] = 1
+
+    isdead = FloatVector(isdead)
+
+    nbdays = FloatVector(nbdays)
+
+    matrix = convert_to_rmatrix(matrix)
+    matrix_test = convert_to_rmatrix(matrix_test)
+
+    surv = survival.Surv(nbdays, isdead)
+
+    cv_glmnet = rob.r('cv.glmnet')
+    glmnet = rob.r('glmnet')
+
+    arg = {'lambda': lambda_val}
+
+    if not lambda_val:
+        cv_fit = cv_glmnet(matrix, surv, family='cox',
+                           alpha=alpha)
+        arg = {'lambda': min(cv_fit[0])}
+
+    fit = glmnet(matrix, surv, family='cox', alpha=0, **arg)
+
+    return np.asarray(rob.r.predict(fit, matrix_test)).T[0]
+
+
 def convert_to_rmatrix(data):
     """ """
     shape = data.shape

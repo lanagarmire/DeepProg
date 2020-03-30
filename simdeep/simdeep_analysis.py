@@ -8,11 +8,15 @@ from sklearn.model_selection import cross_val_score
 
 from simdeep.deepmodel_base import DeepBase
 
+from simdeep.survival_model_utils import ClusterWithSurvival
+
 from simdeep.config import NB_CLUSTERS
 from simdeep.config import CLUSTER_ARRAY
 from simdeep.config import PVALUE_THRESHOLD
 from simdeep.config import CINDEX_THRESHOLD
 from simdeep.config import CLASSIFIER_TYPE
+from simdeep.config import USE_AUTOENCODERS
+from simdeep.config import FEATURE_SURV_ANALYSIS
 
 from simdeep.config import MIXTURE_PARAMS
 from simdeep.config import PATH_RESULTS
@@ -104,6 +108,8 @@ class SimDeep(DeepBase):
                  nb_clusters=NB_CLUSTERS,
                  pvalue_thres=PVALUE_THRESHOLD,
                  cindex_thres=CINDEX_THRESHOLD,
+                 use_autoencoders=USE_AUTOENCODERS,
+                 feature_surv_analysis=FEATURE_SURV_ANALYSIS,
                  cluster_method=CLUSTER_METHOD,
                  cluster_eval_method=CLUSTER_EVAL_METHOD,
                  classifier_type=CLASSIFIER_TYPE,
@@ -127,7 +133,8 @@ class SimDeep(DeepBase):
         self.nb_clusters = nb_clusters
         self.pvalue_thres = pvalue_thres
         self.cindex_thres = cindex_thres
-
+        self.use_autoencoders = use_autoencoders
+        self.feature_surv_analysis = feature_surv_analysis
         self.classifier_grid = GridSearchCV(CLASSIFIER(), HYPER_PARAMETERS, cv=5)
         self.cluster_array = cluster_array
         self.path_results = path_results
@@ -664,6 +671,14 @@ class SimDeep(DeepBase):
                 **self.mixture_params
             )
 
+        elif self.cluster_method == "coxPH":
+            nbdays, isdead = self.dataset.survival.T.tolist()
+
+            self.clustering = ClusterWithSurvival(
+                n_clusters=self.nb_clusters,
+                isdead=isdead,
+                nbdays=nbdays)
+
         if not self.activities_train.any():
             raise Exception('No components linked to survival!'\
                             ' cannot perform clustering')
@@ -767,8 +782,11 @@ class SimDeep(DeepBase):
                           ' returning None')
                 return None
 
+            if self.use_autoencoders:
+                activities = self.encoder_predict(key, matrix)
+            else:
+                activities = np.asarray(matrix)
 
-            activities = self.encoder_predict(key, matrix)
             activities_array[key] = activities.T[self.valid_node_ids_array[key]].T
 
         return hstack([activities_array[key]
@@ -783,12 +801,19 @@ class SimDeep(DeepBase):
             keys = list(self.encoder_array.keys())
 
         for key in keys:
-            valid_node_ids = self._look_for_nodes(key)
-            self.valid_node_ids_array[key] = valid_node_ids
-
             matrix_train = self.matrix_train_array[key]
 
-            activities = self.encoder_predict(key, matrix_train)
+            if self.use_autoencoders:
+                activities = self.encoder_predict(key, matrix_train)
+            else:
+                activities = np.asarray(matrix_train)
+
+            if self.feature_surv_analysis:
+                valid_node_ids = self._look_for_nodes(key)
+            else:
+                valid_node_ids = np.arange(matrix_train.shape[1])
+
+            self.valid_node_ids_array[key] = valid_node_ids
             self.activities_array[key] = activities.T[valid_node_ids].T
 
         self.activities_train = hstack([self.activities_array[key]
@@ -805,9 +830,16 @@ class SimDeep(DeepBase):
         for key in keys:
             matrix_train = self.matrix_train_array[key]
 
-            activities = self.encoder_predict(key, matrix_train)
+            if self.use_autoencoders:
+                activities = self.encoder_predict(key, matrix_train)
+            else:
+                activities = np.asarray(matrix_train)
 
-            valid_node_ids = self._look_for_prediction_nodes(key)
+            if self.feature_surv_analysis:
+                valid_node_ids = self._look_for_prediction_nodes(key)
+            else:
+                valid_node_ids = np.arange(matrix_train.shape[1])
+
             self.pred_node_ids_array[key] = valid_node_ids
 
             self.activities_pred_array[key] = activities.T[valid_node_ids].T
@@ -826,8 +858,12 @@ class SimDeep(DeepBase):
 
         for key in self.dataset.matrix_test_array:
             node_ids = self.pred_node_ids_array[key]
-            activities_test[key] = self.encoder_predict(
-                key, self.dataset.matrix_test_array[key]).T[node_ids].T
+
+            if self.use_autoencoders:
+                activities_test[key] = self.encoder_predict(
+                    key, self.dataset.matrix_test_array[key]).T[node_ids].T
+            else:
+                activities_test[key] = self.dataset.matrix_test_array[key]
 
         activities_test = hstack(activities_test.values())
         activities_train = hstack([self.activities_pred_array[key]
@@ -852,8 +888,12 @@ class SimDeep(DeepBase):
 
         for key in self.dataset.matrix_cv_array:
             node_ids = self.pred_node_ids_array[key]
-            activities_cv[key] = self.encoder_predict(
-                key, self.dataset.matrix_cv_array[key]).T[node_ids].T
+
+            if self.use_autoencoders:
+                activities_cv[key] = self.encoder_predict(
+                    key, self.dataset.matrix_cv_array[key]).T[node_ids].T
+            else:
+                activities_cv[key] = self.dataset.matrix_cv_array[key]
 
         activities_cv = hstack(activities_cv.values())
         cindex = c_index_multiple(self.activities_for_pred_train, dead, days,
@@ -989,7 +1029,11 @@ class SimDeep(DeepBase):
 
         if key is not None:
             matrix_train = self.matrix_train_array[key]
-            activities = np.nan_to_num(self.encoder_predict(key, matrix_train))
+
+            if self.use_autoencoders:
+                activities = np.nan_to_num(self.encoder_predict(key, matrix_train))
+            else:
+                activities = np.asarray(matrix_train)
         else:
             assert(activities is not None)
 
@@ -1030,8 +1074,12 @@ class SimDeep(DeepBase):
         matrix_train = self.matrix_train_array[key]
         matrix_cv = self.dataset.matrix_cv_array[key]
 
-        activities_train = self.encoder_predict(key, matrix_train)
-        activities_cv = self.encoder_predict(key, matrix_cv)
+        if self.use_autoencoders:
+            activities_train = self.encoder_predict(key, matrix_train)
+            activities_cv = self.encoder_predict(key, matrix_cv)
+        else:
+            activities_train = np.asarray( matrix_train)
+            activities_cv = np.asarray( matrix_cv)
 
         input_list = iter((node_id,
                            activities_train.T[node_id], isdead, nbdays,

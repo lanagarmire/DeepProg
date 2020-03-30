@@ -37,6 +37,8 @@ from simdeep.config import PATH_DATA
 from simdeep.config import SURVIVAL_FLAG
 from simdeep.config import NODES_SELECTION
 from simdeep.config import CINDEX_THRESHOLD
+from simdeep.config import USE_AUTOENCODERS
+from simdeep.config import FEATURE_SURV_ANALYSIS
 
 # Parameter for autoencoder
 from simdeep.config import LEVEL_DIMS_IN
@@ -121,6 +123,8 @@ class SimDeepBoosting():
                  verbose=True,
                  seed=None,
                  project_name='{0}_boosting'.format(PROJECT_NAME),
+                 use_autoencoders=USE_AUTOENCODERS,
+                 feature_surv_analysis=FEATURE_SURV_ANALYSIS,
                  split_n_fold=3,
                  path_results=PATH_RESULTS,
                  nb_clusters=NB_CLUSTERS,
@@ -169,6 +173,10 @@ class SimDeepBoosting():
         self.dataset = None
         self.cindex_thres = cindex_thres
         self.node_selection = node_selection
+
+        self.cluster_method = cluster_method
+        self.use_autoencoders = use_autoencoders
+        self.feature_surv_analysis = feature_surv_analysis
 
         self.encoder_for_kde_plot_dict = {}
         self.kde_survival_node_ids = {}
@@ -405,6 +413,9 @@ class SimDeepBoosting():
                 verbose=dataset.verbose,
                 _isboosting=True,
                 do_KM_plot=False,
+                cluster_method=self.cluster_method,
+                use_autoencoders=self.use_autoencoders,
+                feature_surv_analysis=self.feature_surv_analysis,
                 path_results=self.path_results,
                 project_name=self.project_name,
                 classification_method=self.classification_method,
@@ -451,6 +462,9 @@ class SimDeepBoosting():
                 verbose=dataset.verbose,
                 _isboosting=True,
                 do_KM_plot=False,
+                cluster_method=self.cluster_method,
+                use_autoencoders=self.use_autoencoders,
+                feature_surv_analysis=self.feature_surv_analysis,
                 path_results=self.path_results,
                 project_name=self.project_name,
                 cindex_thres=self.cindex_thres,

@@ -9,12 +9,14 @@ PATH_THIS_FILE = pathsplit(abspath(__file__))[0]
 
 #################### SimDeep variable ##################
 NB_CLUSTERS = 2 # Number of clusters
-CLUSTER_METHOD = 'mixture' # possible choice: ['mixture', 'kmeans']
+CLUSTER_METHOD = 'mixture' # possible choice: ['mixture', 'kmeans', 'coxPH']
 CLUSTER_EVAL_METHOD = 'silhouette' # possible choice: ['bic', 'silhouette', 'calinski']
 CLASSIFIER_TYPE = 'svm'
 NODES_SELECTION = 'Cox-PH' # possible choice: ['Cox-PH', 'C-index']
 CLASSIFICATION_METHOD = 'ALL_FEATURES' # ['ALL_FEATURES', 'SURVIVAL_FEATURES']
 FILL_UNKOWN_FEATURE_WITH_0 = True
+USE_AUTOENCODERS = True # Construct autoencoders rather than using all the features
+FEATURE_SURV_ANALYSIS = True # Refine feature wit hsurvival analysis
 
 # Number of top features selected for classification
 # Apply only when CLASSIFICATION_METHOD == 'ALL_FEATURES'
