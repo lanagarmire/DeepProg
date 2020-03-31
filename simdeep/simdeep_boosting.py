@@ -531,6 +531,30 @@ class SimDeepBoosting():
 
         return pvalue, pvalue_proba
 
+    def compute_pvalue_for_merged_test_fold(self):
+        """
+        """
+        print('predict labels on test fold datasets...')
+
+        isdead_cv, nbdays_cv, labels_cv = [], [], []
+
+        for model in self.models:
+            survival_cv = model._get_from_dataset('survival_cv')
+            nbdays, isdead = survival_cv.T.tolist()
+            nbdays_cv += nbdays
+            isdead_cv += isdead
+            labels_cv += self._from_model_attr(model, "cv_labels").tolist()
+
+        pvalue = coxph(
+            labels_cv, isdead_cv, nbdays_cv,
+            isfactor=False,
+            do_KM_plot=self.do_KM_plot,
+            png_path=self.path_results,
+            fig_name='cv_analysis')
+
+        print('#### Pvalue for test fold concatenated: {0}'.format(pvalue))
+        return pvalue
+
     def collect_pvalue_on_test_fold(self):
         """
         """

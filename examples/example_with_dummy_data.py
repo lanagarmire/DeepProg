@@ -53,7 +53,7 @@ def test_instance():
         seed=SEED,
         cluster_method="coxPH",
         use_autoencoders=False,
-        feature_surv_analysis=False,
+        feature_surv_analysis=True,
         # stack_multi_omic=STACK_MULTI_OMIC,
         # level_dims_in=LEVEL_DIMS_IN,
         # level_dims_out=LEVEL_DIMS_OUT,
@@ -80,6 +80,7 @@ def test_instance():
     boosting.compute_feature_scores_per_cluster()
     boosting.write_feature_score_per_cluster()
     boosting.collect_number_of_features_per_omic()
+    boosting.compute_pvalue_for_merged_test_fold()
 
     boosting.load_new_test_dataset(
         {'RNA': 'rna_dummy.tsv'}, # OMIC file of the test set. It doesnt have to be the same as for training

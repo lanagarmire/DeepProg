@@ -81,7 +81,7 @@ def main():
         epochs=EPOCHS,
         survival_flag=survival_flag,
         distribute=False,
-        cluster_method="coxPH",
+        cluster_method="mixture",
         use_autoencoders=True,
         feature_surv_analysis=True,
         normalization=normalization,
@@ -96,6 +96,7 @@ def main():
     boosting.evalutate_cluster_performance()
     boosting.collect_cindex_for_test_fold()
     boosting.collect_cindex_for_full_dataset()
+    boosting.compute_pvalue_for_merged_test_fold()
 
     boosting.compute_feature_scores_per_cluster()
     boosting.write_feature_score_per_cluster()
