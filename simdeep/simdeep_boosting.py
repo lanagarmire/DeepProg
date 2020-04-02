@@ -4,6 +4,7 @@ from simdeep.extract_data import LoadData
 from simdeep.coxph_from_r import coxph
 from simdeep.coxph_from_r import c_index
 from simdeep.coxph_from_r import c_index_multiple
+from simdeep.coxph_from_r import NALogicalType
 
 from sklearn.model_selection import KFold
 # from sklearn.preprocessing import OneHotEncoder
@@ -59,11 +60,6 @@ import simplejson
 from distutils.dir_util import mkpath
 
 from os.path import isdir
-
-try:
-    from rpy2.rinterface import NALogicalType
-except Exception:
-    from rpy2.rinterface_lib.na_values import NALogicalType
 
 import gc
 
@@ -288,6 +284,7 @@ class SimDeepBoosting():
             min_seed = self.seed - max_seed
             max_seed = self.seed
 
+        np.random.seed(self.seed)
         random_states = np.random.randint(min_seed, max_seed, nb_it)
 
         self.split_n_fold = split_n_fold
@@ -550,9 +547,11 @@ class SimDeepBoosting():
             isfactor=False,
             do_KM_plot=self.do_KM_plot,
             png_path=self.path_results,
-            fig_name='cv_analysis')
+            fig_name='cv_analysis', seed=self.seed)
 
-        print('#### Pvalue for test fold concatenated: {0}'.format(pvalue))
+        print('Pvalue for test fold concatenated: {0}'.format(pvalue))
+        self.log['pvalue cv test'] = pvalue
+
         return pvalue
 
     def collect_pvalue_on_test_fold(self):
@@ -658,6 +657,7 @@ class SimDeepBoosting():
 
         return counter
 
+
     def collect_cindex_for_test_fold(self):
         """
         """
@@ -671,7 +671,7 @@ class SimDeepBoosting():
             return np.nan
 
         for cindex in cindexes:
-            if isinstance(cindex, NALogicalType):
+            if np.isnan(cindex) or isinstance(cindex, NALogicalType):
                 cindex = np.nan
 
             self.cindex_test_folds.append(cindex)
@@ -869,7 +869,8 @@ class SimDeepBoosting():
             isfactor=False,
             do_KM_plot=self.do_KM_plot,
             png_path=self.path_results,
-            fig_name='{0}_{1}'.format(project_name, fname_base))
+            fig_name='{0}_{1}'.format(project_name, fname_base),
+            seed=self.seed)
 
         if self.verbose:
             print('Cox-PH p-value (Log-Rank) for inferred labels: {0}'.format(pvalue))
@@ -877,7 +878,8 @@ class SimDeepBoosting():
         pvalue_proba = coxph(
             labels_proba.T[0],
             isdead, nbdays,
-            isfactor=False)
+            isfactor=False,
+            seed=self.seed)
 
         if self.verbose:
             print('Cox-PH proba p-value (Log-Rank) for inferred labels: {0}'.format(pvalue_proba))
@@ -889,7 +891,8 @@ class SimDeepBoosting():
             isfactor=False,
             do_KM_plot=self.do_KM_plot,
             png_path=self.path_results,
-            fig_name='{0}_proba_{1}'.format(project_name, fname_base))
+            fig_name='{0}_proba_{1}'.format(project_name, fname_base),
+            seed=self.seed)
 
         if self.verbose:
             print('Cox-PH categorical p-value (Log-Rank) for inferred labels: {0}'.format(
@@ -924,13 +927,16 @@ class SimDeepBoosting():
             dead_test = np.asarray(dead_test)[0]
 
         cindex = c_index(self.full_labels, dead_full, days_full,
-                         self.test_labels, dead_test, days_test)
+                         self.test_labels, dead_test, days_test,
+                         seed=self.seed)
 
         cindex_cat = c_index(self.full_labels, dead_full, days_full,
-                         labels_test_categorical, dead_test, days_test)
+                             labels_test_categorical, dead_test, days_test,
+                             seed=self.seed)
 
         cindex_proba = c_index(self.full_labels_proba.T[0], dead_full, days_full,
-                               self.test_labels_proba.T[0], dead_test, days_test)
+                               self.test_labels_proba.T[0], dead_test, days_test,
+                               seed=self.seed)
 
         if self.verbose:
             print('c-index for boosting test dataset:{0}'.format(cindex))
@@ -951,13 +957,16 @@ class SimDeepBoosting():
         labels_categorical = self._labels_proba_to_labels(self.full_labels_proba)
 
         cindex = c_index(self.full_labels, dead_full, days_full,
-                         self.full_labels, dead_full, days_full)
+                         self.full_labels, dead_full, days_full,
+                         seed=self.seed)
 
         cindex_cat = c_index(labels_categorical, dead_full, days_full,
-                             labels_categorical, dead_full, days_full)
+                             labels_categorical, dead_full, days_full,
+                             seed=self.seed)
 
         cindex_proba = c_index(self.full_labels_proba.T[0], dead_full, days_full,
-                               self.full_labels_proba.T[0], dead_full, days_full)
+                               self.full_labels_proba.T[0], dead_full, days_full,
+                               seed=self.seed)
 
         if self.verbose:
             print('c-index for boosting full dataset:{0}'.format(cindex))
@@ -994,8 +1003,9 @@ class SimDeepBoosting():
         activities_train = hstack(activities_train)
         activities_test = hstack(activities_test)
 
-        cindex = c_index_multiple(activities_train, isdead, nbdays,
-                                   activities_test, isdead_test, nbdays_test)
+        cindex = c_index_multiple(
+            activities_train, isdead, nbdays,
+            activities_test, isdead_test, nbdays_test, seed=self.seed)
 
         print('total number of survival features: {0}'.format(activities_train.shape[1]))
         print('cindex multiple for test set: {0}:'.format(cindex))

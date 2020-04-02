@@ -17,6 +17,7 @@ from simdeep.config import CINDEX_THRESHOLD
 from simdeep.config import CLASSIFIER_TYPE
 from simdeep.config import USE_AUTOENCODERS
 from simdeep.config import FEATURE_SURV_ANALYSIS
+from simdeep.config import SEED
 
 from simdeep.config import MIXTURE_PARAMS
 from simdeep.config import PATH_RESULTS
@@ -123,6 +124,7 @@ class SimDeep(DeepBase):
                  classification_method=CLASSIFICATION_METHOD,
                  load_existing_models=LOAD_EXISTING_MODELS,
                  path_to_save_model=PATH_TO_SAVE_MODEL,
+                 seed=SEED,
                  do_KM_plot=True,
                  verbose=True,
                  _isboosting=False,
@@ -130,6 +132,7 @@ class SimDeep(DeepBase):
                  deep_model_additional_args={}):
         """
         """
+        self.seed = seed
         self.nb_clusters = nb_clusters
         self.pvalue_thres = pvalue_thres
         self.cindex_thres = cindex_thres
@@ -399,6 +402,7 @@ class SimDeep(DeepBase):
             isfactor=False,
             do_KM_plot=self.do_KM_plot,
             png_path=self.path_results,
+            seed=self.seed,
             fig_name='{0}_{1}'.format(self.project_name, fname_base))
 
         if self.verbose:
@@ -410,6 +414,7 @@ class SimDeep(DeepBase):
             isfactor=False,
             do_KM_plot=False,
             png_path=self.path_results,
+            seed=self.seed,
             fig_name='{0}_{1}_proba'.format(self.project_name, fname_base))
 
         if self.verbose:
@@ -719,9 +724,11 @@ class SimDeep(DeepBase):
                        isfactor=False,
                        do_KM_plot=self.do_KM_plot,
                        png_path=self.path_results,
+                       seed=self.seed,
                        fig_name='{0}_KM_plot_training_dataset'.format(self.project_name))
 
         pvalue_proba = coxph(self.labels_proba.T[0], isdead, nbdays,
+                             seed=self.seed,
                              isfactor=False)
 
         self._write_labels(self.dataset.sample_ids, self.labels,
@@ -870,7 +877,8 @@ class SimDeep(DeepBase):
                                    for key in self.dataset.matrix_ref_array])
 
         cindex = c_index_multiple(activities_train, dead, days,
-                                  activities_test, dead_test, days_test)
+                                  activities_test, dead_test, days_test,
+                                  seed=self.seed,)
 
         if self.verbose:
             print('c-index multiple for test dataset:{0}'.format(cindex))
@@ -897,7 +905,8 @@ class SimDeep(DeepBase):
 
         activities_cv = hstack(activities_cv.values())
         cindex = c_index_multiple(self.activities_for_pred_train, dead, days,
-                                  activities_cv, dead_cv, days_cv)
+                                  activities_cv, dead_cv, days_cv,
+                                  seed=self.seed,)
 
         if self.verbose:
             print('c-index multiple for test fold dataset:{0}'.format(cindex))
@@ -1044,7 +1053,7 @@ class SimDeep(DeepBase):
 
         pvalue_list = []
 
-        input_list = iter((node_id, activity, isdead, nbdays)
+        input_list = iter((node_id, activity, isdead, nbdays, self.seed)
                            for node_id, activity in enumerate(activities.T))
 
         pvalue_list = mapf(_process_parallel_coxph, input_list)
@@ -1113,7 +1122,8 @@ class SimDeep(DeepBase):
 
         try:
             cindex = c_index(self.labels, dead, days,
-                             self.full_labels, dead_full, days_full)
+                             self.full_labels, dead_full, days_full,
+                             seed=self.seed,)
         except Exception as e:
             print('Exception while computing the c-index: {0}'.format(e))
             cindex = np.nan
@@ -1131,7 +1141,8 @@ class SimDeep(DeepBase):
 
         try:
             cindex = c_index(self.labels, dead, days,
-                             self.labels, dead, days)
+                             self.labels, dead, days,
+                             seed=self.seed,)
         except Exception as e:
             print('Exception while computing the c-index: {0}'.format(e))
             cindex = np.nan
@@ -1150,7 +1161,8 @@ class SimDeep(DeepBase):
 
         try:
             cindex = c_index(self.labels, dead, days,
-                             self.test_labels, dead_test, days_test)
+                             self.test_labels, dead_test, days_test,
+                             seed=self.seed,)
         except Exception as e:
             print('Exception while computing the c-index: {0}'.format(e))
             cindex = np.nan
@@ -1169,7 +1181,8 @@ class SimDeep(DeepBase):
 
         try:
             cindex =  c_index(self.labels, dead, days,
-                              self.cv_labels, dead_cv, days_cv)
+                              self.cv_labels, dead_cv, days_cv,
+                              seed=self.seed,)
         except Exception as e:
             print('Exception while computing the c-index: {0}'.format(e))
             cindex = np.nan

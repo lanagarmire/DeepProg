@@ -40,7 +40,9 @@ def main():
                        survival_tsv=survival_file)
 
     simDeep = SimDeep(dataset=dataset,
-                      path_to_save_model=path_to_save_model)
+                      path_to_save_model=path_to_save_model,
+                      seed=2020
+    )
     # dataset must be loaded
     simDeep.load_training_dataset()
     # model construction

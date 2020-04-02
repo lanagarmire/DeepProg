@@ -8,6 +8,8 @@ from os.path import split as pathsplit
 PATH_THIS_FILE = pathsplit(abspath(__file__))[0]
 
 #################### SimDeep variable ##################
+
+USE_R_PACKAGES_FOR_SURVIVAL = False
 NB_CLUSTERS = 2 # Number of clusters
 CLUSTER_METHOD = 'mixture' # possible choice: ['mixture', 'kmeans', 'coxPH']
 CLUSTER_EVAL_METHOD = 'silhouette' # possible choice: ['bic', 'silhouette', 'calinski']

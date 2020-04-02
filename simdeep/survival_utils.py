@@ -351,8 +351,8 @@ def load_entrezID_to_ensg():
 def _process_parallel_coxph(inp):
     """
     """
-    node_id, activity, isdead, nbdays = inp
-    pvalue = coxph(activity, isdead, nbdays)
+    node_id, activity, isdead, nbdays, seed = inp
+    pvalue = coxph(activity, isdead, nbdays, seed=seed)
 
     return node_id, pvalue
 

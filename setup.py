@@ -23,5 +23,6 @@ setup(name='garmire_simdeep',
           'theano',
           'keras',
           'simplejson'
+          'lifelines'
       ],
       )

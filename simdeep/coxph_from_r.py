@@ -2,18 +2,48 @@ import warnings
 
 from numpy import nan
 
-with warnings.catch_warnings():
-    warnings.simplefilter("ignore")
+from lifelines import CoxPHFitter
+from lifelines import KaplanMeierFitter
 
-    from rpy2 import robjects as rob
-    from rpy2.robjects.packages import importr
-    from rpy2.robjects import FloatVector
-    from rpy2.robjects import StrVector
-    from rpy2.robjects import Formula
+from simdeep.config import USE_R_PACKAGES_FOR_SURVIVAL
 
-    survival = importr('survival')
-    survcomp = importr('survcomp')
-    glmnet = importr('glmnet')
+import matplotlib
+matplotlib.use('Agg')
+
+import pylab as plt
+
+import pandas as pd
+
+FloatVector = None
+StrVector = None
+Formula = None
+survival = None
+rob = None
+survcomp = None
+glmnet = None
+
+NALogicalType = type(None)
+
+
+if USE_R_PACKAGES_FOR_SURVIVAL:
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+
+        from rpy2 import robjects as rob
+        from rpy2.robjects.packages import importr
+        from rpy2.robjects import FloatVector
+        from rpy2.robjects import StrVector
+        from rpy2.robjects import Formula
+
+        survival = importr('survival')
+        survcomp = importr('survcomp')
+        glmnet = importr('glmnet')
+
+        try:
+            from rpy2.rinterface import NALogicalType
+        except Exception:
+            from rpy2.rinterface_lib.na_values import NALogicalType
+
 
 import numpy as np
 
@@ -26,15 +56,19 @@ def main():
     values = [0, 1, 1, 0 , 1, 2, 0, 1, 0, 0]
     np.random.seed(2016)
 
+    pvalue = coxph_from_python(values, isdead, nbdays, do_KM_plot=True)
+    cindex = c_index_from_python(
+        values, isdead, nbdays, values, isdead, nbdays)
+
     values_proba = np.random.random(10)
     pvalue_proba = coxph(values_proba, isdead, nbdays,
-                         do_KM_plot=True,
-                         dichotomize_afterward=True)
+                         do_KM_plot=False,
+                         dichotomize_afterward=False)
     print(pvalue_proba)
 
-   # matrix = np.random.random((10, 2))
+    # matrix = np.random.random((10, 2))
 
-    isdead_test = np.random.randint(0, 1, 10)
+    values_test = np.random.randint(0, 1, 10)
 
     pvalue = coxph(values, isdead, nbdays, isfactor=True)
     print('pvalue:', pvalue)
@@ -44,12 +78,83 @@ def main():
         values,
         isdead,
         nbdays,
-        values,
-        isdead_test,
+        values_test,
+        isdead,
+        nbdays)
+
+    print('c index:', cindex)
+    matrix = np.random.random((10, 5))
+    matrix_test = np.random.random((10, 5))
+
+    cindex = c_index_multiple(
+        matrix,
+        isdead,
+        nbdays,
+        matrix_test,
+        isdead,
         nbdays)
 
     print('c index:', cindex)
 
+    print('surv med: {0}'.format(surv_median(isdead, nbdays)))
+    print('surv mean: {0}'.format(surv_mean(isdead, nbdays)))
+
+def coxph_from_python(
+        values,
+        isdead,
+        nbdays,
+        do_KM_plot=False,
+        png_path='./',
+        dichotomize_afterward=False,
+        fig_name='KM_plot.png',
+        isfactor=False):
+    """
+    """
+    values = np.asarray(values)
+    isdead = np.asarray(isdead)
+    nbdays = np.asarray(nbdays)
+
+    if isfactor:
+        values = np.asarray(values).astype("str")
+
+    frame = pd.DataFrame({
+        "values": values,
+        "isdead": isdead,
+        "nbdays": nbdays
+    })
+
+    cph = CoxPHFitter()
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        cph.fit(frame, "nbdays", "isdead")
+
+    pvalue = cph.log_likelihood_ratio_test().p_value
+
+    cindex = cph.concordance_index_
+
+    if do_KM_plot:
+        fig, ax = plt.subplots(figsize=(10, 10))
+
+        kaplan = KaplanMeierFitter()
+
+        for label in set(values):
+            kaplan.fit(
+                values[values==label],
+                event_observed=isdead[values==label],
+                label='cluster nb. {0}'.format(label)
+            )
+
+            kaplan.plot(ax=ax,
+                        ci_alpha=0.15)
+
+            ax.set_xlabel('time unit')
+            ax.set_title('pval.: {0: .1e} CI: {1: .2f}'.format(
+                pvalue, cindex),
+                         fontsize=16,
+                         fontweight='bold')
+
+    return pvalue
 
 def coxph(values,
           isdead,
@@ -58,7 +163,40 @@ def coxph(values,
           png_path='./',
           dichotomize_afterward=False,
           fig_name='KM_plot.png',
-          isfactor=False):
+          isfactor=False,
+          use_r_packages=USE_R_PACKAGES_FOR_SURVIVAL,
+          seed=None,
+):
+    """
+    """
+    if seed:
+        np.random.seed(int(seed))
+
+    if use_r_packages:
+        func = coxph_from_r
+    else:
+        func = coxph_from_python
+
+    return func(
+        values,
+        isdead,
+        nbdays,
+        do_KM_plot=do_KM_plot,
+        png_path=png_path,
+        dichotomize_afterward=dichotomize_afterward,
+        fig_name=fig_name,
+        isfactor=isfactor
+    )
+
+def coxph_from_r(
+        values,
+        isdead,
+        nbdays,
+        do_KM_plot=False,
+        png_path='./',
+        dichotomize_afterward=False,
+        fig_name='KM_plot.png',
+        isfactor=False):
     """
     input:
         :values: array    values of activities
@@ -125,7 +263,133 @@ def coxph(values,
 
     return pvalue
 
-def c_index(values,
+def c_index(
+        values,
+        isdead,
+        nbdays,
+        values_test,
+        isdead_test,
+        nbdays_test,
+        isfactor=False,
+        use_r_packages=USE_R_PACKAGES_FOR_SURVIVAL,
+        seed=None,
+        ):
+    """
+    """
+    if seed:
+        np.random.seed(int(seed))
+
+    if use_r_packages:
+        func = c_index_from_r
+    else:
+        func = c_index_from_python
+
+    return func(
+        values,
+        isdead,
+        nbdays,
+        values_test,
+        isdead_test,
+        nbdays_test,
+        isfactor=isfactor
+    )
+
+
+def c_index_multiple(
+        values,
+        isdead,
+        nbdays,
+        values_test,
+        isdead_test,
+        nbdays_test,
+        isfactor=False,
+        use_r_packages=USE_R_PACKAGES_FOR_SURVIVAL,
+        seed=None,
+        ):
+    """
+    """
+    if seed:
+        np.random.seed(int(seed))
+
+    if use_r_packages:
+        func = c_index_multiple_from_r
+    else:
+        func = c_index_multiple_from_python
+
+    return func(
+        values,
+        isdead,
+        nbdays,
+        values_test,
+        isdead_test,
+        nbdays_test,
+        isfactor=isfactor
+    )
+
+def c_index_from_python(
+        values,
+        isdead,
+        nbdays,
+        values_test,
+        isdead_test,
+        nbdays_test,
+        isfactor=False):
+    """
+    """
+
+    if isfactor:
+        values = np.asarray(values).astype("str")
+        values_test = np.asarray(values_test).astype("str")
+
+    frame = pd.DataFrame({
+        "values": values,
+        "isdead": isdead,
+        "nbdays": nbdays
+    })
+
+    frame_test = pd.DataFrame({
+        "values": values_test,
+        "isdead": isdead_test,
+        "nbdays": nbdays_test
+    })
+
+    cph = CoxPHFitter()
+    cph.fit(frame, "nbdays", "isdead")
+
+    cindex = cph.score(frame_test,
+                       scoring_method="concordance_index")
+
+    return cindex
+
+
+def c_index_multiple_from_python(
+        matrix,
+        isdead,
+        nbdays,
+        matrix_test,
+        isdead_test,
+        nbdays_test,
+        isfactor=False):
+    """
+    """
+    frame = pd.DataFrame(matrix)
+    frame["isdead"] = isdead
+    frame["nbdays"] = nbdays
+
+    frame_test = pd.DataFrame(matrix_test)
+    frame_test["isdead"] = isdead_test
+    frame_test["nbdays"] = nbdays_test
+
+    cph = CoxPHFitter()
+    cph.fit(frame, "nbdays", "isdead")
+
+    cindex = cph.score(frame_test,
+                       scoring_method="concordance_index")
+
+    return cindex
+
+
+def c_index_from_r(values,
             isdead,
             nbdays,
             values_test,
@@ -173,7 +437,7 @@ def c_index(values,
 
     return c_index[0][0]
 
-def c_index_multiple(
+def c_index_multiple_from_r(
         matrix,
         isdead,
         nbdays,
@@ -280,7 +544,59 @@ def convert_to_rmatrix(data):
             nrow=shape[1], ncol=shape[0])
     )
 
-def surv_mean(isdead,nbdays):
+
+def surv_mean(isdead, nbdays,
+              use_r_packages=USE_R_PACKAGES_FOR_SURVIVAL):
+    """
+    """
+    if use_r_packages:
+        func = surv_mean_from_r
+    else:
+        func = surv_mean_from_python
+
+    return func(isdead, nbdays)
+
+def surv_median(
+        isdead, nbdays,
+        use_r_packages=USE_R_PACKAGES_FOR_SURVIVAL):
+    """
+    """
+    if use_r_packages:
+        func = surv_median_from_r
+    else:
+        func = surv_median_from_python
+
+    return func(isdead, nbdays)
+
+def surv_mean_from_python(isdead,nbdays):
+    """
+    """
+    from lifelines.utils import restricted_mean_survival_time
+
+    kaplan = KaplanMeierFitter()
+
+    kaplan.fit(
+        nbdays,
+        event_observed=isdead,
+    )
+
+    survmean = restricted_mean_survival_time(kaplan)
+
+    return survmean
+
+def surv_median_from_python(isdead,nbdays):
+    """
+    """
+    kaplan = KaplanMeierFitter()
+    np.random.seed(2020)
+    kaplan.fit(
+        nbdays,
+        event_observed=isdead,
+    )
+
+    return kaplan.median_survival_time_
+
+def surv_mean_from_r(isdead,nbdays):
     """ """
     isdead = FloatVector(isdead)
     nbdays = FloatVector(nbdays)
@@ -289,7 +605,7 @@ def surv_mean(isdead,nbdays):
 
     return float(surv[3].split(':')[1])
 
-def surv_median(isdead,nbdays):
+def surv_median_from_r(isdead,nbdays):
     """ """
     isdead = FloatVector(isdead)
     nbdays = FloatVector(nbdays)
