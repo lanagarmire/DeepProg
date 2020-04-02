@@ -22,7 +22,7 @@ setup(name='garmire_simdeep',
           'rpy2==2.8.6',
           'theano',
           'keras',
-          'simplejson'
+          'simplejson',
           'lifelines'
       ],
       )
