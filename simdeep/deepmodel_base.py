@@ -1,8 +1,19 @@
 import numpy as np
 
-from simdeep.config import SEED
+import random
+random.seed(2020)
 
+try:
+    from tensorflow.compat.v1 import set_random_seed
+except Exception:
+    set_random_seed = None
+
+np.random.seed(2020)
+set_random_seed(2020)
+
+from simdeep.config import SEED
 import os
+
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 import warnings
@@ -46,7 +57,6 @@ from simdeep.config import DATA_SPLIT
 
 from os.path import isfile
 
-import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 
@@ -114,6 +124,9 @@ class DeepBase(object):
 
         if self.seed:
             np.random.seed(self.seed)
+
+            if set_random_seed is not None:
+                set_random_seed(self.seed)
 
         self.W_l1_constant = w_reg
         self.A_l2_constant = act_reg
@@ -285,7 +298,8 @@ class DeepBase(object):
                       verbose=verbose,
                       epochs=self.epochs,
                       validation_split=self.data_split,
-                      shuffle=True)
+                      # shuffle=True
+            )
 
             if self.verbose:
                 print('fitting done for model {0}!'.format(key))

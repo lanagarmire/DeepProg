@@ -18,7 +18,7 @@ NODES_SELECTION = 'Cox-PH' # possible choice: ['Cox-PH', 'C-index']
 CLASSIFICATION_METHOD = 'ALL_FEATURES' # ['ALL_FEATURES', 'SURVIVAL_FEATURES']
 FILL_UNKOWN_FEATURE_WITH_0 = True
 USE_AUTOENCODERS = True # Construct autoencoders rather than using all the features
-FEATURE_SURV_ANALYSIS = True # Refine feature wit hsurvival analysis
+FEATURE_SURV_ANALYSIS = True # Refine feature wit survival analysis
 
 # Number of top features selected for classification
 # Apply only when CLASSIFICATION_METHOD == 'ALL_FEATURES'
@@ -118,8 +118,8 @@ NORMALIZATION = {
 # if LEVEL_DIMS == [500, 250] then there will be two hidden layers with 500 and 250 nodes
 # before and after the hidden middle layer (5 hidden layers)
 # if LEVEL_DIMS = [], then the autoencoder will have only one hidden layer
-LEVEL_DIMS_IN = []
-LEVEL_DIMS_OUT = []
+LEVEL_DIMS_IN = ()
+LEVEL_DIMS_OUT = ()
 # Number of nodes in the middle hidden layer
 # (i.e. the new dimensions of the transformed data)
 NEW_DIM = 100
