@@ -80,7 +80,7 @@ def main():
         path_results=path_data,
         epochs=EPOCHS,
         survival_flag=survival_flag,
-        distribute=False,
+        distribute=True,
         cluster_method="mixture",
         use_autoencoders=True,
         feature_surv_analysis=True,

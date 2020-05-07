@@ -506,11 +506,11 @@ class SimDeepBoosting():
         isdead_cv, nbdays_cv, labels_cv = [], [], []
 
         for model in self.models:
-            survival_cv = model._get_from_dataset('survival_cv')
+            survival_cv = self._from_model_dataset(model, 'survival_cv')
             nbdays, isdead = survival_cv.T.tolist()
             nbdays_cv += nbdays
             isdead_cv += isdead
-            labels_cv += self._from_model_attr(model, "cv_labels").tolist()
+            labels_cv += self._from_model_dataset(model, "cv_labels").tolist()
 
         pvalue = coxph(
             labels_cv, isdead_cv, nbdays_cv,
