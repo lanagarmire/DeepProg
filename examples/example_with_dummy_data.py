@@ -1,3 +1,9 @@
+import os
+os.environ['PYTHONHASHSEED']=str(2020)
+
+import random
+random.seed(2020)
+
 from os.path import abspath
 from os.path import split
 

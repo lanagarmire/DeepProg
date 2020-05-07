@@ -75,36 +75,6 @@ MODEL_THRES = 0.05
 ###########################################
 
 
-def main():
-    """ """
-    from simdeep.config import TEST_TSV
-    from simdeep.config import SURVIVAL_TSV_TEST
-
-    boosting = SimDeepBoosting(seed=2)
-    boosting.fit()
-    boosting.predict_labels_on_full_dataset()
-    boosting.collect_cindex_for_test_fold()
-    boosting.collect_pvalue_on_full_dataset()
-
-    boosting.load_new_test_dataset(TEST_TSV,
-                                   SURVIVAL_TSV_TEST,
-                                   fname_key='dummy')
-    boosting.predict_labels_on_test_dataset()
-    boosting.plot_supervised_kernel_for_test_sets()
-
-    boosting.collect_pvalue_on_training_dataset()
-    boosting.collect_pvalue_on_test_fold()
-
-    boosting.collect_number_of_features_per_omic()
-    boosting.collect_pvalue_on_test_dataset()
-    boosting.collect_cindex_for_test_dataset()
-
-    boosting.compute_c_indexes_for_test_dataset()
-    boosting.compute_c_indexes_multiple_for_test_dataset()
-    boosting.compute_clusters_consistency_for_full_labels()
-    boosting.compute_clusters_consistency_for_test_labels()
-
-
 class SimDeepBoosting():
     """
     """
@@ -1427,7 +1397,3 @@ def _reorder_labels(labels, sample_ids):
     index = [sample_dict[sample] for sample in sample_ordered]
 
     return labels[index]
-
-
-if __name__ == '__main__':
-    main()
