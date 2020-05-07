@@ -540,7 +540,7 @@ class SimDeepBoosting():
             nbdays, isdead = survival_cv.T.tolist()
             nbdays_cv += nbdays
             isdead_cv += isdead
-            labels_cv += self._from_model_dataset(model, "cv_labels").tolist()
+            labels_cv += self._from_model_attr(model, "cv_labels").tolist()
 
         pvalue = coxph(
             labels_cv, isdead_cv, nbdays_cv,
@@ -1203,7 +1203,7 @@ class SimDeepBoosting():
 
         self.test_normalization = normalization
 
-        if debug or self.nb_threads<2:
+        if debug or self.nb_threads < 2:
             pass
         # for model in self.models:
         # model.verbose = True

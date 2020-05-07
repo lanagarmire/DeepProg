@@ -127,7 +127,14 @@ def coxph_from_python(
 
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        cph.fit(frame, "nbdays", "isdead")
+
+        try:
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+                cph.fit(frame, "nbdays", "isdead")
+        except Exception as e:
+            print(e)
+            return np.nan
 
     pvalue = cph.log_likelihood_ratio_test().p_value
 
@@ -354,7 +361,14 @@ def c_index_from_python(
     })
 
     cph = CoxPHFitter()
-    cph.fit(frame, "nbdays", "isdead")
+
+    try:
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            cph.fit(frame, "nbdays", "isdead")
+    except Exception as e:
+        print(e)
+        return np.nan
 
     cindex = cph.score(frame_test,
                        scoring_method="concordance_index")
@@ -381,7 +395,14 @@ def c_index_multiple_from_python(
     frame_test["nbdays"] = nbdays_test
 
     cph = CoxPHFitter()
-    cph.fit(frame, "nbdays", "isdead")
+
+    try:
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            cph.fit(frame, "nbdays", "isdead")
+    except Exception as e:
+        print(e)
+        return np.nan
 
     cindex = cph.score(frame_test,
                        scoring_method="concordance_index")
