@@ -1,8 +1,17 @@
-import os
-os.environ['PYTHONHASHSEED']=str(2020)
+"""
+This example details how to optimize the choice of the hyperparameters to cluster
+a multi-omic dataset.
 
-import random
-random.seed(2020)
+Multiple objective criteria can be used, such as model final cox-PH pvalues,
+cox-PH pvalues for agglomerated out-of-bags samples, cluster consistency,
+ c-index for out-of-bags samples or for the full labels, mix score, or sum of the pvalues
+
+Sum of pvalues formula:
+sum_log_pval = - np.log10(1e-128 + full_model_pvalue) - np.log10(1e-128 + test_fold_pvalue)
+
+Mix score formula:
+mix_score = sum_log_pval * cluster_consistency * test_fold_cindex
+"""
 
 from os.path import abspath
 from os.path import split
@@ -25,8 +34,9 @@ def test_instance():
     PROJECT_NAME = 'TestProjectTuning'
     nb_threads = 2 # Number of processes to be used to fit individual survival models
 
+    ### The following parameters can be parsed in the hyperparameter tuning
+
     ################ AUTOENCODER PARAMETERS ################
-    ## Additional parameters for the autoencoders can be parsed in the hyperparameter tuning
     # LEVEL_DIMS_IN = [250]
     # LEVEL_DIMS_OUT = [250]
     # LOSS = 'binary_crossentropy'
@@ -55,15 +65,23 @@ def test_instance():
     # pvalue_threshold = 0.01
     # nb_selected_features = 10
     # stack_multi_omic = False
+    # use_autoencoders = True
+    # feature_surv_analysis = True
     #########################################################
 
     # ray.init(num_cpus=3)
 
+    # AgglomerativeClustering is an external class that can be used as
+    # a clustering algorithm since it has a fit_predict method
+    from sklearn.cluster.hierarchical import AgglomerativeClustering
+
     args_to_optimize = {
         'seed': [100, 200, 300, 400],
         'nb_clusters': [2, 5],
-        'cluster_method': ['mixture', 'kmeans', 'coxPH'],
-        'stack_multi_omic': (True, False)
+        'cluster_method': ['mixture', 'coxPH',
+                           AgglomerativeClustering],
+        'use_autoencoders': (True, False),
+        'class_selection': ('mean', 'max'),
     }
 
     tuning = SimDeepTuning(
@@ -76,14 +94,23 @@ def test_instance():
         path_results=PATH_DATA,
     )
 
+    # Possible metrics for evaluating training set: {
+    #              "cluster_consistency",
+    #              "full_pvalue",
+    #              "sum_log_pval",
+    #              "test_fold_cindex",
+    #              "mix_score",
+    #     }
+
     ray.init()
     tuning.fit(
+        metric='sum_log_pval',
         num_samples=20,
-        max_concurrent=4,
+        max_concurrent=6,
+        # iterations is usefull to take into account the DL parameter fitting variations
         iterations=1)
 
     table = tuning.get_results_table()
-
     tuning.save_results_table()
 
     ray.shutdown()

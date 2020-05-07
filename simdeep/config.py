@@ -40,6 +40,9 @@ CLASS_SELECTION = 'mean' # mean or max: the method used to select the final clas
 SAVE_FITTED_MODELS = False
 # load existing models if founds
 LOAD_EXISTING_MODELS = False
+
+# Which omics to use for clustering. If empty, then all the available omics will be used
+CLUSTERING_OMICS = []
 ########################################################
 
 #################### Paths to data file ################

@@ -40,6 +40,7 @@ from simdeep.config import NODES_SELECTION
 from simdeep.config import CINDEX_THRESHOLD
 from simdeep.config import USE_AUTOENCODERS
 from simdeep.config import FEATURE_SURV_ANALYSIS
+from simdeep.config import CLUSTERING_OMICS
 
 # Parameter for autoencoder
 from simdeep.config import LEVEL_DIMS_IN
@@ -116,6 +117,7 @@ class SimDeepBoosting():
                  node_selection=NODES_SELECTION,
                  cindex_thres=CINDEX_THRESHOLD,
                  activation=ACTIVATION,
+                 clustering_omics=CLUSTERING_OMICS,
                  path_to_save_model=PATH_TO_SAVE_MODEL,
                  **additional_dataset_args):
         """ """
@@ -139,6 +141,7 @@ class SimDeepBoosting():
         self.dataset = None
         self.cindex_thres = cindex_thres
         self.node_selection = node_selection
+        self.clustering_omics = clustering_omics
 
         self.cluster_method = cluster_method
         self.use_autoencoders = use_autoencoders
@@ -381,6 +384,7 @@ class SimDeepBoosting():
                 _isboosting=True,
                 do_KM_plot=False,
                 cluster_method=self.cluster_method,
+                clustering_omics=self.clustering_omics,
                 use_autoencoders=self.use_autoencoders,
                 feature_surv_analysis=self.feature_surv_analysis,
                 path_results=self.path_results,

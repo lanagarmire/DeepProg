@@ -57,7 +57,7 @@ def test_instance():
         path_results=PATH_DATA,
         epochs=EPOCHS,
         seed=SEED,
-        cluster_method="coxPH",
+        cluster_method='coxPH',
         use_autoencoders=True,
         feature_surv_analysis=True,
         # stack_multi_omic=STACK_MULTI_OMIC,

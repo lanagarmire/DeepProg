@@ -33,6 +33,7 @@ from simdeep.config import NODES_SELECTION
 from simdeep.config import CLASSIFIER
 from simdeep.config import HYPER_PARAMETERS
 from simdeep.config import PATH_TO_SAVE_MODEL
+from simdeep.config import CLUSTERING_OMICS
 
 from simdeep.survival_utils import _process_parallel_coxph
 from simdeep.survival_utils import _process_parallel_cindex
@@ -88,6 +89,8 @@ class SimDeep(DeepBase):
              :nb_clusters: Number of clusters to search (default NB_CLUSTERS)
 
              :pvalue_thres: Pvalue threshold to include a feature  (default PVALUE_THRESHOLD)
+
+             :clustering_omics: Which omics to use for clustering. If empty, then all the available omics will be used
              :cindex_thres: C-index threshold to include a feature. This parameter is used only if `node_selection` is set to "C-index" (default CINDEX_THRESHOLD)
              :cluster_method: Cluster method to use. possible choice ['mixture', 'kmeans']. (default CLUSTER_METHOD)
              :cluster_eval_method: Cluster evaluation method to use in case the `cluster_array` parameter is a list of possible K. Possible choice ['bic', 'silhouette', 'calinski'] (default CLUSTER_EVAL_METHOD)
@@ -124,6 +127,7 @@ class SimDeep(DeepBase):
                  classification_method=CLASSIFICATION_METHOD,
                  load_existing_models=LOAD_EXISTING_MODELS,
                  path_to_save_model=PATH_TO_SAVE_MODEL,
+                 clustering_omics=CLUSTERING_OMICS,
                  seed=SEED,
                  do_KM_plot=True,
                  verbose=True,
@@ -141,6 +145,7 @@ class SimDeep(DeepBase):
         self.classifier_grid = GridSearchCV(CLASSIFIER(), HYPER_PARAMETERS, cv=5)
         self.cluster_array = cluster_array
         self.path_results = path_results
+        self.clustering_omics = clustering_omics
 
         if self.path_results and not isdir(self.path_results):
             mkdir(self.path_results)
@@ -284,7 +289,7 @@ class SimDeep(DeepBase):
         if not self.is_model_loaded:
             self.construct_autoencoders()
 
-        self.look_for_survival_nodes()
+        self.look_for_survival_nodes(self.clustering_omics)
 
         self.training_omic_list = list(self.encoder_array.keys())
         self.predict_labels()
@@ -667,7 +672,11 @@ class SimDeep(DeepBase):
             print('performing clustering on the omic model with the following key:{0}'.format(
                 self.training_omic_list))
 
-        if self.cluster_method == 'kmeans':
+        if hasattr(self.cluster_method, 'fit_predict'):
+            self.clustering = self.cluster_method(n_clusters=self.nb_clusters)
+            self.cluster_method == 'custom'
+
+        elif self.cluster_method == 'kmeans':
             self.clustering = KMeans(n_clusters=self.nb_clusters, n_init=100)
 
         elif self.cluster_method == 'mixture':
@@ -684,6 +693,10 @@ class SimDeep(DeepBase):
                 isdead=isdead,
                 nbdays=nbdays)
 
+        else:
+            raise(Exception("No method fit and predict found for: {0}".format(
+                self.cluster_method)))
+
         if not self.activities_train.any():
             raise Exception('No components linked to survival!'\
                             ' cannot perform clustering')
@@ -691,18 +704,24 @@ class SimDeep(DeepBase):
         if self.cluster_array and len(self.cluster_array) > 1:
             self._predict_best_k_for_cluster()
 
-        self.clustering.fit(self.activities_train)
-
-        labels = self.clustering.predict(self.activities_train)
+        if hasattr(self.clustering, 'predict'):
+            self.clustering.fit(self.activities_train)
+            labels = self.clustering.predict(self.activities_train)
+        else:
+            labels = self.clustering.fit_predict(self.activities_train)
 
         labels = self._order_labels_according_to_survival(labels)
 
         self.labels = labels
 
-        if self.cluster_method == 'mixture':
+        if hasattr(self.clustering, 'predict_proba'):
             self.labels_proba = self.clustering.predict_proba(self.activities_train)
         else:
             self.labels_proba = np.array([self.labels, self.labels]).T
+
+        if len(self.labels_proba.shape) == 1:
+            self.labels_proba = self.labels_proba.reshape((
+                self.labels_proba.shape[0], 1))
 
         if self.labels_proba.shape[1] < self.nb_clusters:
             missing_columns = self.nb_clusters - self.labels_proba.shape[1]
@@ -710,7 +729,7 @@ class SimDeep(DeepBase):
             for i in range(missing_columns):
                 self.labels_proba = hstack([
                     self.labels_proba, np.zeros(
-                        shape=(self.labels_proba, 1))])
+                        shape=(self.labels_proba.shape[0], 1))])
 
         if self.verbose:
             print("clustering done, labels ordered according to survival:")
@@ -967,19 +986,19 @@ class SimDeep(DeepBase):
             else:
                 self.clustering.set_params(n_clusters=k_cluster)
 
-            self.clustering.fit(self.activities_train)
+            labels = self.clustering.fit_predict(self.activities_train)
 
             if self.cluster_eval_method == 'bic':
                 score = self.clustering.bic(self.activities_train)
             elif self.cluster_eval_method == 'calinski':
                 score = calinski_harabaz_score(
                     self.activities_train,
-                    self.clustering.predict(self.activities_train)
+                    labels
                 )
             elif self.cluster_eval_method == 'silhouette':
                 score = silhouette_score(
                     self.activities_train,
-                    self.clustering.predict(self.activities_train)
+                    labels
                 )
 
             if self.verbose:
