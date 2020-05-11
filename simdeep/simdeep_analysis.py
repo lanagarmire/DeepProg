@@ -246,13 +246,18 @@ class SimDeep(DeepBase):
         if self.node_selection == 'C-index':
             return self._look_for_prediction_nodes(key)
 
-    def load_new_test_dataset(self, tsv_dict, path_survival_file,
-                              fname_key=None, normalization=None):
+    def load_new_test_dataset(self, tsv_dict,
+                              path_survival_file,
+                              fname_key=None,
+                              normalization=None,
+                              survival_flag=None):
         """
         """
-        self.dataset.load_new_test_dataset(tsv_dict,
-                                           path_survival_file,
-                                           normalization=normalization)
+        self.dataset.load_new_test_dataset(
+            tsv_dict,
+            path_survival_file,
+            normalization=normalization,
+            survival_flag=survival_flag)
 
         if normalization is not None:
             self.test_normalization = {
@@ -289,7 +294,7 @@ class SimDeep(DeepBase):
         if not self.is_model_loaded:
             self.construct_autoencoders()
 
-        self.look_for_survival_nodes(self.clustering_omics)
+        self.look_for_survival_nodes()
 
         self.training_omic_list = list(self.encoder_array.keys())
         self.predict_labels()
@@ -841,6 +846,9 @@ class SimDeep(DeepBase):
 
             self.valid_node_ids_array[key] = valid_node_ids
             self.activities_array[key] = activities.T[valid_node_ids].T
+
+        if self.clustering_omics:
+            keys = self.clustering_omics
 
         self.activities_train = hstack([self.activities_array[key]
                                         for key in keys])
@@ -1448,12 +1456,15 @@ class SimDeep(DeepBase):
     def _predict_new_dataset(self,
                              tsv_dict,
                              path_survival_file,
-                             normalization):
+                             normalization,
+                             survival_flag=None):
         """
         """
         self.load_new_test_dataset(
             tsv_dict,
             path_survival_file,
-            normalization=normalization)
+            normalization=normalization,
+            survival_flag=survival_flag,
+        )
 
         self.predict_labels_on_test_dataset()

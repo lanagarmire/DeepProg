@@ -264,7 +264,10 @@ class LoadData():
         self._stack_multiomics(self.matrix_ref_array,
                                self.feature_ref_array)
 
-    def load_new_test_dataset(self, tsv_dict, path_survival_file, normalization=None):
+    def load_new_test_dataset(self, tsv_dict,
+                              path_survival_file,
+                              survival_flag=None,
+                              normalization=None):
         """
         """
         if normalization is not None:
@@ -289,7 +292,7 @@ class LoadData():
         self.feature_ref_index = {}
 
         self.load_matrix_test(normalization)
-        self.load_survival_test()
+        self.load_survival_test(survival_flag)
 
     def _create_ref_matrix(self, key):
         """ """
@@ -462,10 +465,14 @@ class LoadData():
             if self.verbose:
                 print('{0} samples without survival removed'.format(sample_removed))
 
-    def load_survival_test(self):
+    def load_survival_test(self, survival_flag=None):
         """ """
-        survival = load_survival_file(self.survival_tsv_test, path_data=self.path_data,
-                                      survival_flag=self.survival_flag)
+        if survival_flag is None:
+            survival_flag = self.survival_flag
+
+        survival = load_survival_file(self.survival_tsv_test,
+                                      path_data=self.path_data,
+                                      survival_flag=survival_flag)
         matrix = []
 
         retained_samples = []
@@ -574,8 +581,15 @@ class LoadData():
             print('normalizing for {0}...'.format(key))
 
         if self.normalization['NB_FEATURES_TO_KEEP']:
-            self.variance_reducer.nb_features = self.normalization['NB_FEATURES_TO_KEEP']
+            self.variance_reducer.nb_features = self.normalization[
+                'NB_FEATURES_TO_KEEP']
             matrix = self.variance_reducer.fit_transform(matrix)
+
+        if self.normalization['CUSTOM']:
+            custom_norm = self.normalization['CUSTOM']()
+            assert(hasattr(custom_norm, 'fit') and hasattr(
+                custom_norm, 'fit_transform'))
+            matrix = custom_norm.fit_transform(matrix)
 
         if self.normalization['TRAIN_MIN_MAX']:
             matrix = MinMaxScaler().fit_transform(matrix.T).T
@@ -635,8 +649,16 @@ class LoadData():
         if normalization['LOG_TEST_MATRIX']:
             matrix = np.log2(1.0 +  matrix)
 
+        if self.normalization['CUSTOM']:
+            custom_norm = self.normalization['CUSTOM']()
+            assert(hasattr(custom_norm, 'fit') and hasattr(
+                custom_norm, 'fit_transform'))
+            matrix_ref = custom_norm.fit_transform(matrix_ref)
+            matrix = custom_norm.transform(matrix)
+
         if normalization['NB_FEATURES_TO_KEEP']:
-            self.variance_reducer.nb_features = normalization['NB_FEATURES_TO_KEEP']
+            self.variance_reducer.nb_features = normalization[
+                'NB_FEATURES_TO_KEEP']
             matrix_ref = self.variance_reducer.fit_transform(matrix_ref)
             matrix = self.variance_reducer.transform(matrix)
 

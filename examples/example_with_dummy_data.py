@@ -46,6 +46,11 @@ def test_instance():
     # STACK_MULTI_OMIC = False
     #########################################################
 
+    from sklearn.preprocessing import RobustScaler
+    norm = {
+            'CUSTOM': RobustScaler,
+    }
+
     boosting = SimDeepBoosting(
         nb_threads=nb_threads,
         nb_it=nb_it,
@@ -57,7 +62,8 @@ def test_instance():
         path_results=PATH_DATA,
         epochs=EPOCHS,
         seed=SEED,
-        cluster_method='coxPH',
+        normalization=norm,
+        cluster_method='mixture',
         use_autoencoders=True,
         feature_surv_analysis=True,
         # stack_multi_omic=STACK_MULTI_OMIC,

@@ -22,6 +22,7 @@ from simdeep.config import PATH_TO_SAVE_MODEL
 
 from simdeep.config import USE_AUTOENCODERS
 from simdeep.config import FEATURE_SURV_ANALYSIS
+from simdeep.config import CLUSTERING_OMICS
 
 
 @ray.remote
@@ -45,6 +46,7 @@ class SimDeepDistributed(SimDeep):
             nb_threads_coxph=NB_THREADS_COXPH,
             classification_method=CLASSIFICATION_METHOD,
             load_existing_models=LOAD_EXISTING_MODELS,
+            clustering_omics=CLUSTERING_OMICS,
             path_to_save_model=PATH_TO_SAVE_MODEL,
             do_KM_plot=True,
             verbose=True,
@@ -62,6 +64,7 @@ class SimDeepDistributed(SimDeep):
             cluster_eval_method=cluster_eval_method,
             classifier_type=classifier_type,
             project_name=project_name,
+            clustering_omics=clustering_omics,
             path_results=path_results,
             use_autoencoders=use_autoencoders,
             feature_surv_analysis=feature_surv_analysis,

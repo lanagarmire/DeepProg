@@ -77,11 +77,29 @@ def test_instance():
 
     args_to_optimize = {
         'seed': [100, 200, 300, 400],
-        'nb_clusters': [2, 5],
+        # 'nb_clusters': [2, 5],
         'cluster_method': ['mixture', 'coxPH',
                            AgglomerativeClustering],
-        'use_autoencoders': (True, False),
-        'class_selection': ('mean', 'max'),
+        'normalization': ['default', 'alternative']
+        # 'use_autoencoders': (True, False),
+        # 'class_selection': ('mean', 'max'),
+    }
+
+    # Different normalisations can be tested
+    from sklearn.preprocessing import RobustScaler
+    # An external normalisation class can be used
+    # it requires the class to have fit and fit_transform method
+
+    normalization = {
+        'default': {
+            'NB_FEATURES_TO_KEEP': 100,
+            'TRAIN_RANK_NORM': True,
+            'TRAIN_CORR_REDUCTION': True,
+            'TRAIN_CORR_RANK_NORM': True,
+        },
+        'alternative': {
+            'CUSTOM': RobustScaler,
+        }
     }
 
     tuning = SimDeepTuning(
@@ -92,6 +110,7 @@ def test_instance():
         path_data=PATH_DATA,
         project_name=PROJECT_NAME,
         path_results=PATH_DATA,
+        normalization=normalization,
     )
 
     # Possible metrics for evaluating training set: {
@@ -99,14 +118,15 @@ def test_instance():
     #              "full_pvalue",
     #              "sum_log_pval",
     #              "test_fold_cindex",
+    #              "test_fold_pval",
     #              "mix_score",
     #     }
 
     ray.init()
     tuning.fit(
-        metric='sum_log_pval',
+        metric='log_test_fold_pvalue',
         num_samples=20,
-        max_concurrent=6,
+        max_concurrent=10,
         # iterations is usefull to take into account the DL parameter fitting variations
         iterations=1)
 

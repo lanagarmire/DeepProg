@@ -18,7 +18,7 @@ NODES_SELECTION = 'Cox-PH' # possible choice: ['Cox-PH', 'C-index']
 CLASSIFICATION_METHOD = 'ALL_FEATURES' # ['ALL_FEATURES', 'SURVIVAL_FEATURES']
 FILL_UNKOWN_FEATURE_WITH_0 = True
 USE_AUTOENCODERS = True # Construct autoencoders rather than using all the features
-FEATURE_SURV_ANALYSIS = True # Refine feature wit survival analysis
+FEATURE_SURV_ANALYSIS = True # Refine feature with survival analysis
 
 # Number of top features selected for classification
 # Apply only when CLASSIFICATION_METHOD == 'ALL_FEATURES'

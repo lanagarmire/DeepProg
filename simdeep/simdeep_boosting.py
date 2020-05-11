@@ -1166,7 +1166,8 @@ class SimDeepBoosting():
                               fname_key=None,
                               normalization=None,
                               debug=False,
-                              verbose=False):
+                              verbose=False,
+                              survival_flag=None,):
         """
         """
         self.test_tsv_dict = tsv_dict
@@ -1191,13 +1192,14 @@ class SimDeepBoosting():
         self._from_models('_predict_new_dataset',
                           tsv_dict=tsv_dict,
                           path_survival_file=path_survival_file,
-                          normalization=normalization)
+                          normalization=normalization,
+                          survival_flag=survival_flag,
+        )
 
         print("Test dataset loaded in {0} s".format(time() - t_start))
 
         if fname_key:
             self.project_name = '{0}_{1}'.format(self._project_name, fname_key)
-
 
     def compute_feature_scores_per_cluster(self):
         """
