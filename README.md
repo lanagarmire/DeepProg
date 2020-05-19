@@ -10,29 +10,37 @@ A more complete documentation with API description is also temporarly available 
 
 
 ## Requirements
-* Python 2 or 3
-* Either theano, tensorflow or CNTK
+* Python 2 or 3 (Python3 is recommended)
+* Either theano, tensorflow or CNTK (theano is recommended)
 * [theano](http://deeplearning.net/software/theano/install.html) (the used version for the manuscript was 0.8.2)
 * [tensorflow](https://www.tensorflow.org/) as a more robust alternative to theano
 * [cntk](https://github.com/microsoft/CNTK) CNTK is anoter DL library that can present some advantages compared to tensorflow or theano. See [https://docs.microsoft.com/en-us/cognitive-toolkit/](https://docs.microsoft.com/en-us/cognitive-toolkit/)
-* R
-* the R "survival" package installed.
-* numpy, scipy
 * scikit-learn (>=0.18)
-* rpy2 2.8.6 (for python2 rpy2 can be install with: pip install rpy2==2.8.6, for python3 pip3 install rpy2==2.8.6). It seems that newer version of rpy2 might not work due to a bug (not tested)
+* numpy, scipy
+* lifelines
+* (if using python3) scikit-survival
+* (For distributed computing) ray (ray >= 0.8.4) framework
+* (For hyperparameter tuning) scikit-optimize
 
 
 ```bash
-pip install theano --user # Original backend used
-pip install tensorflow --user # Alternative backend and default for keras. Tensorflow is well maintained by a large team.
-pip install keras --user
-pip install rpy2==2.8.6 --user
+pip3 install tensorflow
+
+# Alternative to tensorflow, original backend used
+pip3 install theano
 
 #If you want to use theano or CNTK
 nano ~/.keras/keras.json
 ```
 
-* R installation
+* R installation (Optional)
+
+In his first implementation, DeepProg used the R survival toolkits to fit the survival functions. Thse functions have been replaced with the python toolkits lifelines and scikit-survival for more convenience and avoid any compatibility issue.
+
+* R
+* the R "survival" package installed.
+* rpy2 2.8.6 (for python2 rpy2 can be install with: pip install rpy2==2.8.6, for python3 pip3 install rpy2==2.8.6). It seems that newer version of rpy2 might not work due to a bug (not tested)
+
 
 ```R
 install.package("survival")
@@ -57,27 +65,35 @@ The default configuration file looks like this:
 ```
 
 ### Distributed computation
-* It is possible to use the python ray framework [https://github.com/ray-project/ray](https://github.com/ray-project/ray) to control the parallel computation of the multiple models. To use this framework, it is required to install it: `pip install ray --user`
+* It is possible to use the python ray framework [https://github.com/ray-project/ray](https://github.com/ray-project/ray) to control the parallel computation of the multiple models. To use this framework, it is required to install it: `pip install ray`
 * Alternatively, it is also possible to create the model one by one without the need of the ray framework
 
 ### Visualisation module (Experimental)
-* To visualise test sets projected into the multi-omic survival space, it is required to install `mpld3` module: `pip install mpld3 --user`
+* To visualise test sets projected into the multi-omic survival space, it is required to install `mpld3` module: `pip install mpld3`
 * Note that the pip version of mpld3 installed on my computer presented a [bug](https://github.com/mpld3/mpld3/issues/434): `TypeError: array([1.]) is not JSON serializable `. However, the [newest](https://github.com/mpld3/mpld3) version of the mpld3 available from the github solved this issue. It is therefore recommended to install the newest version to avoid this issue.
 
 ### installation (local)
 
 ```bash
-git clone https://github.com/lanagarmire/SimDeep.git # The downloading can take few minutes due to the size of th git project
+# The downloading can take few minutes due to the size of th git project
+git clone https://github.com/lanagarmire/SimDeep.git
 cd SimDeep
-pip install -r requirements.txt --user # The installation should only take a short amount of time
+# The installation should only take a short amount of time
+pip3 install -r requirements.txt --user
+# To intall the distributed frameworks
+pip3 install -r requirements_distributed.txt --user
+pip3 install -r requirements_pip3.txt --user
+
+# DeepProg is working also with python2/pip2 however there is no support for scikit-survival in python2
+pip2 install -r requirements.txt --user
+pip2 install -r requirements_distributed.txt --user
 ```
 
 ## Usage
 * test if simdeep is functional (all the software are correctly installed):
 
 ```bash
-  python test/test_dummy_boosting_stacking.py -v # OR
-  nosetests test -v # Improved version of python unit testing
+  python3 test/test_simdeep.py -v #
   ```
 
 * All the default parameters are defined in the config file: `./simdeep/config.py` but can be passed dynamically. Three types of parameters must be defined:
@@ -274,18 +290,68 @@ boosting = SimDeepBoosting(
 ray.shutdown()
 ```
 
+## Hyperparameter search
+DeepProg can accept various alernative hyperparameters to fit a model, including alterative clustering,  normalisation, embedding, choice of autoencoder hyperparameters, use/restrict embedding and survival selection, size of holdout samples, ensemble model merging criterion. Furthermore it can accept external methods to perform clustering / normalisation or embedding. To help ones to find the optimal combinaisons of hyperparameter for a given dataset, we implemented an optional hyperparameter search module based on sequencial-model optimisation search and relying on the [tune](https://docs.ray.io/en/master/tune.html) and [scikit-optimize](https://scikit-optimize.github.io/stable/) python libraries. The optional hyperparameter tuning will perform a non-random itertive grid search and will select each new set of hyperparameters based on the performance of the past iterations. The computation can be entirely distributed thanks to the ray interace (see above).
+
+```python
+
+from simdeep.simdeep_tuning import SimDeepTuning
+
+# AgglomerativeClustering is an external class that can be used as
+# a clustering algorithm since it has a fit_predict method
+from sklearn.cluster.hierarchical import AgglomerativeClustering
+
+args_to_optimize = {
+    'seed': [100, 200, 300, 400],
+    'nb_clusters': [2, 3, 4, 5],
+    'cluster_method': ['mixture', 'coxPH',
+                       AgglomerativeClustering],
+    'use_autoencoders': (True, False),
+    'class_selection': ('mean', 'max'),
+}
+
+tuning = SimDeepTuning(
+    args_to_optimize=args_to_optimize,
+    nb_threads=nb_threads,
+    survival_tsv=SURVIVAL_TSV,
+    training_tsv=TRAINING_TSV,
+    path_data=PATH_DATA,
+    project_name=PROJECT_NAME,
+    path_results=PATH_DATA,
+)
+
+ray.init()
+
+
+tuning.fit(
+    # We will use the holdout samples Cox-PH pvalue as objective
+    metric='log_test_fold_pvalue',
+    num_samples=25,
+    # Experiment run concurently using ray as dispatcher
+    max_concurrent=2,
+    # In addition, each deeprog model will be distributed
+    distribute_deepprog=True,
+    iterations=1)
+
+# We recommend using large `max_concurrent` and distribute_deepprog=True
+# when a large number CPUs and large RAMs are availables
+
+# Results
+table = tuning.get_results_table()
+print(table)
+```
+
 ## Example scripts
 
 Example scripts are availables in ./examples/ which will assist you to build a model from scratch with test and real data:
 
 ```bash
 examples
-├── create_autoencoder_from_scratch.py # Construct a simple deeprog model on the dummy example dataset
-├── example_with_dummy_data_distributed.py # Process the dummy example dataset using ray
-├── example_with_dummy_data.py # Process the dummy example dataset
-└── load_3_omics_model.py # Process the example HCC dataset
-
-
+├── example_hyperparameters_tuning.py
+├── example_hyperparameters_tuning_with_test_dataset.py
+├── example_with_dummy_data_distributed.py
+├── example_with_dummy_data.py
+└── load_3_omics_model.py
 ```
 
 ## License

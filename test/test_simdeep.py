@@ -19,24 +19,7 @@ from shutil import rmtree
 
 class TestPackage(unittest.TestCase):
     """ """
-    def test_1_rpy2_and_r(self):
-        """test that rpy2 is installed and linked to R"""
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
-            from rpy2 import robjects as rob
-
-        var = rob.r('1')[0]
-
-        self.assertTrue(var == 1)
-
-    def test_2_survival_package_from_r(self):
-        """test if the survival package is installed in R """
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
-            from rpy2.robjects.packages import importr
-            importr('survival')
-
-    def test_3_coxph_function(self):
+    def test_1_coxph_function(self):
         """test if the coxph function works """
         from simdeep.coxph_from_r import coxph
 
@@ -113,6 +96,7 @@ class TestPackage(unittest.TestCase):
 
         path_fig = '{0}/{1}_KM_plot_training_dataset.png'.format(PATH_DATA, PROJECT_NAME)
 
+        print('#### asserting file: {0} exists'.format(path_fig))
         self.assertTrue(isfile(path_fig))
 
         from glob import glob

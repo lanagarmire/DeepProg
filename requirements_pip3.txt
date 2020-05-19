@@ -1,0 +1,1 @@
+scikit-survival >= 0.11

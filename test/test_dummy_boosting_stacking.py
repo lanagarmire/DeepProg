@@ -73,5 +73,6 @@ def test_instance():
         elif isdir(fil):
             rmtree(fil)
 
+
 if __name__ == '__main__':
     test_instance()

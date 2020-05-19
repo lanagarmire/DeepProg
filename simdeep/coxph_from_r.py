@@ -161,6 +161,11 @@ def coxph_from_python(
                          fontsize=16,
                          fontweight='bold')
 
+        figname = "{0}/{1}.png".format(
+            png_path, fig_name.replace('.png', ''))
+
+        fig.savefig(figname)
+
     return pvalue
 
 def coxph(values,
