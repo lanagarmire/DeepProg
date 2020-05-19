@@ -85,6 +85,7 @@ class DeepBase(object):
                  data_split=DATA_SPLIT,
                  activation=ACTIVATION,
                  seed=SEED,
+                 alternative_embedding=None,
                  path_to_save_model=PATH_TO_SAVE_MODEL):
         """
         ### DEFAULT PARAMETER ###:
@@ -121,6 +122,7 @@ class DeepBase(object):
         self.activation = activation
         self.data_split = data_split
         self.seed = seed
+        self.alternative_embedding = alternative_embedding
 
         if self.seed:
             np.random.seed(self.seed)

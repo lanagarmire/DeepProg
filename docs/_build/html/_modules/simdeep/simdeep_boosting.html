@@ -149,121 +149,128 @@
            <div itemprop="articleBody">
             
   <h1>Source code for simdeep.simdeep_boosting</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">simdeep.simdeep_analysis</span> <span class="k">import</span> <span class="n">SimDeep</span>
-<span class="kn">from</span> <span class="nn">simdeep.extract_data</span> <span class="k">import</span> <span class="n">LoadData</span>
+<span></span><span class="kn">from</span> <span class="nn">simdeep.simdeep_analysis</span> <span class="kn">import</span> <span class="n">SimDeep</span>
+<span class="kn">from</span> <span class="nn">simdeep.extract_data</span> <span class="kn">import</span> <span class="n">LoadData</span>
 
-<span class="kn">from</span> <span class="nn">simdeep.coxph_from_r</span> <span class="k">import</span> <span class="n">coxph</span>
-<span class="kn">from</span> <span class="nn">simdeep.coxph_from_r</span> <span class="k">import</span> <span class="n">c_index</span>
-<span class="kn">from</span> <span class="nn">simdeep.coxph_from_r</span> <span class="k">import</span> <span class="n">c_index_multiple</span>
+<span class="kn">from</span> <span class="nn">simdeep.coxph_from_r</span> <span class="kn">import</span> <span class="n">coxph</span>
+<span class="kn">from</span> <span class="nn">simdeep.coxph_from_r</span> <span class="kn">import</span> <span class="n">c_index</span>
+<span class="kn">from</span> <span class="nn">simdeep.coxph_from_r</span> <span class="kn">import</span> <span class="n">c_index_multiple</span>
+<span class="kn">from</span> <span class="nn">simdeep.coxph_from_r</span> <span class="kn">import</span> <span class="n">NALogicalType</span>
 
-<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="k">import</span> <span class="n">KFold</span>
+<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">KFold</span>
 <span class="c1"># from sklearn.preprocessing import OneHotEncoder</span>
 
-<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">Counter</span>
-<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">defaultdict</span>
-<span class="kn">from</span> <span class="nn">itertools</span> <span class="k">import</span> <span class="n">combinations</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">Counter</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">combinations</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
-<span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">gmean</span>
-<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="k">import</span> <span class="n">adjusted_rand_score</span>
+<span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">gmean</span>
+<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">adjusted_rand_score</span>
 
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">PROJECT_NAME</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">PATH_RESULTS</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">NB_THREADS</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">NB_ITER</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">NB_FOLDS</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">CLASS_SELECTION</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">NB_CLUSTERS</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">NORMALIZATION</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">EPOCHS</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">NEW_DIM</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">NB_SELECTED_FEATURES</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">PVALUE_THRESHOLD</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">CLUSTER_METHOD</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">CLASSIFICATION_METHOD</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">TRAINING_TSV</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">SURVIVAL_TSV</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">PATH_DATA</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">SURVIVAL_FLAG</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">NODES_SELECTION</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">CINDEX_THRESHOLD</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">PROJECT_NAME</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">PATH_RESULTS</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">NB_THREADS</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">NB_ITER</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">NB_FOLDS</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">CLASS_SELECTION</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">NB_CLUSTERS</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">NORMALIZATION</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">EPOCHS</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">NEW_DIM</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">NB_SELECTED_FEATURES</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">PVALUE_THRESHOLD</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">CLUSTER_METHOD</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">CLASSIFICATION_METHOD</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">TRAINING_TSV</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">SURVIVAL_TSV</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">PATH_DATA</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">SURVIVAL_FLAG</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">NODES_SELECTION</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">CINDEX_THRESHOLD</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">USE_AUTOENCODERS</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">FEATURE_SURV_ANALYSIS</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">CLUSTERING_OMICS</span>
 
 <span class="c1"># Parameter for autoencoder</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">LEVEL_DIMS_IN</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">LEVEL_DIMS_OUT</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">LOSS</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">OPTIMIZER</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">ACT_REG</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">W_REG</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">DROPOUT</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">ACTIVATION</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">PATH_TO_SAVE_MODEL</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">DATA_SPLIT</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">LEVEL_DIMS_IN</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">LEVEL_DIMS_OUT</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">LOSS</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">OPTIMIZER</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">ACT_REG</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">W_REG</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">DROPOUT</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">ACTIVATION</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">PATH_TO_SAVE_MODEL</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">DATA_SPLIT</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">MODEL_THRES</span>
 
-<span class="kn">from</span> <span class="nn">simdeep.deepmodel_base</span> <span class="k">import</span> <span class="n">DeepBase</span>
+<span class="kn">from</span> <span class="nn">simdeep.deepmodel_base</span> <span class="kn">import</span> <span class="n">DeepBase</span>
 
 <span class="kn">import</span> <span class="nn">simplejson</span>
 
-<span class="kn">from</span> <span class="nn">distutils.dir_util</span> <span class="k">import</span> <span class="n">mkpath</span>
+<span class="kn">from</span> <span class="nn">distutils.dir_util</span> <span class="kn">import</span> <span class="n">mkpath</span>
 
-<span class="kn">from</span> <span class="nn">os.path</span> <span class="k">import</span> <span class="n">isdir</span>
-
-<span class="k">try</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">rpy2.rinterface</span> <span class="k">import</span> <span class="n">NALogicalType</span>
-<span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">rpy2.rinterface_lib.na_values</span> <span class="k">import</span> <span class="n">NALogicalType</span>
+<span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">isdir</span>
 
 <span class="kn">import</span> <span class="nn">gc</span>
 
-<span class="kn">from</span> <span class="nn">time</span> <span class="k">import</span> <span class="n">time</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">time</span>
 
-<span class="kn">from</span> <span class="nn">numpy</span> <span class="k">import</span> <span class="n">hstack</span>
-<span class="kn">from</span> <span class="nn">simdeep.survival_utils</span> <span class="k">import</span> \
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">hstack</span>
+<span class="kn">from</span> <span class="nn">simdeep.survival_utils</span> <span class="kn">import</span> \
     <span class="n">_process_parallel_feature_importance_per_cluster</span>
 
-
-<span class="c1">################# Variable ################</span>
-<span class="n">MODEL_THRES</span> <span class="o">=</span> <span class="mf">0.05</span>
-<span class="c1">###########################################</span>
-
-
-<div class="viewcode-block" id="main"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.simdeep_boosting.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
-    <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">TEST_TSV</span>
-    <span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">SURVIVAL_TSV_TEST</span>
-
-    <span class="n">boosting</span> <span class="o">=</span> <span class="n">SimDeepBoosting</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-    <span class="n">boosting</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
-    <span class="n">boosting</span><span class="o">.</span><span class="n">predict_labels_on_full_dataset</span><span class="p">()</span>
-    <span class="n">boosting</span><span class="o">.</span><span class="n">collect_cindex_for_test_fold</span><span class="p">()</span>
-    <span class="n">boosting</span><span class="o">.</span><span class="n">collect_pvalue_on_full_dataset</span><span class="p">()</span>
-
-    <span class="n">boosting</span><span class="o">.</span><span class="n">load_new_test_dataset</span><span class="p">(</span><span class="n">TEST_TSV</span><span class="p">,</span>
-                                   <span class="n">SURVIVAL_TSV_TEST</span><span class="p">,</span>
-                                   <span class="n">fname_key</span><span class="o">=</span><span class="s1">&#39;dummy&#39;</span><span class="p">)</span>
-    <span class="n">boosting</span><span class="o">.</span><span class="n">predict_labels_on_test_dataset</span><span class="p">()</span>
-    <span class="n">boosting</span><span class="o">.</span><span class="n">plot_supervised_kernel_for_test_sets</span><span class="p">()</span>
-
-    <span class="n">boosting</span><span class="o">.</span><span class="n">collect_pvalue_on_training_dataset</span><span class="p">()</span>
-    <span class="n">boosting</span><span class="o">.</span><span class="n">collect_pvalue_on_test_fold</span><span class="p">()</span>
-
-    <span class="n">boosting</span><span class="o">.</span><span class="n">collect_number_of_features_per_omic</span><span class="p">()</span>
-    <span class="n">boosting</span><span class="o">.</span><span class="n">collect_pvalue_on_test_dataset</span><span class="p">()</span>
-    <span class="n">boosting</span><span class="o">.</span><span class="n">collect_cindex_for_test_dataset</span><span class="p">()</span>
-
-    <span class="n">boosting</span><span class="o">.</span><span class="n">compute_c_indexes_for_test_dataset</span><span class="p">()</span>
-    <span class="n">boosting</span><span class="o">.</span><span class="n">compute_c_indexes_multiple_for_test_dataset</span><span class="p">()</span>
-    <span class="n">boosting</span><span class="o">.</span><span class="n">compute_clusters_consistency_for_full_labels</span><span class="p">()</span>
-    <span class="n">boosting</span><span class="o">.</span><span class="n">compute_clusters_consistency_for_test_labels</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="SimDeepBoosting"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.simdeep_boosting.SimDeepBoosting">[docs]</a><span class="k">class</span> <span class="nc">SimDeepBoosting</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Instanciate a new DeepProg Boosting instance.</span>
+<span class="sd">    The default parameters are defined in the config.py file</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">            :nb_it: Number of models to construct</span>
+<span class="sd">            :do_KM_plot: Plot Kaplan-Meier (default: True)</span>
+<span class="sd">            :distribute: Distribute DeepProg using ray (default:  False)</span>
+<span class="sd">            :nb_threads: Number of python threads to use to compute parallel Cox-PH</span>
+<span class="sd">            :class_selection: Consensus score to agglomerate DeepProg Instance {&#39;mean&#39;, &#39;max&#39;, &#39;weighted_mean&#39;, &#39;weighted_max&#39;} (default: &#39;mean&#39;)</span>
+<span class="sd">            :model_thres: Cox-PH p-value threshold to reject a model for DeepProg Boosting module</span>
+<span class="sd">            :verbose: Verobosity (Default: True)</span>
+<span class="sd">            :seed: Seed defining the  random split of the training dataset (Default: None).</span>
+<span class="sd">            :project_name: Project name used to save files</span>
+<span class="sd">            :use_autoencoders: Use autoencoder steps to embed the data (default: True)</span>
+<span class="sd">            :feature_surv_analysis: Use individual survival feature detection to filter out features (default: True)</span>
+<span class="sd">            :split_n_fold: For each instance, the original dataset is split in folds and one fold is left</span>
+<span class="sd">            :path_results: Path to create a result folder</span>
+<span class="sd">            :nb_clusters: Number of clusters to use</span>
+<span class="sd">            :epochs: Number of epochs</span>
+<span class="sd">            :normalization: Normalisation procedure to use. See config.py file for details</span>
+<span class="sd">            :nb_selected_features: Number of top features selected for classification</span>
+<span class="sd">            :cluster_method: Clustering method. possible choice: [&#39;mixture&#39;, &#39;kmeans&#39;, &#39;coxPH&#39;] or class instance having fit and fit_proba attributes</span>
+<span class="sd">            :pvalue_thres: Threshold for survival significance to set a node as valid</span>
+<span class="sd">            :classification_method: Possible choice: {&#39;ALL_FEATURES&#39;, &#39;SURVIVAL_FEATURES&#39;} (default: &#39;ALL_FEATURES&#39;)</span>
+<span class="sd">            :new_dim: Size of the new embedding</span>
+<span class="sd">            :training_tsv: Input matrix files</span>
+<span class="sd">            :survival_tsv: Input surival file</span>
+<span class="sd">            :survival_flag: Survival flag to use</span>
+<span class="sd">            :path_data: Path of the input file</span>
+<span class="sd">            :level_dims_in: Autoencoder node layers before the middle layer (default: [])</span>
+<span class="sd">            :level_dims_out: Autoencoder node layers after the middle layer (default: [])</span>
+<span class="sd">            :loss: Loss function to minimize (default: &#39;binary_crossentropy&#39;)</span>
+<span class="sd">            :optimizer: Optimizer (default: adam)</span>
+<span class="sd">            :act_reg: L2 Regularization constant on the node activity (default: False)</span>
+<span class="sd">            :w_reg: L1 Regularization constant on the weight (default: False)</span>
+<span class="sd">            :dropout: Percentage of edges being dropout at each training iteration (None for no dropout) (default: 0.5)</span>
+<span class="sd">            :data_split: Fraction of the dataset to be used as test set when building the autoencoder (default: None)</span>
+<span class="sd">            :node_selection: possible choice: {&#39;Cox-PH&#39;, &#39;C-index&#39;} (default: Cox-PH)</span>
+<span class="sd">            :cindex_thres: Valid if &#39;c-index&#39; is chosen (default: 0.65)</span>
+<span class="sd">            :activation: Activation function (default: &#39;tanh&#39;)</span>
+<span class="sd">            :clustering_omics: Which omics to use for clustering. If empty, then all the available omics will be used (default [] =&gt; all)</span>
+<span class="sd">            :path_to_save_model: path to save the model</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                  <span class="n">nb_it</span><span class="o">=</span><span class="n">NB_ITER</span><span class="p">,</span>
-                 <span class="n">nb_fold</span><span class="o">=</span><span class="n">NB_FOLDS</span><span class="p">,</span>
                  <span class="n">do_KM_plot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                  <span class="n">distribute</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                  <span class="n">nb_threads</span><span class="o">=</span><span class="n">NB_THREADS</span><span class="p">,</span>
@@ -272,7 +279,9 @@
                  <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                  <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">project_name</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">{0}</span><span class="s1">_boosting&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">PROJECT_NAME</span><span class="p">),</span>
-                 <span class="n">split_n_fold</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+                 <span class="n">use_autoencoders</span><span class="o">=</span><span class="n">USE_AUTOENCODERS</span><span class="p">,</span>
+                 <span class="n">feature_surv_analysis</span><span class="o">=</span><span class="n">FEATURE_SURV_ANALYSIS</span><span class="p">,</span>
+                 <span class="n">split_n_fold</span><span class="o">=</span><span class="n">NB_FOLDS</span><span class="p">,</span>
                  <span class="n">path_results</span><span class="o">=</span><span class="n">PATH_RESULTS</span><span class="p">,</span>
                  <span class="n">nb_clusters</span><span class="o">=</span><span class="n">NB_CLUSTERS</span><span class="p">,</span>
                  <span class="n">epochs</span><span class="o">=</span><span class="n">EPOCHS</span><span class="p">,</span>
@@ -297,6 +306,7 @@
                  <span class="n">node_selection</span><span class="o">=</span><span class="n">NODES_SELECTION</span><span class="p">,</span>
                  <span class="n">cindex_thres</span><span class="o">=</span><span class="n">CINDEX_THRESHOLD</span><span class="p">,</span>
                  <span class="n">activation</span><span class="o">=</span><span class="n">ACTIVATION</span><span class="p">,</span>
+                 <span class="n">clustering_omics</span><span class="o">=</span><span class="n">CLUSTERING_OMICS</span><span class="p">,</span>
                  <span class="n">path_to_save_model</span><span class="o">=</span><span class="n">PATH_TO_SAVE_MODEL</span><span class="p">,</span>
                  <span class="o">**</span><span class="n">additional_dataset_args</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
@@ -320,6 +330,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cindex_thres</span> <span class="o">=</span> <span class="n">cindex_thres</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">node_selection</span> <span class="o">=</span> <span class="n">node_selection</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">clustering_omics</span> <span class="o">=</span> <span class="n">clustering_omics</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">cluster_method</span> <span class="o">=</span> <span class="n">cluster_method</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">use_autoencoders</span> <span class="o">=</span> <span class="n">use_autoencoders</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">feature_surv_analysis</span> <span class="o">=</span> <span class="n">feature_surv_analysis</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">encoder_for_kde_plot_dict</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">kde_survival_node_ids</span> <span class="o">=</span> <span class="p">{}</span>
@@ -431,6 +446,7 @@
             <span class="n">min_seed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">seed</span> <span class="o">-</span> <span class="n">max_seed</span>
             <span class="n">max_seed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">seed</span>
 
+        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">)</span>
         <span class="n">random_states</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="n">min_seed</span><span class="p">,</span> <span class="n">max_seed</span><span class="p">,</span> <span class="n">nb_it</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">split_n_fold</span> <span class="o">=</span> <span class="n">split_n_fold</span>
@@ -452,13 +468,17 @@
 
             <span class="bp">self</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">:</span>
             <span class="k">del</span> <span class="n">model</span>
 
-        <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Warning: Exception </span><span class="si">{0}</span><span class="s1"> from garbage collector. continuing... &#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">e</span><span class="p">))</span>
 
     <span class="k">def</span> <span class="nf">_from_models</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fname</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -537,7 +557,7 @@
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;fit models...&#39;</span><span class="p">)</span>
         <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
 
-        <span class="kn">from</span> <span class="nn">simdeep.simdeep_distributed</span> <span class="k">import</span> <span class="n">SimDeepDistributed</span>
+        <span class="kn">from</span> <span class="nn">simdeep.simdeep_distributed</span> <span class="kn">import</span> <span class="n">SimDeepDistributed</span>
         <span class="kn">import</span> <span class="nn">ray</span>
         <span class="k">assert</span><span class="p">(</span><span class="n">ray</span><span class="o">.</span><span class="n">is_initialized</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ray</span> <span class="o">=</span> <span class="n">ray</span>
@@ -552,6 +572,10 @@
                 <span class="n">verbose</span><span class="o">=</span><span class="n">dataset</span><span class="o">.</span><span class="n">verbose</span><span class="p">,</span>
                 <span class="n">_isboosting</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                 <span class="n">do_KM_plot</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">cluster_method</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cluster_method</span><span class="p">,</span>
+                <span class="n">clustering_omics</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">clustering_omics</span><span class="p">,</span>
+                <span class="n">use_autoencoders</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">use_autoencoders</span><span class="p">,</span>
+                <span class="n">feature_surv_analysis</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">feature_surv_analysis</span><span class="p">,</span>
                 <span class="n">path_results</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">path_results</span><span class="p">,</span>
                 <span class="n">project_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">project_name</span><span class="p">,</span>
                 <span class="n">classification_method</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">classification_method</span><span class="p">,</span>
@@ -598,6 +622,9 @@
                 <span class="n">verbose</span><span class="o">=</span><span class="n">dataset</span><span class="o">.</span><span class="n">verbose</span><span class="p">,</span>
                 <span class="n">_isboosting</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                 <span class="n">do_KM_plot</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">cluster_method</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cluster_method</span><span class="p">,</span>
+                <span class="n">use_autoencoders</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">use_autoencoders</span><span class="p">,</span>
+                <span class="n">feature_surv_analysis</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">feature_surv_analysis</span><span class="p">,</span>
                 <span class="n">path_results</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">path_results</span><span class="p">,</span>
                 <span class="n">project_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">project_name</span><span class="p">,</span>
                 <span class="n">cindex_thres</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cindex_thres</span><span class="p">,</span>
@@ -663,6 +690,32 @@
             <span class="n">nbdays</span><span class="o">=</span><span class="n">nbdays</span><span class="p">,</span> <span class="n">isdead</span><span class="o">=</span><span class="n">isdead</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">pvalue</span><span class="p">,</span> <span class="n">pvalue_proba</span></div>
+
+<div class="viewcode-block" id="SimDeepBoosting.compute_pvalue_for_merged_test_fold"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.simdeep_boosting.SimDeepBoosting.compute_pvalue_for_merged_test_fold">[docs]</a>    <span class="k">def</span> <span class="nf">compute_pvalue_for_merged_test_fold</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;predict labels on test fold datasets...&#39;</span><span class="p">)</span>
+
+        <span class="n">isdead_cv</span><span class="p">,</span> <span class="n">nbdays_cv</span><span class="p">,</span> <span class="n">labels_cv</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">:</span>
+            <span class="n">survival_cv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_from_model_dataset</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;survival_cv&#39;</span><span class="p">)</span>
+            <span class="n">nbdays</span><span class="p">,</span> <span class="n">isdead</span> <span class="o">=</span> <span class="n">survival_cv</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+            <span class="n">nbdays_cv</span> <span class="o">+=</span> <span class="n">nbdays</span>
+            <span class="n">isdead_cv</span> <span class="o">+=</span> <span class="n">isdead</span>
+            <span class="n">labels_cv</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_from_model_attr</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s2">&quot;cv_labels&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+
+        <span class="n">pvalue</span> <span class="o">=</span> <span class="n">coxph</span><span class="p">(</span>
+            <span class="n">labels_cv</span><span class="p">,</span> <span class="n">isdead_cv</span><span class="p">,</span> <span class="n">nbdays_cv</span><span class="p">,</span>
+            <span class="n">isfactor</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">do_KM_plot</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">do_KM_plot</span><span class="p">,</span>
+            <span class="n">png_path</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">path_results</span><span class="p">,</span>
+            <span class="n">fig_name</span><span class="o">=</span><span class="s1">&#39;cv_analysis&#39;</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">)</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Pvalue for test fold concatenated: </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pvalue</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">[</span><span class="s1">&#39;pvalue cv test&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pvalue</span>
+
+        <span class="k">return</span> <span class="n">pvalue</span></div>
 
 <div class="viewcode-block" id="SimDeepBoosting.collect_pvalue_on_test_fold"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.simdeep_boosting.SimDeepBoosting.collect_pvalue_on_test_fold">[docs]</a>    <span class="k">def</span> <span class="nf">collect_pvalue_on_test_fold</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -767,16 +820,21 @@
 
         <span class="k">return</span> <span class="n">counter</span></div>
 
+
 <div class="viewcode-block" id="SimDeepBoosting.collect_cindex_for_test_fold"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.simdeep_boosting.SimDeepBoosting.collect_cindex_for_test_fold">[docs]</a>    <span class="k">def</span> <span class="nf">collect_cindex_for_test_fold</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cindex_test_folds</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_from_models</span><span class="p">(</span><span class="s1">&#39;predict_labels_on_test_fold&#39;</span><span class="p">)</span>
-        <span class="n">cindexes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_from_models</span><span class="p">(</span><span class="s1">&#39;compute_c_indexes_for_test_fold_dataset&#39;</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">cindexes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_from_models</span><span class="p">(</span><span class="s1">&#39;compute_c_indexes_for_test_fold_dataset&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Exception while computing the c-index for test fold: </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
 
         <span class="k">for</span> <span class="n">cindex</span> <span class="ow">in</span> <span class="n">cindexes</span><span class="p">:</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cindex</span><span class="p">,</span> <span class="n">NALogicalType</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">cindex</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cindex</span><span class="p">,</span> <span class="n">NALogicalType</span><span class="p">):</span>
                 <span class="n">cindex</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">cindex_test_folds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cindex</span><span class="p">)</span>
@@ -794,7 +852,12 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_from_models</span><span class="p">(</span><span class="s1">&#39;predict_labels_on_test_fold&#39;</span><span class="p">)</span>
-        <span class="n">cindexes_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_from_models</span><span class="p">(</span><span class="s1">&#39;compute_c_indexes_for_full_dataset&#39;</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">cindexes_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_from_models</span><span class="p">(</span><span class="s1">&#39;compute_c_indexes_for_full_dataset&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Exception while computing the c-index for full dataset: </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;c-index results for full dataset: mean </span><span class="si">{0}</span><span class="s1"> std </span><span class="si">{1}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
@@ -808,7 +871,12 @@
 <div class="viewcode-block" id="SimDeepBoosting.collect_cindex_for_training_dataset"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.simdeep_boosting.SimDeepBoosting.collect_cindex_for_training_dataset">[docs]</a>    <span class="k">def</span> <span class="nf">collect_cindex_for_training_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">cindexes_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_from_models</span><span class="p">(</span><span class="s1">&#39;compute_c_indexes_for_training_dataset&#39;</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">cindexes_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_from_models</span><span class="p">(</span><span class="s1">&#39;compute_c_indexes_for_training_dataset&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Exception while computing the c-index for training dataset: </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">[</span><span class="s1">&#39;c-indexes train (mean)&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;C-index results for training dataset: mean </span><span class="si">{0}</span><span class="s1"> std </span><span class="si">{1}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
@@ -821,7 +889,12 @@
 <div class="viewcode-block" id="SimDeepBoosting.collect_cindex_for_test_dataset"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.simdeep_boosting.SimDeepBoosting.collect_cindex_for_test_dataset">[docs]</a>    <span class="k">def</span> <span class="nf">collect_cindex_for_test_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">cindexes_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_from_models</span><span class="p">(</span><span class="s1">&#39;compute_c_indexes_for_test_dataset&#39;</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">cindexes_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_from_models</span><span class="p">(</span><span class="s1">&#39;compute_c_indexes_for_test_dataset&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Exception while computing the c-index for test dataset: </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">[</span><span class="s1">&#39;C-index test </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">test_fname_key</span><span class="p">)]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;C-index results for test: mean </span><span class="si">{0}</span><span class="s1"> std </span><span class="si">{1}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
@@ -959,7 +1032,8 @@
             <span class="n">isfactor</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
             <span class="n">do_KM_plot</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">do_KM_plot</span><span class="p">,</span>
             <span class="n">png_path</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">path_results</span><span class="p">,</span>
-            <span class="n">fig_name</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">{0}</span><span class="s1">_</span><span class="si">{1}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">project_name</span><span class="p">,</span> <span class="n">fname_base</span><span class="p">))</span>
+            <span class="n">fig_name</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">{0}</span><span class="s1">_</span><span class="si">{1}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">project_name</span><span class="p">,</span> <span class="n">fname_base</span><span class="p">),</span>
+            <span class="n">seed</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Cox-PH p-value (Log-Rank) for inferred labels: </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pvalue</span><span class="p">))</span>
@@ -967,7 +1041,8 @@
         <span class="n">pvalue_proba</span> <span class="o">=</span> <span class="n">coxph</span><span class="p">(</span>
             <span class="n">labels_proba</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
             <span class="n">isdead</span><span class="p">,</span> <span class="n">nbdays</span><span class="p">,</span>
-            <span class="n">isfactor</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">isfactor</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">seed</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Cox-PH proba p-value (Log-Rank) for inferred labels: </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pvalue_proba</span><span class="p">))</span>
@@ -979,7 +1054,8 @@
             <span class="n">isfactor</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
             <span class="n">do_KM_plot</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">do_KM_plot</span><span class="p">,</span>
             <span class="n">png_path</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">path_results</span><span class="p">,</span>
-            <span class="n">fig_name</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">{0}</span><span class="s1">_proba_</span><span class="si">{1}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">project_name</span><span class="p">,</span> <span class="n">fname_base</span><span class="p">))</span>
+            <span class="n">fig_name</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">{0}</span><span class="s1">_proba_</span><span class="si">{1}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">project_name</span><span class="p">,</span> <span class="n">fname_base</span><span class="p">),</span>
+            <span class="n">seed</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Cox-PH categorical p-value (Log-Rank) for inferred labels: </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
@@ -1014,13 +1090,16 @@
             <span class="n">dead_test</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">dead_test</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 
         <span class="n">cindex</span> <span class="o">=</span> <span class="n">c_index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">full_labels</span><span class="p">,</span> <span class="n">dead_full</span><span class="p">,</span> <span class="n">days_full</span><span class="p">,</span>
-                         <span class="bp">self</span><span class="o">.</span><span class="n">test_labels</span><span class="p">,</span> <span class="n">dead_test</span><span class="p">,</span> <span class="n">days_test</span><span class="p">)</span>
+                         <span class="bp">self</span><span class="o">.</span><span class="n">test_labels</span><span class="p">,</span> <span class="n">dead_test</span><span class="p">,</span> <span class="n">days_test</span><span class="p">,</span>
+                         <span class="n">seed</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">)</span>
 
         <span class="n">cindex_cat</span> <span class="o">=</span> <span class="n">c_index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">full_labels</span><span class="p">,</span> <span class="n">dead_full</span><span class="p">,</span> <span class="n">days_full</span><span class="p">,</span>
-                         <span class="n">labels_test_categorical</span><span class="p">,</span> <span class="n">dead_test</span><span class="p">,</span> <span class="n">days_test</span><span class="p">)</span>
+                             <span class="n">labels_test_categorical</span><span class="p">,</span> <span class="n">dead_test</span><span class="p">,</span> <span class="n">days_test</span><span class="p">,</span>
+                             <span class="n">seed</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">)</span>
 
         <span class="n">cindex_proba</span> <span class="o">=</span> <span class="n">c_index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">full_labels_proba</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dead_full</span><span class="p">,</span> <span class="n">days_full</span><span class="p">,</span>
-                               <span class="bp">self</span><span class="o">.</span><span class="n">test_labels_proba</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dead_test</span><span class="p">,</span> <span class="n">days_test</span><span class="p">)</span>
+                               <span class="bp">self</span><span class="o">.</span><span class="n">test_labels_proba</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dead_test</span><span class="p">,</span> <span class="n">days_test</span><span class="p">,</span>
+                               <span class="n">seed</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;c-index for boosting test dataset:</span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cindex</span><span class="p">))</span>
@@ -1041,13 +1120,16 @@
         <span class="n">labels_categorical</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_labels_proba_to_labels</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">full_labels_proba</span><span class="p">)</span>
 
         <span class="n">cindex</span> <span class="o">=</span> <span class="n">c_index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">full_labels</span><span class="p">,</span> <span class="n">dead_full</span><span class="p">,</span> <span class="n">days_full</span><span class="p">,</span>
-                         <span class="bp">self</span><span class="o">.</span><span class="n">full_labels</span><span class="p">,</span> <span class="n">dead_full</span><span class="p">,</span> <span class="n">days_full</span><span class="p">)</span>
+                         <span class="bp">self</span><span class="o">.</span><span class="n">full_labels</span><span class="p">,</span> <span class="n">dead_full</span><span class="p">,</span> <span class="n">days_full</span><span class="p">,</span>
+                         <span class="n">seed</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">)</span>
 
         <span class="n">cindex_cat</span> <span class="o">=</span> <span class="n">c_index</span><span class="p">(</span><span class="n">labels_categorical</span><span class="p">,</span> <span class="n">dead_full</span><span class="p">,</span> <span class="n">days_full</span><span class="p">,</span>
-                             <span class="n">labels_categorical</span><span class="p">,</span> <span class="n">dead_full</span><span class="p">,</span> <span class="n">days_full</span><span class="p">)</span>
+                             <span class="n">labels_categorical</span><span class="p">,</span> <span class="n">dead_full</span><span class="p">,</span> <span class="n">days_full</span><span class="p">,</span>
+                             <span class="n">seed</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">)</span>
 
         <span class="n">cindex_proba</span> <span class="o">=</span> <span class="n">c_index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">full_labels_proba</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dead_full</span><span class="p">,</span> <span class="n">days_full</span><span class="p">,</span>
-                               <span class="bp">self</span><span class="o">.</span><span class="n">full_labels_proba</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dead_full</span><span class="p">,</span> <span class="n">days_full</span><span class="p">)</span>
+                               <span class="bp">self</span><span class="o">.</span><span class="n">full_labels_proba</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dead_full</span><span class="p">,</span> <span class="n">days_full</span><span class="p">,</span>
+                               <span class="n">seed</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;c-index for boosting full dataset:</span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cindex</span><span class="p">))</span>
@@ -1084,8 +1166,9 @@
         <span class="n">activities_train</span> <span class="o">=</span> <span class="n">hstack</span><span class="p">(</span><span class="n">activities_train</span><span class="p">)</span>
         <span class="n">activities_test</span> <span class="o">=</span> <span class="n">hstack</span><span class="p">(</span><span class="n">activities_test</span><span class="p">)</span>
 
-        <span class="n">cindex</span> <span class="o">=</span> <span class="n">c_index_multiple</span><span class="p">(</span><span class="n">activities_train</span><span class="p">,</span> <span class="n">isdead</span><span class="p">,</span> <span class="n">nbdays</span><span class="p">,</span>
-                                   <span class="n">activities_test</span><span class="p">,</span> <span class="n">isdead_test</span><span class="p">,</span> <span class="n">nbdays_test</span><span class="p">)</span>
+        <span class="n">cindex</span> <span class="o">=</span> <span class="n">c_index_multiple</span><span class="p">(</span>
+            <span class="n">activities_train</span><span class="p">,</span> <span class="n">isdead</span><span class="p">,</span> <span class="n">nbdays</span><span class="p">,</span>
+            <span class="n">activities_test</span><span class="p">,</span> <span class="n">isdead_test</span><span class="p">,</span> <span class="n">nbdays_test</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">)</span>
 
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;total number of survival features: </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">activities_train</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;cindex multiple for test set: </span><span class="si">{0}</span><span class="s1">:&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cindex</span><span class="p">))</span>
@@ -1114,7 +1197,7 @@
 <div class="viewcode-block" id="SimDeepBoosting.plot_supervised_kernel_for_test_sets"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.simdeep_boosting.SimDeepBoosting.plot_supervised_kernel_for_test_sets">[docs]</a>    <span class="k">def</span> <span class="nf">plot_supervised_kernel_for_test_sets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">from</span> <span class="nn">simdeep.plot_utils</span> <span class="k">import</span> <span class="n">plot_kernel_plots</span>
+        <span class="kn">from</span> <span class="nn">simdeep.plot_utils</span> <span class="kn">import</span> <span class="n">plot_kernel_plots</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;plotting survival features using autoencoder...&#39;</span><span class="p">)</span>
@@ -1272,7 +1355,8 @@
                               <span class="n">fname_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                               <span class="n">normalization</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                               <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                              <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+                              <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                              <span class="n">survival_flag</span><span class="o">=</span><span class="kc">None</span><span class="p">,):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">test_tsv_dict</span> <span class="o">=</span> <span class="n">tsv_dict</span>
@@ -1283,7 +1367,7 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">test_normalization</span> <span class="o">=</span> <span class="n">normalization</span>
 
-        <span class="k">if</span> <span class="n">debug</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">nb_threads</span><span class="o">&lt;</span><span class="mi">2</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">debug</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">nb_threads</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
             <span class="k">pass</span>
         <span class="c1"># for model in self.models:</span>
         <span class="c1"># model.verbose = True</span>
@@ -1297,13 +1381,14 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_from_models</span><span class="p">(</span><span class="s1">&#39;_predict_new_dataset&#39;</span><span class="p">,</span>
                           <span class="n">tsv_dict</span><span class="o">=</span><span class="n">tsv_dict</span><span class="p">,</span>
                           <span class="n">path_survival_file</span><span class="o">=</span><span class="n">path_survival_file</span><span class="p">,</span>
-                          <span class="n">normalization</span><span class="o">=</span><span class="n">normalization</span><span class="p">)</span>
+                          <span class="n">normalization</span><span class="o">=</span><span class="n">normalization</span><span class="p">,</span>
+                          <span class="n">survival_flag</span><span class="o">=</span><span class="n">survival_flag</span><span class="p">,</span>
+        <span class="p">)</span>
 
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Test dataset loaded in </span><span class="si">{0}</span><span class="s2"> s&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t_start</span><span class="p">))</span>
 
         <span class="k">if</span> <span class="n">fname_key</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">project_name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{0}</span><span class="s1">_</span><span class="si">{1}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_project_name</span><span class="p">,</span> <span class="n">fname_key</span><span class="p">)</span></div>
-
 
 <div class="viewcode-block" id="SimDeepBoosting.compute_feature_scores_per_cluster"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.simdeep_boosting.SimDeepBoosting.compute_feature_scores_per_cluster">[docs]</a>    <span class="k">def</span> <span class="nf">compute_feature_scores_per_cluster</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -1507,10 +1592,6 @@
     <span class="n">index</span> <span class="o">=</span> <span class="p">[</span><span class="n">sample_dict</span><span class="p">[</span><span class="n">sample</span><span class="p">]</span> <span class="k">for</span> <span class="n">sample</span> <span class="ow">in</span> <span class="n">sample_ordered</span><span class="p">]</span>
 
     <span class="k">return</span> <span class="n">labels</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
-
-
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
-    <span class="n">main</span><span class="p">()</span>
 </pre></div>
 
            </div>

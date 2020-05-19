@@ -86,6 +86,12 @@
 <li class="toctree-l1"><a class="reference internal" href="usage_ensemble.html">Tutorial: Ensemble of DeepProg model</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Tutorial: Advanced usage of DeepProg model</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#visualisation">Visualisation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#hyperparameters">Hyperparameters</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#number-of-clusters">Number of clusters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#clustering-algorithm">Clustering algorithm</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#normalisation">Normalisation</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="case_study.html">Case study: Analyzing TCGA HCC dataset</a></li>
@@ -172,6 +178,89 @@
 </div>
 <p><img alt="kdplot 2" src="_images/stacked_TestProject_TEST_DATA_2_KM_plot_boosting_test_kde_1_cropped.png" /></p>
 <p>Note that these visualisation are not very efficient in that example dataset, since we have only a limited number of samples (40) and features. However, they might become more useful for real datasets.</p>
+</div>
+<div class="section" id="hyperparameters">
+<h2>Hyperparameters<a class="headerlink" href="#hyperparameters" title="Permalink to this headline">¶</a></h2>
+<p>Hyperparameters can have a considerable influence on the accuracy of DeepProgs models. We set up the default hyperparameters to be used on a maximum of different datasets. However, specific datasets might require additional optimizations. Below, we are listing</p>
+<div class="section" id="number-of-clusters">
+<h3>Number of clusters<a class="headerlink" href="#number-of-clusters" title="Permalink to this headline">¶</a></h3>
+<p>The parameters <code class="docutils literal notranslate"><span class="pre">nb_clusters</span></code> is used to define the number of partitions to produce</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#Example</span>
+<span class="n">boosting</span> <span class="o">=</span> <span class="n">SimDeepBoosting</span><span class="p">(</span>
+    <span class="n">nb_clusters</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">boosting</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="clustering-algorithm">
+<h3>Clustering algorithm<a class="headerlink" href="#clustering-algorithm" title="Permalink to this headline">¶</a></h3>
+<p>By default, DeepProg is using a gaussian mixture model from the scikit-learn library  to perform clustering. The hyperparameter of the model are customisable using the <code class="docutils literal notranslate"><span class="pre">mixture_params</span></code> parameter:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Default params from the config file:</span>
+
+<span class="n">MIXTURE_PARAMS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;covariance_type&#39;</span><span class="p">:</span> <span class="s1">&#39;diag&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;max_iter&#39;</span><span class="p">:</span> <span class="mi">1000</span><span class="p">,</span>
+    <span class="s1">&#39;n_init&#39;</span><span class="p">:</span> <span class="mi">100</span>
+    <span class="p">}</span>
+
+<span class="n">boosting</span> <span class="o">=</span> <span class="n">SimDeepBoosting</span><span class="p">(</span>
+    <span class="n">mixture_params</span><span class="o">=</span><span class="n">MIXTURE_PARAMS</span><span class="p">,</span>
+    <span class="n">nb_clusters</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+    <span class="n">cluster_method</span><span class="o">=</span><span class="s1">&#39;mixture&#39;</span> <span class="c1"># Default</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+<p>In addition, two alternative clustering approaches are available <code class="docutils literal notranslate"><span class="pre">kmeans</span></code>, which refers to the scikit-learn KMeans class and <code class="docutils literal notranslate"><span class="pre">coxPH</span></code> which fits a L1 penalized multi-dimensional Cox-PH model and then dichotomize the samples into K groups using the  predicted suvival times. The L1 penalised Cox-PH model is fitted using scikit-survival <code class="docutils literal notranslate"><span class="pre">CoxnetSurvivalAnalysis</span></code>class for python3 so it cannot be computed when using pytho 2. Finally, external clustering class instances can be used as long as they have a <code class="docutils literal notranslate"><span class="pre">fit_predict</span></code> method returning an array of labels, and accepting a <code class="docutils literal notranslate"><span class="pre">nb_clusters</span></code> parameter.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># External clustering class having fit_predict method</span>
+<span class="kn">from</span> <span class="nn">sklearn.cluster.hierarchical</span> <span class="kn">import</span> <span class="n">AgglomerativeClustering</span>
+
+<span class="n">boostingH</span> <span class="o">=</span> <span class="n">SimDeepBoosting</span><span class="p">(</span>
+        <span class="n">nb_clusters</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+        <span class="n">cluster_method</span><span class="o">=</span><span class="n">AgglomerativeClustering</span> <span class="c1"># Default</span>
+    <span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">DummyClustering</span><span class="p">:</span>
+    <span class="bp">self</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nb_clusters</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nb_clusters</span>
+
+    <span class="k">def</span> <span class="nf">fit_predict</span><span class="p">(</span><span class="n">M</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
+        <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nb_clusters</span><span class="p">,</span> <span class="n">M</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+
+<span class="n">boostingDummy</span> <span class="o">=</span> <span class="n">SimDeepBoosting</span><span class="p">(</span>
+        <span class="n">nb_clusters</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+        <span class="n">cluster_method</span><span class="o">=</span><span class="n">DummyClustering</span> <span class="c1"># Default</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="normalisation">
+<h3>Normalisation<a class="headerlink" href="#normalisation" title="Permalink to this headline">¶</a></h3>
+<p>DeepProg uses by default a four-step normalisation for both training and test datasets:</p>
+<ol class="simple">
+<li>Selection of the top 100 features according to the variances</li>
+<li>Rank normalisation per sample</li>
+<li>Sample-sample Correlation similarity transformation</li>
+<li>Rank normalisation</li>
+</ol>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">default_normalisation</span> <span class="o">=</span>  <span class="p">{</span>
+    <span class="s1">&#39;NB_FEATURES_TO_KEEP&#39;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
+    <span class="s1">&#39;TRAIN_RANK_NORM&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="s1">&#39;TRAIN_CORR_REDUCTION&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="s1">&#39;TRAIN_CORR_RANK_NORM&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="n">boosting</span> <span class="o">=</span> <span class="n">SimDeepBoosting</span><span class="p">(</span>
+        <span class="n">normalization</span><span class="o">=</span><span class="n">default_normalisation</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+<p>However, it is possible to use other normalisation. DeepProg</p>
+</div>
 </div>
 </div>
 

@@ -151,9 +151,20 @@
   <h1>Source code for simdeep.deepmodel_base</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">SEED</span>
+<span class="kn">import</span> <span class="nn">random</span>
+<span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">2020</span><span class="p">)</span>
 
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">tensorflow.compat.v1</span> <span class="kn">import</span> <span class="n">set_random_seed</span>
+<span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+    <span class="n">set_random_seed</span> <span class="o">=</span> <span class="kc">None</span>
+
+<span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">2020</span><span class="p">)</span>
+<span class="n">set_random_seed</span><span class="p">(</span><span class="mi">2020</span><span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">SEED</span>
 <span class="kn">import</span> <span class="nn">os</span>
+
 <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;TF_CPP_MIN_LOG_LEVEL&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;3&#39;</span>
 
 <span class="kn">import</span> <span class="nn">warnings</span>
@@ -168,36 +179,35 @@
 
 <span class="k">with</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">():</span>
     <span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
-    <span class="kn">from</span> <span class="nn">keras.layers</span> <span class="k">import</span> <span class="n">Dense</span>
-    <span class="kn">from</span> <span class="nn">keras.layers</span> <span class="k">import</span> <span class="n">Dropout</span>
-    <span class="kn">from</span> <span class="nn">keras.layers</span> <span class="k">import</span> <span class="n">Input</span>
+    <span class="kn">from</span> <span class="nn">keras.layers</span> <span class="kn">import</span> <span class="n">Dense</span>
+    <span class="kn">from</span> <span class="nn">keras.layers</span> <span class="kn">import</span> <span class="n">Dropout</span>
+    <span class="kn">from</span> <span class="nn">keras.layers</span> <span class="kn">import</span> <span class="n">Input</span>
 
-    <span class="kn">from</span> <span class="nn">keras.models</span> <span class="k">import</span> <span class="n">Sequential</span>
-    <span class="kn">from</span> <span class="nn">keras.models</span> <span class="k">import</span> <span class="n">load_model</span>
-    <span class="kn">from</span> <span class="nn">keras.models</span> <span class="k">import</span> <span class="n">Model</span>
+    <span class="kn">from</span> <span class="nn">keras.models</span> <span class="kn">import</span> <span class="n">Sequential</span>
+    <span class="kn">from</span> <span class="nn">keras.models</span> <span class="kn">import</span> <span class="n">load_model</span>
+    <span class="kn">from</span> <span class="nn">keras.models</span> <span class="kn">import</span> <span class="n">Model</span>
 
-    <span class="kn">from</span> <span class="nn">keras</span> <span class="k">import</span> <span class="n">regularizers</span>
+    <span class="kn">from</span> <span class="nn">keras</span> <span class="kn">import</span> <span class="n">regularizers</span>
 
-<span class="kn">from</span> <span class="nn">simdeep.extract_data</span> <span class="k">import</span> <span class="n">LoadData</span>
+<span class="kn">from</span> <span class="nn">simdeep.extract_data</span> <span class="kn">import</span> <span class="n">LoadData</span>
 
-<span class="kn">from</span> <span class="nn">time</span> <span class="k">import</span> <span class="n">time</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">time</span>
 
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">EPOCHS</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">LEVEL_DIMS_IN</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">LEVEL_DIMS_OUT</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">NEW_DIM</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">LOSS</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">OPTIMIZER</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">ACT_REG</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">W_REG</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">DROPOUT</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">ACTIVATION</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">PATH_TO_SAVE_MODEL</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">DATA_SPLIT</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">EPOCHS</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">LEVEL_DIMS_IN</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">LEVEL_DIMS_OUT</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">NEW_DIM</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">LOSS</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">OPTIMIZER</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">ACT_REG</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">W_REG</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">DROPOUT</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">ACTIVATION</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">PATH_TO_SAVE_MODEL</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">DATA_SPLIT</span>
 
-<span class="kn">from</span> <span class="nn">os.path</span> <span class="k">import</span> <span class="n">isfile</span>
+<span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">isfile</span>
 
-<span class="kn">import</span> <span class="nn">os</span>
 <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;TF_CPP_MIN_LOG_LEVEL&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;3&#39;</span>
 
 
@@ -211,7 +221,7 @@
 
 <div class="viewcode-block" id="DeepBase"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.deepmodel_base.DeepBase">[docs]</a><span class="k">class</span> <span class="nc">DeepBase</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                  <span class="n">dataset</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                  <span class="n">epochs</span><span class="o">=</span><span class="n">EPOCHS</span><span class="p">,</span>
@@ -265,6 +275,9 @@
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">:</span>
             <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">set_random_seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">set_random_seed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">W_l1_constant</span> <span class="o">=</span> <span class="n">w_reg</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">A_l2_constant</span> <span class="o">=</span> <span class="n">act_reg</span>
@@ -436,7 +449,8 @@
                       <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>
                       <span class="n">epochs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">epochs</span><span class="p">,</span>
                       <span class="n">validation_split</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data_split</span><span class="p">,</span>
-                      <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                      <span class="c1"># shuffle=True</span>
+            <span class="p">)</span>
 
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;fitting done for model </span><span class="si">{0}</span><span class="s1">!&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>

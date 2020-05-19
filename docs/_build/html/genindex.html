@@ -173,7 +173,15 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/simdeep.html#simdeep.coxph_from_r.c_index">c_index() (in module simdeep.coxph_from_r)</a>
 </li>
+      <li><a href="api/simdeep.html#simdeep.coxph_from_r.c_index_from_python">c_index_from_python() (in module simdeep.coxph_from_r)</a>
+</li>
+      <li><a href="api/simdeep.html#simdeep.coxph_from_r.c_index_from_r">c_index_from_r() (in module simdeep.coxph_from_r)</a>
+</li>
       <li><a href="api/simdeep.html#simdeep.coxph_from_r.c_index_multiple">c_index_multiple() (in module simdeep.coxph_from_r)</a>
+</li>
+      <li><a href="api/simdeep.html#simdeep.coxph_from_r.c_index_multiple_from_python">c_index_multiple_from_python() (in module simdeep.coxph_from_r)</a>
+</li>
+      <li><a href="api/simdeep.html#simdeep.coxph_from_r.c_index_multiple_from_r">c_index_multiple_from_r() (in module simdeep.coxph_from_r)</a>
 </li>
       <li><a href="api/simdeep.html#simdeep.simdeep_boosting.SimDeepBoosting.collect_cindex_for_full_dataset">collect_cindex_for_full_dataset() (simdeep.simdeep_boosting.SimDeepBoosting method)</a>
 </li>
@@ -233,6 +241,8 @@
         <li><a href="api/simdeep.html#simdeep.simdeep_boosting.SimDeepBoosting.compute_feature_scores_per_cluster">(simdeep.simdeep_boosting.SimDeepBoosting method)</a>
 </li>
       </ul></li>
+      <li><a href="api/simdeep.html#simdeep.simdeep_boosting.SimDeepBoosting.compute_pvalue_for_merged_test_fold">compute_pvalue_for_merged_test_fold() (simdeep.simdeep_boosting.SimDeepBoosting method)</a>
+</li>
       <li><a href="api/simdeep.html#simdeep.deepmodel_base.DeepBase.construct_autoencoders">construct_autoencoders() (simdeep.deepmodel_base.DeepBase method)</a>
 </li>
       <li><a href="api/simdeep.html#simdeep.deepmodel_base.DeepBase.construct_supervized_network">construct_supervized_network() (simdeep.deepmodel_base.DeepBase method)</a>
@@ -242,6 +252,10 @@
       <li><a href="api/simdeep.html#simdeep.survival_utils.CorrelationReducer">CorrelationReducer (class in simdeep.survival_utils)</a>
 </li>
       <li><a href="api/simdeep.html#simdeep.coxph_from_r.coxph">coxph() (in module simdeep.coxph_from_r)</a>
+</li>
+      <li><a href="api/simdeep.html#simdeep.coxph_from_r.coxph_from_python">coxph_from_python() (in module simdeep.coxph_from_r)</a>
+</li>
+      <li><a href="api/simdeep.html#simdeep.coxph_from_r.coxph_from_r">coxph_from_r() (in module simdeep.coxph_from_r)</a>
 </li>
       <li><a href="api/simdeep.html#simdeep.extract_data.LoadData.create_a_cv_split">create_a_cv_split() (simdeep.extract_data.LoadData method)</a>
 </li>
@@ -368,8 +382,6 @@
       <ul>
         <li><a href="api/simdeep.html#simdeep.deepmodel_base.main">(in module simdeep.deepmodel_base)</a>
 </li>
-        <li><a href="api/simdeep.html#simdeep.simdeep_boosting.main">(in module simdeep.simdeep_boosting)</a>
-</li>
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -407,10 +419,10 @@
       </ul></li>
       <li><a href="api/simdeep.html#simdeep.simdeep_boosting.SimDeepBoosting.plot_supervised_predicted_labels_for_test_sets">plot_supervised_predicted_labels_for_test_sets() (simdeep.simdeep_boosting.SimDeepBoosting method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/simdeep.html#simdeep.simdeep_analysis.SimDeep.predict_labels">predict_labels() (simdeep.simdeep_analysis.SimDeep method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/simdeep.html#simdeep.simdeep_analysis.SimDeep.predict_labels_on_full_dataset">predict_labels_on_full_dataset() (simdeep.simdeep_analysis.SimDeep method)</a>
 
       <ul>
@@ -426,6 +438,8 @@
       <li><a href="api/simdeep.html#simdeep.simdeep_analysis.SimDeep.predict_labels_on_test_fold">predict_labels_on_test_fold() (simdeep.simdeep_analysis.SimDeep method)</a>
 </li>
       <li><a href="api/simdeep.html#simdeep.simdeep_analysis.SimDeep.predict_nodes_activities">predict_nodes_activities() (simdeep.simdeep_analysis.SimDeep method)</a>
+</li>
+      <li><a href="api/simdeep.html#simdeep.coxph_from_r.predict_with_coxph_glmnet">predict_with_coxph_glmnet() (in module simdeep.coxph_from_r)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -471,12 +485,12 @@
 </li>
       <li><a href="api/simdeep.html#module-simdeep.coxph_from_r">simdeep.coxph_from_r (module)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/simdeep.html#module-simdeep.deepmodel_base">simdeep.deepmodel_base (module)</a>
 </li>
       <li><a href="api/simdeep.html#module-simdeep.extract_data">simdeep.extract_data (module)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/simdeep.html#module-simdeep.plot_utils">simdeep.plot_utils (module)</a>
 </li>
       <li><a href="api/simdeep.html#module-simdeep.simdeep_analysis">simdeep.simdeep_analysis (module)</a>
@@ -497,7 +511,15 @@
 </li>
       <li><a href="api/simdeep.html#simdeep.coxph_from_r.surv_mean">surv_mean() (in module simdeep.coxph_from_r)</a>
 </li>
+      <li><a href="api/simdeep.html#simdeep.coxph_from_r.surv_mean_from_python">surv_mean_from_python() (in module simdeep.coxph_from_r)</a>
+</li>
+      <li><a href="api/simdeep.html#simdeep.coxph_from_r.surv_mean_from_r">surv_mean_from_r() (in module simdeep.coxph_from_r)</a>
+</li>
       <li><a href="api/simdeep.html#simdeep.coxph_from_r.surv_median">surv_median() (in module simdeep.coxph_from_r)</a>
+</li>
+      <li><a href="api/simdeep.html#simdeep.coxph_from_r.surv_median_from_python">surv_median_from_python() (in module simdeep.coxph_from_r)</a>
+</li>
+      <li><a href="api/simdeep.html#simdeep.coxph_from_r.surv_median_from_r">surv_median_from_r() (in module simdeep.coxph_from_r)</a>
 </li>
   </ul></td>
 </tr></table>

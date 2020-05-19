@@ -150,47 +150,47 @@
             
   <h1>Source code for simdeep.extract_data</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
-<span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="k">import</span> <span class="n">Normalizer</span>
-<span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="k">import</span> <span class="n">RobustScaler</span>
-<span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="k">import</span> <span class="n">MinMaxScaler</span>
-<span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="k">import</span> <span class="n">quantile_transform</span>
+<span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">Normalizer</span>
+<span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">RobustScaler</span>
+<span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">MinMaxScaler</span>
+<span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">quantile_transform</span>
 
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">TRAINING_TSV</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">SURVIVAL_TSV</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">TRAINING_TSV</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">SURVIVAL_TSV</span>
 
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">TEST_TSV</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">SURVIVAL_TSV_TEST</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">TEST_TSV</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">SURVIVAL_TSV_TEST</span>
 
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">PATH_DATA</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">STACK_MULTI_OMIC</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">PATH_DATA</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">STACK_MULTI_OMIC</span>
 
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">NORMALIZATION</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">NORMALIZATION</span>
 
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">FILL_UNKOWN_FEATURE_WITH_0</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">FILL_UNKOWN_FEATURE_WITH_0</span>
 
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">CROSS_VALIDATION_INSTANCE</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">TEST_FOLD</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">CROSS_VALIDATION_INSTANCE</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">TEST_FOLD</span>
 
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">SURVIVAL_FLAG</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">SURVIVAL_FLAG</span>
 
-<span class="kn">from</span> <span class="nn">simdeep.survival_utils</span> <span class="k">import</span> <span class="n">load_data_from_tsv</span>
-<span class="kn">from</span> <span class="nn">simdeep.survival_utils</span> <span class="k">import</span> <span class="n">load_survival_file</span>
-<span class="kn">from</span> <span class="nn">simdeep.survival_utils</span> <span class="k">import</span> <span class="n">MadScaler</span>
-<span class="kn">from</span> <span class="nn">simdeep.survival_utils</span> <span class="k">import</span> <span class="n">RankNorm</span>
-<span class="kn">from</span> <span class="nn">simdeep.survival_utils</span> <span class="k">import</span> <span class="n">CorrelationReducer</span>
-<span class="kn">from</span> <span class="nn">simdeep.survival_utils</span> <span class="k">import</span> <span class="n">VarianceReducer</span>
-<span class="kn">from</span> <span class="nn">simdeep.survival_utils</span> <span class="k">import</span> <span class="n">SampleReducer</span>
+<span class="kn">from</span> <span class="nn">simdeep.survival_utils</span> <span class="kn">import</span> <span class="n">load_data_from_tsv</span>
+<span class="kn">from</span> <span class="nn">simdeep.survival_utils</span> <span class="kn">import</span> <span class="n">load_survival_file</span>
+<span class="kn">from</span> <span class="nn">simdeep.survival_utils</span> <span class="kn">import</span> <span class="n">MadScaler</span>
+<span class="kn">from</span> <span class="nn">simdeep.survival_utils</span> <span class="kn">import</span> <span class="n">RankNorm</span>
+<span class="kn">from</span> <span class="nn">simdeep.survival_utils</span> <span class="kn">import</span> <span class="n">CorrelationReducer</span>
+<span class="kn">from</span> <span class="nn">simdeep.survival_utils</span> <span class="kn">import</span> <span class="n">VarianceReducer</span>
+<span class="kn">from</span> <span class="nn">simdeep.survival_utils</span> <span class="kn">import</span> <span class="n">SampleReducer</span>
 
-<span class="kn">from</span> <span class="nn">simdeep.survival_utils</span> <span class="k">import</span> <span class="n">save_matrix</span>
+<span class="kn">from</span> <span class="nn">simdeep.survival_utils</span> <span class="kn">import</span> <span class="n">save_matrix</span>
 
-<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">defaultdict</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
 
-<span class="kn">from</span> <span class="nn">time</span> <span class="k">import</span> <span class="n">time</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">time</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
-<span class="kn">from</span> <span class="nn">numpy</span> <span class="k">import</span> <span class="n">hstack</span>
-<span class="kn">from</span> <span class="nn">numpy</span> <span class="k">import</span> <span class="n">vstack</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">hstack</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">vstack</span>
 
 
 <span class="c1">######################## VARIABLE ############################</span>
@@ -203,7 +203,7 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">path_data</span><span class="o">=</span><span class="n">PATH_DATA</span><span class="p">,</span>
             <span class="n">training_tsv</span><span class="o">=</span><span class="n">TRAINING_TSV</span><span class="p">,</span>
@@ -292,7 +292,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">normalization</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">bool</span><span class="p">,</span> <span class="n">normalization</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">normalization_test</span> <span class="o">=</span> <span class="kc">None</span>
 
-    <span class="k">def</span> <span class="nf">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
@@ -415,7 +415,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_stack_multiomics</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">matrix_ref_array</span><span class="p">,</span>
                                <span class="bp">self</span><span class="o">.</span><span class="n">feature_ref_array</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="LoadData.load_new_test_dataset"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.extract_data.LoadData.load_new_test_dataset">[docs]</a>    <span class="k">def</span> <span class="nf">load_new_test_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tsv_dict</span><span class="p">,</span> <span class="n">path_survival_file</span><span class="p">,</span> <span class="n">normalization</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="LoadData.load_new_test_dataset"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.extract_data.LoadData.load_new_test_dataset">[docs]</a>    <span class="k">def</span> <span class="nf">load_new_test_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tsv_dict</span><span class="p">,</span>
+                              <span class="n">path_survival_file</span><span class="p">,</span>
+                              <span class="n">survival_flag</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                              <span class="n">normalization</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">normalization</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -440,7 +443,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">feature_ref_index</span> <span class="o">=</span> <span class="p">{}</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">load_matrix_test</span><span class="p">(</span><span class="n">normalization</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">load_survival_test</span><span class="p">()</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">load_survival_test</span><span class="p">(</span><span class="n">survival_flag</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">_create_ref_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
@@ -613,10 +616,14 @@
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{0}</span><span class="s1"> samples without survival removed&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">sample_removed</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="LoadData.load_survival_test"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.extract_data.LoadData.load_survival_test">[docs]</a>    <span class="k">def</span> <span class="nf">load_survival_test</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="LoadData.load_survival_test"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.extract_data.LoadData.load_survival_test">[docs]</a>    <span class="k">def</span> <span class="nf">load_survival_test</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">survival_flag</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
-        <span class="n">survival</span> <span class="o">=</span> <span class="n">load_survival_file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">survival_tsv_test</span><span class="p">,</span> <span class="n">path_data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">path_data</span><span class="p">,</span>
-                                      <span class="n">survival_flag</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">survival_flag</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">survival_flag</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">survival_flag</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">survival_flag</span>
+
+        <span class="n">survival</span> <span class="o">=</span> <span class="n">load_survival_file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">survival_tsv_test</span><span class="p">,</span>
+                                      <span class="n">path_data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">path_data</span><span class="p">,</span>
+                                      <span class="n">survival_flag</span><span class="o">=</span><span class="n">survival_flag</span><span class="p">)</span>
         <span class="n">matrix</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="n">retained_samples</span> <span class="o">=</span> <span class="p">[]</span>
@@ -725,8 +732,15 @@
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;normalizing for </span><span class="si">{0}</span><span class="s1">...&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalization</span><span class="p">[</span><span class="s1">&#39;NB_FEATURES_TO_KEEP&#39;</span><span class="p">]:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">variance_reducer</span><span class="o">.</span><span class="n">nb_features</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalization</span><span class="p">[</span><span class="s1">&#39;NB_FEATURES_TO_KEEP&#39;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">variance_reducer</span><span class="o">.</span><span class="n">nb_features</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalization</span><span class="p">[</span>
+                <span class="s1">&#39;NB_FEATURES_TO_KEEP&#39;</span><span class="p">]</span>
             <span class="n">matrix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">variance_reducer</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">matrix</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalization</span><span class="p">[</span><span class="s1">&#39;CUSTOM&#39;</span><span class="p">]:</span>
+            <span class="n">custom_norm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalization</span><span class="p">[</span><span class="s1">&#39;CUSTOM&#39;</span><span class="p">]()</span>
+            <span class="k">assert</span><span class="p">(</span><span class="nb">hasattr</span><span class="p">(</span><span class="n">custom_norm</span><span class="p">,</span> <span class="s1">&#39;fit&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span>
+                <span class="n">custom_norm</span><span class="p">,</span> <span class="s1">&#39;fit_transform&#39;</span><span class="p">))</span>
+            <span class="n">matrix</span> <span class="o">=</span> <span class="n">custom_norm</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">matrix</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalization</span><span class="p">[</span><span class="s1">&#39;TRAIN_MIN_MAX&#39;</span><span class="p">]:</span>
             <span class="n">matrix</span> <span class="o">=</span> <span class="n">MinMaxScaler</span><span class="p">()</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">matrix</span><span class="o">.</span><span class="n">T</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
@@ -786,8 +800,16 @@
         <span class="k">if</span> <span class="n">normalization</span><span class="p">[</span><span class="s1">&#39;LOG_TEST_MATRIX&#39;</span><span class="p">]:</span>
             <span class="n">matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span>  <span class="n">matrix</span><span class="p">)</span>
 
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalization</span><span class="p">[</span><span class="s1">&#39;CUSTOM&#39;</span><span class="p">]:</span>
+            <span class="n">custom_norm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalization</span><span class="p">[</span><span class="s1">&#39;CUSTOM&#39;</span><span class="p">]()</span>
+            <span class="k">assert</span><span class="p">(</span><span class="nb">hasattr</span><span class="p">(</span><span class="n">custom_norm</span><span class="p">,</span> <span class="s1">&#39;fit&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span>
+                <span class="n">custom_norm</span><span class="p">,</span> <span class="s1">&#39;fit_transform&#39;</span><span class="p">))</span>
+            <span class="n">matrix_ref</span> <span class="o">=</span> <span class="n">custom_norm</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">matrix_ref</span><span class="p">)</span>
+            <span class="n">matrix</span> <span class="o">=</span> <span class="n">custom_norm</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">matrix</span><span class="p">)</span>
+
         <span class="k">if</span> <span class="n">normalization</span><span class="p">[</span><span class="s1">&#39;NB_FEATURES_TO_KEEP&#39;</span><span class="p">]:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">variance_reducer</span><span class="o">.</span><span class="n">nb_features</span> <span class="o">=</span> <span class="n">normalization</span><span class="p">[</span><span class="s1">&#39;NB_FEATURES_TO_KEEP&#39;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">variance_reducer</span><span class="o">.</span><span class="n">nb_features</span> <span class="o">=</span> <span class="n">normalization</span><span class="p">[</span>
+                <span class="s1">&#39;NB_FEATURES_TO_KEEP&#39;</span><span class="p">]</span>
             <span class="n">matrix_ref</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">variance_reducer</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">matrix_ref</span><span class="p">)</span>
             <span class="n">matrix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">variance_reducer</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">matrix</span><span class="p">)</span>
 

@@ -151,20 +151,50 @@
   <h1>Source code for simdeep.coxph_from_r</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">warnings</span>
 
-<span class="kn">from</span> <span class="nn">numpy</span> <span class="k">import</span> <span class="n">nan</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">nan</span>
 
-<span class="k">with</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">():</span>
-    <span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">lifelines</span> <span class="kn">import</span> <span class="n">CoxPHFitter</span>
+<span class="kn">from</span> <span class="nn">lifelines</span> <span class="kn">import</span> <span class="n">KaplanMeierFitter</span>
 
-    <span class="kn">from</span> <span class="nn">rpy2</span> <span class="k">import</span> <span class="n">robjects</span> <span class="k">as</span> <span class="n">rob</span>
-    <span class="kn">from</span> <span class="nn">rpy2.robjects.packages</span> <span class="k">import</span> <span class="n">importr</span>
-    <span class="kn">from</span> <span class="nn">rpy2.robjects</span> <span class="k">import</span> <span class="n">FloatVector</span>
-    <span class="kn">from</span> <span class="nn">rpy2.robjects</span> <span class="k">import</span> <span class="n">StrVector</span>
-    <span class="kn">from</span> <span class="nn">rpy2.robjects</span> <span class="k">import</span> <span class="n">Formula</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">USE_R_PACKAGES_FOR_SURVIVAL</span>
 
-    <span class="n">survival</span> <span class="o">=</span> <span class="n">importr</span><span class="p">(</span><span class="s1">&#39;survival&#39;</span><span class="p">)</span>
-    <span class="n">survcomp</span> <span class="o">=</span> <span class="n">importr</span><span class="p">(</span><span class="s1">&#39;survcomp&#39;</span><span class="p">)</span>
-    <span class="n">glmnet</span> <span class="o">=</span> <span class="n">importr</span><span class="p">(</span><span class="s1">&#39;glmnet&#39;</span><span class="p">)</span>
+<span class="kn">import</span> <span class="nn">matplotlib</span>
+<span class="n">matplotlib</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s1">&#39;Agg&#39;</span><span class="p">)</span>
+
+<span class="kn">import</span> <span class="nn">pylab</span> <span class="k">as</span> <span class="nn">plt</span>
+
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+<span class="n">FloatVector</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="n">StrVector</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="n">Formula</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="n">survival</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="n">rob</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="n">survcomp</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="n">glmnet</span> <span class="o">=</span> <span class="kc">None</span>
+
+<span class="n">NALogicalType</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+
+
+<span class="k">if</span> <span class="n">USE_R_PACKAGES_FOR_SURVIVAL</span><span class="p">:</span>
+    <span class="k">with</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">():</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
+
+        <span class="kn">from</span> <span class="nn">rpy2</span> <span class="kn">import</span> <span class="n">robjects</span> <span class="k">as</span> <span class="n">rob</span>
+        <span class="kn">from</span> <span class="nn">rpy2.robjects.packages</span> <span class="kn">import</span> <span class="n">importr</span>
+        <span class="kn">from</span> <span class="nn">rpy2.robjects</span> <span class="kn">import</span> <span class="n">FloatVector</span>
+        <span class="kn">from</span> <span class="nn">rpy2.robjects</span> <span class="kn">import</span> <span class="n">StrVector</span>
+        <span class="kn">from</span> <span class="nn">rpy2.robjects</span> <span class="kn">import</span> <span class="n">Formula</span>
+
+        <span class="n">survival</span> <span class="o">=</span> <span class="n">importr</span><span class="p">(</span><span class="s1">&#39;survival&#39;</span><span class="p">)</span>
+        <span class="n">survcomp</span> <span class="o">=</span> <span class="n">importr</span><span class="p">(</span><span class="s1">&#39;survcomp&#39;</span><span class="p">)</span>
+        <span class="n">glmnet</span> <span class="o">=</span> <span class="n">importr</span><span class="p">(</span><span class="s1">&#39;glmnet&#39;</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">rpy2.rinterface</span> <span class="kn">import</span> <span class="n">NALogicalType</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">rpy2.rinterface_lib.na_values</span> <span class="kn">import</span> <span class="n">NALogicalType</span>
+
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
@@ -177,15 +207,19 @@
     <span class="n">values</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span> <span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
     <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">2016</span><span class="p">)</span>
 
+    <span class="n">pvalue</span> <span class="o">=</span> <span class="n">coxph_from_python</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">isdead</span><span class="p">,</span> <span class="n">nbdays</span><span class="p">,</span> <span class="n">do_KM_plot</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">cindex</span> <span class="o">=</span> <span class="n">c_index_from_python</span><span class="p">(</span>
+        <span class="n">values</span><span class="p">,</span> <span class="n">isdead</span><span class="p">,</span> <span class="n">nbdays</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">isdead</span><span class="p">,</span> <span class="n">nbdays</span><span class="p">)</span>
+
     <span class="n">values_proba</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
     <span class="n">pvalue_proba</span> <span class="o">=</span> <span class="n">coxph</span><span class="p">(</span><span class="n">values_proba</span><span class="p">,</span> <span class="n">isdead</span><span class="p">,</span> <span class="n">nbdays</span><span class="p">,</span>
-                         <span class="n">do_KM_plot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                         <span class="n">dichotomize_afterward</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                         <span class="n">do_KM_plot</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                         <span class="n">dichotomize_afterward</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">pvalue_proba</span><span class="p">)</span>
 
-   <span class="c1"># matrix = np.random.random((10, 2))</span>
+    <span class="c1"># matrix = np.random.random((10, 2))</span>
 
-    <span class="n">isdead_test</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+    <span class="n">values_test</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
 
     <span class="n">pvalue</span> <span class="o">=</span> <span class="n">coxph</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">isdead</span><span class="p">,</span> <span class="n">nbdays</span><span class="p">,</span> <span class="n">isfactor</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;pvalue:&#39;</span><span class="p">,</span> <span class="n">pvalue</span><span class="p">)</span>
@@ -195,12 +229,95 @@
         <span class="n">values</span><span class="p">,</span>
         <span class="n">isdead</span><span class="p">,</span>
         <span class="n">nbdays</span><span class="p">,</span>
-        <span class="n">values</span><span class="p">,</span>
-        <span class="n">isdead_test</span><span class="p">,</span>
+        <span class="n">values_test</span><span class="p">,</span>
+        <span class="n">isdead</span><span class="p">,</span>
         <span class="n">nbdays</span><span class="p">)</span>
 
-    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;c index:&#39;</span><span class="p">,</span> <span class="n">cindex</span><span class="p">)</span></div>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;c index:&#39;</span><span class="p">,</span> <span class="n">cindex</span><span class="p">)</span>
+    <span class="n">matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">((</span><span class="mi">10</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+    <span class="n">matrix_test</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">((</span><span class="mi">10</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
 
+    <span class="n">cindex</span> <span class="o">=</span> <span class="n">c_index_multiple</span><span class="p">(</span>
+        <span class="n">matrix</span><span class="p">,</span>
+        <span class="n">isdead</span><span class="p">,</span>
+        <span class="n">nbdays</span><span class="p">,</span>
+        <span class="n">matrix_test</span><span class="p">,</span>
+        <span class="n">isdead</span><span class="p">,</span>
+        <span class="n">nbdays</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;c index:&#39;</span><span class="p">,</span> <span class="n">cindex</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;surv med: </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">surv_median</span><span class="p">(</span><span class="n">isdead</span><span class="p">,</span> <span class="n">nbdays</span><span class="p">)))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;surv mean: </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">surv_mean</span><span class="p">(</span><span class="n">isdead</span><span class="p">,</span> <span class="n">nbdays</span><span class="p">)))</span></div>
+
+<div class="viewcode-block" id="coxph_from_python"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.coxph_from_r.coxph_from_python">[docs]</a><span class="k">def</span> <span class="nf">coxph_from_python</span><span class="p">(</span>
+        <span class="n">values</span><span class="p">,</span>
+        <span class="n">isdead</span><span class="p">,</span>
+        <span class="n">nbdays</span><span class="p">,</span>
+        <span class="n">do_KM_plot</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">png_path</span><span class="o">=</span><span class="s1">&#39;./&#39;</span><span class="p">,</span>
+        <span class="n">dichotomize_afterward</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">fig_name</span><span class="o">=</span><span class="s1">&#39;KM_plot.png&#39;</span><span class="p">,</span>
+        <span class="n">isfactor</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+    <span class="n">isdead</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">isdead</span><span class="p">)</span>
+    <span class="n">nbdays</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">nbdays</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">isfactor</span><span class="p">:</span>
+        <span class="n">values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">values</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;str&quot;</span><span class="p">)</span>
+
+    <span class="n">frame</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+        <span class="s2">&quot;values&quot;</span><span class="p">:</span> <span class="n">values</span><span class="p">,</span>
+        <span class="s2">&quot;isdead&quot;</span><span class="p">:</span> <span class="n">isdead</span><span class="p">,</span>
+        <span class="s2">&quot;nbdays&quot;</span><span class="p">:</span> <span class="n">nbdays</span>
+    <span class="p">})</span>
+
+    <span class="n">cph</span> <span class="o">=</span> <span class="n">CoxPHFitter</span><span class="p">()</span>
+
+    <span class="k">with</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">():</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">():</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
+                <span class="n">cph</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="s2">&quot;nbdays&quot;</span><span class="p">,</span> <span class="s2">&quot;isdead&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+
+    <span class="n">pvalue</span> <span class="o">=</span> <span class="n">cph</span><span class="o">.</span><span class="n">log_likelihood_ratio_test</span><span class="p">()</span><span class="o">.</span><span class="n">p_value</span>
+
+    <span class="n">cindex</span> <span class="o">=</span> <span class="n">cph</span><span class="o">.</span><span class="n">concordance_index_</span>
+
+    <span class="k">if</span> <span class="n">do_KM_plot</span><span class="p">:</span>
+        <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+
+        <span class="n">kaplan</span> <span class="o">=</span> <span class="n">KaplanMeierFitter</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">values</span><span class="p">):</span>
+            <span class="n">kaplan</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
+                <span class="n">values</span><span class="p">[</span><span class="n">values</span><span class="o">==</span><span class="n">label</span><span class="p">],</span>
+                <span class="n">event_observed</span><span class="o">=</span><span class="n">isdead</span><span class="p">[</span><span class="n">values</span><span class="o">==</span><span class="n">label</span><span class="p">],</span>
+                <span class="n">label</span><span class="o">=</span><span class="s1">&#39;cluster nb. </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
+            <span class="p">)</span>
+
+            <span class="n">kaplan</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
+                        <span class="n">ci_alpha</span><span class="o">=</span><span class="mf">0.15</span><span class="p">)</span>
+
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;time unit&#39;</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;pval.: </span><span class="si">{0: .1e}</span><span class="s1"> CI: </span><span class="si">{1: .2f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">pvalue</span><span class="p">,</span> <span class="n">cindex</span><span class="p">),</span>
+                         <span class="n">fontsize</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span>
+                         <span class="n">fontweight</span><span class="o">=</span><span class="s1">&#39;bold&#39;</span><span class="p">)</span>
+
+        <span class="n">figname</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{0}</span><span class="s2">/</span><span class="si">{1}</span><span class="s2">.png&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">png_path</span><span class="p">,</span> <span class="n">fig_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.png&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">))</span>
+
+        <span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">figname</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">pvalue</span></div>
 
 <div class="viewcode-block" id="coxph"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.coxph_from_r.coxph">[docs]</a><span class="k">def</span> <span class="nf">coxph</span><span class="p">(</span><span class="n">values</span><span class="p">,</span>
           <span class="n">isdead</span><span class="p">,</span>
@@ -209,7 +326,40 @@
           <span class="n">png_path</span><span class="o">=</span><span class="s1">&#39;./&#39;</span><span class="p">,</span>
           <span class="n">dichotomize_afterward</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
           <span class="n">fig_name</span><span class="o">=</span><span class="s1">&#39;KM_plot.png&#39;</span><span class="p">,</span>
-          <span class="n">isfactor</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+          <span class="n">isfactor</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+          <span class="n">use_r_packages</span><span class="o">=</span><span class="n">USE_R_PACKAGES_FOR_SURVIVAL</span><span class="p">,</span>
+          <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">seed</span><span class="p">:</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">seed</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">use_r_packages</span><span class="p">:</span>
+        <span class="n">func</span> <span class="o">=</span> <span class="n">coxph_from_r</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">func</span> <span class="o">=</span> <span class="n">coxph_from_python</span>
+
+    <span class="k">return</span> <span class="n">func</span><span class="p">(</span>
+        <span class="n">values</span><span class="p">,</span>
+        <span class="n">isdead</span><span class="p">,</span>
+        <span class="n">nbdays</span><span class="p">,</span>
+        <span class="n">do_KM_plot</span><span class="o">=</span><span class="n">do_KM_plot</span><span class="p">,</span>
+        <span class="n">png_path</span><span class="o">=</span><span class="n">png_path</span><span class="p">,</span>
+        <span class="n">dichotomize_afterward</span><span class="o">=</span><span class="n">dichotomize_afterward</span><span class="p">,</span>
+        <span class="n">fig_name</span><span class="o">=</span><span class="n">fig_name</span><span class="p">,</span>
+        <span class="n">isfactor</span><span class="o">=</span><span class="n">isfactor</span>
+    <span class="p">)</span></div>
+
+<div class="viewcode-block" id="coxph_from_r"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.coxph_from_r.coxph_from_r">[docs]</a><span class="k">def</span> <span class="nf">coxph_from_r</span><span class="p">(</span>
+        <span class="n">values</span><span class="p">,</span>
+        <span class="n">isdead</span><span class="p">,</span>
+        <span class="n">nbdays</span><span class="p">,</span>
+        <span class="n">do_KM_plot</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">png_path</span><span class="o">=</span><span class="s1">&#39;./&#39;</span><span class="p">,</span>
+        <span class="n">dichotomize_afterward</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">fig_name</span><span class="o">=</span><span class="s1">&#39;KM_plot.png&#39;</span><span class="p">,</span>
+        <span class="n">isfactor</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    input:</span>
 <span class="sd">        :values: array    values of activities</span>
@@ -276,7 +426,147 @@
 
     <span class="k">return</span> <span class="n">pvalue</span></div>
 
-<div class="viewcode-block" id="c_index"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.coxph_from_r.c_index">[docs]</a><span class="k">def</span> <span class="nf">c_index</span><span class="p">(</span><span class="n">values</span><span class="p">,</span>
+<div class="viewcode-block" id="c_index"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.coxph_from_r.c_index">[docs]</a><span class="k">def</span> <span class="nf">c_index</span><span class="p">(</span>
+        <span class="n">values</span><span class="p">,</span>
+        <span class="n">isdead</span><span class="p">,</span>
+        <span class="n">nbdays</span><span class="p">,</span>
+        <span class="n">values_test</span><span class="p">,</span>
+        <span class="n">isdead_test</span><span class="p">,</span>
+        <span class="n">nbdays_test</span><span class="p">,</span>
+        <span class="n">isfactor</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">use_r_packages</span><span class="o">=</span><span class="n">USE_R_PACKAGES_FOR_SURVIVAL</span><span class="p">,</span>
+        <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">seed</span><span class="p">:</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">seed</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">use_r_packages</span><span class="p">:</span>
+        <span class="n">func</span> <span class="o">=</span> <span class="n">c_index_from_r</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">func</span> <span class="o">=</span> <span class="n">c_index_from_python</span>
+
+    <span class="k">return</span> <span class="n">func</span><span class="p">(</span>
+        <span class="n">values</span><span class="p">,</span>
+        <span class="n">isdead</span><span class="p">,</span>
+        <span class="n">nbdays</span><span class="p">,</span>
+        <span class="n">values_test</span><span class="p">,</span>
+        <span class="n">isdead_test</span><span class="p">,</span>
+        <span class="n">nbdays_test</span><span class="p">,</span>
+        <span class="n">isfactor</span><span class="o">=</span><span class="n">isfactor</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="c_index_multiple"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.coxph_from_r.c_index_multiple">[docs]</a><span class="k">def</span> <span class="nf">c_index_multiple</span><span class="p">(</span>
+        <span class="n">values</span><span class="p">,</span>
+        <span class="n">isdead</span><span class="p">,</span>
+        <span class="n">nbdays</span><span class="p">,</span>
+        <span class="n">values_test</span><span class="p">,</span>
+        <span class="n">isdead_test</span><span class="p">,</span>
+        <span class="n">nbdays_test</span><span class="p">,</span>
+        <span class="n">isfactor</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">use_r_packages</span><span class="o">=</span><span class="n">USE_R_PACKAGES_FOR_SURVIVAL</span><span class="p">,</span>
+        <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">seed</span><span class="p">:</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">seed</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">use_r_packages</span><span class="p">:</span>
+        <span class="n">func</span> <span class="o">=</span> <span class="n">c_index_multiple_from_r</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">func</span> <span class="o">=</span> <span class="n">c_index_multiple_from_python</span>
+
+    <span class="k">return</span> <span class="n">func</span><span class="p">(</span>
+        <span class="n">values</span><span class="p">,</span>
+        <span class="n">isdead</span><span class="p">,</span>
+        <span class="n">nbdays</span><span class="p">,</span>
+        <span class="n">values_test</span><span class="p">,</span>
+        <span class="n">isdead_test</span><span class="p">,</span>
+        <span class="n">nbdays_test</span><span class="p">,</span>
+        <span class="n">isfactor</span><span class="o">=</span><span class="n">isfactor</span>
+    <span class="p">)</span></div>
+
+<div class="viewcode-block" id="c_index_from_python"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.coxph_from_r.c_index_from_python">[docs]</a><span class="k">def</span> <span class="nf">c_index_from_python</span><span class="p">(</span>
+        <span class="n">values</span><span class="p">,</span>
+        <span class="n">isdead</span><span class="p">,</span>
+        <span class="n">nbdays</span><span class="p">,</span>
+        <span class="n">values_test</span><span class="p">,</span>
+        <span class="n">isdead_test</span><span class="p">,</span>
+        <span class="n">nbdays_test</span><span class="p">,</span>
+        <span class="n">isfactor</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">isfactor</span><span class="p">:</span>
+        <span class="n">values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">values</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;str&quot;</span><span class="p">)</span>
+        <span class="n">values_test</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">values_test</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;str&quot;</span><span class="p">)</span>
+
+    <span class="n">frame</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+        <span class="s2">&quot;values&quot;</span><span class="p">:</span> <span class="n">values</span><span class="p">,</span>
+        <span class="s2">&quot;isdead&quot;</span><span class="p">:</span> <span class="n">isdead</span><span class="p">,</span>
+        <span class="s2">&quot;nbdays&quot;</span><span class="p">:</span> <span class="n">nbdays</span>
+    <span class="p">})</span>
+
+    <span class="n">frame_test</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+        <span class="s2">&quot;values&quot;</span><span class="p">:</span> <span class="n">values_test</span><span class="p">,</span>
+        <span class="s2">&quot;isdead&quot;</span><span class="p">:</span> <span class="n">isdead_test</span><span class="p">,</span>
+        <span class="s2">&quot;nbdays&quot;</span><span class="p">:</span> <span class="n">nbdays_test</span>
+    <span class="p">})</span>
+
+    <span class="n">cph</span> <span class="o">=</span> <span class="n">CoxPHFitter</span><span class="p">()</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">():</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
+            <span class="n">cph</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="s2">&quot;nbdays&quot;</span><span class="p">,</span> <span class="s2">&quot;isdead&quot;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+
+    <span class="n">cindex</span> <span class="o">=</span> <span class="n">cph</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">frame_test</span><span class="p">,</span>
+                       <span class="n">scoring_method</span><span class="o">=</span><span class="s2">&quot;concordance_index&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">cindex</span></div>
+
+
+<div class="viewcode-block" id="c_index_multiple_from_python"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.coxph_from_r.c_index_multiple_from_python">[docs]</a><span class="k">def</span> <span class="nf">c_index_multiple_from_python</span><span class="p">(</span>
+        <span class="n">matrix</span><span class="p">,</span>
+        <span class="n">isdead</span><span class="p">,</span>
+        <span class="n">nbdays</span><span class="p">,</span>
+        <span class="n">matrix_test</span><span class="p">,</span>
+        <span class="n">isdead_test</span><span class="p">,</span>
+        <span class="n">nbdays_test</span><span class="p">,</span>
+        <span class="n">isfactor</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">frame</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">matrix</span><span class="p">)</span>
+    <span class="n">frame</span><span class="p">[</span><span class="s2">&quot;isdead&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">isdead</span>
+    <span class="n">frame</span><span class="p">[</span><span class="s2">&quot;nbdays&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nbdays</span>
+
+    <span class="n">frame_test</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">matrix_test</span><span class="p">)</span>
+    <span class="n">frame_test</span><span class="p">[</span><span class="s2">&quot;isdead&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">isdead_test</span>
+    <span class="n">frame_test</span><span class="p">[</span><span class="s2">&quot;nbdays&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nbdays_test</span>
+
+    <span class="n">cph</span> <span class="o">=</span> <span class="n">CoxPHFitter</span><span class="p">()</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">():</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
+            <span class="n">cph</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="s2">&quot;nbdays&quot;</span><span class="p">,</span> <span class="s2">&quot;isdead&quot;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+
+    <span class="n">cindex</span> <span class="o">=</span> <span class="n">cph</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">frame_test</span><span class="p">,</span>
+                       <span class="n">scoring_method</span><span class="o">=</span><span class="s2">&quot;concordance_index&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">cindex</span></div>
+
+
+<div class="viewcode-block" id="c_index_from_r"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.coxph_from_r.c_index_from_r">[docs]</a><span class="k">def</span> <span class="nf">c_index_from_r</span><span class="p">(</span><span class="n">values</span><span class="p">,</span>
             <span class="n">isdead</span><span class="p">,</span>
             <span class="n">nbdays</span><span class="p">,</span>
             <span class="n">values_test</span><span class="p">,</span>
@@ -324,7 +614,7 @@
 
     <span class="k">return</span> <span class="n">c_index</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="c_index_multiple"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.coxph_from_r.c_index_multiple">[docs]</a><span class="k">def</span> <span class="nf">c_index_multiple</span><span class="p">(</span>
+<div class="viewcode-block" id="c_index_multiple_from_r"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.coxph_from_r.c_index_multiple_from_r">[docs]</a><span class="k">def</span> <span class="nf">c_index_multiple_from_r</span><span class="p">(</span>
         <span class="n">matrix</span><span class="p">,</span>
         <span class="n">isdead</span><span class="p">,</span>
         <span class="n">nbdays</span><span class="p">,</span>
@@ -380,6 +670,47 @@
 
     <span class="k">return</span> <span class="n">c_index</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span></div>
 
+
+<div class="viewcode-block" id="predict_with_coxph_glmnet"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.coxph_from_r.predict_with_coxph_glmnet">[docs]</a><span class="k">def</span> <span class="nf">predict_with_coxph_glmnet</span><span class="p">(</span>
+        <span class="n">matrix</span><span class="p">,</span>
+        <span class="n">isdead</span><span class="p">,</span>
+        <span class="n">nbdays</span><span class="p">,</span>
+        <span class="n">matrix_test</span><span class="p">,</span>
+        <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+        <span class="n">lambda_val</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">rob</span><span class="o">.</span><span class="n">r</span><span class="p">(</span><span class="s1">&#39;set.seed(2020)&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+
+    <span class="n">nbdays</span><span class="p">[</span><span class="n">nbdays</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="n">isdead</span> <span class="o">=</span> <span class="n">FloatVector</span><span class="p">(</span><span class="n">isdead</span><span class="p">)</span>
+
+    <span class="n">nbdays</span> <span class="o">=</span> <span class="n">FloatVector</span><span class="p">(</span><span class="n">nbdays</span><span class="p">)</span>
+
+    <span class="n">matrix</span> <span class="o">=</span> <span class="n">convert_to_rmatrix</span><span class="p">(</span><span class="n">matrix</span><span class="p">)</span>
+    <span class="n">matrix_test</span> <span class="o">=</span> <span class="n">convert_to_rmatrix</span><span class="p">(</span><span class="n">matrix_test</span><span class="p">)</span>
+
+    <span class="n">surv</span> <span class="o">=</span> <span class="n">survival</span><span class="o">.</span><span class="n">Surv</span><span class="p">(</span><span class="n">nbdays</span><span class="p">,</span> <span class="n">isdead</span><span class="p">)</span>
+
+    <span class="n">cv_glmnet</span> <span class="o">=</span> <span class="n">rob</span><span class="o">.</span><span class="n">r</span><span class="p">(</span><span class="s1">&#39;cv.glmnet&#39;</span><span class="p">)</span>
+    <span class="n">glmnet</span> <span class="o">=</span> <span class="n">rob</span><span class="o">.</span><span class="n">r</span><span class="p">(</span><span class="s1">&#39;glmnet&#39;</span><span class="p">)</span>
+
+    <span class="n">arg</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;lambda&#39;</span><span class="p">:</span> <span class="n">lambda_val</span><span class="p">}</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">lambda_val</span><span class="p">:</span>
+        <span class="n">cv_fit</span> <span class="o">=</span> <span class="n">cv_glmnet</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="n">surv</span><span class="p">,</span> <span class="n">family</span><span class="o">=</span><span class="s1">&#39;cox&#39;</span><span class="p">,</span>
+                           <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">)</span>
+        <span class="n">arg</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;lambda&#39;</span><span class="p">:</span> <span class="nb">min</span><span class="p">(</span><span class="n">cv_fit</span><span class="p">[</span><span class="mi">0</span><span class="p">])}</span>
+
+    <span class="n">fit</span> <span class="o">=</span> <span class="n">glmnet</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="n">surv</span><span class="p">,</span> <span class="n">family</span><span class="o">=</span><span class="s1">&#39;cox&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">arg</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">rob</span><span class="o">.</span><span class="n">r</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">fit</span><span class="p">,</span> <span class="n">matrix_test</span><span class="p">))</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
+
+
 <div class="viewcode-block" id="convert_to_rmatrix"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.coxph_from_r.convert_to_rmatrix">[docs]</a><span class="k">def</span> <span class="nf">convert_to_rmatrix</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
     <span class="n">shape</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span>
@@ -390,7 +721,59 @@
             <span class="n">nrow</span><span class="o">=</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">ncol</span><span class="o">=</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
     <span class="p">)</span></div>
 
-<div class="viewcode-block" id="surv_mean"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.coxph_from_r.surv_mean">[docs]</a><span class="k">def</span> <span class="nf">surv_mean</span><span class="p">(</span><span class="n">isdead</span><span class="p">,</span><span class="n">nbdays</span><span class="p">):</span>
+
+<div class="viewcode-block" id="surv_mean"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.coxph_from_r.surv_mean">[docs]</a><span class="k">def</span> <span class="nf">surv_mean</span><span class="p">(</span><span class="n">isdead</span><span class="p">,</span> <span class="n">nbdays</span><span class="p">,</span>
+              <span class="n">use_r_packages</span><span class="o">=</span><span class="n">USE_R_PACKAGES_FOR_SURVIVAL</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">use_r_packages</span><span class="p">:</span>
+        <span class="n">func</span> <span class="o">=</span> <span class="n">surv_mean_from_r</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">func</span> <span class="o">=</span> <span class="n">surv_mean_from_python</span>
+
+    <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="n">isdead</span><span class="p">,</span> <span class="n">nbdays</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="surv_median"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.coxph_from_r.surv_median">[docs]</a><span class="k">def</span> <span class="nf">surv_median</span><span class="p">(</span>
+        <span class="n">isdead</span><span class="p">,</span> <span class="n">nbdays</span><span class="p">,</span>
+        <span class="n">use_r_packages</span><span class="o">=</span><span class="n">USE_R_PACKAGES_FOR_SURVIVAL</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">use_r_packages</span><span class="p">:</span>
+        <span class="n">func</span> <span class="o">=</span> <span class="n">surv_median_from_r</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">func</span> <span class="o">=</span> <span class="n">surv_median_from_python</span>
+
+    <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="n">isdead</span><span class="p">,</span> <span class="n">nbdays</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="surv_mean_from_python"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.coxph_from_r.surv_mean_from_python">[docs]</a><span class="k">def</span> <span class="nf">surv_mean_from_python</span><span class="p">(</span><span class="n">isdead</span><span class="p">,</span><span class="n">nbdays</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">lifelines.utils</span> <span class="kn">import</span> <span class="n">restricted_mean_survival_time</span>
+
+    <span class="n">kaplan</span> <span class="o">=</span> <span class="n">KaplanMeierFitter</span><span class="p">()</span>
+
+    <span class="n">kaplan</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
+        <span class="n">nbdays</span><span class="p">,</span>
+        <span class="n">event_observed</span><span class="o">=</span><span class="n">isdead</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">survmean</span> <span class="o">=</span> <span class="n">restricted_mean_survival_time</span><span class="p">(</span><span class="n">kaplan</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">survmean</span></div>
+
+<div class="viewcode-block" id="surv_median_from_python"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.coxph_from_r.surv_median_from_python">[docs]</a><span class="k">def</span> <span class="nf">surv_median_from_python</span><span class="p">(</span><span class="n">isdead</span><span class="p">,</span><span class="n">nbdays</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">kaplan</span> <span class="o">=</span> <span class="n">KaplanMeierFitter</span><span class="p">()</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">2020</span><span class="p">)</span>
+    <span class="n">kaplan</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
+        <span class="n">nbdays</span><span class="p">,</span>
+        <span class="n">event_observed</span><span class="o">=</span><span class="n">isdead</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">kaplan</span><span class="o">.</span><span class="n">median_survival_time_</span></div>
+
+<div class="viewcode-block" id="surv_mean_from_r"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.coxph_from_r.surv_mean_from_r">[docs]</a><span class="k">def</span> <span class="nf">surv_mean_from_r</span><span class="p">(</span><span class="n">isdead</span><span class="p">,</span><span class="n">nbdays</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
     <span class="n">isdead</span> <span class="o">=</span> <span class="n">FloatVector</span><span class="p">(</span><span class="n">isdead</span><span class="p">)</span>
     <span class="n">nbdays</span> <span class="o">=</span> <span class="n">FloatVector</span><span class="p">(</span><span class="n">nbdays</span><span class="p">)</span>
@@ -399,7 +782,7 @@
 
     <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">surv</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span></div>
 
-<div class="viewcode-block" id="surv_median"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.coxph_from_r.surv_median">[docs]</a><span class="k">def</span> <span class="nf">surv_median</span><span class="p">(</span><span class="n">isdead</span><span class="p">,</span><span class="n">nbdays</span><span class="p">):</span>
+<div class="viewcode-block" id="surv_median_from_r"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.coxph_from_r.surv_median_from_r">[docs]</a><span class="k">def</span> <span class="nf">surv_median_from_r</span><span class="p">(</span><span class="n">isdead</span><span class="p">,</span><span class="n">nbdays</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
     <span class="n">isdead</span> <span class="o">=</span> <span class="n">FloatVector</span><span class="p">(</span><span class="n">isdead</span><span class="p">)</span>
     <span class="n">nbdays</span> <span class="o">=</span> <span class="n">FloatVector</span><span class="p">(</span><span class="n">nbdays</span><span class="p">)</span>

@@ -85,11 +85,8 @@ class SimDeep(DeepBase):
 
     Parameters:
              :dataset: ExtractData instance. Default None (create a new dataset using the config variable)
-
              :nb_clusters: Number of clusters to search (default NB_CLUSTERS)
-
              :pvalue_thres: Pvalue threshold to include a feature  (default PVALUE_THRESHOLD)
-
              :clustering_omics: Which omics to use for clustering. If empty, then all the available omics will be used
              :cindex_thres: C-index threshold to include a feature. This parameter is used only if `node_selection` is set to "C-index" (default CINDEX_THRESHOLD)
              :cluster_method: Cluster method to use. possible choice ['mixture', 'kmeans']. (default CLUSTER_METHOD)
@@ -914,7 +911,7 @@ class SimDeep(DeepBase):
 
     def compute_c_indexes_multiple_for_test_fold_dataset(self):
         """
-        return c-index using labels as predicat
+        return c-index using test-fold labels as predicat
         """
         days, dead = np.asarray(self.dataset.survival).T
         days_cv, dead_cv = np.asarray(self.dataset.survival_cv).T

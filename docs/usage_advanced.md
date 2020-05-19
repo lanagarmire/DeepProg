@@ -21,3 +21,110 @@ boosting.plot_supervised_kernel_for_test_sets()
 ![kdplot 2](./img/stacked_TestProject_TEST_DATA_2_KM_plot_boosting_test_kde_1_cropped.png)
 
 Note that these visualisation are not very efficient in that example dataset, since we have only a limited number of samples (40) and features. However, they might become more useful for real datasets.
+
+
+## Hyperparameters
+
+Hyperparameters can have a considerable influence on the accuracy of DeepProgs models. We set up the default hyperparameters to be used on a maximum of different datasets. However, specific datasets might require additional optimizations. Below, we are listing
+
+### Number of clusters
+
+The parameters `nb_clusters` is used to define the number of partitions to produce
+
+```python
+#Example
+boosting = SimDeepBoosting(
+    nb_clusters=3)
+boosting.fit()
+```
+
+### Clustering algorithm
+
+By default, DeepProg is using a gaussian mixture model from the scikit-learn library  to perform clustering. The hyperparameter of the model are customisable using the `mixture_params` parameter:
+
+```python
+# Default params from the config file:
+
+MIXTURE_PARAMS = {
+    'covariance_type': 'diag',
+    'max_iter': 1000,
+    'n_init': 100
+    }
+
+boosting = SimDeepBoosting(
+    mixture_params=MIXTURE_PARAMS,
+    nb_clusters=3,
+    cluster_method='mixture' # Default
+    )
+```
+
+In addition, two alternative clustering approaches are available `kmeans`, which refers to the scikit-learn KMeans class and `coxPH` which fits a L1 penalized multi-dimensional Cox-PH model and then dichotomize the samples into K groups using the  predicted suvival times. The L1 penalised Cox-PH model is fitted using scikit-survival `CoxnetSurvivalAnalysis`class for python3 so it cannot be computed when using python 2. Finally, external clustering class instances can be used as long as they have a `fit_predict` method returning an array of labels, and accepting a `nb_clusters` parameter.
+
+```python
+# External clustering class having fit_predict method
+from sklearn.cluster.hierarchical import AgglomerativeClustering
+
+boostingH = SimDeepBoosting(
+        nb_clusters=3,
+        cluster_method=AgglomerativeClustering # Default
+    )
+
+
+class DummyClustering:
+    self __init__(self, nb_clusters):
+        """ """
+        self.nb_clusters
+
+    def fit_predict(M):
+        """ """
+        import numpy as np
+        return np.random.randint(0, self.nb_clusters, M.shape[0])
+
+
+boostingDummy = SimDeepBoosting(
+        nb_clusters=3,
+        cluster_method=DummyClustering # Default
+    )
+```
+
+### Normalisation
+
+DeepProg uses by default a four-step normalisation for both training and test datasets:
+1. Selection of the top 100 features according to the variances
+2. Rank normalisation per sample
+3. Sample-sample Correlation similarity transformation
+4. Rank normalisation
+
+```python
+default_normalisation =  {
+    'NB_FEATURES_TO_KEEP': 100,
+    'TRAIN_RANK_NORM': True,
+    'TRAIN_CORR_REDUCTION': True,
+    'TRAIN_CORR_RANK_NORM': True,
+}
+
+boosting = SimDeepBoosting(
+        normalization=default_normalisation
+    )
+```
+
+However, it is possible to use other normalisation using external python classes that have `fit` and `fit_transform` methods.
+
+
+```python
+from sklearn.preprocessing import RobustScaler
+
+custom_norm =  {
+    'CUSTOM': RobustScaler,
+}
+
+boosting = SimDeepBoosting(
+        normalization=custom_norm
+    )
+
+    ```
+
+Finally, more alternative normalisations are proposed in the config file.
+
+
+### Number of iterations and seed

@@ -53,6 +53,7 @@ from simdeep.config import DROPOUT
 from simdeep.config import ACTIVATION
 from simdeep.config import PATH_TO_SAVE_MODEL
 from simdeep.config import DATA_SPLIT
+from simdeep.config import MODEL_THRES
 
 from simdeep.deepmodel_base import DeepBase
 
@@ -71,17 +72,54 @@ from simdeep.survival_utils import \
     _process_parallel_feature_importance_per_cluster
 
 
-################# Variable ################
-MODEL_THRES = 0.05
-###########################################
-
 
 class SimDeepBoosting():
     """
+    Instanciate a new DeepProg Boosting instance.
+    The default parameters are defined in the config.py file
+
+    Parameters:
+            :nb_it: Number of models to construct
+            :do_KM_plot: Plot Kaplan-Meier (default: True)
+            :distribute: Distribute DeepProg using ray (default:  False)
+            :nb_threads: Number of python threads to use to compute parallel Cox-PH
+            :class_selection: Consensus score to agglomerate DeepProg Instance {'mean', 'max', 'weighted_mean', 'weighted_max'} (default: 'mean')
+            :model_thres: Cox-PH p-value threshold to reject a model for DeepProg Boosting module
+            :verbose: Verobosity (Default: True)
+            :seed: Seed defining the  random split of the training dataset (Default: None).
+            :project_name: Project name used to save files
+            :use_autoencoders: Use autoencoder steps to embed the data (default: True)
+            :feature_surv_analysis: Use individual survival feature detection to filter out features (default: True)
+            :split_n_fold: For each instance, the original dataset is split in folds and one fold is left
+            :path_results: Path to create a result folder
+            :nb_clusters: Number of clusters to use
+            :epochs: Number of epochs
+            :normalization: Normalisation procedure to use. See config.py file for details
+            :nb_selected_features: Number of top features selected for classification
+            :cluster_method: Clustering method. possible choice: ['mixture', 'kmeans', 'coxPH'] or class instance having fit and fit_proba attributes
+            :pvalue_thres: Threshold for survival significance to set a node as valid
+            :classification_method: Possible choice: {'ALL_FEATURES', 'SURVIVAL_FEATURES'} (default: 'ALL_FEATURES')
+            :new_dim: Size of the new embedding
+            :training_tsv: Input matrix files
+            :survival_tsv: Input surival file
+            :survival_flag: Survival flag to use
+            :path_data: Path of the input file
+            :level_dims_in: Autoencoder node layers before the middle layer (default: [])
+            :level_dims_out: Autoencoder node layers after the middle layer (default: [])
+            :loss: Loss function to minimize (default: 'binary_crossentropy')
+            :optimizer: Optimizer (default: adam)
+            :act_reg: L2 Regularization constant on the node activity (default: False)
+            :w_reg: L1 Regularization constant on the weight (default: False)
+            :dropout: Percentage of edges being dropout at each training iteration (None for no dropout) (default: 0.5)
+            :data_split: Fraction of the dataset to be used as test set when building the autoencoder (default: None)
+            :node_selection: possible choice: {'Cox-PH', 'C-index'} (default: Cox-PH)
+            :cindex_thres: Valid if 'c-index' is chosen (default: 0.65)
+            :activation: Activation function (default: 'tanh')
+            :clustering_omics: Which omics to use for clustering. If empty, then all the available omics will be used (default [] => all)
+            :path_to_save_model: path to save the model
     """
     def __init__(self,
                  nb_it=NB_ITER,
-                 nb_fold=NB_FOLDS,
                  do_KM_plot=True,
                  distribute=False,
                  nb_threads=NB_THREADS,
@@ -92,7 +130,7 @@ class SimDeepBoosting():
                  project_name='{0}_boosting'.format(PROJECT_NAME),
                  use_autoencoders=USE_AUTOENCODERS,
                  feature_surv_analysis=FEATURE_SURV_ANALYSIS,
-                 split_n_fold=3,
+                 split_n_fold=NB_FOLDS,
                  path_results=PATH_RESULTS,
                  nb_clusters=NB_CLUSTERS,
                  epochs=EPOCHS,

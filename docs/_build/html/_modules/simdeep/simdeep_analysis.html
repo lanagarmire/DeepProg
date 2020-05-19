@@ -153,68 +153,74 @@
 <span class="sd">DeepProg class for one instance model</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">sklearn.cluster</span> <span class="k">import</span> <span class="n">KMeans</span>
-<span class="kn">from</span> <span class="nn">sklearn.mixture</span> <span class="k">import</span> <span class="n">GaussianMixture</span>
-<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="k">import</span> <span class="n">cross_val_score</span>
+<span class="kn">from</span> <span class="nn">sklearn.cluster</span> <span class="kn">import</span> <span class="n">KMeans</span>
+<span class="kn">from</span> <span class="nn">sklearn.mixture</span> <span class="kn">import</span> <span class="n">GaussianMixture</span>
+<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">cross_val_score</span>
 
-<span class="kn">from</span> <span class="nn">simdeep.deepmodel_base</span> <span class="k">import</span> <span class="n">DeepBase</span>
+<span class="kn">from</span> <span class="nn">simdeep.deepmodel_base</span> <span class="kn">import</span> <span class="n">DeepBase</span>
 
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">NB_CLUSTERS</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">CLUSTER_ARRAY</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">PVALUE_THRESHOLD</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">CINDEX_THRESHOLD</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">CLASSIFIER_TYPE</span>
+<span class="kn">from</span> <span class="nn">simdeep.survival_model_utils</span> <span class="kn">import</span> <span class="n">ClusterWithSurvival</span>
 
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">MIXTURE_PARAMS</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">PATH_RESULTS</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">PROJECT_NAME</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">CLASSIFICATION_METHOD</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">NB_CLUSTERS</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">CLUSTER_ARRAY</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">PVALUE_THRESHOLD</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">CINDEX_THRESHOLD</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">CLASSIFIER_TYPE</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">USE_AUTOENCODERS</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">FEATURE_SURV_ANALYSIS</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">SEED</span>
 
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">CLUSTER_EVAL_METHOD</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">CLUSTER_METHOD</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">NB_THREADS_COXPH</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">NB_SELECTED_FEATURES</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">LOAD_EXISTING_MODELS</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">NODES_SELECTION</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">CLASSIFIER</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">HYPER_PARAMETERS</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">PATH_TO_SAVE_MODEL</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">MIXTURE_PARAMS</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">PATH_RESULTS</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">PROJECT_NAME</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">CLASSIFICATION_METHOD</span>
 
-<span class="kn">from</span> <span class="nn">simdeep.survival_utils</span> <span class="k">import</span> <span class="n">_process_parallel_coxph</span>
-<span class="kn">from</span> <span class="nn">simdeep.survival_utils</span> <span class="k">import</span> <span class="n">_process_parallel_cindex</span>
-<span class="kn">from</span> <span class="nn">simdeep.survival_utils</span> <span class="k">import</span> <span class="n">_process_parallel_feature_importance</span>
-<span class="kn">from</span> <span class="nn">simdeep.survival_utils</span> <span class="k">import</span> <span class="n">_process_parallel_feature_importance_per_cluster</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">CLUSTER_EVAL_METHOD</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">CLUSTER_METHOD</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">NB_THREADS_COXPH</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">NB_SELECTED_FEATURES</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">LOAD_EXISTING_MODELS</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">NODES_SELECTION</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">CLASSIFIER</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">HYPER_PARAMETERS</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">PATH_TO_SAVE_MODEL</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">CLUSTERING_OMICS</span>
 
-<span class="kn">from</span> <span class="nn">simdeep.survival_utils</span> <span class="k">import</span> <span class="n">select_best_classif_params</span>
+<span class="kn">from</span> <span class="nn">simdeep.survival_utils</span> <span class="kn">import</span> <span class="n">_process_parallel_coxph</span>
+<span class="kn">from</span> <span class="nn">simdeep.survival_utils</span> <span class="kn">import</span> <span class="n">_process_parallel_cindex</span>
+<span class="kn">from</span> <span class="nn">simdeep.survival_utils</span> <span class="kn">import</span> <span class="n">_process_parallel_feature_importance</span>
+<span class="kn">from</span> <span class="nn">simdeep.survival_utils</span> <span class="kn">import</span> <span class="n">_process_parallel_feature_importance_per_cluster</span>
 
-<span class="kn">from</span> <span class="nn">simdeep.coxph_from_r</span> <span class="k">import</span> <span class="n">coxph</span>
-<span class="kn">from</span> <span class="nn">simdeep.coxph_from_r</span> <span class="k">import</span> <span class="n">c_index</span>
-<span class="kn">from</span> <span class="nn">simdeep.coxph_from_r</span> <span class="k">import</span> <span class="n">c_index_multiple</span>
+<span class="kn">from</span> <span class="nn">simdeep.survival_utils</span> <span class="kn">import</span> <span class="n">select_best_classif_params</span>
 
-<span class="kn">from</span> <span class="nn">simdeep.coxph_from_r</span> <span class="k">import</span> <span class="n">surv_median</span>
+<span class="kn">from</span> <span class="nn">simdeep.coxph_from_r</span> <span class="kn">import</span> <span class="n">coxph</span>
+<span class="kn">from</span> <span class="nn">simdeep.coxph_from_r</span> <span class="kn">import</span> <span class="n">c_index</span>
+<span class="kn">from</span> <span class="nn">simdeep.coxph_from_r</span> <span class="kn">import</span> <span class="n">c_index_multiple</span>
 
-<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">Counter</span>
+<span class="kn">from</span> <span class="nn">simdeep.coxph_from_r</span> <span class="kn">import</span> <span class="n">surv_median</span>
 
-<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="k">import</span> <span class="n">silhouette_score</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">Counter</span>
+
+<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">silhouette_score</span>
 
 <span class="k">try</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="k">import</span> <span class="n">calinski_harabasz_score</span> <span class="k">as</span> <span class="n">calinski_harabaz_score</span>
+    <span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">calinski_harabasz_score</span> <span class="k">as</span> <span class="n">calinski_harabaz_score</span>
 <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="k">import</span> <span class="n">calinski_harabaz_score</span>
+    <span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">calinski_harabaz_score</span>
 
-<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="k">import</span> <span class="n">GridSearchCV</span>
+<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">GridSearchCV</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">numpy</span> <span class="k">import</span> <span class="n">hstack</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">hstack</span>
 
-<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">defaultdict</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
 
 <span class="kn">import</span> <span class="nn">warnings</span>
 
-<span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="k">import</span> <span class="n">Pool</span>
+<span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="kn">import</span> <span class="n">Pool</span>
 
-<span class="kn">from</span> <span class="nn">os.path</span> <span class="k">import</span> <span class="n">isdir</span>
-<span class="kn">from</span> <span class="nn">os</span> <span class="k">import</span> <span class="n">mkdir</span>
+<span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">isdir</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">mkdir</span>
 
 
 <span class="c1">################ VARIABLE ############################################</span>
@@ -230,10 +236,9 @@
 
 <span class="sd">    Parameters:</span>
 <span class="sd">             :dataset: ExtractData instance. Default None (create a new dataset using the config variable)</span>
-
 <span class="sd">             :nb_clusters: Number of clusters to search (default NB_CLUSTERS)</span>
-
 <span class="sd">             :pvalue_thres: Pvalue threshold to include a feature  (default PVALUE_THRESHOLD)</span>
+<span class="sd">             :clustering_omics: Which omics to use for clustering. If empty, then all the available omics will be used</span>
 <span class="sd">             :cindex_thres: C-index threshold to include a feature. This parameter is used only if `node_selection` is set to &quot;C-index&quot; (default CINDEX_THRESHOLD)</span>
 <span class="sd">             :cluster_method: Cluster method to use. possible choice [&#39;mixture&#39;, &#39;kmeans&#39;]. (default CLUSTER_METHOD)</span>
 <span class="sd">             :cluster_eval_method: Cluster evaluation method to use in case the `cluster_array` parameter is a list of possible K. Possible choice [&#39;bic&#39;, &#39;silhouette&#39;, &#39;calinski&#39;] (default CLUSTER_EVAL_METHOD)</span>
@@ -251,10 +256,12 @@
 
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                  <span class="n">nb_clusters</span><span class="o">=</span><span class="n">NB_CLUSTERS</span><span class="p">,</span>
                  <span class="n">pvalue_thres</span><span class="o">=</span><span class="n">PVALUE_THRESHOLD</span><span class="p">,</span>
                  <span class="n">cindex_thres</span><span class="o">=</span><span class="n">CINDEX_THRESHOLD</span><span class="p">,</span>
+                 <span class="n">use_autoencoders</span><span class="o">=</span><span class="n">USE_AUTOENCODERS</span><span class="p">,</span>
+                 <span class="n">feature_surv_analysis</span><span class="o">=</span><span class="n">FEATURE_SURV_ANALYSIS</span><span class="p">,</span>
                  <span class="n">cluster_method</span><span class="o">=</span><span class="n">CLUSTER_METHOD</span><span class="p">,</span>
                  <span class="n">cluster_eval_method</span><span class="o">=</span><span class="n">CLUSTER_EVAL_METHOD</span><span class="p">,</span>
                  <span class="n">classifier_type</span><span class="o">=</span><span class="n">CLASSIFIER_TYPE</span><span class="p">,</span>
@@ -268,6 +275,8 @@
                  <span class="n">classification_method</span><span class="o">=</span><span class="n">CLASSIFICATION_METHOD</span><span class="p">,</span>
                  <span class="n">load_existing_models</span><span class="o">=</span><span class="n">LOAD_EXISTING_MODELS</span><span class="p">,</span>
                  <span class="n">path_to_save_model</span><span class="o">=</span><span class="n">PATH_TO_SAVE_MODEL</span><span class="p">,</span>
+                 <span class="n">clustering_omics</span><span class="o">=</span><span class="n">CLUSTERING_OMICS</span><span class="p">,</span>
+                 <span class="n">seed</span><span class="o">=</span><span class="n">SEED</span><span class="p">,</span>
                  <span class="n">do_KM_plot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                  <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                  <span class="n">_isboosting</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
@@ -275,13 +284,16 @@
                  <span class="n">deep_model_additional_args</span><span class="o">=</span><span class="p">{}):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">seed</span> <span class="o">=</span> <span class="n">seed</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">nb_clusters</span> <span class="o">=</span> <span class="n">nb_clusters</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pvalue_thres</span> <span class="o">=</span> <span class="n">pvalue_thres</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cindex_thres</span> <span class="o">=</span> <span class="n">cindex_thres</span>
-
+        <span class="bp">self</span><span class="o">.</span><span class="n">use_autoencoders</span> <span class="o">=</span> <span class="n">use_autoencoders</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">feature_surv_analysis</span> <span class="o">=</span> <span class="n">feature_surv_analysis</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">classifier_grid</span> <span class="o">=</span> <span class="n">GridSearchCV</span><span class="p">(</span><span class="n">CLASSIFIER</span><span class="p">(),</span> <span class="n">HYPER_PARAMETERS</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cluster_array</span> <span class="o">=</span> <span class="n">cluster_array</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">path_results</span> <span class="o">=</span> <span class="n">path_results</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">clustering_omics</span> <span class="o">=</span> <span class="n">clustering_omics</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">path_results</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">isdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path_results</span><span class="p">):</span>
             <span class="n">mkdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path_results</span><span class="p">)</span>
@@ -382,13 +394,18 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">node_selection</span> <span class="o">==</span> <span class="s1">&#39;C-index&#39;</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_look_for_prediction_nodes</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
 
-<div class="viewcode-block" id="SimDeep.load_new_test_dataset"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.simdeep_analysis.SimDeep.load_new_test_dataset">[docs]</a>    <span class="k">def</span> <span class="nf">load_new_test_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tsv_dict</span><span class="p">,</span> <span class="n">path_survival_file</span><span class="p">,</span>
-                              <span class="n">fname_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">normalization</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="SimDeep.load_new_test_dataset"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.simdeep_analysis.SimDeep.load_new_test_dataset">[docs]</a>    <span class="k">def</span> <span class="nf">load_new_test_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tsv_dict</span><span class="p">,</span>
+                              <span class="n">path_survival_file</span><span class="p">,</span>
+                              <span class="n">fname_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                              <span class="n">normalization</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                              <span class="n">survival_flag</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">load_new_test_dataset</span><span class="p">(</span><span class="n">tsv_dict</span><span class="p">,</span>
-                                           <span class="n">path_survival_file</span><span class="p">,</span>
-                                           <span class="n">normalization</span><span class="o">=</span><span class="n">normalization</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">load_new_test_dataset</span><span class="p">(</span>
+            <span class="n">tsv_dict</span><span class="p">,</span>
+            <span class="n">path_survival_file</span><span class="p">,</span>
+            <span class="n">normalization</span><span class="o">=</span><span class="n">normalization</span><span class="p">,</span>
+            <span class="n">survival_flag</span><span class="o">=</span><span class="n">survival_flag</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">normalization</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">test_normalization</span> <span class="o">=</span> <span class="p">{</span>
@@ -543,6 +560,7 @@
             <span class="n">isfactor</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
             <span class="n">do_KM_plot</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">do_KM_plot</span><span class="p">,</span>
             <span class="n">png_path</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">path_results</span><span class="p">,</span>
+            <span class="n">seed</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">,</span>
             <span class="n">fig_name</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">{0}</span><span class="s1">_</span><span class="si">{1}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project_name</span><span class="p">,</span> <span class="n">fname_base</span><span class="p">))</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
@@ -554,6 +572,7 @@
             <span class="n">isfactor</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
             <span class="n">do_KM_plot</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
             <span class="n">png_path</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">path_results</span><span class="p">,</span>
+            <span class="n">seed</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">,</span>
             <span class="n">fig_name</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">{0}</span><span class="s1">_</span><span class="si">{1}</span><span class="s1">_proba&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project_name</span><span class="p">,</span> <span class="n">fname_base</span><span class="p">))</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
@@ -806,7 +825,11 @@
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;performing clustering on the omic model with the following key:</span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">training_omic_list</span><span class="p">))</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cluster_method</span> <span class="o">==</span> <span class="s1">&#39;kmeans&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cluster_method</span><span class="p">,</span> <span class="s1">&#39;fit_predict&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">clustering</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cluster_method</span><span class="p">(</span><span class="n">n_clusters</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nb_clusters</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cluster_method</span> <span class="o">==</span> <span class="s1">&#39;custom&#39;</span>
+
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">cluster_method</span> <span class="o">==</span> <span class="s1">&#39;kmeans&#39;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">clustering</span> <span class="o">=</span> <span class="n">KMeans</span><span class="p">(</span><span class="n">n_clusters</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nb_clusters</span><span class="p">,</span> <span class="n">n_init</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
 
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">cluster_method</span> <span class="o">==</span> <span class="s1">&#39;mixture&#39;</span><span class="p">:</span>
@@ -815,6 +838,18 @@
                 <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">mixture_params</span>
             <span class="p">)</span>
 
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">cluster_method</span> <span class="o">==</span> <span class="s2">&quot;coxPH&quot;</span><span class="p">:</span>
+            <span class="n">nbdays</span><span class="p">,</span> <span class="n">isdead</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">survival</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">clustering</span> <span class="o">=</span> <span class="n">ClusterWithSurvival</span><span class="p">(</span>
+                <span class="n">n_clusters</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nb_clusters</span><span class="p">,</span>
+                <span class="n">isdead</span><span class="o">=</span><span class="n">isdead</span><span class="p">,</span>
+                <span class="n">nbdays</span><span class="o">=</span><span class="n">nbdays</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span><span class="p">(</span><span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No method fit and predict found for: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">cluster_method</span><span class="p">)))</span>
+
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">activities_train</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;No components linked to survival!&#39;</span>\
                             <span class="s1">&#39; cannot perform clustering&#39;</span><span class="p">)</span>
@@ -822,18 +857,24 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cluster_array</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cluster_array</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_predict_best_k_for_cluster</span><span class="p">()</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">clustering</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">activities_train</span><span class="p">)</span>
-
-        <span class="n">labels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">clustering</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">activities_train</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">clustering</span><span class="p">,</span> <span class="s1">&#39;predict&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">clustering</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">activities_train</span><span class="p">)</span>
+            <span class="n">labels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">clustering</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">activities_train</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">labels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">clustering</span><span class="o">.</span><span class="n">fit_predict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">activities_train</span><span class="p">)</span>
 
         <span class="n">labels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_order_labels_according_to_survival</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">labels</span> <span class="o">=</span> <span class="n">labels</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cluster_method</span> <span class="o">==</span> <span class="s1">&#39;mixture&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">clustering</span><span class="p">,</span> <span class="s1">&#39;predict_proba&#39;</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">labels_proba</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">clustering</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">activities_train</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">labels_proba</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="p">])</span><span class="o">.</span><span class="n">T</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">labels_proba</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">labels_proba</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">labels_proba</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">labels_proba</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">))</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">labels_proba</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">nb_clusters</span><span class="p">:</span>
             <span class="n">missing_columns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nb_clusters</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">labels_proba</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
@@ -841,7 +882,7 @@
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">missing_columns</span><span class="p">):</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">labels_proba</span> <span class="o">=</span> <span class="n">hstack</span><span class="p">([</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">labels_proba</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
-                        <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">labels_proba</span><span class="p">,</span> <span class="mi">1</span><span class="p">))])</span>
+                        <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">labels_proba</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">))])</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;clustering done, labels ordered according to survival:&quot;</span><span class="p">)</span>
@@ -855,9 +896,11 @@
                        <span class="n">isfactor</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                        <span class="n">do_KM_plot</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">do_KM_plot</span><span class="p">,</span>
                        <span class="n">png_path</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">path_results</span><span class="p">,</span>
+                       <span class="n">seed</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">,</span>
                        <span class="n">fig_name</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">{0}</span><span class="s1">_KM_plot_training_dataset&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project_name</span><span class="p">))</span>
 
         <span class="n">pvalue_proba</span> <span class="o">=</span> <span class="n">coxph</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">labels_proba</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">isdead</span><span class="p">,</span> <span class="n">nbdays</span><span class="p">,</span>
+                             <span class="n">seed</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">,</span>
                              <span class="n">isfactor</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_write_labels</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">sample_ids</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="p">,</span>
@@ -918,8 +961,11 @@
                           <span class="s1">&#39; returning None&#39;</span><span class="p">)</span>
                 <span class="k">return</span> <span class="kc">None</span>
 
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_autoencoders</span><span class="p">:</span>
+                <span class="n">activities</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoder_predict</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">matrix</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">activities</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">matrix</span><span class="p">)</span>
 
-            <span class="n">activities</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoder_predict</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">matrix</span><span class="p">)</span>
             <span class="n">activities_array</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">activities</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">valid_node_ids_array</span><span class="p">[</span><span class="n">key</span><span class="p">]]</span><span class="o">.</span><span class="n">T</span>
 
         <span class="k">return</span> <span class="n">hstack</span><span class="p">([</span><span class="n">activities_array</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
@@ -934,13 +980,23 @@
             <span class="n">keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">encoder_array</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
 
         <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">:</span>
-            <span class="n">valid_node_ids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_look_for_nodes</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">valid_node_ids_array</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">valid_node_ids</span>
-
             <span class="n">matrix_train</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">matrix_train_array</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
 
-            <span class="n">activities</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoder_predict</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">matrix_train</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_autoencoders</span><span class="p">:</span>
+                <span class="n">activities</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoder_predict</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">matrix_train</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">activities</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">matrix_train</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_surv_analysis</span><span class="p">:</span>
+                <span class="n">valid_node_ids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_look_for_nodes</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">valid_node_ids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">matrix_train</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">valid_node_ids_array</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">valid_node_ids</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">activities_array</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">activities</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="n">valid_node_ids</span><span class="p">]</span><span class="o">.</span><span class="n">T</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">clustering_omics</span><span class="p">:</span>
+            <span class="n">keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">clustering_omics</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">activities_train</span> <span class="o">=</span> <span class="n">hstack</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">activities_array</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
                                         <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">])</span></div>
@@ -956,9 +1012,16 @@
         <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">:</span>
             <span class="n">matrix_train</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">matrix_train_array</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
 
-            <span class="n">activities</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoder_predict</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">matrix_train</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_autoencoders</span><span class="p">:</span>
+                <span class="n">activities</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoder_predict</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">matrix_train</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">activities</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">matrix_train</span><span class="p">)</span>
 
-            <span class="n">valid_node_ids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_look_for_prediction_nodes</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_surv_analysis</span><span class="p">:</span>
+                <span class="n">valid_node_ids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_look_for_prediction_nodes</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">valid_node_ids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">matrix_train</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
             <span class="bp">self</span><span class="o">.</span><span class="n">pred_node_ids_array</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">valid_node_ids</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">activities_pred_array</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">activities</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="n">valid_node_ids</span><span class="p">]</span><span class="o">.</span><span class="n">T</span>
@@ -977,15 +1040,20 @@
 
         <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">matrix_test_array</span><span class="p">:</span>
             <span class="n">node_ids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pred_node_ids_array</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
-            <span class="n">activities_test</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoder_predict</span><span class="p">(</span>
-                <span class="n">key</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">matrix_test_array</span><span class="p">[</span><span class="n">key</span><span class="p">])</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="n">node_ids</span><span class="p">]</span><span class="o">.</span><span class="n">T</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_autoencoders</span><span class="p">:</span>
+                <span class="n">activities_test</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoder_predict</span><span class="p">(</span>
+                    <span class="n">key</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">matrix_test_array</span><span class="p">[</span><span class="n">key</span><span class="p">])</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="n">node_ids</span><span class="p">]</span><span class="o">.</span><span class="n">T</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">activities_test</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">matrix_test_array</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
 
         <span class="n">activities_test</span> <span class="o">=</span> <span class="n">hstack</span><span class="p">(</span><span class="n">activities_test</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
         <span class="n">activities_train</span> <span class="o">=</span> <span class="n">hstack</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">activities_pred_array</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
                                    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">matrix_ref_array</span><span class="p">])</span>
 
         <span class="n">cindex</span> <span class="o">=</span> <span class="n">c_index_multiple</span><span class="p">(</span><span class="n">activities_train</span><span class="p">,</span> <span class="n">dead</span><span class="p">,</span> <span class="n">days</span><span class="p">,</span>
-                                  <span class="n">activities_test</span><span class="p">,</span> <span class="n">dead_test</span><span class="p">,</span> <span class="n">days_test</span><span class="p">)</span>
+                                  <span class="n">activities_test</span><span class="p">,</span> <span class="n">dead_test</span><span class="p">,</span> <span class="n">days_test</span><span class="p">,</span>
+                                  <span class="n">seed</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">,)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;c-index multiple for test dataset:</span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cindex</span><span class="p">))</span>
@@ -994,7 +1062,7 @@
 
 <div class="viewcode-block" id="SimDeep.compute_c_indexes_multiple_for_test_fold_dataset"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.simdeep_analysis.SimDeep.compute_c_indexes_multiple_for_test_fold_dataset">[docs]</a>    <span class="k">def</span> <span class="nf">compute_c_indexes_multiple_for_test_fold_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        return c-index using labels as predicat</span>
+<span class="sd">        return c-index using test-fold labels as predicat</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">days</span><span class="p">,</span> <span class="n">dead</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">survival</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
         <span class="n">days_cv</span><span class="p">,</span> <span class="n">dead_cv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">survival_cv</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
@@ -1003,12 +1071,17 @@
 
         <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">matrix_cv_array</span><span class="p">:</span>
             <span class="n">node_ids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pred_node_ids_array</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
-            <span class="n">activities_cv</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoder_predict</span><span class="p">(</span>
-                <span class="n">key</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">matrix_cv_array</span><span class="p">[</span><span class="n">key</span><span class="p">])</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="n">node_ids</span><span class="p">]</span><span class="o">.</span><span class="n">T</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_autoencoders</span><span class="p">:</span>
+                <span class="n">activities_cv</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoder_predict</span><span class="p">(</span>
+                    <span class="n">key</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">matrix_cv_array</span><span class="p">[</span><span class="n">key</span><span class="p">])</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="n">node_ids</span><span class="p">]</span><span class="o">.</span><span class="n">T</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">activities_cv</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">matrix_cv_array</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
 
         <span class="n">activities_cv</span> <span class="o">=</span> <span class="n">hstack</span><span class="p">(</span><span class="n">activities_cv</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
         <span class="n">cindex</span> <span class="o">=</span> <span class="n">c_index_multiple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">activities_for_pred_train</span><span class="p">,</span> <span class="n">dead</span><span class="p">,</span> <span class="n">days</span><span class="p">,</span>
-                                  <span class="n">activities_cv</span><span class="p">,</span> <span class="n">dead_cv</span><span class="p">,</span> <span class="n">days_cv</span><span class="p">)</span>
+                                  <span class="n">activities_cv</span><span class="p">,</span> <span class="n">dead_cv</span><span class="p">,</span> <span class="n">days_cv</span><span class="p">,</span>
+                                  <span class="n">seed</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">,)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;c-index multiple for test fold dataset:</span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cindex</span><span class="p">))</span>
@@ -1069,19 +1142,19 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">clustering</span><span class="o">.</span><span class="n">set_params</span><span class="p">(</span><span class="n">n_clusters</span><span class="o">=</span><span class="n">k_cluster</span><span class="p">)</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">clustering</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">activities_train</span><span class="p">)</span>
+            <span class="n">labels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">clustering</span><span class="o">.</span><span class="n">fit_predict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">activities_train</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cluster_eval_method</span> <span class="o">==</span> <span class="s1">&#39;bic&#39;</span><span class="p">:</span>
                 <span class="n">score</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">clustering</span><span class="o">.</span><span class="n">bic</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">activities_train</span><span class="p">)</span>
             <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">cluster_eval_method</span> <span class="o">==</span> <span class="s1">&#39;calinski&#39;</span><span class="p">:</span>
                 <span class="n">score</span> <span class="o">=</span> <span class="n">calinski_harabaz_score</span><span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">activities_train</span><span class="p">,</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">clustering</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">activities_train</span><span class="p">)</span>
+                    <span class="n">labels</span>
                 <span class="p">)</span>
             <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">cluster_eval_method</span> <span class="o">==</span> <span class="s1">&#39;silhouette&#39;</span><span class="p">:</span>
                 <span class="n">score</span> <span class="o">=</span> <span class="n">silhouette_score</span><span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">activities_train</span><span class="p">,</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">clustering</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">activities_train</span><span class="p">)</span>
+                    <span class="n">labels</span>
                 <span class="p">)</span>
 
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
@@ -1140,7 +1213,11 @@
 
         <span class="k">if</span> <span class="n">key</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">matrix_train</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">matrix_train_array</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
-            <span class="n">activities</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">encoder_predict</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">matrix_train</span><span class="p">))</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_autoencoders</span><span class="p">:</span>
+                <span class="n">activities</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">encoder_predict</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">matrix_train</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">activities</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">matrix_train</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">assert</span><span class="p">(</span><span class="n">activities</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span>
 
@@ -1151,7 +1228,7 @@
 
         <span class="n">pvalue_list</span> <span class="o">=</span> <span class="p">[]</span>
 
-        <span class="n">input_list</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">((</span><span class="n">node_id</span><span class="p">,</span> <span class="n">activity</span><span class="p">,</span> <span class="n">isdead</span><span class="p">,</span> <span class="n">nbdays</span><span class="p">)</span>
+        <span class="n">input_list</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">((</span><span class="n">node_id</span><span class="p">,</span> <span class="n">activity</span><span class="p">,</span> <span class="n">isdead</span><span class="p">,</span> <span class="n">nbdays</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">)</span>
                            <span class="k">for</span> <span class="n">node_id</span><span class="p">,</span> <span class="n">activity</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">activities</span><span class="o">.</span><span class="n">T</span><span class="p">))</span>
 
         <span class="n">pvalue_list</span> <span class="o">=</span> <span class="n">mapf</span><span class="p">(</span><span class="n">_process_parallel_coxph</span><span class="p">,</span> <span class="n">input_list</span><span class="p">)</span>
@@ -1181,8 +1258,12 @@
         <span class="n">matrix_train</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">matrix_train_array</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
         <span class="n">matrix_cv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">matrix_cv_array</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
 
-        <span class="n">activities_train</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoder_predict</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">matrix_train</span><span class="p">)</span>
-        <span class="n">activities_cv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoder_predict</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">matrix_cv</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_autoencoders</span><span class="p">:</span>
+            <span class="n">activities_train</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoder_predict</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">matrix_train</span><span class="p">)</span>
+            <span class="n">activities_cv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoder_predict</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">matrix_cv</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">activities_train</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span> <span class="n">matrix_train</span><span class="p">)</span>
+            <span class="n">activities_cv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span> <span class="n">matrix_cv</span><span class="p">)</span>
 
         <span class="n">input_list</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">((</span><span class="n">node_id</span><span class="p">,</span>
                            <span class="n">activities_train</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="n">node_id</span><span class="p">],</span> <span class="n">isdead</span><span class="p">,</span> <span class="n">nbdays</span><span class="p">,</span>
@@ -1214,8 +1295,13 @@
         <span class="n">days</span><span class="p">,</span> <span class="n">dead</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">survival</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
         <span class="n">days_full</span><span class="p">,</span> <span class="n">dead_full</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">survival_full</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
 
-        <span class="n">cindex</span> <span class="o">=</span> <span class="n">c_index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="p">,</span> <span class="n">dead</span><span class="p">,</span> <span class="n">days</span><span class="p">,</span>
-                       <span class="bp">self</span><span class="o">.</span><span class="n">full_labels</span><span class="p">,</span> <span class="n">dead_full</span><span class="p">,</span> <span class="n">days_full</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">cindex</span> <span class="o">=</span> <span class="n">c_index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="p">,</span> <span class="n">dead</span><span class="p">,</span> <span class="n">days</span><span class="p">,</span>
+                             <span class="bp">self</span><span class="o">.</span><span class="n">full_labels</span><span class="p">,</span> <span class="n">dead_full</span><span class="p">,</span> <span class="n">days_full</span><span class="p">,</span>
+                             <span class="n">seed</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">,)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Exception while computing the c-index: </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+            <span class="n">cindex</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;c-index for full dataset:</span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cindex</span><span class="p">))</span>
@@ -1228,8 +1314,13 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">days</span><span class="p">,</span> <span class="n">dead</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">survival</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
 
-        <span class="n">cindex</span> <span class="o">=</span> <span class="n">c_index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="p">,</span> <span class="n">dead</span><span class="p">,</span> <span class="n">days</span><span class="p">,</span>
-                       <span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="p">,</span> <span class="n">dead</span><span class="p">,</span> <span class="n">days</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">cindex</span> <span class="o">=</span> <span class="n">c_index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="p">,</span> <span class="n">dead</span><span class="p">,</span> <span class="n">days</span><span class="p">,</span>
+                             <span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="p">,</span> <span class="n">dead</span><span class="p">,</span> <span class="n">days</span><span class="p">,</span>
+                             <span class="n">seed</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">,)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Exception while computing the c-index: </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+            <span class="n">cindex</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;c-index for training dataset:</span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cindex</span><span class="p">))</span>
@@ -1243,8 +1334,13 @@
         <span class="n">days</span><span class="p">,</span> <span class="n">dead</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">survival</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
         <span class="n">days_test</span><span class="p">,</span> <span class="n">dead_test</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">survival_test</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
 
-        <span class="n">cindex</span> <span class="o">=</span> <span class="n">c_index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="p">,</span> <span class="n">dead</span><span class="p">,</span> <span class="n">days</span><span class="p">,</span>
-                         <span class="bp">self</span><span class="o">.</span><span class="n">test_labels</span><span class="p">,</span> <span class="n">dead_test</span><span class="p">,</span> <span class="n">days_test</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">cindex</span> <span class="o">=</span> <span class="n">c_index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="p">,</span> <span class="n">dead</span><span class="p">,</span> <span class="n">days</span><span class="p">,</span>
+                             <span class="bp">self</span><span class="o">.</span><span class="n">test_labels</span><span class="p">,</span> <span class="n">dead_test</span><span class="p">,</span> <span class="n">days_test</span><span class="p">,</span>
+                             <span class="n">seed</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">,)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Exception while computing the c-index: </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+            <span class="n">cindex</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;c-index for test dataset:</span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cindex</span><span class="p">))</span>
@@ -1258,8 +1354,13 @@
         <span class="n">days</span><span class="p">,</span> <span class="n">dead</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">survival</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
         <span class="n">days_cv</span><span class="p">,</span> <span class="n">dead_cv</span><span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">survival_cv</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
 
-        <span class="n">cindex</span> <span class="o">=</span>  <span class="n">c_index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="p">,</span> <span class="n">dead</span><span class="p">,</span> <span class="n">days</span><span class="p">,</span>
-                          <span class="bp">self</span><span class="o">.</span><span class="n">cv_labels</span><span class="p">,</span> <span class="n">dead_cv</span><span class="p">,</span> <span class="n">days_cv</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">cindex</span> <span class="o">=</span>  <span class="n">c_index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="p">,</span> <span class="n">dead</span><span class="p">,</span> <span class="n">days</span><span class="p">,</span>
+                              <span class="bp">self</span><span class="o">.</span><span class="n">cv_labels</span><span class="p">,</span> <span class="n">dead_cv</span><span class="p">,</span> <span class="n">days_cv</span><span class="p">,</span>
+                              <span class="n">seed</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">,)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Exception while computing the c-index: </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+            <span class="n">cindex</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;c-index for test fold dataset:</span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cindex</span><span class="p">))</span>
@@ -1294,7 +1395,7 @@
                                   <span class="n">key</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">from</span> <span class="nn">simdeep.plot_utils</span> <span class="k">import</span> <span class="n">plot_kernel_plots</span>
+        <span class="kn">from</span> <span class="nn">simdeep.plot_utils</span> <span class="kn">import</span> <span class="n">plot_kernel_plots</span>
 
         <span class="k">if</span> <span class="n">dataset</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span>
@@ -1503,13 +1604,16 @@
     <span class="k">def</span> <span class="nf">_predict_new_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                              <span class="n">tsv_dict</span><span class="p">,</span>
                              <span class="n">path_survival_file</span><span class="p">,</span>
-                             <span class="n">normalization</span><span class="p">):</span>
+                             <span class="n">normalization</span><span class="p">,</span>
+                             <span class="n">survival_flag</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">load_new_test_dataset</span><span class="p">(</span>
             <span class="n">tsv_dict</span><span class="p">,</span>
             <span class="n">path_survival_file</span><span class="p">,</span>
-            <span class="n">normalization</span><span class="o">=</span><span class="n">normalization</span><span class="p">)</span>
+            <span class="n">normalization</span><span class="o">=</span><span class="n">normalization</span><span class="p">,</span>
+            <span class="n">survival_flag</span><span class="o">=</span><span class="n">survival_flag</span><span class="p">,</span>
+        <span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">predict_labels_on_test_dataset</span><span class="p">()</span></div>
 </pre></div>

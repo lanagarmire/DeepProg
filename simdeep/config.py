@@ -22,7 +22,8 @@ FEATURE_SURV_ANALYSIS = True # Refine feature with survival analysis
 
 # Number of top features selected for classification
 # Apply only when CLASSIFICATION_METHOD == 'ALL_FEATURES'
-NB_SELECTED_FEATURES = 10
+NB_SELECTED_FEATURES = 50
+
 CLUSTER_ARRAY = []
 PVALUE_THRESHOLD = 0.01 # Threshold for survival significance to set a node as valid
 CINDEX_THRESHOLD = 0.65 # experimental
@@ -34,6 +35,7 @@ NB_ITER = 5 # boosting iteration
 NB_THREADS= 5 # number of simdeep instance launched in parallel
 NB_FOLDS = 5 # for each instance, the original dataset is split in folds and one fold is left
 CLASS_SELECTION = 'mean' # mean or max: the method used to select the final class, according to class probas
+MODEL_THRES = 0.05 # Cox-PH p-value threshold to reject a model for DeepProg Boosting module
 
 #### SimDeep analysis
 # save fitted models
