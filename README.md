@@ -290,7 +290,9 @@ examples
 
 ## License
 
-The project is licensed under the MIT license.
+The project is licensed under the PolyForm Perimeter License 1.0.0.
+
+(See https://polyformproject.org/licenses/)
 
 ## contact and credentials
 * Developer: Olivier Poirion (PhD)
