@@ -210,7 +210,7 @@
     <span class="p">)</span>
 </pre></div>
 </div>
-<p>In addition, two alternative clustering approaches are available <code class="docutils literal notranslate"><span class="pre">kmeans</span></code>, which refers to the scikit-learn KMeans class and <code class="docutils literal notranslate"><span class="pre">coxPH</span></code> which fits a L1 penalized multi-dimensional Cox-PH model and then dichotomize the samples into K groups using the  predicted suvival times. The L1 penalised Cox-PH model is fitted using scikit-survival <code class="docutils literal notranslate"><span class="pre">CoxnetSurvivalAnalysis</span></code>class for python3 so it cannot be computed when using pytho 2. Finally, external clustering class instances can be used as long as they have a <code class="docutils literal notranslate"><span class="pre">fit_predict</span></code> method returning an array of labels, and accepting a <code class="docutils literal notranslate"><span class="pre">nb_clusters</span></code> parameter.</p>
+<p>In addition, two alternative clustering approaches are available <code class="docutils literal notranslate"><span class="pre">kmeans</span></code>, which refers to the scikit-learn KMeans class and <code class="docutils literal notranslate"><span class="pre">coxPH</span></code> which fits a L1 penalized multi-dimensional Cox-PH model and then dichotomize the samples into K groups using the  predicted suvival times. The L1 penalised Cox-PH model is fitted using scikit-survival <code class="docutils literal notranslate"><span class="pre">CoxnetSurvivalAnalysis</span></code>class for python3 so it cannot be computed when using python 2. Finally, external clustering class instances can be used as long as they have a <code class="docutils literal notranslate"><span class="pre">fit_predict</span></code> method returning an array of labels, and accepting a <code class="docutils literal notranslate"><span class="pre">nb_clusters</span></code> parameter.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># External clustering class having fit_predict method</span>
 <span class="kn">from</span> <span class="nn">sklearn.cluster.hierarchical</span> <span class="kn">import</span> <span class="n">AgglomerativeClustering</span>
 
@@ -259,7 +259,25 @@
     <span class="p">)</span>
 </pre></div>
 </div>
-<p>However, it is possible to use other normalisation. DeepProg</p>
+<p>However, it is possible to use other normalisation using external python classes that have <code class="docutils literal notranslate"><span class="pre">fit</span></code> and <code class="docutils literal notranslate"><span class="pre">fit_transform</span></code> methods.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>from sklearn.preprocessing import RobustScaler
+
+custom_norm =  {
+    &#39;CUSTOM&#39;: RobustScaler,
+}
+
+boosting = SimDeepBoosting(
+        normalization=custom_norm
+    )
+
+    ```
+
+Finally, more alternative normalisations are proposed in the config file.
+
+
+### Number of iterations and seed
+</pre></div>
+</div>
 </div>
 </div>
 </div>

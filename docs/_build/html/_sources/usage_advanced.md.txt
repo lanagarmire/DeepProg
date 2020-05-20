@@ -58,7 +58,7 @@ boosting = SimDeepBoosting(
     )
 ```
 
-In addition, two alternative clustering approaches are available `kmeans`, which refers to the scikit-learn KMeans class and `coxPH` which fits a L1 penalized multi-dimensional Cox-PH model and then dichotomize the samples into K groups using the  predicted suvival times. The L1 penalised Cox-PH model is fitted using scikit-survival `CoxnetSurvivalAnalysis`class for python3 so it cannot be computed when using pytho 2. Finally, external clustering class instances can be used as long as they have a `fit_predict` method returning an array of labels, and accepting a `nb_clusters` parameter.
+In addition, two alternative clustering approaches are available `kmeans`, which refers to the scikit-learn KMeans class and `coxPH` which fits a L1 penalized multi-dimensional Cox-PH model and then dichotomize the samples into K groups using the  predicted suvival times. The L1 penalised Cox-PH model is fitted using scikit-survival `CoxnetSurvivalAnalysis`class for python3 so it cannot be computed when using python 2. Finally, external clustering class instances can be used as long as they have a `fit_predict` method returning an array of labels, and accepting a `nb_clusters` parameter.
 
 ```python
 # External clustering class having fit_predict method
@@ -108,4 +108,23 @@ boosting = SimDeepBoosting(
     )
 ```
 
-However, it is possible to use other normalisation. DeepProg
+However, it is possible to use other normalisation using external python classes that have `fit` and `fit_transform` methods.
+
+
+```python
+from sklearn.preprocessing import RobustScaler
+
+custom_norm =  {
+    'CUSTOM': RobustScaler,
+}
+
+boosting = SimDeepBoosting(
+        normalization=custom_norm
+    )
+
+    ```
+
+Finally, more alternative normalisations are proposed in the config file.
+
+
+### Number of iterations and seed

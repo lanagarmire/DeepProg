@@ -236,6 +236,7 @@
                  <span class="n">data_split</span><span class="o">=</span><span class="n">DATA_SPLIT</span><span class="p">,</span>
                  <span class="n">activation</span><span class="o">=</span><span class="n">ACTIVATION</span><span class="p">,</span>
                  <span class="n">seed</span><span class="o">=</span><span class="n">SEED</span><span class="p">,</span>
+                 <span class="n">alternative_embedding</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">path_to_save_model</span><span class="o">=</span><span class="n">PATH_TO_SAVE_MODEL</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        ### DEFAULT PARAMETER ###:</span>
@@ -272,6 +273,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">activation</span> <span class="o">=</span> <span class="n">activation</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data_split</span> <span class="o">=</span> <span class="n">data_split</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">seed</span> <span class="o">=</span> <span class="n">seed</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">alternative_embedding</span> <span class="o">=</span> <span class="n">alternative_embedding</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">:</span>
             <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">)</span>

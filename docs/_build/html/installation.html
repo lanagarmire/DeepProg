@@ -83,19 +83,29 @@
               <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#requirements">Requirements</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#tested-versions">Tested versions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#python-packages-installation">Python packages installation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#support-for-cntk-tensorflow">Support for CNTK / tensorflow</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#r-installation">R installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#tested-versions">Tested versions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#installation-local">installation (local)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#deep-learning-packages-installation">Deep-Learning packages installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#support-for-cntk-tensorflow">Support for CNTK / tensorflow</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#r-installation-optional">R installation (Optional)</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#distributed-computation">Distributed computation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#visualisation-module-experimental">Visualisation module (Experimental)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#installation-of-the-package">installation of the package</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#test">Test</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#visualisation-module-experimental">Visualisation module (Experimental)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id1">Distributed computation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id2">Visualisation module (Experimental)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#usage">Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#example-scripts">Example scripts</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="usage.html">Tutorial: Simple DeepProg model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="usage_ensemble.html">Tutorial: Ensemble of DeepProg model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="usage_advanced.html">Tutorial: Advanced usage of DeepProg model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="case_study.html">Case study: Analyzing TCGA HCC dataset</a></li>
 <li class="toctree-l1"><a class="reference internal" href="LICENSE.html">License</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/simdeep.html">simdeep package</a></li>
 </ul>
@@ -168,15 +178,17 @@
 <div class="section" id="requirements">
 <h2>Requirements<a class="headerlink" href="#requirements" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li>Python 2 or 3</li>
+<li>Python 2 or 3 (Python3 is recommended)</li>
+<li>Either theano, tensorflow or CNTK (theano is recommended)</li>
 <li><a class="reference external" href="http://deeplearning.net/software/theano/install.html">theano</a> (the used version for the manuscript was 0.8.2)</li>
 <li><a class="reference external" href="https://www.tensorflow.org/">tensorflow</a> as a more robust alternative to theano</li>
 <li><a class="reference external" href="https://github.com/microsoft/CNTK">cntk</a> CNTK is anoter DL library that can present some advantages compared to tensorflow or theano. See <a class="reference external" href="https://docs.microsoft.com/en-us/cognitive-toolkit/">https://docs.microsoft.com/en-us/cognitive-toolkit/</a></li>
-<li>R</li>
-<li>the R “survival” package installed.</li>
-<li>numpy, scipy</li>
 <li>scikit-learn (&gt;=0.18)</li>
-<li>rpy2 2.8.6 (for python2 rpy2 can be install with: pip install rpy2==2.8.6, for python3 pip3 install rpy2==2.8.6). <strong>It seems that newer version of rpy2 might not work due to a bug</strong>. Thus, we highly recommand to install the 2.8.6 version for now.</li>
+<li>numpy, scipy</li>
+<li>lifelines</li>
+<li>(if using python3) scikit-survival</li>
+<li>(For distributed computing) ray (ray &gt;= 0.8.4) framework</li>
+<li>(For hyperparameter tuning) scikit-optimize</li>
 </ul>
 </div>
 <div class="section" id="tested-versions">
@@ -192,14 +204,31 @@
 <li>theano: 1.0.2</li>
 <li>rpy2: <strong>2.8.6</strong></li>
 </ul>
+<div class="section" id="installation-local">
+<h3>installation (local)<a class="headerlink" href="#installation-local" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># The downloading can take few minutes due to the size of th git project</span>
+git clone https://gitlab.com/Grouumf/SimDeep.git
+<span class="nb">cd</span> SimDeep
+<span class="c1"># The installation should only take a short amount of time</span>
+pip3 install -e . -r requirements.txt --user
+<span class="c1"># To intall the distributed frameworks</span>
+pip3 install -r requirements_distributed.txt --user
+<span class="c1"># Installing scikit-survival (python3 only)</span>
+pip3 install -r requirements_pip3.txt --user
+
+<span class="c1"># DeepProg is working also with python2/pip2 however there is no support for scikit-survival in python2</span>
+pip2 install -r requirements.txt --user
+pip2 install -r requirements_distributed.txt --user
+</pre></div>
 </div>
-<div class="section" id="python-packages-installation">
-<h2>Python packages installation<a class="headerlink" href="#python-packages-installation" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+<div class="section" id="deep-learning-packages-installation">
+<h2>Deep-Learning packages installation<a class="headerlink" href="#deep-learning-packages-installation" title="Permalink to this headline">¶</a></h2>
 <p>The required python packages can be installed using pip:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install theano --user <span class="c1"># Original backend used OR</span>
 pip install tensorflow --user <span class="c1"># Alternative backend for keras</span>
 pip install keras --user
-pip install <span class="nv">rpy2</span><span class="o">==</span><span class="m">2</span>.8.6 --user
 </pre></div>
 </div>
 </div>
@@ -215,14 +244,20 @@ pip install <span class="nv">rpy2</span><span class="o">==</span><span class="m"
 <span class="p">}</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="r-installation">
-<h2>R installation<a class="headerlink" href="#r-installation" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-R notranslate"><div class="highlight"><pre><span></span>install.package<span class="p">(</span><span class="s">&quot;survival&quot;</span><span class="p">)</span>
-install.package<span class="p">(</span><span class="s">&quot;glmnet&quot;</span><span class="p">)</span>
-<span class="kn">source</span><span class="p">(</span><span class="s">&quot;https://bioconductor.org/biocLite.R&quot;</span><span class="p">)</span>
-biocLite<span class="p">(</span><span class="s">&quot;survcomp&quot;</span><span class="p">)</span>
+<div class="section" id="r-installation-optional">
+<h3>R installation (Optional)<a class="headerlink" href="#r-installation-optional" title="Permalink to this headline">¶</a></h3>
+<p>In his first implementation, DeepProg used the R survival toolkits to fit the survival functions. Thse functions have been replaced with the python toolkits lifelines and scikit-survival for more convenience and avoid any compatibility issue.</p>
+<ul class="simple">
+<li>R</li>
+<li>the R “survival” package installed.</li>
+<li>rpy2 2.8.6 (for python2 rpy2 can be install with: pip install rpy2==2.8.6, for python3 pip3 install rpy2==2.8.6). It seems that newer version of rpy2 might not work due to a bug (not tested)</li>
+</ul>
+<div class="highlight-R notranslate"><div class="highlight"><pre><span></span><span class="nf">install.package</span><span class="p">(</span><span class="s">&quot;survival&quot;</span><span class="p">)</span>
+<span class="nf">install.package</span><span class="p">(</span><span class="s">&quot;glmnet&quot;</span><span class="p">)</span>
+<span class="nf">source</span><span class="p">(</span><span class="s">&quot;https://bioconductor.org/biocLite.R&quot;</span><span class="p">)</span>
+<span class="nf">biocLite</span><span class="p">(</span><span class="s">&quot;survcomp&quot;</span><span class="p">)</span>
 </pre></div>
+</div>
 </div>
 </div>
 <div class="section" id="distributed-computation">
@@ -239,22 +274,50 @@ Note that the pip version of mpld3 installed with pip on my computer presented a
 pip install -e . --user
 </pre></div>
 </div>
+<div class="section" id="id1">
+<h3>Distributed computation<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>It is possible to use the python ray framework <a class="reference external" href="https://github.com/ray-project/ray">https://github.com/ray-project/ray</a> to control the parallel computation of the multiple models. To use this framework, it is required to install it: <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">ray</span></code></li>
+<li>Alternatively, it is also possible to create the model one by one without the need of the ray framework</li>
+</ul>
 </div>
-<div class="section" id="installation-of-the-package">
-<h2>installation of the package<a class="headerlink" href="#installation-of-the-package" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/lanagarmire/SimDeep.git
-<span class="nb">cd</span> SimDeep
-pip install -r requirements.txt --user
-</pre></div>
+<div class="section" id="id2">
+<h3>Visualisation module (Experimental)<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>To visualise test sets projected into the multi-omic survival space, it is required to install <code class="docutils literal notranslate"><span class="pre">mpld3</span></code> module: <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">mpld3</span></code></li>
+<li>Note that the pip version of mpld3 installed on my computer presented a <a class="reference external" href="https://github.com/mpld3/mpld3/issues/434">bug</a>: <code class="docutils literal notranslate"><span class="pre">TypeError:</span> <span class="pre">array([1.])</span> <span class="pre">is</span> <span class="pre">not</span> <span class="pre">JSON</span> <span class="pre">serializable</span> </code>. However, the <a class="reference external" href="https://github.com/mpld3/mpld3">newest</a> version of the mpld3 available from the github solved this issue. It is therefore recommended to install the newest version to avoid this issue.</li>
+</ul>
 </div>
 </div>
-<div class="section" id="test">
-<h2>Test<a class="headerlink" href="#test" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>test if simdeep is functional (all the software are correctly installed):</li>
 </ul>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>  python test/test_dummy_boosting_stacking.py -v <span class="c1"># OR</span>
-  nosetests <span class="nb">test</span> -v <span class="c1"># Improved version of python unit testing</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>  python3 test/test_simdeep.py -v <span class="c1">#</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li>All the default parameters are defined in the config file: <code class="docutils literal notranslate"><span class="pre">./simdeep/config.py</span></code> but can be passed dynamically. Three types of parameters must be defined:<ul>
+<li>The training dataset (omics + survival input files)<ul>
+<li>In addition, the parameters of the test set, i.e. the omic dataset and the survival file</li>
+</ul>
+</li>
+<li>The parameters of the autoencoder (the default parameters works but it might be fine-tuned.</li>
+<li>The parameters of the classification procedures (default are still good)</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="example-scripts">
+<h2>Example scripts<a class="headerlink" href="#example-scripts" title="Permalink to this headline">¶</a></h2>
+<p>Example scripts are availables in ./examples/ which will assist you to build a model from scratch with test and real data:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>examples
+├── example_hyperparameters_tuning.py
+├── example_hyperparameters_tuning_with_test_dataset.py
+├── example_with_dummy_data_distributed.py
+├── example_with_dummy_data.py
+└── load_3_omics_model.py
 </pre></div>
 </div>
 </div>
