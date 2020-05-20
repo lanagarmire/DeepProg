@@ -33,7 +33,7 @@ pip3 install theano
 nano ~/.keras/keras.json
 ```
 
-* R installation (Optional)
+### R installation (Optional)
 
 In his first implementation, DeepProg used the R survival toolkits to fit the survival functions. Thse functions have been replaced with the python toolkits lifelines and scikit-survival for more convenience and avoid any compatibility issue.
 
@@ -76,10 +76,10 @@ The default configuration file looks like this:
 
 ```bash
 # The downloading can take few minutes due to the size of th git project
-git clone https://github.com/lanagarmire/SimDeep.git
+git clone https://gitlab.com/Grouumf/SimDeep.git
 cd SimDeep
 # The installation should only take a short amount of time
-pip3 install -r requirements.txt --user
+pip3 install -e . -r requirements.txt --user
 # To intall the distributed frameworks
 pip3 install -r requirements_distributed.txt --user
 pip3 install -r requirements_pip3.txt --user
