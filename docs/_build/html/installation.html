@@ -178,31 +178,31 @@
 <div class="section" id="requirements">
 <h2>Requirements<a class="headerlink" href="#requirements" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li>Python 2 or 3 (Python3 is recommended)</li>
-<li>Either theano, tensorflow or CNTK (theano is recommended)</li>
-<li><a class="reference external" href="http://deeplearning.net/software/theano/install.html">theano</a> (the used version for the manuscript was 0.8.2)</li>
-<li><a class="reference external" href="https://www.tensorflow.org/">tensorflow</a> as a more robust alternative to theano</li>
-<li><a class="reference external" href="https://github.com/microsoft/CNTK">cntk</a> CNTK is anoter DL library that can present some advantages compared to tensorflow or theano. See <a class="reference external" href="https://docs.microsoft.com/en-us/cognitive-toolkit/">https://docs.microsoft.com/en-us/cognitive-toolkit/</a></li>
-<li>scikit-learn (&gt;=0.18)</li>
-<li>numpy, scipy</li>
-<li>lifelines</li>
-<li>(if using python3) scikit-survival</li>
-<li>(For distributed computing) ray (ray &gt;= 0.8.4) framework</li>
-<li>(For hyperparameter tuning) scikit-optimize</li>
+<li><p>Python 2 or 3 (Python3 is recommended)</p></li>
+<li><p>Either theano, tensorflow or CNTK (theano is recommended)</p></li>
+<li><p><a class="reference external" href="http://deeplearning.net/software/theano/install.html">theano</a> (the used version for the manuscript was 0.8.2)</p></li>
+<li><p><a class="reference external" href="https://www.tensorflow.org/">tensorflow</a> as a more robust alternative to theano</p></li>
+<li><p><a class="reference external" href="https://github.com/microsoft/CNTK">cntk</a> CNTK is anoter DL library that can present some advantages compared to tensorflow or theano. See <a class="reference external" href="https://docs.microsoft.com/en-us/cognitive-toolkit/">https://docs.microsoft.com/en-us/cognitive-toolkit/</a></p></li>
+<li><p>scikit-learn (&gt;=0.18)</p></li>
+<li><p>numpy, scipy</p></li>
+<li><p>lifelines</p></li>
+<li><p>(if using python3) scikit-survival</p></li>
+<li><p>(For distributed computing) ray (ray &gt;= 0.8.4) framework</p></li>
+<li><p>(For hyperparameter tuning) scikit-optimize</p></li>
 </ul>
 </div>
 <div class="section" id="tested-versions">
 <h2>Tested versions<a class="headerlink" href="#tested-versions" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li>python: 2.7.15, 3.6.6</li>
-<li>R: 3.5.0</li>
-<li>Numpy: 1.16.5</li>
-<li>Scipy: 1.2.2</li>
-<li>scikit-learn: 0.20.3</li>
-<li>keras: 2.3.1</li>
-<li>tensorflow: 1.14.0</li>
-<li>theano: 1.0.2</li>
-<li>rpy2: <strong>2.8.6</strong></li>
+<li><p>python: 2.7.15, 3.6.6</p></li>
+<li><p>R: 3.5.0</p></li>
+<li><p>Numpy: 1.16.5</p></li>
+<li><p>Scipy: 1.2.2</p></li>
+<li><p>scikit-learn: 0.20.3</p></li>
+<li><p>keras: 2.3.1</p></li>
+<li><p>tensorflow: 1.14.0</p></li>
+<li><p>theano: 1.0.2</p></li>
+<li><p>rpy2: <strong>2.8.6</strong></p></li>
 </ul>
 <div class="section" id="installation-local">
 <h3>installation (local)<a class="headerlink" href="#installation-local" title="Permalink to this headline">¶</a></h3>
@@ -248,14 +248,14 @@ pip install keras --user
 <h3>R installation (Optional)<a class="headerlink" href="#r-installation-optional" title="Permalink to this headline">¶</a></h3>
 <p>In his first implementation, DeepProg used the R survival toolkits to fit the survival functions. Thse functions have been replaced with the python toolkits lifelines and scikit-survival for more convenience and avoid any compatibility issue.</p>
 <ul class="simple">
-<li>R</li>
-<li>the R “survival” package installed.</li>
-<li>rpy2 2.8.6 (for python2 rpy2 can be install with: pip install rpy2==2.8.6, for python3 pip3 install rpy2==2.8.6). It seems that newer version of rpy2 might not work due to a bug (not tested)</li>
+<li><p>R</p></li>
+<li><p>the R “survival” package installed.</p></li>
+<li><p>rpy2 2.8.6 (for python2 rpy2 can be install with: pip install rpy2==2.8.6, for python3 pip3 install rpy2==2.8.6). It seems that newer version of rpy2 might not work due to a bug (not tested)</p></li>
 </ul>
-<div class="highlight-R notranslate"><div class="highlight"><pre><span></span><span class="nf">install.package</span><span class="p">(</span><span class="s">&quot;survival&quot;</span><span class="p">)</span>
-<span class="nf">install.package</span><span class="p">(</span><span class="s">&quot;glmnet&quot;</span><span class="p">)</span>
-<span class="nf">source</span><span class="p">(</span><span class="s">&quot;https://bioconductor.org/biocLite.R&quot;</span><span class="p">)</span>
-<span class="nf">biocLite</span><span class="p">(</span><span class="s">&quot;survcomp&quot;</span><span class="p">)</span>
+<div class="highlight-R notranslate"><div class="highlight"><pre><span></span>install.package<span class="p">(</span><span class="s">&quot;survival&quot;</span><span class="p">)</span>
+install.package<span class="p">(</span><span class="s">&quot;glmnet&quot;</span><span class="p">)</span>
+<span class="kn">source</span><span class="p">(</span><span class="s">&quot;https://bioconductor.org/biocLite.R&quot;</span><span class="p">)</span>
+biocLite<span class="p">(</span><span class="s">&quot;survcomp&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -277,34 +277,36 @@ pip install -e . --user
 <div class="section" id="id1">
 <h3>Distributed computation<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
-<li>It is possible to use the python ray framework <a class="reference external" href="https://github.com/ray-project/ray">https://github.com/ray-project/ray</a> to control the parallel computation of the multiple models. To use this framework, it is required to install it: <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">ray</span></code></li>
-<li>Alternatively, it is also possible to create the model one by one without the need of the ray framework</li>
+<li><p>It is possible to use the python ray framework <a class="reference external" href="https://github.com/ray-project/ray">https://github.com/ray-project/ray</a> to control the parallel computation of the multiple models. To use this framework, it is required to install it: <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">ray</span></code></p></li>
+<li><p>Alternatively, it is also possible to create the model one by one without the need of the ray framework</p></li>
 </ul>
 </div>
 <div class="section" id="id2">
 <h3>Visualisation module (Experimental)<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
-<li>To visualise test sets projected into the multi-omic survival space, it is required to install <code class="docutils literal notranslate"><span class="pre">mpld3</span></code> module: <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">mpld3</span></code></li>
-<li>Note that the pip version of mpld3 installed on my computer presented a <a class="reference external" href="https://github.com/mpld3/mpld3/issues/434">bug</a>: <code class="docutils literal notranslate"><span class="pre">TypeError:</span> <span class="pre">array([1.])</span> <span class="pre">is</span> <span class="pre">not</span> <span class="pre">JSON</span> <span class="pre">serializable</span> </code>. However, the <a class="reference external" href="https://github.com/mpld3/mpld3">newest</a> version of the mpld3 available from the github solved this issue. It is therefore recommended to install the newest version to avoid this issue.</li>
+<li><p>To visualise test sets projected into the multi-omic survival space, it is required to install <code class="docutils literal notranslate"><span class="pre">mpld3</span></code> module: <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">mpld3</span></code></p></li>
+<li><p>Note that the pip version of mpld3 installed on my computer presented a <a class="reference external" href="https://github.com/mpld3/mpld3/issues/434">bug</a>: <code class="docutils literal notranslate"><span class="pre">TypeError:</span> <span class="pre">array([1.])</span> <span class="pre">is</span> <span class="pre">not</span> <span class="pre">JSON</span> <span class="pre">serializable</span> </code>. However, the <a class="reference external" href="https://github.com/mpld3/mpld3">newest</a> version of the mpld3 available from the github solved this issue. It is therefore recommended to install the newest version to avoid this issue.</p></li>
 </ul>
 </div>
 </div>
 <div class="section" id="usage">
 <h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li>test if simdeep is functional (all the software are correctly installed):</li>
+<li><p>test if simdeep is functional (all the software are correctly installed):</p></li>
 </ul>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>  python3 test/test_simdeep.py -v <span class="c1">#</span>
 </pre></div>
 </div>
 <ul class="simple">
-<li>All the default parameters are defined in the config file: <code class="docutils literal notranslate"><span class="pre">./simdeep/config.py</span></code> but can be passed dynamically. Three types of parameters must be defined:<ul>
-<li>The training dataset (omics + survival input files)<ul>
-<li>In addition, the parameters of the test set, i.e. the omic dataset and the survival file</li>
+<li><p>All the default parameters are defined in the config file: <code class="docutils literal notranslate"><span class="pre">./simdeep/config.py</span></code> but can be passed dynamically. Three types of parameters must be defined:</p>
+<ul>
+<li><p>The training dataset (omics + survival input files)</p>
+<ul>
+<li><p>In addition, the parameters of the test set, i.e. the omic dataset and the survival file</p></li>
 </ul>
 </li>
-<li>The parameters of the autoencoder (the default parameters works but it might be fine-tuned.</li>
-<li>The parameters of the classification procedures (default are still good)</li>
+<li><p>The parameters of the autoencoder (the default parameters works but it might be fine-tuned.</p></li>
+<li><p>The parameters of the classification procedures (default are still good)</p></li>
 </ul>
 </li>
 </ul>
