@@ -416,7 +416,7 @@
                                <span class="bp">self</span><span class="o">.</span><span class="n">feature_ref_array</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="LoadData.load_new_test_dataset"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.extract_data.LoadData.load_new_test_dataset">[docs]</a>    <span class="k">def</span> <span class="nf">load_new_test_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tsv_dict</span><span class="p">,</span>
-                              <span class="n">path_survival_file</span><span class="p">,</span>
+                              <span class="n">path_survival_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                               <span class="n">survival_flag</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                               <span class="n">normalization</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -618,6 +618,14 @@
 
 <div class="viewcode-block" id="LoadData.load_survival_test"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.extract_data.LoadData.load_survival_test">[docs]</a>    <span class="k">def</span> <span class="nf">load_survival_test</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">survival_flag</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">survival_tsv_test</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">survival_test</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span>
+                <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_ids_test</span><span class="p">),</span> <span class="mi">2</span><span class="p">))</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">survival_test</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+
+            <span class="k">return</span>
+
         <span class="k">if</span> <span class="n">survival_flag</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">survival_flag</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">survival_flag</span>
 

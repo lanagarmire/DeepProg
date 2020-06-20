@@ -683,11 +683,11 @@
         <span class="n">sample_id_test</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_from_model_dataset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;sample_ids_test&#39;</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_from_model</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;_write_labels&#39;</span><span class="p">,</span>
-            <span class="n">sample_id_test</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">test_labels</span><span class="p">,</span>
-            <span class="s1">&#39;</span><span class="si">{0}</span><span class="s1">_test_labels&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project_name</span><span class="p">),</span>
-            <span class="n">labels_proba</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">test_labels_proba</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-            <span class="n">nbdays</span><span class="o">=</span><span class="n">nbdays</span><span class="p">,</span> <span class="n">isdead</span><span class="o">=</span><span class="n">isdead</span><span class="p">)</span>
+                         <span class="n">sample_id_test</span><span class="p">,</span>
+                         <span class="bp">self</span><span class="o">.</span><span class="n">test_labels</span><span class="p">,</span>
+                         <span class="s1">&#39;</span><span class="si">{0}</span><span class="s1">_test_labels&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project_name</span><span class="p">),</span>
+                         <span class="n">labels_proba</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">test_labels_proba</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                         <span class="n">nbdays</span><span class="o">=</span><span class="n">nbdays</span><span class="p">,</span> <span class="n">isdead</span><span class="o">=</span><span class="n">isdead</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">pvalue</span><span class="p">,</span> <span class="n">pvalue_proba</span></div>
 
@@ -1083,6 +1083,11 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">days_full</span><span class="p">,</span> <span class="n">dead_full</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">survival_full</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
         <span class="n">days_test</span><span class="p">,</span> <span class="n">dead_test</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_from_model_dataset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;survival_test&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">days_test</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Cannot compute C-index for test dataset. Need test survival file&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+
         <span class="n">labels_test_categorical</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_labels_proba_to_labels</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">test_labels_proba</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">days_test</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">matrix</span><span class="p">):</span>
@@ -1351,8 +1356,8 @@
         <span class="k">return</span> <span class="n">encoder_key</span>
 
 <div class="viewcode-block" id="SimDeepBoosting.load_new_test_dataset"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.simdeep_boosting.SimDeepBoosting.load_new_test_dataset">[docs]</a>    <span class="k">def</span> <span class="nf">load_new_test_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tsv_dict</span><span class="p">,</span>
-                              <span class="n">path_survival_file</span><span class="p">,</span>
                               <span class="n">fname_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                              <span class="n">path_survival_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                               <span class="n">normalization</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                               <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                               <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>

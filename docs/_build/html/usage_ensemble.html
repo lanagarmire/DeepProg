@@ -290,8 +290,8 @@ Two KM plots are also generated, one using the cluster labels:</p>
 <p>We can then load and evaluate a first test dataset</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">boosting</span><span class="o">.</span><span class="n">load_new_test_dataset</span><span class="p">(</span>
     <span class="p">{</span><span class="s1">&#39;RNA&#39;</span><span class="p">:</span> <span class="s1">&#39;rna_dummy.tsv&#39;</span><span class="p">},</span> <span class="c1"># OMIC file of the test set. It doesnt have to be the same as for training</span>
-    <span class="s1">&#39;survival_dummy.tsv&#39;</span><span class="p">,</span> <span class="c1"># Survival file of the test set</span>
     <span class="s1">&#39;TEST_DATA_1&#39;</span><span class="p">,</span> <span class="c1"># Name of the test test to be used</span>
+    <span class="s1">&#39;survival_dummy.tsv&#39;</span><span class="p">,</span> <span class="c1"># [OPTIONAL] Survival file of the test set. USeful to compute accuracy metrics on the test dataset</span>
 <span class="p">)</span>
 
 <span class="c1"># Predict the labels on the test dataset</span>

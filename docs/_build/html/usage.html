@@ -313,7 +313,12 @@ The test dataset do not need to have the same input omic matrices than the train
 <span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">TEST_TSV</span>
 <span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">SURVIVAL_TSV_TEST</span>
 
-<span class="n">simDeep</span><span class="o">.</span><span class="n">load_new_test_dataset</span><span class="p">(</span><span class="n">TEST_TSV</span><span class="p">,</span> <span class="n">SURVIVAL_TSV_TEST</span><span class="p">,</span> <span class="n">fname_key</span><span class="o">=</span><span class="s1">&#39;dummy&#39;</span><span class="p">)</span>
+<span class="n">simDeep</span><span class="o">.</span><span class="n">load_new_test_dataset</span><span class="p">(</span>
+    <span class="n">TEST_TSV</span><span class="p">,</span>
+    <span class="n">fname_key</span><span class="o">=</span><span class="s1">&#39;dummy&#39;</span>
+    <span class="n">SURVIVAL_TSV_TEST</span><span class="p">,</span> <span class="c1"># [OPTIONAL] test survival file useful to compute accuracy of test dataset</span>
+
+    <span class="p">)</span>
 
 <span class="c1"># The test set is a dummy rna expression (generated randomly)</span>
 <span class="k">print</span><span class="p">(</span><span class="n">simDeep</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">test_tsv</span><span class="p">)</span> <span class="c1"># Defined in the config file</span>
