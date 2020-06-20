@@ -104,8 +104,8 @@ def main():
     # Finally, load test set
     boosting.load_new_test_dataset(
         tsv_test,
-        test_survival,
         'test_RNA_only',
+        test_survival,
     )
 
     boosting.predict_labels_on_test_dataset()

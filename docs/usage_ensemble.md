@@ -151,8 +151,8 @@ We can then load and evaluate a first test dataset
 ```
 boosting.load_new_test_dataset(
     {'RNA': 'rna_dummy.tsv'}, # OMIC file of the test set. It doesnt have to be the same as for training
-    'survival_dummy.tsv', # Survival file of the test set
     'TEST_DATA_1', # Name of the test test to be used
+    'survival_dummy.tsv', # [OPTIONAL] Survival file of the test set. USeful to compute accuracy metrics on the test dataset
 )
 
 # Predict the labels on the test dataset

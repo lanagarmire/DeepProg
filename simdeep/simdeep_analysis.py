@@ -244,8 +244,8 @@ class SimDeep(DeepBase):
             return self._look_for_prediction_nodes(key)
 
     def load_new_test_dataset(self, tsv_dict,
-                              path_survival_file,
                               fname_key=None,
+                              path_survival_file=None,
                               normalization=None,
                               survival_flag=None):
         """
@@ -366,7 +366,8 @@ class SimDeep(DeepBase):
     def predict_labels_on_test_dataset(self):
         """
         """
-        nbdays, isdead = self.dataset.survival_test.T.tolist()
+        if self.dataset.survival_test is not None:
+            nbdays, isdead = self.dataset.survival_test.T.tolist()
 
         self.test_omic_list = list(self.dataset.matrix_test_array.keys())
         self.test_omic_list = list(set(self.test_omic_list).intersection(
@@ -388,11 +389,16 @@ class SimDeep(DeepBase):
             for key, value in Counter(self.test_labels).items():
                 print('class: {0}, number of samples :{1}'.format(key, value))
 
-        pvalue, pvalue_proba = self._compute_test_coxph('KM_plot_test',
-                                                        nbdays, isdead,
-                                                        self.test_labels, self.test_labels_proba)
-        self.test_pvalue = pvalue
-        self.test_pvalue_proba = pvalue_proba
+        pvalue, pvalue_proba = None, None
+
+        if self.dataset.survival_test is not None:
+            pvalue, pvalue_proba = self._compute_test_coxph(
+                'KM_plot_test',
+                nbdays, isdead,
+                self.test_labels, self.test_labels_proba)
+
+            self.test_pvalue = pvalue
+            self.test_pvalue_proba = pvalue_proba
 
         self._write_labels(self.dataset.sample_ids_test, self.test_labels,
                            labels_proba=self.test_labels_proba.T[0],

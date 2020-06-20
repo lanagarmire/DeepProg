@@ -532,11 +532,11 @@ class SimDeepBoosting():
         sample_id_test = self._from_model_dataset(self.models[0], 'sample_ids_test')
 
         self._from_model(self.models[0], '_write_labels',
-            sample_id_test,
-            self.test_labels,
-            '{0}_test_labels'.format(self.project_name),
-            labels_proba=self.test_labels_proba.T[0],
-            nbdays=nbdays, isdead=isdead)
+                         sample_id_test,
+                         self.test_labels,
+                         '{0}_test_labels'.format(self.project_name),
+                         labels_proba=self.test_labels_proba.T[0],
+                         nbdays=nbdays, isdead=isdead)
 
         return pvalue, pvalue_proba
 
@@ -932,6 +932,11 @@ class SimDeepBoosting():
         """
         days_full, dead_full = np.asarray(self.survival_full).T
         days_test, dead_test = self._from_model_dataset(self.models[0], 'survival_test').T
+
+        if np.isnan(days_test).all():
+            print("Cannot compute C-index for test dataset. Need test survival file")
+            return
+
         labels_test_categorical = self._labels_proba_to_labels(self.test_labels_proba)
 
         if isinstance(days_test, np.matrix):
@@ -1200,8 +1205,8 @@ class SimDeepBoosting():
         return encoder_key
 
     def load_new_test_dataset(self, tsv_dict,
-                              path_survival_file,
                               fname_key=None,
+                              path_survival_file=None,
                               normalization=None,
                               debug=False,
                               verbose=False,

@@ -265,7 +265,7 @@ class LoadData():
                                self.feature_ref_array)
 
     def load_new_test_dataset(self, tsv_dict,
-                              path_survival_file,
+                              path_survival_file=None,
                               survival_flag=None,
                               normalization=None):
         """
@@ -467,6 +467,14 @@ class LoadData():
 
     def load_survival_test(self, survival_flag=None):
         """ """
+        if self.survival_tsv_test is None:
+            self.survival_test = np.empty(
+                shape=(len(self.sample_ids_test), 2))
+
+            self.survival_test[:] = np.nan
+
+            return
+
         if survival_flag is None:
             survival_flag = self.survival_flag
 
