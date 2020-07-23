@@ -47,6 +47,9 @@ def main():
     simDeep.load_training_dataset()
     # model construction
     simDeep.fit()
+
+    # predict on full dataset
+    simDeep.predict_labels_on_full_dataset()
     # Finally, saving the model
     simDeep.save_encoders('encoder_example.h5')
 

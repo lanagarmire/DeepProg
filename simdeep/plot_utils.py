@@ -65,7 +65,7 @@ class SampleHTML():
       <td>{3}</td>
     </tr>
     <tr>
-      <th>is dead</th>
+      <th>Event</th>
       <td>{4}</td>
     </tr>
   </tbody>
@@ -183,10 +183,14 @@ def plot_kernel_plots(
             alpha=0.7
         )
 
+    survival_test = dataset.survival_test
+
+    import ipdb;ipdb.set_trace()
+
     labels = [SampleHTML(
         name=dataset.sample_ids_test[i],
         label=test_labels[i],
-        survival=np.asarray(dataset.survival_test[i])[0],
+        survival=np.asarray(survival_test[i])[0],
         proba=test_labels_proba[i][test_labels[i]]).html
               for i in range(len(test_labels))]
 

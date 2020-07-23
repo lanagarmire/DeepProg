@@ -155,16 +155,17 @@ def coxph_from_python(
             kaplan.plot(ax=ax,
                         ci_alpha=0.15)
 
-            ax.set_xlabel('time unit')
-            ax.set_title('pval.: {0: .1e} CI: {1: .2f}'.format(
-                pvalue, cindex),
-                         fontsize=16,
-                         fontweight='bold')
+        ax.set_xlabel('time unit')
+        ax.set_title('pval.: {0: .1e} CI: {1: .2f}'.format(
+            pvalue, cindex),
+                     fontsize=16,
+                     fontweight='bold')
 
         figname = "{0}/{1}.png".format(
             png_path, fig_name.replace('.png', ''))
 
         fig.savefig(figname)
+        print('Figure saved in: {0}'.format(figname))
 
     return pvalue
 

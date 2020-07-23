@@ -96,8 +96,8 @@ def test_instance():
 
     boosting.load_new_test_dataset(
         {'RNA': 'rna_dummy.tsv'}, # OMIC file of the test set. It doesnt have to be the same as for training
-        'survival_dummy.tsv', # Survival file of the test set
         'dummy', # Name of the test test to be used
+        'survival_dummy.tsv', # Survival file of the test set
     )
 
     boosting.predict_labels_on_test_dataset()
@@ -110,8 +110,8 @@ def test_instance():
 
     boosting.load_new_test_dataset(
         {'METH': 'meth_dummy.tsv'}, # OMIC file of the second test set.
-        'survival_dummy.tsv', # Survival file of the test set
         'dummy_METH', # Name of the second test test
+        'survival_dummy.tsv', # Survival file of the test set
     )
 
     boosting.predict_labels_on_test_dataset()

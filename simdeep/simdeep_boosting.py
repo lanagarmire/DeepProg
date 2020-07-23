@@ -519,6 +519,10 @@ class SimDeepBoosting():
             print('class: {0}, number of samples :{1}'.format(key, value))
 
         nbdays, isdead = self._from_model_dataset(self.models[0], "survival_test").T.tolist()
+
+        if np.isnan(nbdays).all():
+            return np.nan, np.nan
+
         pvalue, pvalue_proba, pvalue_cat = self._compute_test_coxph(
             'KM_plot_boosting_test',
             nbdays, isdead,
@@ -1172,6 +1176,7 @@ class SimDeepBoosting():
         self.dataset.reorder_matrix_array(self.sample_ids_full)
         self.dataset.create_a_cv_split()
         self.dataset.normalize_training_array()
+
         self.dataset.load_new_test_dataset(
             tsv_dict=self.test_tsv_dict,
             path_survival_file=self.test_survival_file,

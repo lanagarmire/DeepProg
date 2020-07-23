@@ -31,7 +31,7 @@ Here we describe how to install the DeepProg package. We assume that the install
 
 ```bash
 # The downloading can take few minutes due to the size of th git project
-git clone https://gitlab.com/Grouumf/SimDeep.git
+git clone https://github.com/lanagarmire/DeepProg.git
 cd SimDeep
 # The installation should only take a short amount of time
 pip3 install -e . -r requirements.txt --user

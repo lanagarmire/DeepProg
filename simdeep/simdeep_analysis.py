@@ -39,8 +39,9 @@ from simdeep.survival_utils import _process_parallel_coxph
 from simdeep.survival_utils import _process_parallel_cindex
 from simdeep.survival_utils import _process_parallel_feature_importance
 from simdeep.survival_utils import _process_parallel_feature_importance_per_cluster
-
 from simdeep.survival_utils import select_best_classif_params
+
+from simdeep.simdeep_utils import load_labels_file
 
 from simdeep.coxph_from_r import coxph
 from simdeep.coxph_from_r import c_index
@@ -279,6 +280,84 @@ class SimDeep(DeepBase):
         if fname_key:
             self.project_name = '{0}_{1}'.format(self._project_name, fname_key)
 
+    def fit_on_pretrained_label_file(self, label_file):
+        """
+        fit a deepprog simdeep model without training autoencoder but just using a ID->labels file to train a classifier
+        """
+        self.dataset.load_array()
+        self.dataset.load_survival()
+
+        labels_dict = load_labels_file()
+
+        train, test, labels, labels_proba = [], [], [], []
+
+        for sample in self.dataset.sample_ids:
+
+            if sample in labels_dict:
+                train.append(sample)
+                label, label_proba = labels_dict[sample]
+
+                labels.append(label)
+                labels_proba.append(label_proba)
+
+            else:
+                test.append(sample)
+
+        if test:
+            self.dataset.cross_validation_instance = (train, test)
+        else:
+            self.dataset.cross_validation_instance = None
+
+        self.dataset.create_a_cv_split()
+        self.dataset.normalize_training_array()
+
+        self.matrix_train_array = self.dataset.matrix_train_array
+
+        for key in self.matrix_train_array:
+            self.matrix_train_array[key] = self.matrix_train_array[key].astype('float32')
+
+        self.training_omic_list = self.dataset.training_tsv.keys()
+
+        self.predict_labels_using_external_labels(labels, labels_proba)
+
+        self.used_normalization = {key: self.dataset.normalization[key]
+                                   for key in self.dataset.normalization
+                                   if self.dataset.normalization[key]}
+
+        self.used_features_for_classif = self.dataset.feature_train_array
+        self.fit_classification_model()
+
+    def predict_labels_using_external_labels(self, labels, labels_proba):
+        """
+        """
+        self.labels = labels
+        nb_clusters = len(set(self.labels))
+        self.labels_proba = np.array([labels_proba for _ in range(nb_clusters)]).T
+
+        nbdays, isdead = self.dataset.survival.T.tolist()
+
+        pvalue = coxph(self.labels, isdead, nbdays,
+                       isfactor=False,
+                       do_KM_plot=self.do_KM_plot,
+                       png_path=self.path_results,
+                       seed=self.seed,
+                       fig_name='{0}_KM_plot_training_dataset'.format(self.project_name))
+
+        pvalue_proba = coxph(self.labels_proba.T[0], isdead, nbdays,
+                             seed=self.seed,
+                             isfactor=False)
+
+        if not self._isboosting:
+            self._write_labels(self.dataset.sample_ids, self.labels,
+                               labels_proba=self.labels_proba.T[0],
+                               fname='{0}_training_set_labels'.format(self.project_name))
+
+        if self.verbose:
+            print('Cox-PH p-value (Log-Rank) for the cluster labels: {0}'.format(pvalue))
+
+        self.train_pvalue = pvalue
+        self.train_pvalue_proba = pvalue_proba
+
     def fit(self):
         """
         main function
@@ -328,9 +407,10 @@ class SimDeep(DeepBase):
         self.cv_pvalue = pvalue
         self.cv_pvalue_proba = pvalue_proba
 
-        self._write_labels(self.dataset.sample_ids_cv, self.cv_labels,
-                           labels_proba=self.cv_labels_proba.T[0],
-                           fname='{0}_test_fold_labels'.format(self.project_name))
+        if not self._isboosting:
+            self._write_labels(self.dataset.sample_ids_cv, self.cv_labels,
+                               labels_proba=self.cv_labels_proba.T[0],
+                               fname='{0}_test_fold_labels'.format(self.project_name))
 
         return self.cv_labels, pvalue, pvalue_proba
 
@@ -357,9 +437,10 @@ class SimDeep(DeepBase):
         self.full_pvalue = pvalue
         self.full_pvalue_proba = pvalue_proba
 
-        self._write_labels(self.dataset.sample_ids_full, self.full_labels,
-                           labels_proba=self.full_labels_proba.T[0],
-                           fname='{0}_full_labels'.format(self.project_name))
+        if not self._isboosting:
+            self._write_labels(self.dataset.sample_ids_full, self.full_labels,
+                               labels_proba=self.full_labels_proba.T[0],
+                               fname='{0}_full_labels'.format(self.project_name))
 
         return self.full_labels, pvalue, pvalue_proba
 
@@ -392,17 +473,19 @@ class SimDeep(DeepBase):
         pvalue, pvalue_proba = None, None
 
         if self.dataset.survival_test is not None:
-            pvalue, pvalue_proba = self._compute_test_coxph(
-                'KM_plot_test',
-                nbdays, isdead,
-                self.test_labels, self.test_labels_proba)
+            if np.isnan(nbdays).all():
+                pvalue, pvalue_proba = self._compute_test_coxph(
+                    'KM_plot_test',
+                    nbdays, isdead,
+                    self.test_labels, self.test_labels_proba)
 
-            self.test_pvalue = pvalue
-            self.test_pvalue_proba = pvalue_proba
+                self.test_pvalue = pvalue
+                self.test_pvalue_proba = pvalue_proba
 
-        self._write_labels(self.dataset.sample_ids_test, self.test_labels,
-                           labels_proba=self.test_labels_proba.T[0],
-                           fname='{0}_test_labels'.format(self.project_name))
+        if not self._isboosting:
+            self._write_labels(self.dataset.sample_ids_test, self.test_labels,
+                               labels_proba=self.test_labels_proba.T[0],
+                               fname='{0}_test_labels'.format(self.project_name))
 
         return self.test_labels, pvalue, pvalue_proba
 
@@ -758,9 +841,10 @@ class SimDeep(DeepBase):
                              seed=self.seed,
                              isfactor=False)
 
-        self._write_labels(self.dataset.sample_ids, self.labels,
-                           labels_proba=self.labels_proba.T[0],
-                           fname='{0}_training_set_labels'.format(self.project_name))
+        if not self._isboosting:
+            self._write_labels(self.dataset.sample_ids, self.labels,
+                               labels_proba=self.labels_proba.T[0],
+                               fname='{0}_training_set_labels'.format(self.project_name))
 
         if self.verbose:
             print('Cox-PH p-value (Log-Rank) for the cluster labels: {0}'.format(pvalue))
@@ -786,7 +870,8 @@ class SimDeep(DeepBase):
     def _write_labels(self, sample_ids, labels, fname,
                       labels_proba=None, nbdays=None, isdead=None):
         """ """
-        with open('{0}/{1}.tsv'.format(self.path_results, fname), 'w') as f_file:
+        path_file = '{0}/{1}.tsv'.format(self.path_results, fname)
+        with open(path_file, 'w') as f_file:
             for ids, (sample, label) in enumerate(zip(sample_ids, labels)):
                 suppl = ''
 
@@ -798,6 +883,8 @@ class SimDeep(DeepBase):
                     suppl += '\t{0}'.format(isdead[ids])
 
                 f_file.write('{0}\t{1}{2}\n'.format(sample, label, suppl))
+
+        print('file written: {0}'.format(path_file))
 
     def _predict_survival_nodes(self, matrix_array, keys=None):
         """

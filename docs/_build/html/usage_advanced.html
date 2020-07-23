@@ -227,7 +227,7 @@
 
     <span class="k">def</span> <span class="nf">fit_predict</span><span class="p">(</span><span class="n">M</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
-        <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+        <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nb_clusters</span><span class="p">,</span> <span class="n">M</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 
 
@@ -242,16 +242,16 @@
 <h3>Normalisation<a class="headerlink" href="#normalisation" title="Permalink to this headline">¶</a></h3>
 <p>DeepProg uses by default a four-step normalisation for both training and test datasets:</p>
 <ol class="simple">
-<li><p>Selection of the top 100 features according to the variances</p></li>
-<li><p>Rank normalisation per sample</p></li>
-<li><p>Sample-sample Correlation similarity transformation</p></li>
-<li><p>Rank normalisation</p></li>
+<li>Selection of the top 100 features according to the variances</li>
+<li>Rank normalisation per sample</li>
+<li>Sample-sample Correlation similarity transformation</li>
+<li>Rank normalisation</li>
 </ol>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">default_normalisation</span> <span class="o">=</span>  <span class="p">{</span>
     <span class="s1">&#39;NB_FEATURES_TO_KEEP&#39;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
-    <span class="s1">&#39;TRAIN_RANK_NORM&#39;</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
-    <span class="s1">&#39;TRAIN_CORR_REDUCTION&#39;</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
-    <span class="s1">&#39;TRAIN_CORR_RANK_NORM&#39;</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+    <span class="s1">&#39;TRAIN_RANK_NORM&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="s1">&#39;TRAIN_CORR_REDUCTION&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="s1">&#39;TRAIN_CORR_RANK_NORM&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
 <span class="p">}</span>
 
 <span class="n">boosting</span> <span class="o">=</span> <span class="n">SimDeepBoosting</span><span class="p">(</span>

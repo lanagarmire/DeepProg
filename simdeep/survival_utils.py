@@ -12,6 +12,8 @@ from simdeep.config import CLASSIFIER
 
 import  numpy as np
 
+from os.path import isfile
+
 from scipy.stats import rankdata
 
 from sklearn.metrics import pairwise_distances
@@ -181,7 +183,12 @@ def load_survival_file(f_name,
 
     survival = {}
 
-    with open(path_data + f_name, 'r') as f_surv:
+    filename = '{0}/{1}'.format(path_data, f_name)
+
+    if not isfile(filename):
+        raise Exception('## Error wirh unexisting file: {0}'.format(filename))
+
+    with open(filename, 'r') as f_surv:
         first_line = f_surv.readline().strip(' \n\r\t').split(sep)
         for field in survival_flag.values():
             try:

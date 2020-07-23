@@ -161,31 +161,30 @@
 <h1>Tutorial: Simple DeepProg model<a class="headerlink" href="#tutorial-simple-deepprog-model" title="Permalink to this headline">¶</a></h1>
 <p>The principle of DeepProg can be summarized as follow:</p>
 <ul class="simple">
-<li><p>Loading of multiple samples x OMIC matrices</p></li>
-<li><p>Preprocessing ,normalisation, and sub-sampling of the input matrices</p></li>
-<li><p>Matrix transformation using autoencoder</p></li>
-<li><p>Detection of survival features</p></li>
-<li><p>Survival feature agglomeration and clustering</p></li>
-<li><p>Creation of supervised models to predict the output of new samples</p></li>
+<li>Loading of multiple samples x OMIC matrices</li>
+<li>Preprocessing ,normalisation, and sub-sampling of the input matrices</li>
+<li>Matrix transformation using autoencoder</li>
+<li>Detection of survival features</li>
+<li>Survival feature agglomeration and clustering</li>
+<li>Creation of supervised models to predict the output of new samples</li>
 </ul>
 <div class="section" id="input-parameters">
 <h2>Input parameters<a class="headerlink" href="#input-parameters" title="Permalink to this headline">¶</a></h2>
 <p>All the default parameters are defined in the config file: <code class="docutils literal notranslate"><span class="pre">./simdeep/config.py</span></code> but can be passed dynamically. Three types of parameters must be defined:</p>
 <ul class="simple">
-<li><p>The training dataset (omics + survival input files)</p>
-<ul>
-<li><p>In addition, the parameters of the test set, i.e. the omic dataset and the survival file</p></li>
+<li>The training dataset (omics + survival input files)<ul>
+<li>In addition, the parameters of the test set, i.e. the omic dataset and the survival file</li>
 </ul>
 </li>
-<li><p>The parameters of the autoencoder (the default parameters works but it might be fine-tuned.</p></li>
-<li><p>The parameters of the classification procedures (default are still good)</p></li>
+<li>The parameters of the autoencoder (the default parameters works but it might be fine-tuned.</li>
+<li>The parameters of the classification procedures (default are still good)</li>
 </ul>
 </div>
 <div class="section" id="input-matrices">
 <h2>Input matrices<a class="headerlink" href="#input-matrices" title="Permalink to this headline">¶</a></h2>
 <p>As examples, we included two datasets:</p>
 <ul class="simple">
-<li><p>A dummy example dataset in the <code class="docutils literal notranslate"><span class="pre">example/data/</span></code> folder:</p></li>
+<li>A dummy example dataset in the <code class="docutils literal notranslate"><span class="pre">example/data/</span></code> folder:</li>
 </ul>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>examples
 ├── data
@@ -198,7 +197,7 @@
 </pre></div>
 </div>
 <ul class="simple">
-<li><p>And a real dataset in the <code class="docutils literal notranslate"><span class="pre">data</span></code> folder. This dataset derives from the TCGA HCC cancer dataset. This dataset needs to be decompressed before processing:</p></li>
+<li>And a real dataset in the <code class="docutils literal notranslate"><span class="pre">data</span></code> folder. This dataset derives from the TCGA HCC cancer dataset. This dataset needs to be decompressed before processing:</li>
 </ul>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>data
 ├── meth.tsv.gz
@@ -321,13 +320,13 @@ The test dataset do not need to have the same input omic matrices than the train
     <span class="p">)</span>
 
 <span class="c1"># The test set is a dummy rna expression (generated randomly)</span>
-<span class="k">print</span><span class="p">(</span><span class="n">simDeep</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">test_tsv</span><span class="p">)</span> <span class="c1"># Defined in the config file</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">simDeep</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">test_tsv</span><span class="p">)</span> <span class="c1"># Defined in the config file</span>
 <span class="c1"># The data type of the test set is also defined to match an existing type</span>
-<span class="k">print</span><span class="p">(</span><span class="n">simDeep</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">data_type</span><span class="p">)</span> <span class="c1"># Defined in the config file</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">simDeep</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">data_type</span><span class="p">)</span> <span class="c1"># Defined in the config file</span>
 <span class="n">simDeep</span><span class="o">.</span><span class="n">predict_labels_on_test_dataset</span><span class="p">()</span> <span class="c1"># Perform the classification analysis and label the set dataset</span>
 
-<span class="k">print</span><span class="p">(</span><span class="n">simDeep</span><span class="o">.</span><span class="n">test_labels</span><span class="p">)</span>
-<span class="k">print</span><span class="p">(</span><span class="n">simDeep</span><span class="o">.</span><span class="n">test_labels_proba</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">simDeep</span><span class="o">.</span><span class="n">test_labels</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">simDeep</span><span class="o">.</span><span class="n">test_labels_proba</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>The assigned class and class probabilities for the test samples are now available in the output folder:</p>

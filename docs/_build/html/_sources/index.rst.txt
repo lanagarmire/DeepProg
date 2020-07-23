@@ -26,8 +26,8 @@ The package is accessible at this link: https://github.com/lanagarmire/DeepProg.
 Contribute
 ----------
 
-- Issue Tracker: gitlab.com/grouumf/simdeep/issues
-- Source Code: gitlab.com/grouumf/simdeep
+- Issue Tracker: github.com/lanagarmire/DeepProg/issues
+- Source Code: github.com/lanagarmire/DeepProg
 
 Support
 -------

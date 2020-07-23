@@ -5,7 +5,7 @@ from os.path import isdir
 
 from os import mkdir
 
-from sys import version_info
+# from sys import version_info
 
 # if version_info > (3, 0, 0):
 #     import pickle as cPickle
@@ -33,6 +33,7 @@ def save_model(boosting, path_to_save_model=PATH_TO_SAVE_MODEL):
     print('model saved in %2.1f s at %s/%s.pickle' % (
         time() - t, path_to_save_model, boosting._project_name))
 
+
 def load_model(project_name, path_model=PATH_TO_SAVE_MODEL):
     """ """
     t = time()
@@ -46,3 +47,43 @@ def load_model(project_name, path_model=PATH_TO_SAVE_MODEL):
     print('model loaded in %2.1f s' % (time() - t))
 
     return boosting
+
+
+def load_labels_file(path_labels, sep="\t"):
+    """
+    """
+    labels_dict = {}
+
+    for line in open(path_labels):
+        split = line.strip().split(sep)
+
+        if len(split) < 2:
+            raise Exception(
+                '## Errorfor file in load_labels_file: {0} for line{1}' \
+                ' line cannot be splitted in more than 2'.format(
+                    line, path_labels))
+
+        patient, label = split[0], split[1]
+
+        try:
+            label = int(label)
+        except Exception:
+            raise Exception(
+                '## Error: in load_labels_file {0} for line {1}' \
+                'labels should be an int'.format(
+                    path_labels, line))
+
+        if len(split) > 2:
+            try:
+                proba = float(split[2])
+            except Exception:
+                raise Exception(
+                    '## Error: in load_labels_file {0} for line {1}' \
+                    'label proba in column 3 should be a float'.format(
+                        path_labels, line))
+            else:
+                proba = label
+
+        labels_dict[patient] = (label, proba)
+
+    return labels_dict

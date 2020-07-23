@@ -149,9 +149,9 @@
            <div itemprop="articleBody">
             
   <h1>Source code for simdeep.plot_utils</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">sklearn.decomposition</span> <span class="k">import</span> <span class="n">PCA</span>
+<span></span><span class="kn">from</span> <span class="nn">sklearn.decomposition</span> <span class="kn">import</span> <span class="n">PCA</span>
 
-<span class="kn">from</span> <span class="nn">colour</span> <span class="k">import</span> <span class="n">Color</span>
+<span class="kn">from</span> <span class="nn">colour</span> <span class="kn">import</span> <span class="n">Color</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 <span class="kn">import</span> <span class="nn">matplotlib</span>
@@ -189,7 +189,7 @@
 
 
 <div class="viewcode-block" id="SampleHTML"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.plot_utils.SampleHTML">[docs]</a><span class="k">class</span> <span class="nc">SampleHTML</span><span class="p">():</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">proba</span><span class="p">,</span> <span class="n">survival</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">proba</span><span class="p">,</span> <span class="n">survival</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">nbdays</span><span class="p">,</span> <span class="n">isdead</span> <span class="o">=</span> <span class="n">survival</span>
@@ -216,7 +216,7 @@
 <span class="s2">      &lt;td&gt;</span><span class="si">{3}</span><span class="s2">&lt;/td&gt;</span>
 <span class="s2">    &lt;/tr&gt;</span>
 <span class="s2">    &lt;tr&gt;</span>
-<span class="s2">      &lt;th&gt;is dead&lt;/th&gt;</span>
+<span class="s2">      &lt;th&gt;Event&lt;/th&gt;</span>
 <span class="s2">      &lt;td&gt;</span><span class="si">{4}</span><span class="s2">&lt;/td&gt;</span>
 <span class="s2">    &lt;/tr&gt;</span>
 <span class="s2">  &lt;/tbody&gt;</span>
@@ -334,10 +334,14 @@
             <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span>
         <span class="p">)</span>
 
+    <span class="n">survival_test</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">survival_test</span>
+
+    <span class="kn">import</span> <span class="nn">ipdb</span><span class="p">;</span><span class="n">ipdb</span><span class="o">.</span><span class="n">set_trace</span><span class="p">()</span>
+
     <span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="n">SampleHTML</span><span class="p">(</span>
         <span class="n">name</span><span class="o">=</span><span class="n">dataset</span><span class="o">.</span><span class="n">sample_ids_test</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
         <span class="n">label</span><span class="o">=</span><span class="n">test_labels</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
-        <span class="n">survival</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">survival_test</span><span class="p">[</span><span class="n">i</span><span class="p">])[</span><span class="mi">0</span><span class="p">],</span>
+        <span class="n">survival</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">survival_test</span><span class="p">[</span><span class="n">i</span><span class="p">])[</span><span class="mi">0</span><span class="p">],</span>
         <span class="n">proba</span><span class="o">=</span><span class="n">test_labels_proba</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">test_labels</span><span class="p">[</span><span class="n">i</span><span class="p">]])</span><span class="o">.</span><span class="n">html</span>
               <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">test_labels</span><span class="p">))]</span>
 
