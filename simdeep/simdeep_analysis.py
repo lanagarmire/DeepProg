@@ -183,6 +183,7 @@ class SimDeep(DeepBase):
         self.used_features_for_classif = None
 
         self._isboosting = _isboosting
+        self._pretrained_model = False
         self._is_fitted = False
 
         self.valid_node_ids_array = {}
@@ -284,10 +285,13 @@ class SimDeep(DeepBase):
         """
         fit a deepprog simdeep model without training autoencoder but just using a ID->labels file to train a classifier
         """
+        self._pretrained_model = True
+        self.use_autoencoders = False
+
         self.dataset.load_array()
         self.dataset.load_survival()
 
-        labels_dict = load_labels_file()
+        labels_dict = load_labels_file(label_file)
 
         train, test, labels, labels_proba = [], [], [], []
 
@@ -325,6 +329,7 @@ class SimDeep(DeepBase):
                                    if self.dataset.normalization[key]}
 
         self.used_features_for_classif = self.dataset.feature_train_array
+        self.look_for_survival_nodes()
         self.fit_classification_model()
 
     def predict_labels_using_external_labels(self, labels, labels_proba):
@@ -896,12 +901,12 @@ class SimDeep(DeepBase):
 
         for key in keys:
             matrix = matrix_array[key]
-
-            if self.encoder_input_shape(key)[1] != matrix.shape[1]:
-                if self.verbose:
-                    print('matrix doesnt have the input dimension of the encoder'\
-                          ' returning None')
-                return None
+            if not self._pretrained_model:
+                if self.encoder_input_shape(key)[1] != matrix.shape[1]:
+                    if self.verbose:
+                        print('matrix doesnt have the input dimension of the encoder'\
+                              ' returning None')
+                    return None
 
             if self.use_autoencoders:
                 activities = self.encoder_predict(key, matrix)
@@ -920,6 +925,9 @@ class SimDeep(DeepBase):
         """
         if not keys:
             keys = list(self.encoder_array.keys())
+
+            if not keys:
+                keys = self.matrix_train_array.keys()
 
         for key in keys:
             matrix_train = self.matrix_train_array[key]
