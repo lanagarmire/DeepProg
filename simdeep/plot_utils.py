@@ -41,7 +41,10 @@ class SampleHTML():
     def __init__(self, name, label, proba, survival):
         """
         """
-        nbdays, isdead = survival
+        try:
+            nbdays, isdead = survival
+        except Exception:
+            nbdays, isdead = 'NaN', 'NaN'
 
         self.html =  """
 <table border="1" class="dataframe">
@@ -183,9 +186,7 @@ def plot_kernel_plots(
             alpha=0.7
         )
 
-    survival_test = dataset.survival_test
-
-    import ipdb;ipdb.set_trace()
+    survival_test = np.nan_to_num(dataset.survival_test)
 
     labels = [SampleHTML(
         name=dataset.sample_ids_test[i],

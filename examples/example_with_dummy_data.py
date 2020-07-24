@@ -84,6 +84,9 @@ def test_instance():
     boosting.fit()
     boosting.predict_labels_on_full_dataset()
 
+    boosting.save_models_classes()
+    boosting.save_cv_models_classes()
+
     boosting.compute_clusters_consistency_for_full_labels()
     boosting.evalutate_cluster_performance()
     boosting.collect_cindex_for_test_fold()
@@ -101,6 +104,8 @@ def test_instance():
     )
 
     boosting.predict_labels_on_test_dataset()
+    boosting.save_test_models_classes()
+
     boosting.compute_c_indexes_for_test_dataset()
     boosting.compute_clusters_consistency_for_test_labels()
 

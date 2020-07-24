@@ -206,6 +206,9 @@ class SimDeep(DeepBase):
         self.full_labels = None
         self.full_labels_proba = None
 
+        self.labels = None
+        self.labels_proba = None
+
         self.training_omic_list = []
         self.test_omic_list = []
 
@@ -872,10 +875,17 @@ class SimDeep(DeepBase):
             print('calinski-harabaz score: {0}'.format(self.calinski_score))
             print('bic score: {0}'.format(self.bic_score))
 
-    def _write_labels(self, sample_ids, labels, fname,
-                      labels_proba=None, nbdays=None, isdead=None):
+    def _write_labels(self, sample_ids, labels, fname="",
+                      labels_proba=None,
+                      nbdays=None,
+                      isdead=None,
+                      path_file=None):
         """ """
-        path_file = '{0}/{1}.tsv'.format(self.path_results, fname)
+        assert(fname or path_file)
+
+        if not path_file:
+            path_file = '{0}/{1}.tsv'.format(self.path_results, fname)
+
         with open(path_file, 'w') as f_file:
             for ids, (sample, label) in enumerate(zip(sample_ids, labels)):
                 suppl = ''
@@ -1548,6 +1558,19 @@ class SimDeep(DeepBase):
         self.predict_labels_on_test_fold()
         self.predict_labels_on_full_dataset()
         self.evalutate_cluster_performance()
+
+        return self._is_fitted
+
+    def _partial_fit_model_with_pretrained_pool(self, labels_file):
+        """
+        """
+        self.fit_on_pretrained_label_file(labels_file)
+
+        self.predict_labels_on_test_fold()
+        self.predict_labels_on_full_dataset()
+        self.evalutate_cluster_performance()
+
+        self._is_fitted = True
 
         return self._is_fitted
 
