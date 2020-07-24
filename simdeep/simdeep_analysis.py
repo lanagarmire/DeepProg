@@ -1490,8 +1490,8 @@ class SimDeep(DeepBase):
         encoder_array = self.encoder_for_kde_plot_dict[encoder_key]
 
         for key in encoder_array:
-            matrix_ref = self.encoder_predict(key, dataset.matrix_ref_array[key])
-            matrix_test = self.encoder_predict(key, dataset.matrix_test_array[key])
+            matrix_ref = encoder_array[key].predict(dataset.matrix_ref_array[key])
+            matrix_test =encoder_array[key].predict(dataset.matrix_test_array[key])
 
             survival_node_ids = self._look_for_survival_nodes(
                 activities=matrix_ref, survival=dataset.survival)
