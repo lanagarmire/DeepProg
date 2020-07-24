@@ -169,6 +169,7 @@ class SimDeep(DeepBase):
 
         self.classifier = None
         self.classifier_test = None
+        self.clustering = None
 
         self.classifier_dict = {}
 
@@ -298,17 +299,17 @@ class SimDeep(DeepBase):
 
         train, test, labels, labels_proba = [], [], [], []
 
-        for sample in self.dataset.sample_ids:
+        for index, sample in enumerate(self.dataset.sample_ids):
 
             if sample in labels_dict:
-                train.append(sample)
+                train.append(index)
                 label, label_proba = labels_dict[sample]
 
                 labels.append(label)
                 labels_proba.append(label_proba)
 
             else:
-                test.append(sample)
+                test.append(index)
 
         if test:
             self.dataset.cross_validation_instance = (train, test)
@@ -863,6 +864,10 @@ class SimDeep(DeepBase):
     def evalutate_cluster_performance(self):
         """
         """
+        if not self.clustering:
+            print('clustering attribute is defined as None. ' \
+                   ' Cannot evaluate cluster performance')
+            return
 
         if self.cluster_method == 'mixture':
             self.bic_score = self.clustering.bic(self.activities_train)

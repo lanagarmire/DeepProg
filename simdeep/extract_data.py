@@ -394,7 +394,13 @@ class LoadData():
             return
 
         cv = self.cross_validation_instance
-        train, test = [(tn, tt) for tn, tt in cv.split(self.sample_ids)][self.test_fold]
+
+        if isinstance(self.cross_validation_instance, tuple):
+            train, test = self.cross_validation_instance
+        else:
+            train, test = [(tn, tt)
+                           for tn, tt in
+                           cv.split(self.sample_ids)][self.test_fold]
 
         if self.normalization['PERC_SAMPLE_TO_KEEP']:
             sample_reducer = SampleReducer(self.normalization['PERC_SAMPLE_TO_KEEP'])

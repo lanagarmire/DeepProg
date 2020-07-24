@@ -216,6 +216,8 @@ class SimDeepBoosting():
         self.sample_ids_full = None
         self.feature_scores_per_cluster = {}
 
+        self._pretrained_fit = False
+
         self.log = {}
 
         self.feature_train_array = None
@@ -291,6 +293,8 @@ class SimDeepBoosting():
         """
         if self.seed:
             np.random.seed(self.seed)
+        else:
+            self.seed = np.random.randint(0, 10000000)
 
         max_seed = 1000
         min_seed = 0
@@ -400,13 +404,15 @@ class SimDeepBoosting():
             self,
             labels_files=[],
             labels_files_folder="",
-            file_name_regex="*labels.tsv",
+            file_name_regex="*.tsv",
             verbose=False,
             debug=False,
     ):
         """
         fit a deepprog simdeep models without training autoencoders but using isntead  ID->labels files (one for each model instance)
         """
+        assert(isinstance((labels_files), list))
+
         if not labels_files and not labels_files_folder:
             raise Exception(
                 '## Error with fit_on_pretrained_label_file: ' \
@@ -427,6 +433,11 @@ class SimDeepBoosting():
         """
         if pretrained_labels_files, is given, the models are constructed using these labels
         """
+        if pretrained_labels_files:
+            self._pretrained_fit = True
+        else:
+            self._pretrained_fit = False
+
         if self.distribute:
             self._fit_distributed(
                 pretrained_labels_files=pretrained_labels_files)
@@ -543,9 +554,10 @@ class SimDeepBoosting():
                         ' inferior to number of instance{0}'.format(
                         nb_files))
                     self.models = self.models[:nb_files]
-                    results = [
-                        model._partial_fit_model_with_pretrained_pool(labels)
-                        for model,labels in zip(self.models, pretrained_labels_files)]
+
+                results = [
+                    model._partial_fit_model_with_pretrained_pool(labels)
+                    for model, labels in zip(self.models, pretrained_labels_files)]
             else:
                 results = [model._partial_fit_model_pool() for model in self.models]
 
@@ -618,6 +630,11 @@ class SimDeepBoosting():
 
         for model in self.models:
             survival_cv = self._from_model_dataset(model, 'survival_cv')
+
+            if survival_cv is None:
+                print('No survival dataset for CV fold returning')
+                return
+
             nbdays, isdead = survival_cv.T.tolist()
             nbdays_cv += nbdays
             isdead_cv += isdead
@@ -1374,6 +1391,11 @@ class SimDeepBoosting():
     def evalutate_cluster_performance(self):
         """
         """
+        if self._pretrained_fit:
+            print('model is fitted on pretrained labels' \
+                  ' Cannot evaluate cluster performance')
+            return
+
         bic_scores = np.array([self._from_model_attr(model, 'bic_score') for model in self.models])
 
         if bic_scores[0] is not None:
@@ -1460,6 +1482,8 @@ class SimDeepBoosting():
 
             path_file = '{0}/model_instance_{1}.tsv'.format(
                 path_results, seed)
+
+            labels_proba = labels_proba.T[0]
 
             self._from_model(
                 model, '_write_labels',

@@ -1,9 +1,3 @@
-import os
-os.environ['PYTHONHASHSEED']=str(2020)
-
-import random
-random.seed(2020)
-
 from os.path import abspath
 from os.path import split
 
@@ -46,10 +40,11 @@ def test_instance():
     # STACK_MULTI_OMIC = False
     #########################################################
 
-    from sklearn.preprocessing import RobustScaler
-    norm = {
-            'CUSTOM': RobustScaler,
-    }
+    # IT is possible to define a custom normalisation
+    # from sklearn.preprocessing import RobustScaler
+    # norm = {
+    #         'CUSTOM': RobustScaler,
+    # }
 
     boosting = SimDeepBoosting(
         nb_threads=nb_threads,
@@ -62,7 +57,7 @@ def test_instance():
         path_results=PATH_DATA,
         epochs=EPOCHS,
         seed=SEED,
-        normalization=norm,
+        # normalization=norm,
         cluster_method='mixture',
         use_autoencoders=True,
         feature_surv_analysis=True,
