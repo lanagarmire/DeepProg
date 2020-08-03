@@ -65,7 +65,8 @@ def test_instance():
     boosting.compute_pvalue_for_merged_test_fold()
 
     boosting.load_new_test_dataset(
-        {'RNA': 'rna_dummy.tsv'}, # OMIC file of the test set. It doesnt have to be the same as for training
+        {'RNA': 'rna_dummy.tsv',
+         'METH': 'meth_dummy.tsv'}, # OMIC file of the test set. It doesnt have to be the same as for training
         'dummy', # Name of the test test to be used
         'survival_dummy.tsv', # Survival file of the test set
     )
@@ -75,9 +76,13 @@ def test_instance():
     boosting.compute_c_indexes_for_test_dataset()
     boosting.compute_clusters_consistency_for_test_labels()
 
-    # Experimental method to plot the test dataset amongst the class kernel densities
-    boosting.plot_supervised_kernel_for_test_sets()
-    boosting.plot_supervised_predicted_labels_for_test_sets()
+    boosting.load_new_test_dataset(
+        {'METH': 'meth_dummy.tsv'}, # OMIC file of the second test set.
+        'dummy_METH', # Name of the second test test
+        'survival_dummy.tsv', # Survival file of the test set (optional)
+    )
+
+    boosting.predict_labels_on_test_dataset()
 
     ray.shutdown()
 

@@ -41,6 +41,9 @@ def test_instance():
         seed=SEED)
 
     boosting.fit()
+    boosting.save_models_classes()
+    boosting.save_cv_models_classes()
+
     boosting.predict_labels_on_full_dataset()
 
     boosting.compute_clusters_consistency_for_full_labels()
@@ -60,6 +63,8 @@ def test_instance():
     )
 
     boosting.predict_labels_on_test_dataset()
+    boosting.save_test_models_classes()
+
     boosting.compute_c_indexes_for_test_dataset()
     boosting.compute_clusters_consistency_for_test_labels()
 
@@ -69,8 +74,8 @@ def test_instance():
 
     boosting.load_new_test_dataset(
         {'METH': 'meth_dummy.tsv'}, # OMIC file of the second test set.
-        'survival_dummy.tsv', # Survival file of the test set (optional)
         'dummy_METH', # Name of the second test test
+        'survival_dummy.tsv', # Survival file of the test set (optional)
     )
 
     boosting.predict_labels_on_test_dataset()

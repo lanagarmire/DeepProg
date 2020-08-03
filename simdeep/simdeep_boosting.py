@@ -419,7 +419,8 @@ class SimDeepBoosting():
                 ' either labels_files or labels_files_folder should be non empty')
 
         if not labels_files:
-            labels_files = glob('{0}/{1}'.format(labels_files_folder, file_name_regex))
+            labels_files = glob('{0}/{1}'.format(labels_files_folder,
+                                                 file_name_regex))
 
         if not labels_files:
             raise Exception('## Error: labels_files empty')
@@ -485,12 +486,14 @@ class SimDeepBoosting():
                     print(
                         'Number of pretrained label files' \
                         ' inferior to number of instance{0}'.format(
-                        nb_files))
+                            nb_files))
                     self.models = self.models[:nb_files]
 
                 results = ray.get([
-                    model._partial_fit_model_with_pretrained_pool.remote(labels)
-                    for model,labels in zip(self.models, pretrained_labels_files)])
+                    model._partial_fit_model_with_pretrained_pool.remote(
+                        labels)
+                    for model, labels in zip(self.models,
+                                             pretrained_labels_files)])
             else:
                 results = ray.get([
                     model._partial_fit_model_pool.remote()
@@ -586,13 +589,17 @@ class SimDeepBoosting():
         """
         """
         print('predict labels on test datasets...')
-        test_labels_proba = np.asarray(self._from_models_attr('test_labels_proba'))
+        test_labels_proba = np.asarray(self._from_models_attr(
+            'test_labels_proba'))
 
-        res = self._do_class_selection(test_labels_proba, weights=self.cindex_test_folds)
+        res = self._do_class_selection(
+            test_labels_proba,
+            weights=self.cindex_test_folds)
         self.test_labels, self.test_labels_proba = res
 
-        print('#### report of assigned cluster:')
-        for key, value in Counter(self.test_labels).items():
+        print('#### Report of assigned cluster for TEST dataset {0}:'.format(
+            self.test_fname_key))
+        for key, value in sorted(Counter(self.test_labels).items()):
             print('class: {0}, number of samples :{1}'.format(key, value))
 
         nbdays, isdead = self._from_model_dataset(self.models[0], "survival_test").T.tolist()
@@ -846,8 +853,8 @@ class SimDeepBoosting():
         self._get_probas_for_full_models()
         self._reorder_survival_full()
 
-        print('#### report of assigned cluster:')
-        for key, value in Counter(self.full_labels).items():
+        print('#### Report of assigned cluster for the full training dataset:')
+        for key, value in sorted(Counter(self.full_labels).items()):
             print('class: {0}, number of samples :{1}'.format(key, value))
 
         nbdays, isdead = self.survival_full.T.tolist()
@@ -1316,7 +1323,8 @@ class SimDeepBoosting():
 
         self.test_fname_key = fname_key
 
-        print("Loading new test dataset...")
+        print("Loading new test dataset {0} ...".format(
+            self.test_fname_key))
         t_start = time()
 
         self._from_models('_predict_new_dataset',
@@ -1326,7 +1334,8 @@ class SimDeepBoosting():
                           survival_flag=survival_flag,
         )
 
-        print("Test dataset loaded in {0} s".format(time() - t_start))
+        print("Test dataset {1} loaded in {0} s".format(
+            time() - t_start, self.test_fname_key))
 
         if fname_key:
             self.project_name = '{0}_{1}'.format(self._project_name, fname_key)

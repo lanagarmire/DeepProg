@@ -637,12 +637,11 @@ class SimDeep(DeepBase):
         print('{0} written'.format(f_file_name))
         print('{0} written'.format(f_anti_name))
 
-
     def write_feature_scores(self):
         """
         """
         with open('{0}/{1}_features_scores.tsv'.format(
-            self.path_results, self.project_name), 'w') as f_file:
+                self.path_results, self.project_name), 'w') as f_file:
 
             for key in self.feature_scores:
                 f_file.write('#### {0} ####\n'.format(key))
@@ -659,16 +658,20 @@ class SimDeep(DeepBase):
         assert (self.classification_method in _CLASSIFICATION_METHOD_LIST)
 
         if self.verbose:
-            print('classification method: {0}'.format(self.classification_method))
+            print('classification method: {0}'.format(
+                self.classification_method))
 
         if self.classification_method == 'SURVIVAL_FEATURES':
             assert(self.classifier_type != 'clustering')
-            matrix = self._predict_survival_nodes(self.dataset.matrix_ref_array)
+            matrix = self._predict_survival_nodes(
+                self.dataset.matrix_ref_array)
         elif self.classification_method == 'ALL_FEATURES':
-            matrix = self._reduce_and_stack_matrices(self.dataset.matrix_ref_array)
+            matrix = self._reduce_and_stack_matrices(
+                self.dataset.matrix_ref_array)
 
         if self.verbose:
-            print('number of features for the classifier: {0}'.format(matrix.shape[1]))
+            print('number of features for the classifier: {0}'.format(
+                matrix.shape[1]))
 
         return np.nan_to_num(matrix)
 
@@ -710,7 +713,8 @@ class SimDeep(DeepBase):
             warnings.simplefilter("ignore")
             self.classifier_grid.fit(train_matrix, labels)
 
-        self.classifier, params = select_best_classif_params(self.classifier_grid)
+        self.classifier, params = select_best_classif_params(
+            self.classifier_grid)
 
         self.classifier.set_params(probability=True)
         self.classifier.fit(train_matrix, labels)
@@ -721,7 +725,8 @@ class SimDeep(DeepBase):
             cvs = cross_val_score(self.classifier, train_matrix, labels, cv=5)
             print('best params:', params)
             print('cross val score: {0}'.format(np.mean(cvs)))
-            print('classification score:', self.classifier.score(train_matrix, labels))
+            print('classification score:', self.classifier.score(
+                train_matrix, labels))
 
     def fit_classification_test_model(self):
         """ """
