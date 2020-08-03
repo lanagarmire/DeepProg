@@ -105,7 +105,11 @@ class SimDeepTuning(object):
                  boosting)
 
             boosting.save_models_classes()
-            boosting.write_logs()
+
+            try:
+                boosting.write_logs()
+            except Exception:
+                pass
 
             for key in self.test_datasets:
                 test_dataset, survival = self.test_datasets[key]
