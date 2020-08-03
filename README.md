@@ -341,6 +341,60 @@ table = tuning.get_results_table()
 print(table)
 ```
 
+## Save / load models
+
+Two mechanisms exist to save and load dataset.
+First the models can be entirely saved and loaded using `dill` (pickle like) libraries.
+
+```python
+from simdeep.simdeep_utils import save_model
+from simdeep.simdeep_utils import load_model
+
+# Save previous boosting model
+save_model(boosting, "./test_saved_model")
+
+# Delete previous model
+del boosting
+
+# Load model
+boosting = load_model("TestProject", "./test_saved_model")
+boosting.predict_labels_on_full_dataset()
+
+```
+
+See an example of saving/loading model in the example file: `examples/load_and_save_models.py`
+
+However, this mechanism presents a huge drawback since the models saved can be very large (all the hyperparameters/matrices... etc... are saved). Also, the equivalent dependencies and DL libraries need to be installed in both the machine computing the models and the machine used to load them which can lead to various errors.
+
+A second solution is to save only the labels inferred for each submodel instance. These label files can then be loaded into a new DeepProg instance that will be used as reference for building the classifier.
+
+```python
+
+# Fitting a model
+boosting.fit()
+# Saving individual labels
+boosting.save_test_models_classes(
+    path_results=PATH_PRECOMPUTED_LABELS # Where to save the labels
+    )
+
+boostingNew = SimDeepBoosting(
+        survival_tsv=SURVIVAL_TSV, # Same reference training set for `boosting` model
+        training_tsv=TRAINING_TSV, # Same reference training set for `boosting` model
+        path_data=PATH_DATA,
+        project_name=PROJECT_NAME,
+        path_results=PATH_DATA,
+        distribute=False, # Option to use ray cluster scheduler (True or False)
+    )
+
+boostingNew.fit_on_pretrained_label_file(
+    labels_files_folder=PATH_PRECOMPUTED_LABELS,
+    file_name_regex="*.tsv")
+
+boostingNew.predict_labels_on_full_dataset()
+```
+
+See the `examples/example_simdeep_start_from_pretrained_labels.py` example file.
+
 ## Example scripts
 
 Example scripts are availables in ./examples/ which will assist you to build a model from scratch with test and real data:
