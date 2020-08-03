@@ -12,7 +12,6 @@ def test_instance():
     the `example_with_dummy_data.py` example script
     """
 
-
     PATH_PRECOMPUTED_LABELS = '{0}/../examples/data/TestProject/saved_models_classes'.format(
         split(abspath(__file__))[0])
 
@@ -46,7 +45,7 @@ def test_instance():
         path_data=PATH_DATA,
         project_name=PROJECT_NAME,
         path_results=PATH_DATA,
-        distribute=False, # Option to use ray cluster scheduler
+        distribute=True, # Option to use ray cluster scheduler (OPTIONAL)
     )
 
     boosting.fit_on_pretrained_label_file(
@@ -65,10 +64,9 @@ def test_instance():
     boosting.compute_pvalue_for_merged_test_fold()
 
     boosting.load_new_test_dataset(
-        {'RNA': 'rna_dummy.tsv',
-         'METH': 'meth_dummy.tsv'}, # OMIC file of the test set. It doesnt have to be the same as for training
+        {'RNA': 'rna_dummy.tsv'}, # OMIC file of the test set. It doesnt have to be the same as for training
         'dummy', # Name of the test test to be used
-        'survival_dummy.tsv', # Survival file of the test set
+        'survival_dummy.tsv', # Survival file of the test set (optional)
     )
 
     boosting.predict_labels_on_test_dataset()

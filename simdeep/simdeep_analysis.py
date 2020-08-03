@@ -690,6 +690,7 @@ class SimDeep(DeepBase):
                          self.feature_scores[key][:self.nb_selected_features]
                          if feature in self.dataset.feature_ref_index[key]
                 ]
+
                 matrix.append(matrices[key].T[index].T)
 
             return hstack(matrix)

@@ -125,8 +125,9 @@ def test_instance():
     ray.init()
     tuning.fit(
         metric='log_test_fold_pvalue',
-        num_samples=20,
-        max_concurrent=10,
+        num_samples=8,
+        max_concurrent=4,
+        distribute_deepprog=True,
         # iterations is usefull to take into account the DL parameter fitting variations
         iterations=1)
 
