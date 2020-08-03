@@ -66,7 +66,7 @@ def load_labels_file(path_labels, sep="\t"):
         patient, label = split[0], split[1]
 
         try:
-            label = int(label)
+            label = int(float(label))
         except Exception:
             raise Exception(
                 '## Error: in load_labels_file {0} for line {1}' \
