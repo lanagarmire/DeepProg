@@ -1593,8 +1593,8 @@ class SimDeep(DeepBase):
         """
         """
         self.load_new_test_dataset(
-            tsv_dict,
-            path_survival_file,
+            tsv_dict=tsv_dict,
+            path_survival_file=path_survival_file,
             normalization=normalization,
             survival_flag=survival_flag,
         )
