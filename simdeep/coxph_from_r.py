@@ -147,7 +147,8 @@ def coxph_from_python(
 
         for label in set(values):
             kaplan.fit(
-                values[values==label],
+                #values[values==label],
+                nbdays[values==label],
                 event_observed=isdead[values==label],
                 label='cluster nb. {0}'.format(label)
             )
