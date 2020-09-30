@@ -120,6 +120,8 @@ class SimDeepBoosting():
             :activation: Activation function (default: 'tanh')
             :clustering_omics: Which omics to use for clustering. If empty, then all the available omics will be used (default [] => all)
             :path_to_save_model: path to save the model
+            :alternative_embedding: alternative external embedding to use instead of building autoencoders (default None)
+            :kwargs_alternative_embedding: parameters for external embedding fitting
     """
     def __init__(self,
                  nb_it=NB_ITER,
@@ -160,6 +162,8 @@ class SimDeepBoosting():
                  activation=ACTIVATION,
                  clustering_omics=CLUSTERING_OMICS,
                  path_to_save_model=PATH_TO_SAVE_MODEL,
+                 alternative_embedding=None,
+                 kwargs_alternative_embedding={},
                  **additional_dataset_args):
         """ """
         assert(class_selection in ['max', 'mean', 'weighted_mean', 'weighted_max'])
@@ -222,6 +226,9 @@ class SimDeepBoosting():
 
         self.feature_train_array = None
         self.matrix_full_array = None
+
+        self.alternative_embedding = alternative_embedding
+        self.kwargs_alternative_embedding = kwargs_alternative_embedding
 
         ######## deepprog instance parameters ########
         self.nb_clusters = nb_clusters
@@ -476,6 +483,8 @@ class SimDeepBoosting():
                 project_name=self.project_name,
                 classification_method=self.classification_method,
                 cindex_thres=self.cindex_thres,
+                alternative_embedding=self.alternative_embedding,
+                kwargs_alternative_embedding=self.kwargs_alternative_embedding,
                 node_selection=self.node_selection,
                 deep_model_additional_args=dataset._autoencoder_parameters)
                            for dataset in self.datasets]
@@ -544,10 +553,11 @@ class SimDeepBoosting():
                 project_name=self.project_name,
                 cindex_thres=self.cindex_thres,
                 node_selection=self.node_selection,
+                alternative_embedding=self.alternative_embedding,
+                kwargs_alternative_embedding=self.kwargs_alternative_embedding,
                 classification_method=self.classification_method,
                 deep_model_additional_args=dataset._autoencoder_parameters)
                            for dataset in self.datasets]
-
 
             if pretrained_labels_files:
                 nb_files = len(pretrained_labels_files)

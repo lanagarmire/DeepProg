@@ -103,6 +103,8 @@ class SimDeep(DeepBase):
              :classification_method: Possible choice  ['ALL_FEATURES', 'SURVIVAL_FEATURES']. If 'SURVIVAL_FEATURES' is selected, the classifiers are built using survival features  (default CLASSIFICATION_METHOD)
              :load_existing_models: (default LOAD_EXISTING_MODELS)
              :path_to_save_model: (default PATH_TO_SAVE_MODEL)
+             :alternative_embedding: alternative external embedding to use instead of builfing autoencoders (default None)
+             :kwargs_alternative_embedding: parameters for external embedding fitting
 
 
     """
@@ -127,10 +129,12 @@ class SimDeep(DeepBase):
                  path_to_save_model=PATH_TO_SAVE_MODEL,
                  clustering_omics=CLUSTERING_OMICS,
                  seed=SEED,
+                 alternative_embedding=None,
                  do_KM_plot=True,
                  verbose=True,
                  _isboosting=False,
                  dataset=None,
+                 kwargs_alternative_embedding={},
                  deep_model_additional_args={}):
         """
         """
@@ -144,6 +148,9 @@ class SimDeep(DeepBase):
         self.cluster_array = cluster_array
         self.path_results = path_results
         self.clustering_omics = clustering_omics
+
+        self.alternative_embedding = alternative_embedding
+        self.kwargs_alternative_embedding = kwargs_alternative_embedding
 
         if self.path_results and not isdir(self.path_results):
             mkdir(self.path_results)
@@ -236,6 +243,8 @@ class SimDeep(DeepBase):
         DeepBase.__init__(self,
                           verbose=self.verbose,
                           dataset=dataset,
+                          alternative_embedding=self.alternative_embedding,
+                          kwargs_alternative_embedding=self.kwargs_alternative_embedding,
                           **deep_model_additional_args)
 
     def _look_for_nodes(self, key):
@@ -370,14 +379,18 @@ class SimDeep(DeepBase):
     def fit(self):
         """
         main function
-        construct an autoencoder, predict nodes linked with survival
-        and do clustering
+        I) construct an autoencoder or fit alternative embedding
+        II) predict nodes linked with survival (if active)
+        and III) do clustering
         """
         if self._load_existing_models:
             self.load_encoders()
 
         if not self.is_model_loaded:
-            self.construct_autoencoders()
+            if self.alternative_embedding is not None:
+                self.fit_alternative_embedding()
+            else:
+                self.construct_autoencoders()
 
         self.look_for_survival_nodes()
 
@@ -923,13 +936,16 @@ class SimDeep(DeepBase):
         for key in keys:
             matrix = matrix_array[key]
             if not self._pretrained_model:
-                if self.encoder_input_shape(key)[1] != matrix.shape[1]:
+                if self.alternative_embedding is  None and \
+                   self.encoder_input_shape(key)[1] != matrix.shape[1]:
                     if self.verbose:
                         print('matrix doesnt have the input dimension of the encoder'\
                               ' returning None')
                     return None
 
-            if self.use_autoencoders:
+            if self.alternative_embedding is not None:
+                activities = self.embedding_predict(key, matrix)
+            elif self.use_autoencoders:
                 activities = self.encoder_predict(key, matrix)
             else:
                 activities = np.asarray(matrix)
@@ -953,7 +969,9 @@ class SimDeep(DeepBase):
         for key in keys:
             matrix_train = self.matrix_train_array[key]
 
-            if self.use_autoencoders:
+            if self.alternative_embedding is not None:
+                activities = self.embedding_predict(key, matrix_train)
+            elif self.use_autoencoders:
                 activities = self.encoder_predict(key, matrix_train)
             else:
                 activities = np.asarray(matrix_train)
@@ -983,7 +1001,9 @@ class SimDeep(DeepBase):
         for key in keys:
             matrix_train = self.matrix_train_array[key]
 
-            if self.use_autoencoders:
+            if self.alternative_embedding is not None:
+                activities = self.embedding_predict(key, matrix_train)
+            elif self.use_autoencoders:
                 activities = self.encoder_predict(key, matrix_train)
             else:
                 activities = np.asarray(matrix_train)
@@ -1012,9 +1032,16 @@ class SimDeep(DeepBase):
         for key in self.dataset.matrix_test_array:
             node_ids = self.pred_node_ids_array[key]
 
-            if self.use_autoencoders:
+            matrix = self.dataset.matrix_test_array[key]
+
+            if self.alternative_embedding is not None:
+                activities_test[key] = self.embedding_predict(
+                    key, matrix).T[node_ids].T
+
+            elif self.use_autoencoders:
                 activities_test[key] = self.encoder_predict(
-                    key, self.dataset.matrix_test_array[key]).T[node_ids].T
+                    key, matrix).T[node_ids].T
+
             else:
                 activities_test[key] = self.dataset.matrix_test_array[key]
 
@@ -1043,9 +1070,14 @@ class SimDeep(DeepBase):
         for key in self.dataset.matrix_cv_array:
             node_ids = self.pred_node_ids_array[key]
 
-            if self.use_autoencoders:
+            if self.alternative_embedding is not None:
+                activities_cv[key] = self.embedding_predict(
+                    key, self.dataset.matrix_cv_array[key]).T[node_ids].T
+
+            elif self.use_autoencoders:
                 activities_cv[key] = self.encoder_predict(
                     key, self.dataset.matrix_cv_array[key]).T[node_ids].T
+
             else:
                 activities_cv[key] = self.dataset.matrix_cv_array[key]
 
@@ -1185,8 +1217,13 @@ class SimDeep(DeepBase):
         if key is not None:
             matrix_train = self.matrix_train_array[key]
 
-            if self.use_autoencoders:
-                activities = np.nan_to_num(self.encoder_predict(key, matrix_train))
+            if self.alternative_embedding is not None:
+                activities = np.nan_to_num(self.embedding_predict(
+                    key, matrix_train))
+
+            elif self.use_autoencoders:
+                activities = np.nan_to_num(self.encoder_predict(
+                    key, matrix_train))
             else:
                 activities = np.asarray(matrix_train)
         else:
@@ -1229,7 +1266,11 @@ class SimDeep(DeepBase):
         matrix_train = self.matrix_train_array[key]
         matrix_cv = self.dataset.matrix_cv_array[key]
 
-        if self.use_autoencoders:
+        if self.alternative_embedding is not None:
+            activities_train = self.embedding_predict(key, matrix_train)
+            activities_cv = self.embedding_predict(key, matrix_cv)
+
+        elif self.use_autoencoders:
             activities_train = self.encoder_predict(key, matrix_train)
             activities_cv = self.encoder_predict(key, matrix_cv)
         else:
@@ -1349,7 +1390,14 @@ class SimDeep(DeepBase):
 
             node_ids = self.pred_node_ids_array[key]
 
-            activities.append(self.encoder_predict(key, matrix_array[key]).T[node_ids].T)
+            if self.alternative_embedding is not None:
+                activities.append(
+                    self.embedding_predict(
+                        key, matrix_array[key]).T[node_ids].T)
+            else:
+                activities.append(
+                    self.encoder_predict(
+                        key, matrix_array[key]).T[node_ids].T)
 
         return hstack(activities)
 
@@ -1491,13 +1539,16 @@ class SimDeep(DeepBase):
 
         if encoder_key not in self.encoder_for_kde_plot_dict or \
            not dataset.fill_unkown_feature_with_0:
-            self._create_autoencoder_for_kernel_plot(labels_proba, dataset, encoder_key)
+            self._create_autoencoder_for_kernel_plot(
+                labels_proba, dataset, encoder_key)
 
         encoder_array = self.encoder_for_kde_plot_dict[encoder_key]
 
         for key in encoder_array:
-            matrix_ref = encoder_array[key].predict(dataset.matrix_ref_array[key])
-            matrix_test =encoder_array[key].predict(dataset.matrix_test_array[key])
+            matrix_ref = encoder_array[key].predict(
+                dataset.matrix_ref_array[key])
+            matrix_test = encoder_array[key].predict(
+                dataset.matrix_test_array[key])
 
             survival_node_ids = self._look_for_survival_nodes(
                 activities=matrix_ref, survival=dataset.survival)
