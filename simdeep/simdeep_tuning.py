@@ -158,10 +158,13 @@ class SimDeepTuning(object):
             else:
                 survival_flag = None
 
+            print("#### TUNING: loading new test daaset: TSVS: {0} SURVIVAL: {1}"\
+                  .format(test_dataset, survival))
+
             boosting.load_new_test_dataset(
-                test_dataset, # OMIC file of the second test set.
-                survival, # Survival file of the test set
-                'test_dataset', # Name of the second test test
+                tsv_dict=test_dataset, # OMIC file of the second test set.
+                path_survival_file=survival, # Survival file of the test set
+                fname_key='test_dataset', # Name of the second test test
                 survival_flag=survival_flag,
             )
 
