@@ -20,6 +20,9 @@ def test_instance():
     TRAINING_TSV = {'RNA': 'rna_dummy.tsv', 'METH': 'meth_dummy.tsv'}
     SURVIVAL_TSV = 'survival_dummy.tsv'
 
+    # Optional metadata FILE
+    OPTIONAL_METADATA = "metadata_dummy.tsv"
+
     PROJECT_NAME = 'TestProject'
     SEED = 3
     nb_it = 5 # Number of models to be built
@@ -28,15 +31,6 @@ def test_instance():
     ################ AUTOENCODER PARAMETERS ################
     EPOCHS = 10
     ## Additional parameters for the autoencoders can be defined, see config.py file for details
-    # LEVEL_DIMS_IN = [250]
-    # LEVEL_DIMS_OUT = [250]
-    # LOSS = 'binary_crossentropy'
-    # OPTIMIZER = 'adam'
-    # ACT_REG = 0
-    # W_REG = 0
-    # DROPOUT = 0.5
-    # DATA_SPLIT = 0
-    # ACTIVATION = 'tanh'
     #########################################################
 
     ################ ADDITIONAL PARAMETERS ##################
@@ -57,6 +51,7 @@ def test_instance():
         split_n_fold=3,
         survival_tsv=SURVIVAL_TSV,
         training_tsv=TRAINING_TSV,
+        metadata_tsv=OPTIONAL_METADATA, # optional
         path_data=PATH_DATA,
         project_name=PROJECT_NAME,
         path_results=PATH_DATA,
@@ -64,16 +59,11 @@ def test_instance():
         seed=SEED,
         normalization=norm,
         cluster_method='mixture',
+        metadata_usage='all',
         use_autoencoders=True,
         feature_surv_analysis=True,
+        feature_selection_usage="individual",
         # stack_multi_omic=STACK_MULTI_OMIC,
-        # level_dims_in=LEVEL_DIMS_IN,
-        # level_dims_out=LEVEL_DIMS_OUT,
-        # loss=LOSS,
-        # optimizer=OPTIMIZER,
-        # act_reg=ACT_REG,
-        # w_reg=W_REG,
-        # dropout=DROPOUT,
         # data_split=DATA_SPLIT,
         # activation=ACTIVATION,
         # path_to_save_model=PATH_TO_SAVE_MODEL,
@@ -95,9 +85,9 @@ def test_instance():
     boosting.compute_pvalue_for_merged_test_fold()
 
     boosting.load_new_test_dataset(
-        {'RNA': 'rna_dummy.tsv'}, # OMIC file of the test set. It doesnt have to be the same as for training
-        'survival_dummy.tsv', # Survival file of the test set
-        'dummy', # Name of the test test to be used
+        tsv_dict={'RNA': 'rna_dummy.tsv'}, # OMIC file of the test set. It doesnt have to be the same as for training
+        path_survival_file='survival_dummy.tsv', # Optional survival file of the test set for computing validation log-rank pvalue
+        fname_key='dummy', # Name of the test test to be used
     )
 
     boosting.predict_labels_on_test_dataset()
@@ -109,9 +99,10 @@ def test_instance():
     boosting.plot_supervised_predicted_labels_for_test_sets()
 
     boosting.load_new_test_dataset(
-        {'METH': 'meth_dummy.tsv'}, # OMIC file of the second test set.
-        'survival_dummy.tsv', # Survival file of the test set
-        'dummy_METH', # Name of the second test test
+        tsv_dict={'METH': 'meth_dummy.tsv'}, # OMIC file of the second test set.
+        path_survival_file='survival_dummy.tsv', # Survival file of the test set
+        fname_key='dummy_METH', # Name of the second test test
+        metadata_file="metadata_dummy.tsv" # Optional metadata
     )
 
     boosting.predict_labels_on_test_dataset()

@@ -2,6 +2,8 @@
 """
 import re
 
+import pandas as pd
+
 from simdeep.config import PATH_DATA
 from simdeep.config import SURVIVAL_FLAG
 from simdeep.config import SEPARATOR
@@ -14,7 +16,12 @@ import  numpy as np
 
 from scipy.stats import rankdata
 
+from numpy import hstack
+
 from sklearn.metrics import pairwise_distances
+
+from sklearn.preprocessing import LabelBinarizer
+from sklearn.preprocessing import RobustScaler
 
 from collections import defaultdict
 
@@ -204,6 +211,56 @@ def load_survival_file(f_name,
 
     return survival
 
+
+def translate_index(original_ids, new_ids):
+    """ """
+    index1d = {ids: pos for pos, ids in enumerate(original_ids)}
+
+    return np.asarray([index1d[sample] for sample in new_ids])
+
+
+def return_intersection_indexes(ids_1, ids_2):
+    """ """
+    index1d = {ids: pos for pos, ids in enumerate(ids_1)}
+    index2d = {ids: pos for pos, ids in enumerate(ids_2)}
+
+    inter = set(ids_1).intersection(ids_2)
+
+    if len(inter) == 0:
+        raise(Exception("Error! No common sample index between: {0}... and {1}...".format(
+            ids_1[:2], ids_2[:2])))
+
+    index1 = np.asarray([index1d[sample] for sample in inter])
+    index2 = np.asarray([index2d[sample] for sample in inter])
+
+    return index1, index2, list(inter)
+
+
+def convert_metadata_frame_to_matrix(frame):
+    """ """
+    lbl = LabelBinarizer()
+
+    normed_matrix = np.zeros((frame.shape[0], 0))
+    keys = []
+
+    for key in frame.keys():
+        if str(frame[key].dtype) == 'object' or str(frame[key].dtype) == 'string':
+            matrix = lbl.fit_transform(frame[key].astype('string'))
+            if lbl.y_type_ == "binary":
+                keys += list(["{0}_{1}".format(key, lbl.classes_[lbl.pos_label])])
+            else:
+                keys += ["{0}_{1}".format(key, k) for k in lbl.classes_]
+        else:
+            rbs = RobustScaler()
+            matrix = np.asarray(frame[key]).reshape((frame.shape[0], 1))
+            matrix = rbs.fit_transform(matrix)
+            keys.append(key)
+
+        normed_matrix = hstack([normed_matrix, matrix])
+
+    return pd.DataFrame(normed_matrix, columns=keys)
+
+
 def load_data_from_tsv(use_transpose=USE_INPUT_TRANSPOSE, **kwargs):
     """
     """
@@ -211,6 +268,7 @@ def load_data_from_tsv(use_transpose=USE_INPUT_TRANSPOSE, **kwargs):
         return _load_data_from_tsv_transposee(**kwargs)
     else:
         return _load_data_from_tsv(**kwargs)
+
 
 def _load_data_from_tsv(
         f_name,
@@ -351,8 +409,12 @@ def load_entrezID_to_ensg():
 def _process_parallel_coxph(inp):
     """
     """
-    node_id, activity, isdead, nbdays, seed = inp
-    pvalue = coxph(activity, isdead, nbdays, seed=seed)
+    node_id, activity, isdead, nbdays, seed, metadata_mat = inp
+    pvalue = coxph(activity,
+                   isdead,
+                   nbdays,
+                   seed=seed,
+                   metadata_mat=metadata_mat)
 
     return node_id, pvalue
 

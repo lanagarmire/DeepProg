@@ -117,6 +117,7 @@ class SimDeepBoosting():
             :activation: Activation function (default: 'tanh')
             :clustering_omics: Which omics to use for clustering. If empty, then all the available omics will be used (default [] => all)
             :path_to_save_model: path to save the model
+             :metadata_usage: Meta data usage with survival models (if metadata_tsv provided as argument to the dataset). Possible choice are [None, False, 'labels', 'new-features', 'all', True] (True is the same as all)
     """
     def __init__(self,
                  nb_it=NB_ITER,
@@ -141,7 +142,9 @@ class SimDeepBoosting():
                  classification_method=CLASSIFICATION_METHOD,
                  new_dim=NEW_DIM,
                  training_tsv=TRAINING_TSV,
+                 metadata_usage=None,
                  survival_tsv=SURVIVAL_TSV,
+                 metadata_tsv=None,
                  survival_flag=SURVIVAL_FLAG,
                  path_data=PATH_DATA,
                  level_dims_in=LEVEL_DIMS_IN,
@@ -157,6 +160,7 @@ class SimDeepBoosting():
                  activation=ACTIVATION,
                  clustering_omics=CLUSTERING_OMICS,
                  path_to_save_model=PATH_TO_SAVE_MODEL,
+                 feature_selection_usage='individual',
                  **additional_dataset_args):
         """ """
         assert(class_selection in ['max', 'mean', 'weighted_mean', 'weighted_max'])
@@ -180,6 +184,9 @@ class SimDeepBoosting():
         self.cindex_thres = cindex_thres
         self.node_selection = node_selection
         self.clustering_omics = clustering_omics
+        self.metadata_tsv = metadata_tsv
+        self.metadata_usage = metadata_usage
+        self.feature_selection_usage = feature_selection_usage
 
         self.cluster_method = cluster_method
         self.use_autoencoders = use_autoencoders
@@ -263,10 +270,12 @@ class SimDeepBoosting():
         self.log['nb clusters'] = nb_clusters
         self.log['success'] = False
         self.log['survival_tsv'] = self.survival_tsv
+        self.log['metadata_tsv'] = self.metadata_tsv
         self.log['training_tsv'] = self.training_tsv
         self.log['path_data'] = self.path_data
 
         additional_dataset_args['survival_tsv'] = self.survival_tsv
+        additional_dataset_args['metadata_tsv'] = self.metadata_tsv
         additional_dataset_args['training_tsv'] = self.training_tsv
         additional_dataset_args['path_data'] = self.path_data
         additional_dataset_args['survival_flag'] = self.survival_flag
@@ -430,6 +439,8 @@ class SimDeepBoosting():
                 classification_method=self.classification_method,
                 cindex_thres=self.cindex_thres,
                 node_selection=self.node_selection,
+                metadata_usage=self.metadata_usage,
+                feature_selection_usage=self.feature_selection_usage,
                 deep_model_additional_args=dataset._autoencoder_parameters)
                            for dataset in self.datasets]
 
@@ -478,6 +489,8 @@ class SimDeepBoosting():
                 project_name=self.project_name,
                 cindex_thres=self.cindex_thres,
                 node_selection=self.node_selection,
+                metadata_usage=self.metadata_usage,
+                feature_selection_usage=self.feature_selection_usage,
                 classification_method=self.classification_method,
                 deep_model_additional_args=dataset._autoencoder_parameters)
                            for dataset in self.datasets]
@@ -1153,6 +1166,7 @@ class SimDeepBoosting():
             cross_validation_instance=None,
             training_tsv=self.training_tsv,
             survival_tsv=self.survival_tsv,
+            metadata_tsv=self.metadata_tsv,
             survival_flag=self.survival_flag,
             path_data=self.path_data,
             verbose=False,
@@ -1205,7 +1219,9 @@ class SimDeepBoosting():
                               normalization=None,
                               debug=False,
                               verbose=False,
-                              survival_flag=None,):
+                              survival_flag=None,
+                              metadata_file=None
+                              ):
         """
         """
         self.test_tsv_dict = tsv_dict
@@ -1232,6 +1248,7 @@ class SimDeepBoosting():
                           path_survival_file=path_survival_file,
                           normalization=normalization,
                           survival_flag=survival_flag,
+                          metadata_file=metadata_file
         )
 
         print("Test dataset loaded in {0} s".format(time() - t_start))

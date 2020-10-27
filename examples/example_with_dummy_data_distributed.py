@@ -20,6 +20,9 @@ def test_instance():
     nb_it = 5
     nb_threads = 2
 
+    # Optional metadata FILE
+    OPTIONAL_METADATA = "metadata_dummy.tsv"
+
     # Import cluster scheduler
     import ray
     ray.init(num_cpus=3)
@@ -36,6 +39,8 @@ def test_instance():
         path_data=PATH_DATA,
         project_name=PROJECT_NAME,
         path_results=PATH_DATA,
+        metadata_tsv=OPTIONAL_METADATA, # optional
+        metadata_usage='all',
         epochs=EPOCHS,
         distribute=True, # Option to use ray cluster scheduler
         seed=SEED)

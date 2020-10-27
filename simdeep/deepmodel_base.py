@@ -163,6 +163,7 @@ class DeepBase(object):
 
         self.dataset.create_a_cv_split()
         self.dataset.normalize_training_array()
+        self.dataset.load_meta_data()
 
         self.matrix_train_array = self.dataset.matrix_train_array
 

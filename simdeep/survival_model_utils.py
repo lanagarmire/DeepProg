@@ -2,6 +2,10 @@ from simdeep.coxph_from_r import predict_with_coxph_glmnet
 
 import numpy as np
 
+from numpy import hstack
+
+from sklearn.preprocessing import RobustScaler
+
 def test():
     """
     """
@@ -37,6 +41,7 @@ class ClusterWithSurvival(object):
     def __init__(self,
                  isdead, nbdays,
                  n_clusters=2,
+                 metadata_mat = None,
                  use_sksurv=True):
         "docstring"
 
@@ -45,6 +50,25 @@ class ClusterWithSurvival(object):
         self.isdead = isdead
         self.nbdays = nbdays
         self.n_clusters = n_clusters
+        self.metadata_mat = metadata_mat
+        self.matrix = None
+
+    def get_nonzero_features(self, matrix):
+        """
+        Get non zero features using lasso coxPH
+        """
+        if self.metadata_mat is not None:
+            self.matrix = hstack([matrix, self.metadata_mat])
+            rbs = RobustScaler()
+            self.matrix = rbs.fit_transform(self.matrix)
+
+        else:
+            self.matrix = matrix
+
+        return self._fit_with_python(self.matrix,
+                                     l1_ratio=1.0,
+                                     return_nonzero_features=True)
+
 
     def fit(self, matrix):
         """
@@ -67,7 +91,10 @@ class ClusterWithSurvival(object):
         else:
             return self._fit_with_glm(matrix_test, get_proba=True)
 
-    def _fit_with_python(self, matrix_test, get_proba=False):
+    def _fit_with_python(self, matrix_test,
+                         get_proba=False,
+                         return_nonzero_features=False,
+                         l1_ratio=0.5):
         """
         """
         from sksurv.linear_model import CoxnetSurvivalAnalysis
@@ -76,13 +103,30 @@ class ClusterWithSurvival(object):
             self.isdead, self.nbdays)],
                        dtype=[("event", np.bool), ("time", np.int)])
 
-        self.coxph_python = CoxnetSurvivalAnalysis(l1_ratio=0.5)
+        self.coxph_python = CoxnetSurvivalAnalysis(
+            l1_ratio=l1_ratio,
+            fit_baseline_model=False)
         self.coxph_python.fit(self.matrix, Y)
 
         predictions = self.coxph_python.predict(matrix_test)
 
         if get_proba:
             return get_proba_from_prediction(predictions)
+
+        if return_nonzero_features:
+            for coef in self.coxph_python.coef_.T:
+                if coef.sum() != 0:
+                    break
+            if coef.sum() == 0:
+                raise(Exception("All features Coefficient are 0!"))
+
+            if self.metadata_mat is not None:
+                if coef[:-self.metadata_mat.shape[1]].sum() == 0:
+                    raise(Exception("Only metadata features are non zero"))
+
+                return np.nonzero(coef[:-self.metadata_mat.shape[1]])
+            else:
+                return np.nonzero(coef)
 
         return fit_and_dichotomise(
             predictions,

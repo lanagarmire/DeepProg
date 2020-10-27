@@ -20,6 +20,7 @@ setup(name='garmire_simdeep',
           'scipy',
           'scikit-learn>=0.19.1',
           'theano',
+          'tensorflow',
           'keras',
           'simplejson',
           'lifelines'

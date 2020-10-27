@@ -105,8 +105,11 @@ def coxph_from_python(
         nbdays,
         do_KM_plot=False,
         png_path='./',
+        metadata_mat=None,
         dichotomize_afterward=False,
         fig_name='KM_plot.png',
+        penalizer=0.01,
+        l1_ratio=0.0,
         isfactor=False):
     """
     """
@@ -117,13 +120,27 @@ def coxph_from_python(
     if isfactor:
         values = np.asarray(values).astype("str")
 
-    frame = pd.DataFrame({
-        "values": values,
-        "isdead": isdead,
-        "nbdays": nbdays
-    })
+    if metadata_mat is not None:
+        frame = {
+            "values": values,
+            "isdead": isdead,
+            "nbdays": nbdays
+        }
 
-    cph = CoxPHFitter()
+        for key in metadata_mat:
+            frame[key] = metadata_mat[key]
+
+        frame = pd.DataFrame(frame)
+
+    else:
+        frame = pd.DataFrame({
+            "values": values,
+            "isdead": isdead,
+            "nbdays": nbdays
+        })
+        penalizer = 0.0
+
+    cph = CoxPHFitter(penalizer=penalizer, l1_ratio=l1_ratio)
 
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
@@ -132,6 +149,7 @@ def coxph_from_python(
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
                 cph.fit(frame, "nbdays", "isdead")
+
         except Exception as e:
             print(e)
             return np.nan
@@ -172,6 +190,7 @@ def coxph(values,
           isdead,
           nbdays,
           do_KM_plot=False,
+          metadata_mat=None,
           png_path='./',
           dichotomize_afterward=False,
           fig_name='KM_plot.png',
@@ -197,6 +216,7 @@ def coxph(values,
         png_path=png_path,
         dichotomize_afterward=dichotomize_afterward,
         fig_name=fig_name,
+        metadata_mat=metadata_mat,
         isfactor=isfactor
     )
 
@@ -205,6 +225,7 @@ def coxph_from_r(
         isdead,
         nbdays,
         do_KM_plot=False,
+        metadata_mat=None,
         png_path='./',
         dichotomize_afterward=False,
         fig_name='KM_plot.png',

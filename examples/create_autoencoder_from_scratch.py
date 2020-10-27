@@ -1,5 +1,5 @@
 """
-Create a new model from strach using user defined .tsv input files
+Create a new autoencoder model from scratch using user defined .tsv input files
 """
 
 from simdeep.extract_data import LoadData
@@ -34,10 +34,15 @@ def main():
     # survival file to be used
     survival_file = 'survival_dummy.tsv'
 
+    # Metadata file (optional)
+    metadata_file = "metadata_dummy.tsv"
+
     # class to load and prepare the data
     dataset = LoadData(path_data=path_data,
                        training_tsv=tsv_files,
-                       survival_tsv=survival_file)
+                       survival_tsv=survival_file,
+                       metadata_tsv=metadata_file # Optional
+                       )
 
     simDeep = SimDeep(dataset=dataset,
                       path_to_save_model=path_to_save_model,

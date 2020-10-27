@@ -42,6 +42,9 @@ from simdeep.survival_utils import _process_parallel_feature_importance_per_clus
 
 from simdeep.survival_utils import select_best_classif_params
 
+from simdeep.simdeep_utils import metadata_usage_type
+from simdeep.simdeep_utils import feature_selection_usage_type
+
 from simdeep.coxph_from_r import coxph
 from simdeep.coxph_from_r import c_index
 from simdeep.coxph_from_r import c_index_multiple
@@ -102,7 +105,8 @@ class SimDeep(DeepBase):
              :classification_method: Possible choice  ['ALL_FEATURES', 'SURVIVAL_FEATURES']. If 'SURVIVAL_FEATURES' is selected, the classifiers are built using survival features  (default CLASSIFICATION_METHOD)
              :load_existing_models: (default LOAD_EXISTING_MODELS)
              :path_to_save_model: (default PATH_TO_SAVE_MODEL)
-
+             :metadata_usage: Meta data usage with survival models (if metadata_tsv provided as argument to the dataset). Possible choice are [None, False, 'labels', 'new-features', 'all', True] (True is the same as all)
+             :feature_selection_usage: selection method for survival features ('individual' or 'lasso')
 
     """
     def __init__(self,
@@ -125,6 +129,8 @@ class SimDeep(DeepBase):
                  load_existing_models=LOAD_EXISTING_MODELS,
                  path_to_save_model=PATH_TO_SAVE_MODEL,
                  clustering_omics=CLUSTERING_OMICS,
+                 metadata_usage=None,
+                 feature_selection_usage='individual',
                  seed=SEED,
                  do_KM_plot=True,
                  verbose=True,
@@ -143,6 +149,9 @@ class SimDeep(DeepBase):
         self.cluster_array = cluster_array
         self.path_results = path_results
         self.clustering_omics = clustering_omics
+        self.metadata_usage = metadata_usage_type(metadata_usage)
+        self.feature_selection_usage = feature_selection_usage_type(
+            feature_selection_usage)
 
         if self.path_results and not isdir(self.path_results):
             mkdir(self.path_results)
@@ -237,8 +246,15 @@ class SimDeep(DeepBase):
         """
         assert(self.node_selection in ['Cox-PH', 'C-index'])
 
+        if self.metadata_usage in ['all', 'new-features'] and \
+           self.dataset.metadata_mat is not None:
+            metadata_mat = self.dataset.metadata_mat
+        else:
+            metadata_mat = None
+
         if self.node_selection == 'Cox-PH':
-            return self._look_for_survival_nodes(key)
+            return self._look_for_survival_nodes(
+                key, metadata_mat=metadata_mat)
 
         if self.node_selection == 'C-index':
             return self._look_for_prediction_nodes(key)
@@ -247,14 +263,17 @@ class SimDeep(DeepBase):
                               path_survival_file,
                               fname_key=None,
                               normalization=None,
-                              survival_flag=None):
+                              survival_flag=None,
+                              metadata_file=None):
         """
         """
         self.dataset.load_new_test_dataset(
             tsv_dict,
             path_survival_file,
             normalization=normalization,
-            survival_flag=survival_flag)
+            survival_flag=survival_flag,
+            metadata_file=metadata_file
+        )
 
         if normalization is not None:
             self.test_normalization = {
@@ -312,7 +331,8 @@ class SimDeep(DeepBase):
         self.dataset.load_matrix_test_fold()
 
         nbdays, isdead = self.dataset.survival_cv.T.tolist()
-        self.activities_cv = self._predict_survival_nodes(self.dataset.matrix_cv_array)
+        self.activities_cv = self._predict_survival_nodes(
+            self.dataset.matrix_cv_array)
 
         self.cv_labels, self.cv_labels_proba = self._predict_labels(
             self.activities_cv, self.dataset.matrix_cv_array)
@@ -322,9 +342,17 @@ class SimDeep(DeepBase):
             for key, value in Counter(self.cv_labels).items():
                 print('class: {0}, number of samples :{1}'.format(key, value))
 
+        if self.metadata_usage in ['all', 'labels'] and \
+           self.dataset.metadata_mat_cv is not None:
+            metadata_mat = self.dataset.metadata_mat_cv
+        else:
+            metadata_mat = None
+
         pvalue, pvalue_proba = self._compute_test_coxph('KM_plot_test_fold',
                                                         nbdays, isdead,
-                                                        self.cv_labels, self.cv_labels_proba)
+                                                        self.cv_labels,
+                                                        self.cv_labels_proba,
+                                                        metadata_mat=metadata_mat)
         self.cv_pvalue = pvalue
         self.cv_pvalue_proba = pvalue_proba
 
@@ -341,7 +369,8 @@ class SimDeep(DeepBase):
 
         nbdays, isdead = self.dataset.survival_full.T.tolist()
 
-        self.activities_full = self._predict_survival_nodes(self.dataset.matrix_full_array)
+        self.activities_full = self._predict_survival_nodes(
+            self.dataset.matrix_full_array)
 
         self.full_labels, self.full_labels_proba = self._predict_labels(
             self.activities_full, self.dataset.matrix_full_array)
@@ -351,9 +380,17 @@ class SimDeep(DeepBase):
             for key, value in Counter(self.full_labels).items():
                 print('class: {0}, number of samples :{1}'.format(key, value))
 
+        if self.metadata_usage in ['all', 'labels'] and \
+           self.dataset.metadata_mat_full is not None:
+            metadata_mat = self.dataset.metadata_mat_full
+        else:
+            metadata_mat = None
+
         pvalue, pvalue_proba = self._compute_test_coxph('KM_plot_full',
                                                         nbdays, isdead,
-                                                        self.full_labels, self.full_labels_proba)
+                                                        self.full_labels,
+                                                        self.full_labels_proba,
+                                                        metadata_mat=metadata_mat)
         self.full_pvalue = pvalue
         self.full_pvalue_proba = pvalue_proba
 
@@ -380,17 +417,27 @@ class SimDeep(DeepBase):
 
         self.fit_classification_test_model()
 
-        self.activities_test = self._predict_survival_nodes(self.dataset.matrix_test_array)
-        self._predict_test_labels(self.activities_test, self.dataset.matrix_test_array)
+        self.activities_test = self._predict_survival_nodes(
+            self.dataset.matrix_test_array)
+        self._predict_test_labels(self.activities_test,
+                                  self.dataset.matrix_test_array)
 
         if self.verbose:
             print('#### report of assigned cluster:')
             for key, value in Counter(self.test_labels).items():
                 print('class: {0}, number of samples :{1}'.format(key, value))
 
+        if self.metadata_usage in ['all', 'test-labels'] and \
+           self.dataset.metadata_mat_test is not None:
+            metadata_mat = self.dataset.metadata_mat_test
+        else:
+            metadata_mat = None
+
         pvalue, pvalue_proba = self._compute_test_coxph('KM_plot_test',
                                                         nbdays, isdead,
-                                                        self.test_labels, self.test_labels_proba)
+                                                        self.test_labels,
+                                                        self.test_labels_proba,
+                                                        metadata_mat=metadata_mat)
         self.test_pvalue = pvalue
         self.test_pvalue_proba = pvalue_proba
 
@@ -400,9 +447,13 @@ class SimDeep(DeepBase):
 
         return self.test_labels, pvalue, pvalue_proba
 
-    def _compute_test_coxph(self, fname_base,
-                            nbdays, isdead,
-                            labels, labels_proba):
+    def _compute_test_coxph(self,
+                            fname_base,
+                            nbdays,
+                            isdead,
+                            labels,
+                            labels_proba,
+                            metadata_mat=None):
         """ """
         pvalue = coxph(
             labels, isdead, nbdays,
@@ -410,6 +461,7 @@ class SimDeep(DeepBase):
             do_KM_plot=self.do_KM_plot,
             png_path=self.path_results,
             seed=self.seed,
+            metadata_mat=metadata_mat,
             fig_name='{0}_{1}'.format(self.project_name, fname_base))
 
         if self.verbose:
@@ -422,6 +474,7 @@ class SimDeep(DeepBase):
             do_KM_plot=False,
             png_path=self.path_results,
             seed=self.seed,
+            metadata_mat=metadata_mat,
             fig_name='{0}_{1}_proba'.format(self.project_name, fname_base))
 
         if self.verbose:
@@ -741,15 +794,24 @@ class SimDeep(DeepBase):
 
         nbdays, isdead = self.dataset.survival.T.tolist()
 
+        if self.metadata_usage in ['all', 'labels'] and \
+           self.dataset.metadata_mat is not None:
+            metadata_mat = self.dataset.metadata_mat
+        else:
+            metadata_mat = None
+
         pvalue = coxph(self.labels, isdead, nbdays,
                        isfactor=False,
                        do_KM_plot=self.do_KM_plot,
                        png_path=self.path_results,
                        seed=self.seed,
+                       metadata_mat=metadata_mat,
                        fig_name='{0}_KM_plot_training_dataset'.format(self.project_name))
 
-        pvalue_proba = coxph(self.labels_proba.T[0], isdead, nbdays,
+        pvalue_proba = coxph(self.labels_proba.T[0],
+                             isdead, nbdays,
                              seed=self.seed,
+                             metadata_mat=metadata_mat,
                              isfactor=False)
 
         self._write_labels(self.dataset.sample_ids, self.labels,
@@ -1049,22 +1111,18 @@ class SimDeep(DeepBase):
 
         return labels
 
-    def _look_for_survival_nodes(self, key=None, activities=None, survival=None):
+    def _look_for_survival_nodes(self, key=None,
+                                 activities=None,
+                                 survival=None,
+                                 metadata_mat=None):
         """
         """
-        pool = None
-
-        if not self._isboosting:
-            pool = Pool(self.nb_threads_coxph)
-            mapf = pool.map
-        else:
-            mapf = map
-
         if key is not None:
             matrix_train = self.matrix_train_array[key]
 
             if self.use_autoencoders:
-                activities = np.nan_to_num(self.encoder_predict(key, matrix_train))
+                activities = np.nan_to_num(
+                    self.encoder_predict(key, matrix_train))
             else:
                 activities = np.asarray(matrix_train)
         else:
@@ -1075,18 +1133,45 @@ class SimDeep(DeepBase):
         else:
             nbdays, isdead = self.dataset.survival.T.tolist()
 
-        pvalue_list = []
+        if self.feature_selection_usage == 'lasso':
+            cws = ClusterWithSurvival(
+                isdead=isdead,
+                nbdays=nbdays,
+                metadata_mat=metadata_mat)
 
-        input_list = iter((node_id, activity, isdead, nbdays, self.seed)
-                           for node_id, activity in enumerate(activities.T))
+            return cws.get_nonzero_features(activities)
+
+        else:
+            return self._get_survival_features_parallel(
+                isdead, nbdays, metadata_mat, activities, key)
+
+    def _get_survival_features_parallel(
+            self, isdead, nbdays, metadata_mat, activities, key):
+        """ """
+        pool = None
+
+        if not self._isboosting:
+            pool = Pool(self.nb_threads_coxph)
+            mapf = pool.map
+        else:
+            mapf = map
+
+        input_list = iter((node_id,
+                           activity,
+                           isdead,
+                           nbdays,
+                           self.seed,
+                           metadata_mat)
+
+                          for node_id, activity in enumerate(activities.T))
 
         pvalue_list = mapf(_process_parallel_coxph, input_list)
 
         pvalue_list = list(filter(lambda x: not np.isnan(x[1]), pvalue_list))
-        pvalue_list.sort(key=lambda x:x[1], reverse=True)
+        pvalue_list.sort(key=lambda x: x[1], reverse=True)
 
         valid_node_ids = [node_id for node_id, pvalue in pvalue_list
-                               if pvalue < self.pvalue_thres]
+                          if pvalue < self.pvalue_thres]
 
         if self.verbose:
             print('number of components linked to survival found:{0} for key {1}'.format(
@@ -1373,12 +1458,18 @@ class SimDeep(DeepBase):
 
         encoder_array = self.encoder_for_kde_plot_dict[encoder_key]
 
+        if self.metadata_usage in ['all', 'new-features'] and \
+           dataset.metadata_mat is not None:
+            metadata_mat = dataset.metadata_mat
+        else:
+            metadata_mat = None
+
         for key in encoder_array:
             matrix_ref = self.encoder_predict(key, dataset.matrix_ref_array[key])
             matrix_test = self.encoder_predict(key, dataset.matrix_test_array[key])
 
             survival_node_ids = self._look_for_survival_nodes(
-                activities=matrix_ref, survival=dataset.survival)
+                activities=matrix_ref, survival=dataset.survival, metadata_mat=metadata_mat)
 
             if len(survival_node_ids) > 1:
                 matrix_ref = matrix_ref.T[survival_node_ids].T
@@ -1454,7 +1545,8 @@ class SimDeep(DeepBase):
                              tsv_dict,
                              path_survival_file,
                              normalization,
-                             survival_flag=None):
+                             survival_flag=None,
+                             metadata_file=None):
         """
         """
         self.load_new_test_dataset(
@@ -1462,6 +1554,7 @@ class SimDeep(DeepBase):
             path_survival_file,
             normalization=normalization,
             survival_flag=survival_flag,
+            metadata_file=metadata_file
         )
 
         self.predict_labels_on_test_dataset()

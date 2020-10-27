@@ -24,19 +24,26 @@ from simdeep.config import SURVIVAL_FLAG
 
 from simdeep.survival_utils import load_data_from_tsv
 from simdeep.survival_utils import load_survival_file
+from simdeep.survival_utils import return_intersection_indexes
+from simdeep.survival_utils import translate_index
 from simdeep.survival_utils import MadScaler
 from simdeep.survival_utils import RankNorm
 from simdeep.survival_utils import CorrelationReducer
 from simdeep.survival_utils import VarianceReducer
 from simdeep.survival_utils import SampleReducer
+from simdeep.survival_utils import convert_metadata_frame_to_matrix
 
 from simdeep.survival_utils import save_matrix
 
 from collections import defaultdict
 
+from os.path import isfile
+
 from time import time
 
 import numpy as np
+
+import pandas as pd
 
 from numpy import hstack
 from numpy import vstack
@@ -57,6 +64,8 @@ class LoadData():
             path_data=PATH_DATA,
             training_tsv=TRAINING_TSV,
             survival_tsv=SURVIVAL_TSV,
+            metadata_tsv=None,
+            metadata_test_tsv=None,
             test_tsv=TEST_TSV,
             survival_tsv_test=SURVIVAL_TSV_TEST,
             cross_validation_instance=CROSS_VALIDATION_INSTANCE,
@@ -78,6 +87,8 @@ class LoadData():
                               of the training set
         :survival_tsv_test: str    name of the tsv file containing the survival data
                                    of the test set
+        :metadata_tsv: str         name of the file containing metadata
+        :metadata_test_tsv: str         name of the file containing metadata of the test set
         :tsv_test: str    name of the file containing the test dataset
         :data_type_test: str    name of the data type of the test set
                                 must match a key existing in training_tsv
@@ -87,6 +98,7 @@ class LoadData():
         self.do_stack_multi_omic = stack_multi_omic
         self.path_data = path_data
         self.survival_tsv = survival_tsv
+        self.metadata_tsv = metadata_tsv
         self.training_tsv = training_tsv
         self.fill_unkown_feature_with_0 = fill_unkown_feature_with_0
         self.survival_flag = survival_flag
@@ -101,6 +113,7 @@ class LoadData():
 
         self.survival = None
         self.survival_tsv_test = survival_tsv_test
+        self.metadata_test_tsv = metadata_test_tsv
 
         self.matrix_full_array = {}
         self.sample_ids_full = []
@@ -121,6 +134,16 @@ class LoadData():
         self.feature_ref_index = {}
         self.feature_train_array = {}
         self.feature_train_index = {}
+
+        self.metadata_frame_full = None
+        self.metadata_frame_cv = None
+        self.metadata_frame_test = None
+        self.metadata_frame = None
+
+        self.metadata_mat_full = None
+        self.metadata_mat_cv = None
+        self.metadata_mat_test = None
+        self.metadata_mat = None
 
         self.survival_test = None
         self.sample_ids_test = None
@@ -264,10 +287,86 @@ class LoadData():
         self._stack_multiomics(self.matrix_ref_array,
                                self.feature_ref_array)
 
+    def load_meta_data_test(self, metadata_file="", sep="\t"):
+        """
+        """
+        if metadata_file:
+            self.metadata_test_tsv = metadata_file
+
+        if isfile("{0}/{1}".format(self.path_data, self.metadata_test_tsv)):
+            self.metadata_test_tsv = "{0}/{1}".format(
+                self.path_data, self.metadata_test_tsv)
+
+        if not self.metadata_test_tsv:
+            return
+
+        frame = pd.read_csv(self.metadata_test_tsv, sep=sep, index_col=0)
+
+        diff = set(self.sample_ids_test).difference(frame.index)
+
+        if diff:
+            raise(Exception(
+                "Error! samples from the tes dataset not present in metadata: {0}".format(
+                    list(diff)[:5])))
+
+        self.metadata_frame_test = frame.T[self.sample_ids_test].T
+        self.metadata_mat_test = convert_metadata_frame_to_matrix(
+            self.metadata_frame_test)
+
+    def load_meta_data(self, sep="\t"):
+        """
+        """
+
+        if isfile("{0}/{1}".format(self.path_data, self.metadata_tsv)):
+            self.metadata_tsv = "{0}/{1}".format(
+                self.path_data, self.metadata_tsv)
+
+        if not self.metadata_tsv:
+            return
+
+        frame = pd.read_csv(self.metadata_tsv, sep=sep, index_col=0)
+
+        ## FULL ##
+        if self.sample_ids_full:
+            diff = set(self.sample_ids_full).difference(frame.index)
+
+            if diff:
+                raise(Exception("Error! sample not present in metadata: {0}".format(
+                    list(diff)[:5])))
+
+            self.metadata_frame_full = frame.T[self.sample_ids_full].T
+
+            self.metadata_mat_full = convert_metadata_frame_to_matrix(
+                self.metadata_frame_full)
+
+        ## CV ##
+        if len(self.sample_ids_cv):
+            diff = set(self.sample_ids_cv).difference(frame.index)
+
+            if diff:
+                raise(Exception("Error! sample not present in metadata: {0}".format(
+                    list(diff)[:5])))
+
+            self.metadata_frame_cv = frame.T[self.sample_ids_cv].T
+            self.metadata_mat_cv = convert_metadata_frame_to_matrix(
+                self.metadata_frame_cv)
+
+        ## ALL ##
+        diff = set(self.sample_ids).difference(frame.index)
+
+        if diff:
+            raise(Exception("Error! sample not present in metadata: {0}".format(
+                list(diff)[:5])))
+
+        self.metadata_frame = frame.T[self.sample_ids].T
+        self.metadata_mat = convert_metadata_frame_to_matrix(
+            self.metadata_frame)
+
     def load_new_test_dataset(self, tsv_dict,
                               path_survival_file,
                               survival_flag=None,
-                              normalization=None):
+                              normalization=None,
+                              metadata_file=None):
         """
         """
         if normalization is not None:
@@ -283,6 +382,10 @@ class LoadData():
 
         self.survival_test = None
         self.sample_ids_test = None
+
+        self.metadata_frame_test = None
+        self.metadata_mat_test = None
+
         self.survival_tsv_test = path_survival_file
 
         self.matrix_test_array = {}
@@ -293,6 +396,7 @@ class LoadData():
 
         self.load_matrix_test(normalization)
         self.load_survival_test(survival_flag)
+        self.load_meta_data_test(metadata_file=metadata_file)
 
     def _create_ref_matrix(self, key):
         """ """
@@ -341,11 +445,18 @@ class LoadData():
                 f_name=f_name,
                 key=data,
                 path_data=self.path_data)
-            try:
-                assert(self.sample_ids == sample_ids)
-            except Exception as e:
-                raise Exception('Assertion error: {0} when loading'\
-                                ' the sample from the training set!'.format(e))
+
+            if self.sample_ids != sample_ids:
+                print('#### Different patient ID for {0} matrix ####'.format(data))
+
+                index1, index2, sample_ids = return_intersection_indexes(
+                    self.sample_ids, sample_ids)
+
+                self.sample_ids = sample_ids
+                matrix = matrix[index2]
+
+                for data2 in self.matrix_array:
+                    self.matrix_array[data2] = self.matrix_array[data2][index1]
 
             self.feature_array[data] = feature_ids
             self.matrix_array[data] = matrix
@@ -423,6 +534,8 @@ class LoadData():
             self.matrix_full_array = self.matrix_train_array
             self.sample_ids_full = self.sample_ids
             self.survival_full = self.survival
+            self.metadata_frame_full = self.metadata_frame
+            self.metadata_mat_full = self.metadata_mat
             return
 
         if not self._cv_loaded:
@@ -434,6 +547,12 @@ class LoadData():
 
         self.sample_ids_full = self.sample_ids[:] + self.sample_ids_cv[:]
         self.survival_full = vstack([self.survival, self.survival_cv])
+
+        if self.metadata_frame is not None:
+            self.metadata_frame_full = pd.concat([self.metadata_frame,
+                                                  self.metadata_frame_cv])
+            self.metadata_mat_full = pd.concat([self.metadata_mat,
+                                                  self.metadata_mat_cv])
 
         self._full_loaded = True
 
