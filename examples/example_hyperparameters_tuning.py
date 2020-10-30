@@ -34,7 +34,7 @@ def test_instance():
     PROJECT_NAME = 'TestProjectTuning'
     nb_threads = 2 # Number of processes to be used to fit individual survival models
 
-    ### The following parameters can be parsed in the hyperparameter tuning
+    ### Below are examples of parameters that can parsed in the hyperparameter tuning
 
     ################ AUTOENCODER PARAMETERS ################
     # LEVEL_DIMS_IN = [250]

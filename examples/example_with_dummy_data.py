@@ -62,7 +62,7 @@ def test_instance():
         metadata_usage='all',
         use_autoencoders=True,
         feature_surv_analysis=True,
-        feature_selection_usage="individual",
+        feature_selection_usage="lasso",
         # stack_multi_omic=STACK_MULTI_OMIC,
         # data_split=DATA_SPLIT,
         # activation=ACTIVATION,

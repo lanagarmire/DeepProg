@@ -24,14 +24,18 @@ class SimDeepTuning(object):
         :args_to_optimize: Dict with names of args from SimDeepBoosting to optimise with values as tuple (for range) or list (for list of values)
         :path_results: Result folder path used to save the output files (default PATH_RESULTS)
         :project_name: Name of the project. This name will be used to save the output files and create the output folder (default PROJECT_NAME)
+        :test_datasets: a dictionary of test dataset {'test dataset name': ({'omic type': 'matrix file'}, 'survival file')}. The survival file is mendatory to evaluate the test dataset
+        :normalization: dictionary of different normalisation types
+        :metadata_tsv_test: dictionary of optional metadata file associated with the test dataset {'test dataset name': 'metadata tsv file'}
 
     """
     def __init__(self,
                  args_to_optimize,
                  path_results=PATH_RESULTS,
                  project_name=PROJECT_NAME,
-                 test_datasets=[],
+                 test_datasets={},
                  normalization={},
+                 metadata_tsv_test={},
                  survival_flag_test={},
                  **deepProgBaseArgs):
         """
@@ -129,11 +133,17 @@ class SimDeepTuning(object):
             else:
                 survival_flag = None
 
+            if key in self.metadata_tsv_test:
+                metadata_file = self.metadata_tsv_test[key]
+            else:
+                metadata_file = None
+
             boosting.load_new_test_dataset(
                 test_dataset, # OMIC file of the second test set.
                 survival, # Survival file of the test set
                 'test_dataset', # Name of the second test test
                 survival_flag=survival_flag,
+                metadata_file=metadata_file,
             )
 
             test_pval, _ = boosting.predict_labels_on_test_dataset()

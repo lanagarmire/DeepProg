@@ -143,7 +143,8 @@ def plot_kernel_plots(
         activities,
         activities_test,
         dataset,
-        path_html):
+        path_html,
+        metadata_frame=None):
     """
     perform a html kernel plot
     """

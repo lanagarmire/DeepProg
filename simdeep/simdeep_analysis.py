@@ -1454,7 +1454,8 @@ class SimDeep(DeepBase):
 
         if encoder_key not in self.encoder_for_kde_plot_dict or \
            not dataset.fill_unkown_feature_with_0:
-            self._create_autoencoder_for_kernel_plot(labels_proba, dataset, encoder_key)
+            self._create_autoencoder_for_kernel_plot(
+                labels_proba, dataset, encoder_key)
 
         encoder_array = self.encoder_for_kde_plot_dict[encoder_key]
 
@@ -1469,7 +1470,8 @@ class SimDeep(DeepBase):
             matrix_test = self.encoder_predict(key, dataset.matrix_test_array[key])
 
             survival_node_ids = self._look_for_survival_nodes(
-                activities=matrix_ref, survival=dataset.survival, metadata_mat=metadata_mat)
+                activities=matrix_ref, survival=dataset.survival,
+                metadata_mat=metadata_mat)
 
             if len(survival_node_ids) > 1:
                 matrix_ref = matrix_ref.T[survival_node_ids].T

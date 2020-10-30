@@ -68,6 +68,10 @@ import gc
 from time import time
 
 from numpy import hstack
+from numpy import vstack
+
+import pandas as pd
+
 from simdeep.survival_utils import \
     _process_parallel_feature_importance_per_cluster
 
@@ -187,6 +191,8 @@ class SimDeepBoosting():
         self.metadata_tsv = metadata_tsv
         self.metadata_usage = metadata_usage
         self.feature_selection_usage = feature_selection_usage
+
+        self.metadata_mat_full = None
 
         self.cluster_method = cluster_method
         self.use_autoencoders = use_autoencoders
@@ -560,6 +566,12 @@ class SimDeepBoosting():
 
         isdead_cv, nbdays_cv, labels_cv = [], [], []
 
+        if self.metadata_usage in ['all', 'labels'] and \
+           self.metadata_tsv:
+            metadata_mat = []
+        else:
+            metadata_mat = None
+
         for model in self.models:
             survival_cv = self._from_model_dataset(model, 'survival_cv')
             nbdays, isdead = survival_cv.T.tolist()
@@ -567,12 +579,23 @@ class SimDeepBoosting():
             isdead_cv += isdead
             labels_cv += self._from_model_attr(model, "cv_labels").tolist()
 
+            if metadata_mat is not None:
+                meta2 = self._from_model_dataset(model, 'metadata_mat_cv')
+                if not len(metadata_mat):
+                    metadata_mat = meta2
+                else:
+                    metadata_mat = pd.concat([metadata_mat, meta2])
+
+        metadata_mat.fillna(0, inplace=True)
+
         pvalue = coxph(
             labels_cv, isdead_cv, nbdays_cv,
             isfactor=False,
             do_KM_plot=self.do_KM_plot,
             png_path=self.path_results,
-            fig_name='cv_analysis', seed=self.seed)
+            fig_name='cv_analysis', seed=self.seed,
+            metadata_mat=metadata_mat
+        )
 
         print('Pvalue for test fold concatenated: {0}'.format(pvalue))
         self.log['pvalue cv test'] = pvalue
@@ -771,13 +794,15 @@ class SimDeepBoosting():
         """
         print('predict labels on full datasets...')
         self._get_probas_for_full_models()
-        self._reorder_survival_full()
+        self._reorder_survival_full_and_metadata()
 
         print('#### report of assigned cluster:')
         for key, value in Counter(self.full_labels).items():
             print('class: {0}, number of samples :{1}'.format(key, value))
 
         nbdays, isdead = self.survival_full.T.tolist()
+
+
         pvalue, pvalue_proba, pvalue_cat = self._compute_test_coxph(
             'KM_plot_boosting_full',
             nbdays, isdead,
@@ -838,7 +863,7 @@ class SimDeepBoosting():
 
         return scores
 
-    def _reorder_survival_full(self):
+    def _reorder_survival_full_and_metadata(self):
         """
         """
         survival_old = self._from_model_dataset(self.models[0], 'survival_full')
@@ -848,6 +873,14 @@ class SimDeepBoosting():
 
         self.survival_full = np.asarray([np.asarray(surv_dict[sample])[0]
                                          for sample in self.sample_ids_full])
+
+        metadata = self._from_model_dataset(self.models[0], 'metadata_mat_full')
+
+        if metadata is not None:
+
+            index_dict = {sample: pos for pos, sample in enumerate(sample_ids)}
+            index = np.asarray([index_dict[sample] for sample in self.sample_ids_full])
+            self.metadata_mat_full = metadata.T[index].T
 
     def _reorder_matrix_full(self):
         """
@@ -887,7 +920,7 @@ class SimDeepBoosting():
 
     def _compute_test_coxph(self, fname_base, nbdays,
                             isdead, labels, labels_proba,
-                            project_name):
+                            project_name, metadata_mat=None):
         """ """
         pvalue = coxph(
             labels, isdead, nbdays,
@@ -895,6 +928,7 @@ class SimDeepBoosting():
             do_KM_plot=self.do_KM_plot,
             png_path=self.path_results,
             fig_name='{0}_{1}'.format(project_name, fname_base),
+            metadata_mat=metadata_mat,
             seed=self.seed)
 
         if self.verbose:
@@ -904,6 +938,7 @@ class SimDeepBoosting():
             labels_proba.T[0],
             isdead, nbdays,
             isfactor=False,
+            metadata_mat=metadata_mat,
             seed=self.seed)
 
         if self.verbose:
@@ -917,6 +952,7 @@ class SimDeepBoosting():
             do_KM_plot=self.do_KM_plot,
             png_path=self.path_results,
             fig_name='{0}_proba_{1}'.format(project_name, fname_base),
+            metadata_mat=metadata_mat,
             seed=self.seed)
 
         if self.verbose:
