@@ -121,7 +121,8 @@ class SimDeepBoosting():
             :activation: Activation function (default: 'tanh')
             :clustering_omics: Which omics to use for clustering. If empty, then all the available omics will be used (default [] => all)
             :path_to_save_model: path to save the model
-             :metadata_usage: Meta data usage with survival models (if metadata_tsv provided as argument to the dataset). Possible choice are [None, False, 'labels', 'new-features', 'all', True] (True is the same as all)
+            :metadata_usage: Meta data usage with survival models (if metadata_tsv provided as argument to the dataset). Possible choice are [None, False, 'labels', 'new-features', 'all', True] (True is the same as all)
+            :subset_training_with_meta: Use a metadata key-value dict {meta_key:value} to subset the training sets
     """
     def __init__(self,
                  nb_it=NB_ITER,
@@ -149,6 +150,7 @@ class SimDeepBoosting():
                  metadata_usage=None,
                  survival_tsv=SURVIVAL_TSV,
                  metadata_tsv=None,
+                 subset_training_with_meta={},
                  survival_flag=SURVIVAL_FLAG,
                  path_data=PATH_DATA,
                  level_dims_in=LEVEL_DIMS_IN,
@@ -191,6 +193,7 @@ class SimDeepBoosting():
         self.metadata_tsv = metadata_tsv
         self.metadata_usage = metadata_usage
         self.feature_selection_usage = feature_selection_usage
+        self.subset_training_with_meta = subset_training_with_meta
 
         self.metadata_mat_full = None
 
@@ -225,6 +228,7 @@ class SimDeepBoosting():
         self.survival_full = None
         self.sample_ids_full = None
         self.feature_scores_per_cluster = {}
+        self.survival_feature_scores_per_cluster = {}
 
         self.log = {}
 
@@ -277,11 +281,13 @@ class SimDeepBoosting():
         self.log['success'] = False
         self.log['survival_tsv'] = self.survival_tsv
         self.log['metadata_tsv'] = self.metadata_tsv
+        self.log['subset_training_with_meta'] = self.subset_training_with_meta
         self.log['training_tsv'] = self.training_tsv
         self.log['path_data'] = self.path_data
 
         additional_dataset_args['survival_tsv'] = self.survival_tsv
         additional_dataset_args['metadata_tsv'] = self.metadata_tsv
+        additional_dataset_args['subset_training_with_meta'] = self.subset_training_with_meta
         additional_dataset_args['training_tsv'] = self.training_tsv
         additional_dataset_args['path_data'] = self.path_data
         additional_dataset_args['survival_flag'] = self.survival_flag
@@ -1206,7 +1212,8 @@ class SimDeepBoosting():
             survival_flag=self.survival_flag,
             path_data=self.path_data,
             verbose=False,
-            normalization=self.test_normalization
+            normalization=self.test_normalization,
+            subset_training_with_meta=self.subset_training_with_meta
         )
 
         if self.verbose:
@@ -1214,9 +1221,12 @@ class SimDeepBoosting():
 
         self.dataset.load_array()
         self.dataset.load_survival()
+        self.dataset.load_meta_data()
+        self.dataset.subset_training_sets()
         self.dataset.reorder_matrix_array(self.sample_ids_full)
         self.dataset.create_a_cv_split()
         self.dataset.normalize_training_array()
+
         self.dataset.load_new_test_dataset(
             tsv_dict=self.test_tsv_dict,
             path_survival_file=self.test_survival_file,

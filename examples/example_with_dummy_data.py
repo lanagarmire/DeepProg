@@ -1,9 +1,3 @@
-import os
-os.environ['PYTHONHASHSEED']=str(2020)
-
-import random
-random.seed(2020)
-
 from os.path import abspath
 from os.path import split
 
@@ -22,6 +16,9 @@ def test_instance():
 
     # Optional metadata FILE
     OPTIONAL_METADATA = "metadata_dummy.tsv"
+
+    # Subsetting training set with only males from metadata:
+    SUBSET_TRAINING_WITH_META = {'stage': ['I', 'II', 'III']}
 
     PROJECT_NAME = 'TestProject'
     SEED = 3
@@ -63,6 +60,7 @@ def test_instance():
         use_autoencoders=True,
         feature_surv_analysis=True,
         feature_selection_usage="lasso",
+        subset_training_with_meta=SUBSET_TRAINING_WITH_META,
         # stack_multi_omic=STACK_MULTI_OMIC,
         # data_split=DATA_SPLIT,
         # activation=ACTIVATION,

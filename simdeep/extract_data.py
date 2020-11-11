@@ -74,6 +74,7 @@ class LoadData():
             fill_unkown_feature_with_0=FILL_UNKOWN_FEATURE_WITH_0,
             normalization=NORMALIZATION,
             survival_flag=SURVIVAL_FLAG,
+            subset_training_with_meta={},
             _autoencoder_parameters={},
             verbose=True,
     ):
@@ -104,6 +105,7 @@ class LoadData():
         self.survival_flag = survival_flag
         self.feature_array = {}
         self.matrix_array = {}
+        self.subset_training_with_meta = subset_training_with_meta
 
         self.test_tsv = test_tsv
         self.matrix_train_array = {}
@@ -361,6 +363,64 @@ class LoadData():
         self.metadata_frame = frame.T[self.sample_ids].T
         self.metadata_mat = convert_metadata_frame_to_matrix(
             self.metadata_frame)
+
+    def subset_training_sets(self, change_cv=False):
+        """ """
+        if not self.subset_training_with_meta:
+            print("Not subsetting training dataset. No metadata values provided")
+            return
+
+        if self.metadata_frame is None:
+            print("No metadata parsed. Not subsetting training sets")
+            return
+
+        samples_subset = set()
+        samples_subset_cv = set()
+
+        for key, values in self.subset_training_with_meta.items():
+            if not isinstance(values, list):
+                values = [values]
+
+            for value in values:
+                if key not in self.metadata_frame:
+                    raise(Exception("Subbseting keys does'nt not exists in the metadata {0}".format(
+                        key)))
+
+                index = self.metadata_frame[self.metadata_frame[key] == value].index
+
+                if self.metadata_frame_cv is not None:
+                    index_cv = self.metadata_frame_cv[self.metadata_frame_cv[key] == value].index
+                    samples_subset_cv.update(index_cv)
+
+                samples_subset.update(index)
+
+        new_index = translate_index(self.sample_ids, samples_subset)
+
+        for key in self.matrix_train_array:
+            self.matrix_train_array[key] = self.matrix_train_array[key][new_index]
+            self.matrix_ref_array[key] = self.matrix_ref_array[key][new_index]
+            self.matrix_array[key] = self.matrix_array[key][new_index]
+
+        self.survival = self.survival[new_index]
+
+        self.metadata_frame = self.metadata_frame.T[list(samples_subset)].T
+        self.metadata_mat = self.metadata_mat.T[new_index].T
+        self.metadata_mat.index = range(len(self.metadata_mat))
+
+        self.sample_ids = list(samples_subset)
+
+        if self.survival_cv is not None:
+            new_index_cv = translate_index(self.sample_ids_cv,
+                                           samples_subset_cv)
+            for key in self.matrix_cv_array:
+                self.matrix_cv_array[key] = self.matrix_cv_array[key][new_index_cv]
+
+            self.metadata_frame_cv = self.metadata_frame_cv.T[list(samples_subset_cv)].T
+            self.metadata_mat_cv = self.metadata_mat_cv.T[new_index_cv].T
+            self.metadata_mat_cv.index = range(len(self.metadata_mat_cv))
+
+            self.sample_ids_cv = list(samples_subset_cv)
+            self.survival_cv = self.survival_cv[new_index_cv]
 
     def load_new_test_dataset(self, tsv_dict,
                               path_survival_file,
