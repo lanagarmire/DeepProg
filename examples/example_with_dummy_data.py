@@ -56,7 +56,7 @@ def test_instance():
         seed=SEED,
         normalization=norm,
         cluster_method='mixture',
-        metadata_usage='all',
+        metadata_usage='labels',
         use_autoencoders=True,
         feature_surv_analysis=True,
         feature_selection_usage="lasso",
@@ -78,6 +78,7 @@ def test_instance():
     boosting.collect_cindex_for_full_dataset()
 
     boosting.compute_feature_scores_per_cluster()
+    boosting.compute_survival_feature_scores_per_cluster(pval_thres=0.05)
     boosting.write_feature_score_per_cluster()
     boosting.collect_number_of_features_per_omic()
     boosting.compute_pvalue_for_merged_test_fold()

@@ -527,7 +527,8 @@ class SimDeep(DeepBase):
             pool.close()
             pool.join()
 
-    def compute_feature_scores_per_cluster(self, use_ref=False):
+    def compute_feature_scores_per_cluster(self, use_ref=False,
+                                           pval_thres=0.01):
         """
         """
         print('computing feature importance per cluster...')
@@ -539,7 +540,7 @@ class SimDeep(DeepBase):
 
         def generator(labels, feature_list, matrix):
             for i in range(len(feature_list)):
-                yield feature_list[i], matrix[i], labels
+                yield feature_list[i], matrix[i], labels, pval_thres
 
         if use_ref:
             key_array = list(self.dataset.matrix_ref_array.keys())

@@ -451,7 +451,7 @@ def _process_parallel_feature_importance_per_cluster(inp):
     arrays = defaultdict(list)
     results = []
 
-    feature, array, labels = inp
+    feature, array, labels, pval_thres = inp
 
     for label, value in zip(labels, np.array(array).reshape(-1)):
         arrays[label].append(value)
@@ -464,10 +464,28 @@ def _process_parallel_feature_importance_per_cluster(inp):
         score, pvalue = ranksums(array, array_comp)
         median_diff = np.median(array) - np.median(array_comp)
 
-        if pvalue < 0.001:
+        if pvalue < pval_thres:
             results.append((cluster, feature, median_diff, pvalue))
 
     return results
+
+
+def _process_parallel_survival_feature_importance_per_cluster(inp):
+    """
+    """
+
+    feature, array, survival, metadata_mat, pval_thres = inp
+    nbdays, isdead = survival.T.tolist()
+
+    pvalue = coxph(
+        array,
+        isdead,
+        nbdays,
+        metadata_mat=metadata_mat)
+
+    if not np.isnan(pvalue) and pvalue < pval_thres:
+        return (feature, pvalue)
+    return None, None
 
 def save_matrix(matrix, feature_array, sample_array,
                 path_folder, project_name, key='', sep='\t'):

@@ -74,6 +74,8 @@ import pandas as pd
 
 from simdeep.survival_utils import \
     _process_parallel_feature_importance_per_cluster
+from simdeep.survival_utils import \
+    _process_parallel_survival_feature_importance_per_cluster
 
 
 
@@ -1302,7 +1304,50 @@ class SimDeepBoosting():
         if fname_key:
             self.project_name = '{0}_{1}'.format(self._project_name, fname_key)
 
-    def compute_feature_scores_per_cluster(self):
+    def compute_survival_feature_scores_per_cluster(self, pval_thres=0.01):
+        """
+        """
+        print('computing survival feature importance per cluster...')
+        mapf = map
+
+        if self.metadata_usage in ['all', 'new-features'] and \
+           self.metadata_mat_full is not None:
+            metadata_mat = self.metadata_mat_full
+        else:
+            metadata_mat = None
+
+        for label in set(self.full_labels):
+            self.survival_feature_scores_per_cluster[label] = []
+
+        def generator(feature_list, matrix):
+            for i in range(len(feature_list)):
+                yield (feature_list[i],
+                       matrix[i],
+                       self.survival_full,
+                       metadata_mat,
+                       pval_thres)
+
+        for key in self.matrix_full_array:
+            for label in self.feature_scores_per_cluster:
+                feature_list = self.feature_scores_per_cluster[label]
+                matrix = self.matrix_full_array[key][:]
+
+                input_list = generator(feature_list, matrix.T)
+
+                features_scored = mapf(
+                    _process_parallel_survival_feature_importance_per_cluster,
+                    input_list)
+
+                for feature, pvalue in features_scored:
+                    if feature is not None:
+                        self.survival_feature_scores_per_cluster[label].append(
+                            (feature, pvalue))
+
+                if label in self.survival_feature_scores_per_cluster:
+                    self.survival_feature_scores_per_cluster[label].sort(
+                        key=lambda x: x[1])
+
+    def compute_feature_scores_per_cluster(self, pval_thres=0.01):
         """
         """
         print('computing feature importance per cluster...')
@@ -1316,7 +1361,7 @@ class SimDeepBoosting():
 
         def generator(labels, feature_list, matrix):
             for i in range(len(feature_list)):
-                yield feature_list[i], matrix[i], labels
+                yield feature_list[i], matrix[i], labels, pval_thres
 
         for key in self.matrix_full_array:
             feature_list = self.feature_train_array[key][:]
@@ -1325,7 +1370,8 @@ class SimDeepBoosting():
 
             input_list = generator(labels, feature_list, matrix.T)
 
-            features_scored = mapf(_process_parallel_feature_importance_per_cluster, input_list)
+            features_scored = mapf(
+                _process_parallel_feature_importance_per_cluster, input_list)
             features_scored = [feat for feat_list in features_scored for feat in feat_list]
 
             for label, feature, median_diff, pvalue in features_scored:
@@ -1344,8 +1390,10 @@ class SimDeepBoosting():
 
         f_file = open(f_file_name, 'w')
         f_anti_file = open(f_anti_name, 'w')
+        f_file.write('#label\tfeature\tmedian difference\tp-value\n')
+        f_anti_file.write('#label\tfeature\tmedian difference\tp-value\n')
 
-        f_file.write('cluster id;feature;median diff;p-value\n')
+        f_file.write('cluster id\tfeature\tmedian diff\tWilcoxon p-value\n')
 
         for label in self.feature_scores_per_cluster:
             for feature, median_diff, pvalue in self.feature_scores_per_cluster[label]:
@@ -1354,10 +1402,27 @@ class SimDeepBoosting():
                 else:
                     f_to_write = f_anti_file
 
-                f_to_write.write('{0};{1};{2};{3}\n'.format(label, feature, median_diff, pvalue))
+                f_to_write.write('{0}\t{1}\t{2}\t{3}\n'.format(
+                    label, feature, median_diff, pvalue))
 
         print('{0} written'.format(f_file_name))
         print('{0} written'.format(f_anti_name))
+
+        if self.survival_feature_scores_per_cluster:
+            f_file_name = '{0}/{1}_survival_features_scores_per_clusters.tsv'.format(
+                self.path_results, self._project_name)
+            f_to_write = open(f_file_name, 'w')
+            f_to_write.write(
+                '#label\tfeature\tmedian difference\tcluster logrank p-value\tCoxPH Log-rank p-value\n')
+
+            for label in self.survival_feature_scores_per_cluster:
+                for feature, pvalue in self.survival_feature_scores_per_cluster[label]:
+                    f_to_write.write('{0}\t{1}\t{2}\t{3}\t{4}\n'.format(
+                        label, feature[0], feature[1], feature[2], pvalue))
+
+            print('{0} written'.format(f_file_name))
+        else:
+            print("No survival features detected. File: {0} not writtten".format(f_file_name))
 
     def evalutate_cluster_performance(self):
         """

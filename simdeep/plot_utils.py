@@ -180,7 +180,7 @@ def plot_kernel_plots(
             ax=ax,
             label='cluster nb {0}'.format(label),
             zorder=1,
-            shade_lowest=False,
+            thresh=False,
             alpha=0.7
         )
 
