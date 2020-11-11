@@ -298,7 +298,7 @@ class SimDeepTuning(object):
         optimizer = Optimizer(optimizer_value)
 
         algo = SkOptSearch(
-            optimizer, optimizer_header,
+            optimizer, list(optimizer_header),
             max_concurrent=max_concurrent,
             metric=metric,
             mode=metric_authorized[metric],
