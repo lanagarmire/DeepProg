@@ -697,7 +697,7 @@ class SimDeepBoosting():
                 else:
                     metadata_mat = pd.concat([metadata_mat, meta2])
 
-        metadata_mat.fillna(0, inplace=True)
+                metadata_mat.fillna(0, inplace=True)
 
         pvalue = coxph(
             labels_cv, isdead_cv, nbdays_cv,
