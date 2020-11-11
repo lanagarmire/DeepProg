@@ -93,6 +93,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="usage_advanced.html">Tutorial: Advanced usage of DeepProg model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="case_study.html">Case study: Analyzing TCGA HCC dataset</a></li>
 <li class="toctree-l1"><a class="reference internal" href="LICENSE.html">License</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/simdeep.html">simdeep package</a></li>
 </ul>
@@ -289,8 +290,8 @@ Two KM plots are also generated, one using the cluster labels:</p>
 <p>We can then load and evaluate a first test dataset</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">boosting</span><span class="o">.</span><span class="n">load_new_test_dataset</span><span class="p">(</span>
     <span class="p">{</span><span class="s1">&#39;RNA&#39;</span><span class="p">:</span> <span class="s1">&#39;rna_dummy.tsv&#39;</span><span class="p">},</span> <span class="c1"># OMIC file of the test set. It doesnt have to be the same as for training</span>
-    <span class="s1">&#39;survival_dummy.tsv&#39;</span><span class="p">,</span> <span class="c1"># Survival file of the test set</span>
     <span class="s1">&#39;TEST_DATA_1&#39;</span><span class="p">,</span> <span class="c1"># Name of the test test to be used</span>
+    <span class="s1">&#39;survival_dummy.tsv&#39;</span><span class="p">,</span> <span class="c1"># [OPTIONAL] Survival file of the test set. USeful to compute accuracy metrics on the test dataset</span>
 <span class="p">)</span>
 
 <span class="c1"># Predict the labels on the test dataset</span>
@@ -351,7 +352,7 @@ Two KM plots are also generated, one using the cluster labels:</p>
 
 <span class="n">boosting</span> <span class="o">=</span> <span class="n">SimDeepBoosting</span><span class="p">(</span>
     <span class="o">...</span>
-    <span class="n">distribute</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="c1"># Additional option to use ray cluster scheduler</span>
+    <span class="n">distribute</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="c1"># Additional option to use ray cluster scheduler</span>
     <span class="o">...</span>
 <span class="p">)</span>
 <span class="o">...</span>

@@ -149,77 +149,77 @@
            <div itemprop="articleBody">
             
   <h1>Source code for simdeep.simdeep_boosting</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">simdeep.simdeep_analysis</span> <span class="kn">import</span> <span class="n">SimDeep</span>
-<span class="kn">from</span> <span class="nn">simdeep.extract_data</span> <span class="kn">import</span> <span class="n">LoadData</span>
+<span></span><span class="kn">from</span> <span class="nn">simdeep.simdeep_analysis</span> <span class="k">import</span> <span class="n">SimDeep</span>
+<span class="kn">from</span> <span class="nn">simdeep.extract_data</span> <span class="k">import</span> <span class="n">LoadData</span>
 
-<span class="kn">from</span> <span class="nn">simdeep.coxph_from_r</span> <span class="kn">import</span> <span class="n">coxph</span>
-<span class="kn">from</span> <span class="nn">simdeep.coxph_from_r</span> <span class="kn">import</span> <span class="n">c_index</span>
-<span class="kn">from</span> <span class="nn">simdeep.coxph_from_r</span> <span class="kn">import</span> <span class="n">c_index_multiple</span>
-<span class="kn">from</span> <span class="nn">simdeep.coxph_from_r</span> <span class="kn">import</span> <span class="n">NALogicalType</span>
+<span class="kn">from</span> <span class="nn">simdeep.coxph_from_r</span> <span class="k">import</span> <span class="n">coxph</span>
+<span class="kn">from</span> <span class="nn">simdeep.coxph_from_r</span> <span class="k">import</span> <span class="n">c_index</span>
+<span class="kn">from</span> <span class="nn">simdeep.coxph_from_r</span> <span class="k">import</span> <span class="n">c_index_multiple</span>
+<span class="kn">from</span> <span class="nn">simdeep.coxph_from_r</span> <span class="k">import</span> <span class="n">NALogicalType</span>
 
-<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">KFold</span>
+<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="k">import</span> <span class="n">KFold</span>
 <span class="c1"># from sklearn.preprocessing import OneHotEncoder</span>
 
-<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">Counter</span>
-<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
-<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">combinations</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">Counter</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">defaultdict</span>
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="k">import</span> <span class="n">combinations</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
-<span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">gmean</span>
-<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">adjusted_rand_score</span>
+<span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">gmean</span>
+<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="k">import</span> <span class="n">adjusted_rand_score</span>
 
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">PROJECT_NAME</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">PATH_RESULTS</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">NB_THREADS</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">NB_ITER</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">NB_FOLDS</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">CLASS_SELECTION</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">NB_CLUSTERS</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">NORMALIZATION</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">EPOCHS</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">NEW_DIM</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">NB_SELECTED_FEATURES</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">PVALUE_THRESHOLD</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">CLUSTER_METHOD</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">CLASSIFICATION_METHOD</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">TRAINING_TSV</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">SURVIVAL_TSV</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">PATH_DATA</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">SURVIVAL_FLAG</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">NODES_SELECTION</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">CINDEX_THRESHOLD</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">USE_AUTOENCODERS</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">FEATURE_SURV_ANALYSIS</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">CLUSTERING_OMICS</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">PROJECT_NAME</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">PATH_RESULTS</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">NB_THREADS</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">NB_ITER</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">NB_FOLDS</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">CLASS_SELECTION</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">NB_CLUSTERS</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">NORMALIZATION</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">EPOCHS</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">NEW_DIM</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">NB_SELECTED_FEATURES</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">PVALUE_THRESHOLD</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">CLUSTER_METHOD</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">CLASSIFICATION_METHOD</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">TRAINING_TSV</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">SURVIVAL_TSV</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">PATH_DATA</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">SURVIVAL_FLAG</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">NODES_SELECTION</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">CINDEX_THRESHOLD</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">USE_AUTOENCODERS</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">FEATURE_SURV_ANALYSIS</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">CLUSTERING_OMICS</span>
 
 <span class="c1"># Parameter for autoencoder</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">LEVEL_DIMS_IN</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">LEVEL_DIMS_OUT</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">LOSS</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">OPTIMIZER</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">ACT_REG</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">W_REG</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">DROPOUT</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">ACTIVATION</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">PATH_TO_SAVE_MODEL</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">DATA_SPLIT</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">MODEL_THRES</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">LEVEL_DIMS_IN</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">LEVEL_DIMS_OUT</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">LOSS</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">OPTIMIZER</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">ACT_REG</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">W_REG</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">DROPOUT</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">ACTIVATION</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">PATH_TO_SAVE_MODEL</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">DATA_SPLIT</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">MODEL_THRES</span>
 
-<span class="kn">from</span> <span class="nn">simdeep.deepmodel_base</span> <span class="kn">import</span> <span class="n">DeepBase</span>
+<span class="kn">from</span> <span class="nn">simdeep.deepmodel_base</span> <span class="k">import</span> <span class="n">DeepBase</span>
 
 <span class="kn">import</span> <span class="nn">simplejson</span>
 
-<span class="kn">from</span> <span class="nn">distutils.dir_util</span> <span class="kn">import</span> <span class="n">mkpath</span>
+<span class="kn">from</span> <span class="nn">distutils.dir_util</span> <span class="k">import</span> <span class="n">mkpath</span>
 
-<span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">isdir</span>
+<span class="kn">from</span> <span class="nn">os.path</span> <span class="k">import</span> <span class="n">isdir</span>
 
 <span class="kn">import</span> <span class="nn">gc</span>
 
-<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">time</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="k">import</span> <span class="n">time</span>
 
-<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">hstack</span>
-<span class="kn">from</span> <span class="nn">simdeep.survival_utils</span> <span class="kn">import</span> \
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="k">import</span> <span class="n">hstack</span>
+<span class="kn">from</span> <span class="nn">simdeep.survival_utils</span> <span class="k">import</span> \
     <span class="n">_process_parallel_feature_importance_per_cluster</span>
 
 
@@ -269,7 +269,7 @@
 <span class="sd">            :clustering_omics: Which omics to use for clustering. If empty, then all the available omics will be used (default [] =&gt; all)</span>
 <span class="sd">            :path_to_save_model: path to save the model</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                  <span class="n">nb_it</span><span class="o">=</span><span class="n">NB_ITER</span><span class="p">,</span>
                  <span class="n">do_KM_plot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                  <span class="n">distribute</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
@@ -468,7 +468,7 @@
 
             <span class="bp">self</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="fm">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">:</span>
@@ -557,7 +557,7 @@
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;fit models...&#39;</span><span class="p">)</span>
         <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
 
-        <span class="kn">from</span> <span class="nn">simdeep.simdeep_distributed</span> <span class="kn">import</span> <span class="n">SimDeepDistributed</span>
+        <span class="kn">from</span> <span class="nn">simdeep.simdeep_distributed</span> <span class="k">import</span> <span class="n">SimDeepDistributed</span>
         <span class="kn">import</span> <span class="nn">ray</span>
         <span class="k">assert</span><span class="p">(</span><span class="n">ray</span><span class="o">.</span><span class="n">is_initialized</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ray</span> <span class="o">=</span> <span class="n">ray</span>
@@ -683,11 +683,11 @@
         <span class="n">sample_id_test</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_from_model_dataset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;sample_ids_test&#39;</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_from_model</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;_write_labels&#39;</span><span class="p">,</span>
-            <span class="n">sample_id_test</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">test_labels</span><span class="p">,</span>
-            <span class="s1">&#39;</span><span class="si">{0}</span><span class="s1">_test_labels&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project_name</span><span class="p">),</span>
-            <span class="n">labels_proba</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">test_labels_proba</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-            <span class="n">nbdays</span><span class="o">=</span><span class="n">nbdays</span><span class="p">,</span> <span class="n">isdead</span><span class="o">=</span><span class="n">isdead</span><span class="p">)</span>
+                         <span class="n">sample_id_test</span><span class="p">,</span>
+                         <span class="bp">self</span><span class="o">.</span><span class="n">test_labels</span><span class="p">,</span>
+                         <span class="s1">&#39;</span><span class="si">{0}</span><span class="s1">_test_labels&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project_name</span><span class="p">),</span>
+                         <span class="n">labels_proba</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">test_labels_proba</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                         <span class="n">nbdays</span><span class="o">=</span><span class="n">nbdays</span><span class="p">,</span> <span class="n">isdead</span><span class="o">=</span><span class="n">isdead</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">pvalue</span><span class="p">,</span> <span class="n">pvalue_proba</span></div>
 
@@ -1083,6 +1083,11 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">days_full</span><span class="p">,</span> <span class="n">dead_full</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">survival_full</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
         <span class="n">days_test</span><span class="p">,</span> <span class="n">dead_test</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_from_model_dataset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;survival_test&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">days_test</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Cannot compute C-index for test dataset. Need test survival file&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+
         <span class="n">labels_test_categorical</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_labels_proba_to_labels</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">test_labels_proba</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">days_test</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">matrix</span><span class="p">):</span>
@@ -1197,7 +1202,7 @@
 <div class="viewcode-block" id="SimDeepBoosting.plot_supervised_kernel_for_test_sets"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.simdeep_boosting.SimDeepBoosting.plot_supervised_kernel_for_test_sets">[docs]</a>    <span class="k">def</span> <span class="nf">plot_supervised_kernel_for_test_sets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">from</span> <span class="nn">simdeep.plot_utils</span> <span class="kn">import</span> <span class="n">plot_kernel_plots</span>
+        <span class="kn">from</span> <span class="nn">simdeep.plot_utils</span> <span class="k">import</span> <span class="n">plot_kernel_plots</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;plotting survival features using autoencoder...&#39;</span><span class="p">)</span>
@@ -1351,8 +1356,8 @@
         <span class="k">return</span> <span class="n">encoder_key</span>
 
 <div class="viewcode-block" id="SimDeepBoosting.load_new_test_dataset"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.simdeep_boosting.SimDeepBoosting.load_new_test_dataset">[docs]</a>    <span class="k">def</span> <span class="nf">load_new_test_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tsv_dict</span><span class="p">,</span>
-                              <span class="n">path_survival_file</span><span class="p">,</span>
                               <span class="n">fname_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                              <span class="n">path_survival_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                               <span class="n">normalization</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                               <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                               <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>

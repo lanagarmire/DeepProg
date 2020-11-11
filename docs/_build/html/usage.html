@@ -89,6 +89,8 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="usage_ensemble.html">Tutorial: Ensemble of DeepProg model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage_advanced.html">Tutorial: Advanced usage of DeepProg model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="case_study.html">Case study: Analyzing TCGA HCC dataset</a></li>
 <li class="toctree-l1"><a class="reference internal" href="LICENSE.html">License</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/simdeep.html">simdeep package</a></li>
 </ul>
@@ -310,16 +312,21 @@ The test dataset do not need to have the same input omic matrices than the train
 <span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">TEST_TSV</span>
 <span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">SURVIVAL_TSV_TEST</span>
 
-<span class="n">simDeep</span><span class="o">.</span><span class="n">load_new_test_dataset</span><span class="p">(</span><span class="n">TEST_TSV</span><span class="p">,</span> <span class="n">SURVIVAL_TSV_TEST</span><span class="p">,</span> <span class="n">fname_key</span><span class="o">=</span><span class="s1">&#39;dummy&#39;</span><span class="p">)</span>
+<span class="n">simDeep</span><span class="o">.</span><span class="n">load_new_test_dataset</span><span class="p">(</span>
+    <span class="n">TEST_TSV</span><span class="p">,</span>
+    <span class="n">fname_key</span><span class="o">=</span><span class="s1">&#39;dummy&#39;</span>
+    <span class="n">SURVIVAL_TSV_TEST</span><span class="p">,</span> <span class="c1"># [OPTIONAL] test survival file useful to compute accuracy of test dataset</span>
+
+    <span class="p">)</span>
 
 <span class="c1"># The test set is a dummy rna expression (generated randomly)</span>
-<span class="k">print</span><span class="p">(</span><span class="n">simDeep</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">test_tsv</span><span class="p">)</span> <span class="c1"># Defined in the config file</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">simDeep</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">test_tsv</span><span class="p">)</span> <span class="c1"># Defined in the config file</span>
 <span class="c1"># The data type of the test set is also defined to match an existing type</span>
-<span class="k">print</span><span class="p">(</span><span class="n">simDeep</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">data_type</span><span class="p">)</span> <span class="c1"># Defined in the config file</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">simDeep</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">data_type</span><span class="p">)</span> <span class="c1"># Defined in the config file</span>
 <span class="n">simDeep</span><span class="o">.</span><span class="n">predict_labels_on_test_dataset</span><span class="p">()</span> <span class="c1"># Perform the classification analysis and label the set dataset</span>
 
-<span class="k">print</span><span class="p">(</span><span class="n">simDeep</span><span class="o">.</span><span class="n">test_labels</span><span class="p">)</span>
-<span class="k">print</span><span class="p">(</span><span class="n">simDeep</span><span class="o">.</span><span class="n">test_labels_proba</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">simDeep</span><span class="o">.</span><span class="n">test_labels</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">simDeep</span><span class="o">.</span><span class="n">test_labels_proba</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>The assigned class and class probabilities for the test samples are now available in the output folder:</p>

@@ -86,6 +86,7 @@ class DeepBase(object):
                  activation=ACTIVATION,
                  seed=SEED,
                  alternative_embedding=None,
+                 kwargs_alternative_embedding={},
                  path_to_save_model=PATH_TO_SAVE_MODEL):
         """
         ### DEFAULT PARAMETER ###:
@@ -133,6 +134,8 @@ class DeepBase(object):
         self.W_l1_constant = w_reg
         self.A_l2_constant = act_reg
 
+        self.alternative_embedding_array = {}
+        self.kwargs_alternative_embedding = kwargs_alternative_embedding
         self.encoder_array = {}
         self.model_array = {}
 
@@ -160,11 +163,11 @@ class DeepBase(object):
         """
         self.dataset.load_array()
         self.dataset.load_survival()
+        self.dataset.load_meta_data()
+        self.dataset.subset_training_sets()
 
         self.dataset.create_a_cv_split()
         self.dataset.normalize_training_array()
-        self.dataset.load_meta_data()
-        self.dataset.subset_training_sets()
 
         self.matrix_train_array = self.dataset.matrix_train_array
 
@@ -182,6 +185,21 @@ class DeepBase(object):
         """ """
         for key in self.matrix_train_array:
             self._create_autoencoder(self.matrix_train_array[key], key, matrix_out)
+
+    def fit_alternative_embedding(self):
+        """ """
+        embedding_class = self.alternative_embedding
+
+        for key in self.matrix_train_array:
+            if self.verbose:
+                print("Fitting alternative embedding for key: {0}, class: {1}".format(
+                    key, embedding_class))
+
+            self.alternative_embedding_array[key] = embedding_class(
+                **self.kwargs_alternative_embedding)
+
+            self.alternative_embedding_array[key].fit(
+                self.matrix_train_array[key])
 
     def _create_autoencoder(self, matrix_train, key, matrix_out=None):
         """
@@ -309,6 +327,13 @@ class DeepBase(object):
                 print('fitting done for model {0}!'.format(key))
 
         self._define_encoders()
+
+    def embedding_predict(self, key, matrix):
+        """
+        Predict the output value using the matrix as input and
+        the fitted embedding model from self.alternative_embedding_array
+        """
+        return self.alternative_embedding_array[key].transform(matrix)
 
     def encoder_predict(self, key, matrix):
         """

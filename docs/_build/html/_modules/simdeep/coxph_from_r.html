@@ -306,16 +306,17 @@
             <span class="n">kaplan</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
                         <span class="n">ci_alpha</span><span class="o">=</span><span class="mf">0.15</span><span class="p">)</span>
 
-            <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;time unit&#39;</span><span class="p">)</span>
-            <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;pval.: </span><span class="si">{0: .1e}</span><span class="s1"> CI: </span><span class="si">{1: .2f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                <span class="n">pvalue</span><span class="p">,</span> <span class="n">cindex</span><span class="p">),</span>
-                         <span class="n">fontsize</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span>
-                         <span class="n">fontweight</span><span class="o">=</span><span class="s1">&#39;bold&#39;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;time unit&#39;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;pval.: </span><span class="si">{0: .1e}</span><span class="s1"> CI: </span><span class="si">{1: .2f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">pvalue</span><span class="p">,</span> <span class="n">cindex</span><span class="p">),</span>
+                     <span class="n">fontsize</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span>
+                     <span class="n">fontweight</span><span class="o">=</span><span class="s1">&#39;bold&#39;</span><span class="p">)</span>
 
         <span class="n">figname</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{0}</span><span class="s2">/</span><span class="si">{1}</span><span class="s2">.png&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
             <span class="n">png_path</span><span class="p">,</span> <span class="n">fig_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.png&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">))</span>
 
         <span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">figname</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Figure saved in: </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">figname</span><span class="p">))</span>
 
     <span class="k">return</span> <span class="n">pvalue</span></div>
 

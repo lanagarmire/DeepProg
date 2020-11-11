@@ -171,7 +171,12 @@ The test dataset do not need to have the same input omic matrices than the train
 from simdeep.config import TEST_TSV
 from simdeep.config import SURVIVAL_TSV_TEST
 
-simDeep.load_new_test_dataset(TEST_TSV, SURVIVAL_TSV_TEST, fname_key='dummy')
+simDeep.load_new_test_dataset(
+    TEST_TSV,
+    fname_key='dummy'
+    SURVIVAL_TSV_TEST, # [OPTIONAL] test survival file useful to compute accuracy of test dataset
+
+    )
 
 # The test set is a dummy rna expression (generated randomly)
 print(simDeep.dataset.test_tsv) # Defined in the config file

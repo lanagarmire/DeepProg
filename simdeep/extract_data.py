@@ -398,7 +398,9 @@ class LoadData():
 
         for key in self.matrix_train_array:
             self.matrix_train_array[key] = self.matrix_train_array[key][new_index]
+        for key in self.matrix_ref_array:
             self.matrix_ref_array[key] = self.matrix_ref_array[key][new_index]
+        for key in self.matrix_array:
             self.matrix_array[key] = self.matrix_array[key][new_index]
 
         self.survival = self.survival[new_index]
@@ -423,7 +425,7 @@ class LoadData():
             self.survival_cv = self.survival_cv[new_index_cv]
 
     def load_new_test_dataset(self, tsv_dict,
-                              path_survival_file,
+                              path_survival_file=None,
                               survival_flag=None,
                               normalization=None,
                               metadata_file=None):
@@ -565,7 +567,13 @@ class LoadData():
             return
 
         cv = self.cross_validation_instance
-        train, test = [(tn, tt) for tn, tt in cv.split(self.sample_ids)][self.test_fold]
+
+        if isinstance(self.cross_validation_instance, tuple):
+            train, test = self.cross_validation_instance
+        else:
+            train, test = [(tn, tt)
+                           for tn, tt in
+                           cv.split(self.sample_ids)][self.test_fold]
 
         if self.normalization['PERC_SAMPLE_TO_KEEP']:
             sample_reducer = SampleReducer(self.normalization['PERC_SAMPLE_TO_KEEP'])
@@ -580,6 +588,18 @@ class LoadData():
 
         self.survival_cv = self.survival.copy()[test]
         self.survival = self.survival[train]
+
+        if self.metadata_frame is not None:
+            # cv
+            self.metadata_frame_cv = self.metadata_frame.T[
+                list(np.asarray(self.sample_ids)[test])].T
+            self.metadata_mat_cv = self.metadata_mat.T[test].T
+            self.metadata_mat_cv.index = range(len(test))
+            # train
+            self.metadata_frame = self.metadata_frame.T[
+                list(np.asarray(self.sample_ids)[train])].T
+            self.metadata_mat = self.metadata_mat.T[train].T
+            self.metadata_mat.index = range(len(train))
 
         self.sample_ids_cv = np.asarray(self.sample_ids)[test].tolist()
         self.sample_ids = np.asarray(self.sample_ids)[train].tolist()
@@ -647,6 +667,14 @@ class LoadData():
 
     def load_survival_test(self, survival_flag=None):
         """ """
+        if self.survival_tsv_test is None:
+            self.survival_test = np.empty(
+                shape=(len(self.sample_ids_test), 2))
+
+            self.survival_test[:] = np.nan
+
+            return
+
         if survival_flag is None:
             survival_flag = self.survival_flag
 

@@ -21,14 +21,13 @@ Welcome to DeepProg's documentation!
 Access
 ------
 
-The package is currently only available for reviewers and will become accessible for everyone upon acceptance of the paper. The package is accessible at this link: https://gitlab.com/Grouumf/SimDeep. To access the package, it is required to log with the user name: **guest_opoirion** and the password: **guest2020**
-
+The package is accessible at this link: https://github.com/lanagarmire/DeepProg.
 
 Contribute
 ----------
 
-- Issue Tracker: gitlab.com/grouumf/simdeep/issues
-- Source Code: gitlab.com/grouumf/simdeep
+- Issue Tracker: github.com/lanagarmire/DeepProg/issues
+- Source Code: github.com/lanagarmire/DeepProg
 
 Support
 -------

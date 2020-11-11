@@ -62,6 +62,9 @@ import simplejson
 from distutils.dir_util import mkpath
 
 from os.path import isdir
+from os import mkdir
+
+from glob import glob
 
 import gc
 
@@ -125,6 +128,8 @@ class SimDeepBoosting():
             :path_to_save_model: path to save the model
             :metadata_usage: Meta data usage with survival models (if metadata_tsv provided as argument to the dataset). Possible choice are [None, False, 'labels', 'new-features', 'all', True] (True is the same as all)
             :subset_training_with_meta: Use a metadata key-value dict {meta_key:value} to subset the training sets
+            :alternative_embedding: alternative external embedding to use instead of building autoencoders (default None)
+            :kwargs_alternative_embedding: parameters for external embedding fitting
     """
     def __init__(self,
                  nb_it=NB_ITER,
@@ -169,6 +174,8 @@ class SimDeepBoosting():
                  clustering_omics=CLUSTERING_OMICS,
                  path_to_save_model=PATH_TO_SAVE_MODEL,
                  feature_selection_usage='individual',
+                 alternative_embedding=None,
+                 kwargs_alternative_embedding={},
                  **additional_dataset_args):
         """ """
         assert(class_selection in ['max', 'mean', 'weighted_mean', 'weighted_max'])
@@ -232,10 +239,15 @@ class SimDeepBoosting():
         self.feature_scores_per_cluster = {}
         self.survival_feature_scores_per_cluster = {}
 
+        self._pretrained_fit = False
+
         self.log = {}
 
         self.feature_train_array = None
         self.matrix_full_array = None
+
+        self.alternative_embedding = alternative_embedding
+        self.kwargs_alternative_embedding = kwargs_alternative_embedding
 
         ######## deepprog instance parameters ########
         self.nb_clusters = nb_clusters
@@ -295,7 +307,8 @@ class SimDeepBoosting():
         additional_dataset_args['survival_flag'] = self.survival_flag
 
         if 'fill_unkown_feature_with_0' in additional_dataset_args:
-            self.log['fill_unkown_feature_with_0'] = additional_dataset_args['fill_unkown_feature_with_0']
+            self.log['fill_unkown_feature_with_0'] = additional_dataset_args[
+                'fill_unkown_feature_with_0']
 
         self.ray = None
 
@@ -310,6 +323,8 @@ class SimDeepBoosting():
         """
         if self.seed:
             np.random.seed(self.seed)
+        else:
+            self.seed = np.random.randint(0, 10000000)
 
         max_seed = 1000
         min_seed = 0
@@ -415,16 +430,55 @@ class SimDeepBoosting():
         """
         self._fit(debug=debug)
 
-    def fit(self, debug=False, verbose=False):
+    def fit_on_pretrained_label_file(
+            self,
+            labels_files=[],
+            labels_files_folder="",
+            file_name_regex="*.tsv",
+            verbose=False,
+            debug=False,
+    ):
         """
+        fit a deepprog simdeep models without training autoencoders but using isntead  ID->labels files (one for each model instance)
         """
-        if self.distribute:
-            self._fit_distributed()
+        assert(isinstance((labels_files), list))
+
+        if not labels_files and not labels_files_folder:
+            raise Exception(
+                '## Error with fit_on_pretrained_label_file: ' \
+                ' either labels_files or labels_files_folder should be non empty')
+
+        if not labels_files:
+            labels_files = glob('{0}/{1}'.format(labels_files_folder,
+                                                 file_name_regex))
+
+        if not labels_files:
+            raise Exception('## Error: labels_files empty')
+
+        self.fit(
+            verbose=verbose,
+            debug=debug,
+            pretrained_labels_files=labels_files)
+
+    def fit(self, debug=False, verbose=False, pretrained_labels_files=[]):
+        """
+        if pretrained_labels_files, is given, the models are constructed using these labels
+        """
+        if pretrained_labels_files:
+            self._pretrained_fit = True
         else:
-            self._fit(debug=debug, verbose=verbose)
+            self._pretrained_fit = False
 
+        if self.distribute:
+            self._fit_distributed(
+                pretrained_labels_files=pretrained_labels_files)
+        else:
+            self._fit(
+                debug=debug,
+                verbose=verbose,
+                pretrained_labels_files=pretrained_labels_files)
 
-    def _fit_distributed(self):
+    def _fit_distributed(self, pretrained_labels_files=[]):
         """ """
         print('fit models...')
         start_time = time()
@@ -452,13 +506,32 @@ class SimDeepBoosting():
                 project_name=self.project_name,
                 classification_method=self.classification_method,
                 cindex_thres=self.cindex_thres,
+                alternative_embedding=self.alternative_embedding,
+                kwargs_alternative_embedding=self.kwargs_alternative_embedding,
                 node_selection=self.node_selection,
                 metadata_usage=self.metadata_usage,
                 feature_selection_usage=self.feature_selection_usage,
                 deep_model_additional_args=dataset._autoencoder_parameters)
                            for dataset in self.datasets]
 
-            results = ray.get([model._partial_fit_model_pool.remote() for model in self.models])
+            if pretrained_labels_files:
+                nb_files = len(pretrained_labels_files)
+                if nb_files < len(self.models):
+                    print(
+                        'Number of pretrained label files' \
+                        ' inferior to number of instance{0}'.format(
+                            nb_files))
+                    self.models = self.models[:nb_files]
+
+                results = ray.get([
+                    model._partial_fit_model_with_pretrained_pool.remote(
+                        labels)
+                    for model, labels in zip(self.models,
+                                             pretrained_labels_files)])
+            else:
+                results = ray.get([
+                    model._partial_fit_model_pool.remote()
+                    for model in self.models])
 
             print("Results: {0}".format(results))
             self.models = [model for model, is_fitted in zip(self.models, results) if is_fitted]
@@ -481,8 +554,10 @@ class SimDeepBoosting():
             if self.class_selection in ['weighted_mean', 'weighted_max']:
                 self.collect_cindex_for_test_fold()
 
-    def _fit(self, debug=False, verbose=False):
-        """ """
+    def _fit(self, debug=False, verbose=False, pretrained_labels_files=[]):
+        """
+        if pretrained_labels_files, is given, the models are constructed using these labels
+        """
         print('fit models...')
         start_time = time()
 
@@ -505,11 +580,26 @@ class SimDeepBoosting():
                 node_selection=self.node_selection,
                 metadata_usage=self.metadata_usage,
                 feature_selection_usage=self.feature_selection_usage,
+                alternative_embedding=self.alternative_embedding,
+                kwargs_alternative_embedding=self.kwargs_alternative_embedding,
                 classification_method=self.classification_method,
                 deep_model_additional_args=dataset._autoencoder_parameters)
                            for dataset in self.datasets]
 
-            results = [model._partial_fit_model_pool() for model in self.models]
+            if pretrained_labels_files:
+                nb_files = len(pretrained_labels_files)
+                if nb_files < len(self.models):
+                    print(
+                        'Number of pretrained label files' \
+                        ' inferior to number of instance{0}'.format(
+                        nb_files))
+                    self.models = self.models[:nb_files]
+
+                results = [
+                    model._partial_fit_model_with_pretrained_pool(labels)
+                    for model, labels in zip(self.models, pretrained_labels_files)]
+            else:
+                results = [model._partial_fit_model_pool() for model in self.models]
 
             print("Results: {0}".format(results))
             self.models = [model for model, is_fitted in zip(self.models, results) if is_fitted]
@@ -536,16 +626,24 @@ class SimDeepBoosting():
         """
         """
         print('predict labels on test datasets...')
-        test_labels_proba = np.asarray(self._from_models_attr('test_labels_proba'))
+        test_labels_proba = np.asarray(self._from_models_attr(
+            'test_labels_proba'))
 
-        res = self._do_class_selection(test_labels_proba, weights=self.cindex_test_folds)
+        res = self._do_class_selection(
+            test_labels_proba,
+            weights=self.cindex_test_folds)
         self.test_labels, self.test_labels_proba = res
 
-        print('#### report of assigned cluster:')
-        for key, value in Counter(self.test_labels).items():
+        print('#### Report of assigned cluster for TEST dataset {0}:'.format(
+            self.test_fname_key))
+        for key, value in sorted(Counter(self.test_labels).items()):
             print('class: {0}, number of samples :{1}'.format(key, value))
 
         nbdays, isdead = self._from_model_dataset(self.models[0], "survival_test").T.tolist()
+
+        if np.isnan(nbdays).all():
+            return np.nan, np.nan
+
         pvalue, pvalue_proba, pvalue_cat = self._compute_test_coxph(
             'KM_plot_boosting_test',
             nbdays, isdead,
@@ -559,11 +657,11 @@ class SimDeepBoosting():
         sample_id_test = self._from_model_dataset(self.models[0], 'sample_ids_test')
 
         self._from_model(self.models[0], '_write_labels',
-            sample_id_test,
-            self.test_labels,
-            '{0}_test_labels'.format(self.project_name),
-            labels_proba=self.test_labels_proba.T[0],
-            nbdays=nbdays, isdead=isdead)
+                         sample_id_test,
+                         self.test_labels,
+                         '{0}_test_labels'.format(self.project_name),
+                         labels_proba=self.test_labels_proba.T[0],
+                         nbdays=nbdays, isdead=isdead)
 
         return pvalue, pvalue_proba
 
@@ -582,6 +680,11 @@ class SimDeepBoosting():
 
         for model in self.models:
             survival_cv = self._from_model_dataset(model, 'survival_cv')
+
+            if survival_cv is None:
+                print('No survival dataset for CV fold returning')
+                return
+
             nbdays, isdead = survival_cv.T.tolist()
             nbdays_cv += nbdays
             isdead_cv += isdead
@@ -804,8 +907,8 @@ class SimDeepBoosting():
         self._get_probas_for_full_models()
         self._reorder_survival_full_and_metadata()
 
-        print('#### report of assigned cluster:')
-        for key, value in Counter(self.full_labels).items():
+        print('#### Report of assigned cluster for the full training dataset:')
+        for key, value in sorted(Counter(self.full_labels).items()):
             print('class: {0}, number of samples :{1}'.format(key, value))
 
         nbdays, isdead = self.survival_full.T.tolist()
@@ -989,6 +1092,11 @@ class SimDeepBoosting():
         """
         days_full, dead_full = np.asarray(self.survival_full).T
         days_test, dead_test = self._from_model_dataset(self.models[0], 'survival_test').T
+
+        if np.isnan(days_test).all():
+            print("Cannot compute C-index for test dataset. Need test survival file")
+            return
+
         labels_test_categorical = self._labels_proba_to_labels(self.test_labels_proba)
 
         if isinstance(days_test, np.matrix):
@@ -1262,8 +1370,8 @@ class SimDeepBoosting():
         return encoder_key
 
     def load_new_test_dataset(self, tsv_dict,
-                              path_survival_file,
                               fname_key=None,
+                              path_survival_file=None,
                               normalization=None,
                               debug=False,
                               verbose=False,
@@ -1288,7 +1396,8 @@ class SimDeepBoosting():
 
         self.test_fname_key = fname_key
 
-        print("Loading new test dataset...")
+        print("Loading new test dataset {0} ...".format(
+            self.test_fname_key))
         t_start = time()
 
         self._from_models('_predict_new_dataset',
@@ -1299,7 +1408,8 @@ class SimDeepBoosting():
                           metadata_file=metadata_file
         )
 
-        print("Test dataset loaded in {0} s".format(time() - t_start))
+        print("Test dataset {1} loaded in {0} s".format(
+            time() - t_start, self.test_fname_key))
 
         if fname_key:
             self.project_name = '{0}_{1}'.format(self._project_name, fname_key)
@@ -1322,7 +1432,7 @@ class SimDeepBoosting():
         def generator(feature_list, matrix):
             for i in range(len(feature_list)):
                 yield (feature_list[i],
-                       matrix[i],
+                       np.asarray(matrix[i]).reshape(-1),
                        self.survival_full,
                        metadata_mat,
                        pval_thres)
@@ -1427,6 +1537,11 @@ class SimDeepBoosting():
     def evalutate_cluster_performance(self):
         """
         """
+        if self._pretrained_fit:
+            print('model is fitted on pretrained labels' \
+                  ' Cannot evaluate cluster performance')
+            return
+
         bic_scores = np.array([self._from_model_attr(model, 'bic_score') for model in self.models])
 
         if bic_scores[0] is not None:
@@ -1455,6 +1570,76 @@ class SimDeepBoosting():
         self.log['calinski'] = calinski
 
         return bic, silhouette, calinski
+
+    def save_cv_models_classes(self, path_results=""):
+        """
+        """
+        self.save_models_classes(path_results=path_results,
+                                 use_cv_labels=True)
+
+    def save_test_models_classes(self, path_results=""):
+        """
+        """
+        self.save_models_classes(path_results=path_results,
+                                 use_test_labels=True)
+
+    def save_models_classes(self, path_results="",
+                            use_cv_labels=False,
+                            use_test_labels=False):
+        """
+        """
+        if not path_results:
+            if use_test_labels:
+                path_results = '{0}/saved_models_test_classes'.format(
+                    self.path_results)
+            elif use_cv_labels:
+                path_results = '{0}/saved_models_cv_classes'.format(
+                    self.path_results)
+            else:
+                path_results = '{0}/saved_models_classes'.format(
+                    self.path_results)
+
+        if not isdir(path_results):
+            mkdir(path_results)
+
+        for i, model in enumerate(self.models):
+            if use_test_labels:
+                labels = self._from_model_attr(model, 'test_labels')
+                labels_proba = self._from_model_attr(model, 'test_labels_proba')
+                sample_ids = self._from_model_dataset(model, 'sample_ids_test')
+                survival = self._from_model_dataset(model, 'survival_test')
+            elif use_cv_labels:
+                labels = self._from_model_attr(model, 'cv_labels')
+                labels_proba = self._from_model_attr(model, 'cv_labels_proba')
+                sample_ids = self._from_model_dataset(model, 'sample_ids_cv')
+                survival = self._from_model_dataset(model, 'survival_cv')
+            else:
+                labels = self._from_model_attr(model, 'labels')
+                labels_proba = self._from_model_attr(model, 'labels_proba')
+                sample_ids = self._from_model_dataset(model, 'sample_ids')
+                survival = self._from_model_dataset(model, 'survival')
+
+            seed = self._from_model_attr(model, 'seed')
+
+            nbdays, isdead = survival.T.tolist()
+
+            if not seed:
+                seed = i
+
+            path_file = '{0}/model_instance_{1}.tsv'.format(
+                path_results, seed)
+
+            labels_proba = labels_proba.T[0]
+
+            self._from_model(
+                model, '_write_labels',
+                sample_ids,
+                labels,
+                path_file=path_file,
+                labels_proba=labels_proba,
+                nbdays=nbdays, isdead=isdead)
+
+        print('individual model labels saved at: {0}'.format(path_results))
 
     def _convert_logs(self):
         """

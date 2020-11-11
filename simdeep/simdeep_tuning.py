@@ -15,6 +15,11 @@ import pandas as pd
 
 from tabulate import tabulate
 
+from os.path import isdir
+from os import mkdir
+
+from distutils.dir_util import mkpath
+
 
 class SimDeepTuning(object):
     """
@@ -52,11 +57,27 @@ class SimDeepTuning(object):
 
         self.results = pd.DataFrame()
 
+        self.path_results = '{0}/{1}'.format(
+            path_results, project_name)
+
+        self._path_models = '{0}/{1}/models'.format(
+            path_results, project_name)
+
+        if not isdir(self.path_results):
+            mkpath(self.path_results)
+
+        if not isdir(self._path_models):
+            mkdir(self._path_models)
+
     def _objective_only_training(self, config, reporter):
         """
         """
         for i in range(config["iterations"]):
             # norm = dict(config['normalization'])
+            trial_id = "{0}_it{1}".format(reporter._trial_id, i)
+            print("#### Trial ID {0} ########".format(trial_id))
+            path_results = "{0}".format(self._path_models)
+
             print('# CONFIG: {0}'.format(config))
 
             args = dict(self.deepProgBaseArgs)
@@ -69,8 +90,8 @@ class SimDeepTuning(object):
                 args['normalization'] = norm
 
             boosting = SimDeepBoosting(
-                path_results=self.path_results,
-                project_name=self.project_name,
+                path_results=path_results,
+                project_name=trial_id,
                 distribute=self._distribute_deepprog,
                 **args
             )
@@ -86,6 +107,13 @@ class SimDeepTuning(object):
              sum_log_pval,
              mix_score, error) = self._return_scores(
                  boosting)
+
+            boosting.save_models_classes()
+
+            try:
+                boosting.write_logs()
+            except Exception:
+                pass
 
             for key in self.test_datasets:
                 test_dataset, survival = self.test_datasets[key]
@@ -113,6 +141,7 @@ class SimDeepTuning(object):
                 mix_score=mix_score,
                 log_test_pval=log_test_pval,
                 test_cindex=np.mean(test_cindexes),
+                trial_name=trial_id,
                 test_consisentcy=np.mean(test_consisentcies)
             )
 
@@ -138,10 +167,13 @@ class SimDeepTuning(object):
             else:
                 metadata_file = None
 
+            print("#### TUNING: loading new test daaset: TSVS: {0} SURVIVAL: {1}"\
+                  .format(test_dataset, survival))
+
             boosting.load_new_test_dataset(
-                test_dataset, # OMIC file of the second test set.
-                survival, # Survival file of the test set
-                'test_dataset', # Name of the second test test
+                tsv_dict=test_dataset, # OMIC file of the second test set.
+                path_survival_file=survival, # Survival file of the test set
+                fname_key='test_dataset', # Name of the second test test
                 survival_flag=survival_flag,
                 metadata_file=metadata_file,
             )
@@ -285,11 +317,19 @@ class SimDeepTuning(object):
         )
 
         index = ['config/' + key for key in self.args_to_optimize]
-        index += [metric, "full_pvalue"]
+        index = ['trial_name'] + index + [metric, "full_pvalue"]
+
+        df = self.results.dataframe()[index]
 
         print('#### best results obtained with:\n{0}'.format(
-            tabulate(self.results.dataframe()[index], headers='keys', tablefmt='psql')
+            tabulate(df, headers='keys', tablefmt='psql')
         ))
+
+        fname = '{0}/{1}_hyperparameter_scores_summary.tsv'.format(
+            self.path_results, self.project_name)
+
+        df.to_csv(fname, sep="\t")
+        print('File :{0} written'.format(fname))
 
     def get_results_table(self):
         """
@@ -305,6 +345,6 @@ class SimDeepTuning(object):
         fname = '{0}/{1}{2}_hyperparameters.tsv'.format(
             self.path_results, self.project_name, tag)
 
-        self.results.dataframe().to_csv(fname)
+        self.results.dataframe().to_csv(fname, sep="\t")
 
         print('File :{0} written'.format(fname))

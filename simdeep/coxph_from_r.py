@@ -150,8 +150,7 @@ def coxph_from_python(
                 warnings.simplefilter("ignore")
                 cph.fit(frame, "nbdays", "isdead")
 
-        except Exception as e:
-            print(e)
+        except Exception:
             return np.nan
 
     pvalue = cph.log_likelihood_ratio_test().p_value
@@ -165,7 +164,8 @@ def coxph_from_python(
 
         for label in set(values):
             kaplan.fit(
-                values[values==label],
+                #values[values==label],
+                nbdays[values==label],
                 event_observed=isdead[values==label],
                 label='cluster nb. {0}'.format(label)
             )
@@ -173,16 +173,17 @@ def coxph_from_python(
             kaplan.plot(ax=ax,
                         ci_alpha=0.15)
 
-            ax.set_xlabel('time unit')
-            ax.set_title('pval.: {0: .1e} CI: {1: .2f}'.format(
-                pvalue, cindex),
-                         fontsize=16,
-                         fontweight='bold')
+        ax.set_xlabel('time unit')
+        ax.set_title('pval.: {0: .1e} CI: {1: .2f}'.format(
+            pvalue, cindex),
+                     fontsize=16,
+                     fontweight='bold')
 
         figname = "{0}/{1}.png".format(
             png_path, fig_name.replace('.png', ''))
 
         fig.savefig(figname)
+        print('Figure saved in: {0}'.format(figname))
 
     return pvalue
 

@@ -39,11 +39,12 @@ from simdeep.survival_utils import _process_parallel_coxph
 from simdeep.survival_utils import _process_parallel_cindex
 from simdeep.survival_utils import _process_parallel_feature_importance
 from simdeep.survival_utils import _process_parallel_feature_importance_per_cluster
-
 from simdeep.survival_utils import select_best_classif_params
 
 from simdeep.simdeep_utils import metadata_usage_type
 from simdeep.simdeep_utils import feature_selection_usage_type
+
+from simdeep.simdeep_utils import load_labels_file
 
 from simdeep.coxph_from_r import coxph
 from simdeep.coxph_from_r import c_index
@@ -56,7 +57,8 @@ from collections import Counter
 from sklearn.metrics import silhouette_score
 
 try:
-    from sklearn.metrics import calinski_harabasz_score as calinski_harabaz_score
+    from sklearn.metrics import calinski_harabasz_score \
+        as calinski_harabaz_score
 except Exception:
     from sklearn.metrics import calinski_harabaz_score
 
@@ -107,7 +109,8 @@ class SimDeep(DeepBase):
              :path_to_save_model: (default PATH_TO_SAVE_MODEL)
              :metadata_usage: Meta data usage with survival models (if metadata_tsv provided as argument to the dataset). Possible choice are [None, False, 'labels', 'new-features', 'all', True] (True is the same as all)
              :feature_selection_usage: selection method for survival features ('individual' or 'lasso')
-
+             :alternative_embedding: alternative external embedding to use instead of builfing autoencoders (default None)
+             :kwargs_alternative_embedding: parameters for external embedding fitting
     """
     def __init__(self,
                  nb_clusters=NB_CLUSTERS,
@@ -132,10 +135,12 @@ class SimDeep(DeepBase):
                  metadata_usage=None,
                  feature_selection_usage='individual',
                  seed=SEED,
+                 alternative_embedding=None,
                  do_KM_plot=True,
                  verbose=True,
                  _isboosting=False,
                  dataset=None,
+                 kwargs_alternative_embedding={},
                  deep_model_additional_args={}):
         """
         """
@@ -152,6 +157,9 @@ class SimDeep(DeepBase):
         self.metadata_usage = metadata_usage_type(metadata_usage)
         self.feature_selection_usage = feature_selection_usage_type(
             feature_selection_usage)
+
+        self.alternative_embedding = alternative_embedding
+        self.kwargs_alternative_embedding = kwargs_alternative_embedding
 
         if self.path_results and not isdir(self.path_results):
             mkdir(self.path_results)
@@ -177,6 +185,7 @@ class SimDeep(DeepBase):
 
         self.classifier = None
         self.classifier_test = None
+        self.clustering = None
 
         self.classifier_dict = {}
 
@@ -191,6 +200,7 @@ class SimDeep(DeepBase):
         self.used_features_for_classif = None
 
         self._isboosting = _isboosting
+        self._pretrained_model = False
         self._is_fitted = False
 
         self.valid_node_ids_array = {}
@@ -212,6 +222,9 @@ class SimDeep(DeepBase):
         self.cv_labels_proba = None
         self.full_labels = None
         self.full_labels_proba = None
+
+        self.labels = None
+        self.labels_proba = None
 
         self.training_omic_list = []
         self.test_omic_list = []
@@ -239,6 +252,8 @@ class SimDeep(DeepBase):
         DeepBase.__init__(self,
                           verbose=self.verbose,
                           dataset=dataset,
+                          alternative_embedding=self.alternative_embedding,
+                          kwargs_alternative_embedding=self.kwargs_alternative_embedding,
                           **deep_model_additional_args)
 
     def _look_for_nodes(self, key):
@@ -260,8 +275,8 @@ class SimDeep(DeepBase):
             return self._look_for_prediction_nodes(key)
 
     def load_new_test_dataset(self, tsv_dict,
-                              path_survival_file,
                               fname_key=None,
+                              path_survival_file=None,
                               normalization=None,
                               survival_flag=None,
                               metadata_file=None):
@@ -298,17 +313,103 @@ class SimDeep(DeepBase):
         if fname_key:
             self.project_name = '{0}_{1}'.format(self._project_name, fname_key)
 
+    def fit_on_pretrained_label_file(self, label_file):
+        """
+        fit a deepprog simdeep model without training autoencoder but just using a ID->labels file to train a classifier
+        """
+        self._pretrained_model = True
+        self.use_autoencoders = False
+
+        self.dataset.load_array()
+        self.dataset.load_survival()
+
+        labels_dict = load_labels_file(label_file)
+
+        train, test, labels, labels_proba = [], [], [], []
+
+        for index, sample in enumerate(self.dataset.sample_ids):
+
+            if sample in labels_dict:
+                train.append(index)
+                label, label_proba = labels_dict[sample]
+
+                labels.append(label)
+                labels_proba.append(label_proba)
+
+            else:
+                test.append(index)
+
+        if test:
+            self.dataset.cross_validation_instance = (train, test)
+        else:
+            self.dataset.cross_validation_instance = None
+
+        self.dataset.create_a_cv_split()
+        self.dataset.normalize_training_array()
+
+        self.matrix_train_array = self.dataset.matrix_train_array
+
+        for key in self.matrix_train_array:
+            self.matrix_train_array[key] = self.matrix_train_array[key].astype('float32')
+
+        self.training_omic_list = self.dataset.training_tsv.keys()
+
+        self.predict_labels_using_external_labels(labels, labels_proba)
+
+        self.used_normalization = {key: self.dataset.normalization[key]
+                                   for key in self.dataset.normalization
+                                   if self.dataset.normalization[key]}
+
+        self.used_features_for_classif = self.dataset.feature_train_array
+        self.look_for_survival_nodes()
+        self.fit_classification_model()
+
+    def predict_labels_using_external_labels(self, labels, labels_proba):
+        """
+        """
+        self.labels = labels
+        nb_clusters = len(set(self.labels))
+        self.labels_proba = np.array([labels_proba for _ in range(nb_clusters)]).T
+
+        nbdays, isdead = self.dataset.survival.T.tolist()
+
+        pvalue = coxph(self.labels, isdead, nbdays,
+                       isfactor=False,
+                       do_KM_plot=self.do_KM_plot,
+                       png_path=self.path_results,
+                       seed=self.seed,
+                       fig_name='{0}_KM_plot_training_dataset'.format(self.project_name))
+
+        pvalue_proba = coxph(self.labels_proba.T[0], isdead, nbdays,
+                             seed=self.seed,
+                             isfactor=False)
+
+        if not self._isboosting:
+            self._write_labels(self.dataset.sample_ids, self.labels,
+                               labels_proba=self.labels_proba.T[0],
+                               fname='{0}_training_set_labels'.format(self.project_name))
+
+        if self.verbose:
+            print('Cox-PH p-value (Log-Rank) for the cluster labels: {0}'.format(pvalue))
+
+        self.train_pvalue = pvalue
+        self.train_pvalue_proba = pvalue_proba
+
     def fit(self):
         """
         main function
-        construct an autoencoder, predict nodes linked with survival
-        and do clustering
+        I) construct an autoencoder or fit alternative embedding
+        II) predict nodes linked with survival (if active)
+        and III) do clustering
         """
         if self._load_existing_models:
             self.load_encoders()
 
         if not self.is_model_loaded:
-            self.construct_autoencoders()
+            if self.alternative_embedding is not None:
+                self.fit_alternative_embedding()
+            else:
+                self.construct_autoencoders()
 
         self.look_for_survival_nodes()
 
@@ -356,9 +457,10 @@ class SimDeep(DeepBase):
         self.cv_pvalue = pvalue
         self.cv_pvalue_proba = pvalue_proba
 
-        self._write_labels(self.dataset.sample_ids_cv, self.cv_labels,
-                           labels_proba=self.cv_labels_proba.T[0],
-                           fname='{0}_test_fold_labels'.format(self.project_name))
+        if not self._isboosting:
+            self._write_labels(self.dataset.sample_ids_cv, self.cv_labels,
+                               labels_proba=self.cv_labels_proba.T[0],
+                               fname='{0}_test_fold_labels'.format(self.project_name))
 
         return self.cv_labels, pvalue, pvalue_proba
 
@@ -394,16 +496,18 @@ class SimDeep(DeepBase):
         self.full_pvalue = pvalue
         self.full_pvalue_proba = pvalue_proba
 
-        self._write_labels(self.dataset.sample_ids_full, self.full_labels,
-                           labels_proba=self.full_labels_proba.T[0],
-                           fname='{0}_full_labels'.format(self.project_name))
+        if not self._isboosting:
+            self._write_labels(self.dataset.sample_ids_full, self.full_labels,
+                               labels_proba=self.full_labels_proba.T[0],
+                               fname='{0}_full_labels'.format(self.project_name))
 
         return self.full_labels, pvalue, pvalue_proba
 
     def predict_labels_on_test_dataset(self):
         """
         """
-        nbdays, isdead = self.dataset.survival_test.T.tolist()
+        if self.dataset.survival_test is not None:
+            nbdays, isdead = self.dataset.survival_test.T.tolist()
 
         self.test_omic_list = list(self.dataset.matrix_test_array.keys())
         self.test_omic_list = list(set(self.test_omic_list).intersection(
@@ -441,9 +545,20 @@ class SimDeep(DeepBase):
         self.test_pvalue = pvalue
         self.test_pvalue_proba = pvalue_proba
 
-        self._write_labels(self.dataset.sample_ids_test, self.test_labels,
-                           labels_proba=self.test_labels_proba.T[0],
-                           fname='{0}_test_labels'.format(self.project_name))
+        if self.dataset.survival_test is not None:
+            if np.isnan(nbdays).all():
+                pvalue, pvalue_proba = self._compute_test_coxph(
+                    'KM_plot_test',
+                    nbdays, isdead,
+                    self.test_labels, self.test_labels_proba)
+
+                self.test_pvalue = pvalue
+                self.test_pvalue_proba = pvalue_proba
+
+        if not self._isboosting:
+            self._write_labels(self.dataset.sample_ids_test, self.test_labels,
+                               labels_proba=self.test_labels_proba.T[0],
+                               fname='{0}_test_labels'.format(self.project_name))
 
         return self.test_labels, pvalue, pvalue_proba
 
@@ -593,12 +708,11 @@ class SimDeep(DeepBase):
         print('{0} written'.format(f_file_name))
         print('{0} written'.format(f_anti_name))
 
-
     def write_feature_scores(self):
         """
         """
         with open('{0}/{1}_features_scores.tsv'.format(
-            self.path_results, self.project_name), 'w') as f_file:
+                self.path_results, self.project_name), 'w') as f_file:
 
             for key in self.feature_scores:
                 f_file.write('#### {0} ####\n'.format(key))
@@ -615,16 +729,20 @@ class SimDeep(DeepBase):
         assert (self.classification_method in _CLASSIFICATION_METHOD_LIST)
 
         if self.verbose:
-            print('classification method: {0}'.format(self.classification_method))
+            print('classification method: {0}'.format(
+                self.classification_method))
 
         if self.classification_method == 'SURVIVAL_FEATURES':
             assert(self.classifier_type != 'clustering')
-            matrix = self._predict_survival_nodes(self.dataset.matrix_ref_array)
+            matrix = self._predict_survival_nodes(
+                self.dataset.matrix_ref_array)
         elif self.classification_method == 'ALL_FEATURES':
-            matrix = self._reduce_and_stack_matrices(self.dataset.matrix_ref_array)
+            matrix = self._reduce_and_stack_matrices(
+                self.dataset.matrix_ref_array)
 
         if self.verbose:
-            print('number of features for the classifier: {0}'.format(matrix.shape[1]))
+            print('number of features for the classifier: {0}'.format(
+                matrix.shape[1]))
 
         return np.nan_to_num(matrix)
 
@@ -643,6 +761,7 @@ class SimDeep(DeepBase):
                          self.feature_scores[key][:self.nb_selected_features]
                          if feature in self.dataset.feature_ref_index[key]
                 ]
+
                 matrix.append(matrices[key].T[index].T)
 
             return hstack(matrix)
@@ -666,7 +785,8 @@ class SimDeep(DeepBase):
             warnings.simplefilter("ignore")
             self.classifier_grid.fit(train_matrix, labels)
 
-        self.classifier, params = select_best_classif_params(self.classifier_grid)
+        self.classifier, params = select_best_classif_params(
+            self.classifier_grid)
 
         self.classifier.set_params(probability=True)
         self.classifier.fit(train_matrix, labels)
@@ -677,7 +797,8 @@ class SimDeep(DeepBase):
             cvs = cross_val_score(self.classifier, train_matrix, labels, cv=5)
             print('best params:', params)
             print('cross val score: {0}'.format(np.mean(cvs)))
-            print('classification score:', self.classifier.score(train_matrix, labels))
+            print('classification score:', self.classifier.score(
+                train_matrix, labels))
 
     def fit_classification_test_model(self):
         """ """
@@ -815,9 +936,10 @@ class SimDeep(DeepBase):
                              metadata_mat=metadata_mat,
                              isfactor=False)
 
-        self._write_labels(self.dataset.sample_ids, self.labels,
-                           labels_proba=self.labels_proba.T[0],
-                           fname='{0}_training_set_labels'.format(self.project_name))
+        if not self._isboosting:
+            self._write_labels(self.dataset.sample_ids, self.labels,
+                               labels_proba=self.labels_proba.T[0],
+                               fname='{0}_training_set_labels'.format(self.project_name))
 
         if self.verbose:
             print('Cox-PH p-value (Log-Rank) for the cluster labels: {0}'.format(pvalue))
@@ -828,6 +950,10 @@ class SimDeep(DeepBase):
     def evalutate_cluster_performance(self):
         """
         """
+        if not self.clustering:
+            print('clustering attribute is defined as None. ' \
+                   ' Cannot evaluate cluster performance')
+            return
 
         if self.cluster_method == 'mixture':
             self.bic_score = self.clustering.bic(self.activities_train)
@@ -840,10 +966,18 @@ class SimDeep(DeepBase):
             print('calinski-harabaz score: {0}'.format(self.calinski_score))
             print('bic score: {0}'.format(self.bic_score))
 
-    def _write_labels(self, sample_ids, labels, fname,
-                      labels_proba=None, nbdays=None, isdead=None):
+    def _write_labels(self, sample_ids, labels, fname="",
+                      labels_proba=None,
+                      nbdays=None,
+                      isdead=None,
+                      path_file=None):
         """ """
-        with open('{0}/{1}.tsv'.format(self.path_results, fname), 'w') as f_file:
+        assert(fname or path_file)
+
+        if not path_file:
+            path_file = '{0}/{1}.tsv'.format(self.path_results, fname)
+
+        with open(path_file, 'w') as f_file:
             for ids, (sample, label) in enumerate(zip(sample_ids, labels)):
                 suppl = ''
 
@@ -856,6 +990,8 @@ class SimDeep(DeepBase):
 
                 f_file.write('{0}\t{1}{2}\n'.format(sample, label, suppl))
 
+        print('file written: {0}'.format(path_file))
+
     def _predict_survival_nodes(self, matrix_array, keys=None):
         """
         """
@@ -866,14 +1002,17 @@ class SimDeep(DeepBase):
 
         for key in keys:
             matrix = matrix_array[key]
+            if not self._pretrained_model:
+                if self.alternative_embedding is  None and \
+                   self.encoder_input_shape(key)[1] != matrix.shape[1]:
+                    if self.verbose:
+                        print('matrix doesnt have the input dimension of the encoder'\
+                              ' returning None')
+                    return None
 
-            if self.encoder_input_shape(key)[1] != matrix.shape[1]:
-                if self.verbose:
-                    print('matrix doesnt have the input dimension of the encoder'\
-                          ' returning None')
-                return None
-
-            if self.use_autoencoders:
+            if self.alternative_embedding is not None:
+                activities = self.embedding_predict(key, matrix)
+            elif self.use_autoencoders:
                 activities = self.encoder_predict(key, matrix)
             else:
                 activities = np.asarray(matrix)
@@ -891,10 +1030,15 @@ class SimDeep(DeepBase):
         if not keys:
             keys = list(self.encoder_array.keys())
 
+            if not keys:
+                keys = self.matrix_train_array.keys()
+
         for key in keys:
             matrix_train = self.matrix_train_array[key]
 
-            if self.use_autoencoders:
+            if self.alternative_embedding is not None:
+                activities = self.embedding_predict(key, matrix_train)
+            elif self.use_autoencoders:
                 activities = self.encoder_predict(key, matrix_train)
             else:
                 activities = np.asarray(matrix_train)
@@ -924,7 +1068,9 @@ class SimDeep(DeepBase):
         for key in keys:
             matrix_train = self.matrix_train_array[key]
 
-            if self.use_autoencoders:
+            if self.alternative_embedding is not None:
+                activities = self.embedding_predict(key, matrix_train)
+            elif self.use_autoencoders:
                 activities = self.encoder_predict(key, matrix_train)
             else:
                 activities = np.asarray(matrix_train)
@@ -953,9 +1099,16 @@ class SimDeep(DeepBase):
         for key in self.dataset.matrix_test_array:
             node_ids = self.pred_node_ids_array[key]
 
-            if self.use_autoencoders:
+            matrix = self.dataset.matrix_test_array[key]
+
+            if self.alternative_embedding is not None:
+                activities_test[key] = self.embedding_predict(
+                    key, matrix).T[node_ids].T
+
+            elif self.use_autoencoders:
                 activities_test[key] = self.encoder_predict(
-                    key, self.dataset.matrix_test_array[key]).T[node_ids].T
+                    key, matrix).T[node_ids].T
+
             else:
                 activities_test[key] = self.dataset.matrix_test_array[key]
 
@@ -984,9 +1137,14 @@ class SimDeep(DeepBase):
         for key in self.dataset.matrix_cv_array:
             node_ids = self.pred_node_ids_array[key]
 
-            if self.use_autoencoders:
+            if self.alternative_embedding is not None:
+                activities_cv[key] = self.embedding_predict(
+                    key, self.dataset.matrix_cv_array[key]).T[node_ids].T
+
+            elif self.use_autoencoders:
                 activities_cv[key] = self.encoder_predict(
                     key, self.dataset.matrix_cv_array[key]).T[node_ids].T
+
             else:
                 activities_cv[key] = self.dataset.matrix_cv_array[key]
 
@@ -1121,9 +1279,14 @@ class SimDeep(DeepBase):
         if key is not None:
             matrix_train = self.matrix_train_array[key]
 
-            if self.use_autoencoders:
-                activities = np.nan_to_num(
-                    self.encoder_predict(key, matrix_train))
+            if self.alternative_embedding is not None:
+                activities = np.nan_to_num(self.embedding_predict(
+                    key, matrix_train))
+
+            elif self.use_autoencoders:
+                activities = np.nan_to_num(self.encoder_predict(
+                    key, matrix_train))
+
             else:
                 activities = np.asarray(matrix_train)
         else:
@@ -1193,7 +1356,11 @@ class SimDeep(DeepBase):
         matrix_train = self.matrix_train_array[key]
         matrix_cv = self.dataset.matrix_cv_array[key]
 
-        if self.use_autoencoders:
+        if self.alternative_embedding is not None:
+            activities_train = self.embedding_predict(key, matrix_train)
+            activities_cv = self.embedding_predict(key, matrix_cv)
+
+        elif self.use_autoencoders:
             activities_train = self.encoder_predict(key, matrix_train)
             activities_cv = self.encoder_predict(key, matrix_cv)
         else:
@@ -1313,7 +1480,14 @@ class SimDeep(DeepBase):
 
             node_ids = self.pred_node_ids_array[key]
 
-            activities.append(self.encoder_predict(key, matrix_array[key]).T[node_ids].T)
+            if self.alternative_embedding is not None:
+                activities.append(
+                    self.embedding_predict(
+                        key, matrix_array[key]).T[node_ids].T)
+            else:
+                activities.append(
+                    self.encoder_predict(
+                        key, matrix_array[key]).T[node_ids].T)
 
         return hstack(activities)
 
@@ -1467,8 +1641,10 @@ class SimDeep(DeepBase):
             metadata_mat = None
 
         for key in encoder_array:
-            matrix_ref = self.encoder_predict(key, dataset.matrix_ref_array[key])
-            matrix_test = self.encoder_predict(key, dataset.matrix_test_array[key])
+            matrix_ref = encoder_array[key].predict(
+                dataset.matrix_ref_array[key])
+            matrix_test = encoder_array[key].predict(
+                dataset.matrix_test_array[key])
 
             survival_node_ids = self._look_for_survival_nodes(
                 activities=matrix_ref, survival=dataset.survival,
@@ -1544,6 +1720,19 @@ class SimDeep(DeepBase):
 
         return self._is_fitted
 
+    def _partial_fit_model_with_pretrained_pool(self, labels_file):
+        """
+        """
+        self.fit_on_pretrained_label_file(labels_file)
+
+        self.predict_labels_on_test_fold()
+        self.predict_labels_on_full_dataset()
+        self.evalutate_cluster_performance()
+
+        self._is_fitted = True
+
+        return self._is_fitted
+
     def _predict_new_dataset(self,
                              tsv_dict,
                              path_survival_file,
@@ -1553,8 +1742,8 @@ class SimDeep(DeepBase):
         """
         """
         self.load_new_test_dataset(
-            tsv_dict,
-            path_survival_file,
+            tsv_dict=tsv_dict,
+            path_survival_file=path_survival_file,
             normalization=normalization,
             survival_flag=survival_flag,
             metadata_file=metadata_file
