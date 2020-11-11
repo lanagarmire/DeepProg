@@ -633,7 +633,7 @@ class LoadData():
                                                   self.metadata_frame_cv])
             self.metadata_mat_full = pd.concat([self.metadata_mat,
                                                   self.metadata_mat_cv])
-        self.metadata_mat_full.index = range(len(self.sample_ids_full))
+            self.metadata_mat_full.index = range(len(self.sample_ids_full))
 
         self._full_loaded = True
 
