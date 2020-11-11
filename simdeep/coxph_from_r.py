@@ -163,12 +163,14 @@ def coxph_from_python(
         kaplan = KaplanMeierFitter()
 
         for label in set(values):
-            kaplan.fit(
-                #values[values==label],
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+                kaplan.fit(
+                    #values[values==label],
                 nbdays[values==label],
-                event_observed=isdead[values==label],
-                label='cluster nb. {0}'.format(label)
-            )
+                    event_observed=isdead[values==label],
+                    label='cluster nb. {0}'.format(label)
+                )
 
             kaplan.plot(ax=ax,
                         ci_alpha=0.15)

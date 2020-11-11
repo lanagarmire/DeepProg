@@ -49,7 +49,7 @@ def test_instance():
         split_n_fold=3,
         survival_tsv=SURVIVAL_TSV,
         training_tsv=TRAINING_TSV,
-        metadata_tsv=OPTIONAL_METADATA, # optional
+        # metadata_tsv=OPTIONAL_METADATA, # optional
         path_data=PATH_DATA,
         project_name=PROJECT_NAME,
         path_results=PATH_DATA,
@@ -61,7 +61,7 @@ def test_instance():
         use_autoencoders=True,
         feature_surv_analysis=True,
         feature_selection_usage="lasso",
-        subset_training_with_meta=SUBSET_TRAINING_WITH_META,
+        # subset_training_with_meta=SUBSET_TRAINING_WITH_META,
         # stack_multi_omic=True,
         # path_to_save_model=PATH_TO_SAVE_MODEL,
         # pvalue_threshold=PVALUE_THRESHOLD,

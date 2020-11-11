@@ -54,6 +54,7 @@ class SimDeepTuning(object):
         self._distribute_deepprog = False
         self.normalization = normalization
         self.survival_flag_test = survival_flag_test
+        self.metadata_tsv_test = metadata_tsv_test
 
         self.results = pd.DataFrame()
 
