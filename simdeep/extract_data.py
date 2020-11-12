@@ -406,8 +406,8 @@ class LoadData():
         self.survival = self.survival[new_index]
 
         self.metadata_frame = self.metadata_frame.T[list(samples_subset)].T
-        self.metadata_mat = self.metadata_mat.T[new_index].T
-        self.metadata_mat.index = range(len(self.metadata_mat))
+        self.metadata_mat = convert_metadata_frame_to_matrix(
+            self.metadata_frame)
 
         self.sample_ids = list(samples_subset)
 
@@ -417,9 +417,10 @@ class LoadData():
             for key in self.matrix_cv_array:
                 self.matrix_cv_array[key] = self.matrix_cv_array[key][new_index_cv]
 
-            self.metadata_frame_cv = self.metadata_frame_cv.T[list(samples_subset_cv)].T
-            self.metadata_mat_cv = self.metadata_mat_cv.T[new_index_cv].T
-            self.metadata_mat_cv.index = range(len(self.metadata_mat_cv))
+            self.metadata_frame_cv = self.metadata_frame_cv.T[
+                list(samples_subset_cv)].T
+            self.metadata_mat_cv = convert_metadata_frame_to_matrix(
+                self.metadata_frame_cv)
 
             self.sample_ids_cv = list(samples_subset_cv)
             self.survival_cv = self.survival_cv[new_index_cv]
