@@ -174,7 +174,7 @@ class SimDeepTuning(object):
             boosting.load_new_test_dataset(
                 tsv_dict=test_dataset, # OMIC file of the second test set.
                 path_survival_file=survival, # Survival file of the test set
-                fname_key='test_dataset', # Name of the second test test
+                fname_key='test_dataset_{0}'.format(test_dataset), # Name of the second test test
                 survival_flag=survival_flag,
                 metadata_file=metadata_file,
             )

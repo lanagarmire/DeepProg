@@ -4,6 +4,8 @@ import numpy as np
 
 from numpy import hstack
 
+import warnings
+
 from sklearn.preprocessing import RobustScaler
 
 def test():
@@ -106,7 +108,10 @@ class ClusterWithSurvival(object):
         self.coxph_python = CoxnetSurvivalAnalysis(
             l1_ratio=l1_ratio,
             fit_baseline_model=False)
-        self.coxph_python.fit(self.matrix, Y)
+
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            self.coxph_python.fit(self.matrix, Y)
 
         predictions = self.coxph_python.predict(matrix_test)
 
