@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-VERSION = '2.4.2'
+VERSION = '2.4.3'
 
 setup(name='garmire_simdeep',
       version=VERSION,
