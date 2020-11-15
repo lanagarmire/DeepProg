@@ -367,7 +367,7 @@ class LoadData():
     def subset_training_sets(self, change_cv=False):
         """ """
         if not self.subset_training_with_meta:
-            print("Not subsetting training dataset. No metadata values provided")
+            print("Not subsetting training dataset.")
             return
 
         if self.metadata_frame is None:

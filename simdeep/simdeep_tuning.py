@@ -116,11 +116,14 @@ class SimDeepTuning(object):
             except Exception:
                 pass
 
+            individual_pvals = {}
+
             for key in self.test_datasets:
                 test_dataset, survival = self.test_datasets[key]
                 (log_test_pval,
                  sum_log_pval,
-                 mix_score) = self._return_scores_test(
+                 mix_score,
+                 test_pval) = self._return_scores_test(
                      boosting, key,
                      test_dataset, survival,
                      test_cindexes,
@@ -129,6 +132,7 @@ class SimDeepTuning(object):
                      sum_log_pval,
                      mix_score,
                      error)
+                individual_pvals["test_pval_{0}".format(key)] = test_pval
 
             reporter(
                 timesteps_total=i,
@@ -143,7 +147,8 @@ class SimDeepTuning(object):
                 log_test_pval=log_test_pval,
                 test_cindex=np.mean(test_cindexes),
                 trial_name=trial_id,
-                test_consisentcy=np.mean(test_consisentcies)
+                test_consisentcy=np.mean(test_consisentcies),
+                **individual_pvals
             )
 
     def _return_scores_test(
@@ -207,7 +212,7 @@ class SimDeepTuning(object):
             mix_score *= log_test_pval * test_cindex * \
                 test_consisentcy
 
-        return log_test_pval, sum_log_pval, mix_score
+        return log_test_pval, sum_log_pval, mix_score, test_pval
 
     def _return_scores(self, boosting):
         """ """
@@ -318,7 +323,9 @@ class SimDeepTuning(object):
         )
 
         index = ['config/' + key for key in self.args_to_optimize]
-        index = ['trial_name'] + index + [metric, "full_pvalue"]
+        index = ['trial_name'] + index + \
+            ["test_pval_{0}".format(key)
+             for key in self.test_datasets] + [metric, "full_pvalue"]
 
         df = self.results.dataframe()[index]
 

@@ -692,12 +692,13 @@ class SimDeepBoosting():
 
             if metadata_mat is not None:
                 meta2 = self._from_model_dataset(model, 'metadata_mat_cv')
+
                 if not len(metadata_mat):
                     metadata_mat = meta2
                 else:
                     metadata_mat = pd.concat([metadata_mat, meta2])
 
-                metadata_mat.fillna(0, inplace=True)
+                metadata_mat = metadata_mat.fillna(0)
 
         pvalue = coxph(
             labels_cv, isdead_cv, nbdays_cv,
@@ -1649,6 +1650,10 @@ class SimDeepBoosting():
                 self.log[key] = float(self.log[key])
             elif isinstance(self.log[key], NALogicalType):
                 self.log[key] = np.nan
+            try:
+                str(self.log[key])
+            except Exception:
+                self.log.pop(key)
 
     def write_logs(self):
         """
