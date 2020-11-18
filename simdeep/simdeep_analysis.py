@@ -870,6 +870,15 @@ class SimDeep(DeepBase):
                 isdead=isdead,
                 nbdays=nbdays)
 
+        elif self.cluster_method == "coxPHMixture":
+            nbdays, isdead = self.dataset.survival.T.tolist()
+
+            self.clustering = ClusterWithSurvival(
+                n_clusters=self.nb_clusters,
+                use_gaussian_to_dichotomize=True,
+                isdead=isdead,
+                nbdays=nbdays)
+
         else:
             raise(Exception("No method fit and predict found for: {0}".format(
                 self.cluster_method)))

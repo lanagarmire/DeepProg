@@ -7,6 +7,7 @@ from numpy import hstack
 import warnings
 
 from sklearn.preprocessing import RobustScaler
+from sklearn.mixture import GaussianMixture
 
 def test():
     """
@@ -32,9 +33,6 @@ def test():
 
     coxph.fit(matrix, Y)
 
-    print(fit_and_dichotomise(res))
-    print(fit_and_dichotomise(coxph.predict(matrix)))
-
 
 class ClusterWithSurvival(object):
     """
@@ -44,6 +42,7 @@ class ClusterWithSurvival(object):
                  isdead, nbdays,
                  n_clusters=2,
                  metadata_mat = None,
+                 use_gaussian_to_dichotomize=False,
                  use_sksurv=True):
         "docstring"
 
@@ -54,6 +53,9 @@ class ClusterWithSurvival(object):
         self.n_clusters = n_clusters
         self.metadata_mat = metadata_mat
         self.matrix = None
+        self._glm = None
+        self._labels = None
+        self._use_gaussian_to_dichotomize = use_gaussian_to_dichotomize
 
     def get_nonzero_features(self, matrix):
         """
@@ -116,7 +118,7 @@ class ClusterWithSurvival(object):
         predictions = self.coxph_python.predict(matrix_test)
 
         if get_proba:
-            return get_proba_from_prediction(predictions)
+            return self._get_proba_from_prediction(predictions)
 
         if return_nonzero_features:
             for coef in self.coxph_python.coef_.T:
@@ -133,7 +135,7 @@ class ClusterWithSurvival(object):
             else:
                 return np.nonzero(coef)
 
-        return fit_and_dichotomise(
+        return self._fit_and_dichotomise(
             predictions,
             n_clusters=self.n_clusters)
 
@@ -144,40 +146,50 @@ class ClusterWithSurvival(object):
             self.matrix, self.isdead, self.nbdays, matrix_test)
 
         if get_proba:
-            return get_proba_from_prediction(predictions)
+            return self._get_proba_from_prediction(predictions)
 
-        return fit_and_dichotomise(predictions,
-                                   n_clusters=self.n_clusters)
+        return self._fit_and_dichotomise(
+            predictions,
+            n_clusters=self.n_clusters)
 
+    def _fit_and_dichotomise(self, predicted_time, n_clusters=2):
+        """
+        """
+        labels = np.zeros(predicted_time.shape)
+        predicted_time[predicted_time == 0] = np.inf
 
-def fit_and_dichotomise(predicted_time, n_clusters=2):
-    """
-    """
-    labels = np.zeros(predicted_time.shape)
-    predicted_time[predicted_time == 0] = np.inf
+        if self._use_gaussian_to_dichotomize:
+            glm = GaussianMixture(n_components=n_clusters)
+            self._labels = glm.fit_predict(predicted_time.reshape(1, -1).T)
+            self._glm = glm
 
-    for cluster in range(n_clusters):
-        percentile = 100 * (1.0 - 1.0 / (cluster + 1.0))
-        value = np.percentile(predicted_time, percentile)
-        labels[predicted_time >= value] = n_clusters - cluster
+            return self._labels
 
-    return labels
+        for cluster in range(n_clusters):
+            percentile = 100 * (1.0 - 1.0 / (cluster + 1.0))
+            value = np.percentile(predicted_time, percentile)
+            labels[predicted_time >= value] = n_clusters - cluster
 
-def get_proba_from_prediction(predicted_time, time_of_following=None):
-    """
-    time_of_following is used to compute the probability of the even happening
-    using the predicted values as referendce => proba = time_predicted / time_of_following
-    if None, time_of_following is computed using the std of time_predicted for all non zero
-    """
-    predicted_time = predicted_time.astype("float32")
+        return labels
 
-    if not time_of_following:
-        time_of_following = np.max(predicted_time[predicted_time != 0]) + \
-            np.std(predicted_time[predicted_time != 0])
+    def _get_proba_from_prediction(self, predicted_time, time_of_following=None):
+        """
+        time_of_following is used to compute the probability of the even happening
+        using the predicted values as referendce => proba = time_predicted / time_of_following
+        if None, time_of_following is computed using the std of time_predicted for all non zero
+        """
+        if self._glm is not None:
+            return self._glm.predict_proba(predicted_time.reshape(1, -1).T)
 
-    predicted_time[predicted_time == 0] = time_of_following
+        predicted_time = predicted_time.astype("float32")
 
-    return predicted_time / time_of_following
+        if not time_of_following:
+            time_of_following = np.max(predicted_time[predicted_time != 0]) + \
+                np.std(predicted_time[predicted_time != 0])
+
+        predicted_time[predicted_time == 0] = time_of_following
+
+        return predicted_time / time_of_following
 
 
 if __name__ == '__main__':

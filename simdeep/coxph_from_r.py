@@ -107,7 +107,7 @@ def coxph_from_python(
         png_path='./',
         metadata_mat=None,
         dichotomize_afterward=False,
-        fig_name='KM_plot.png',
+        fig_name='KM_plot.pdf',
         penalizer=0.01,
         l1_ratio=0.0,
         isfactor=False):
@@ -180,8 +180,8 @@ def coxph_from_python(
                      fontsize=16,
                      fontweight='bold')
 
-        figname = "{0}/{1}.png".format(
-            png_path, fig_name.replace('.png', ''))
+        figname = "{0}/{1}.pdf".format(
+            png_path, fig_name.replace('.pdf', '').replace('.png', ''))
 
         fig.savefig(figname)
         print('Figure saved in: {0}'.format(figname))
