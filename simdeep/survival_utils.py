@@ -290,7 +290,7 @@ def _load_data_from_tsv(
     if f_name in SEPARATOR:
         sep = SEPARATOR[f_name]
 
-    f_tsv = open(path_data + f_name)
+    f_tsv = open("{0}/{1}".format(path_data, f_name)
     header = f_tsv.readline().strip(sep + '\n').split(sep)
 
     feature_ids = ['{0}_{1}'.format(f_short, head)
