@@ -126,6 +126,7 @@ class LoadData():
 
         self.sample_ids_cv = []
         self.matrix_cv_array = {}
+        self.matrix_cv_unormalized_array = {}
         self.survival_cv = None
 
         self._cv_loaded = False
@@ -213,6 +214,8 @@ class LoadData():
                 matrix_ref, matrix_test, key,
             )
 
+            self.matrix_cv_unormalized_array[key] = \
+                self.matrix_cv_array[key].copy()
             self.matrix_cv_array[key] = matrix_test
 
         self._stack_multiomics(self.matrix_cv_array)
@@ -416,6 +419,10 @@ class LoadData():
                                            samples_subset_cv)
             for key in self.matrix_cv_array:
                 self.matrix_cv_array[key] = self.matrix_cv_array[key][new_index_cv]
+
+                if key in self.matrix_cv_unormalized_array:
+                    self.matrix_cv_unormalized_array[key] = self.matrix_cv_unormalized_array[
+                        key][new_index_cv]
 
             self.metadata_frame_cv = self.metadata_frame_cv.T[
                 list(samples_subset_cv)].T

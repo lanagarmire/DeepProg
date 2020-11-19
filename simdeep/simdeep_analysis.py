@@ -319,9 +319,12 @@ class SimDeep(DeepBase):
         """
         self._pretrained_model = True
         self.use_autoencoders = False
+        self.feature_surv_analysis = False
 
         self.dataset.load_array()
         self.dataset.load_survival()
+        self.dataset.load_meta_data()
+        self.dataset.subset_training_sets()
 
         labels_dict = load_labels_file(label_file)
 
@@ -780,6 +783,9 @@ class SimDeep(DeepBase):
 
         if self.verbose:
             print('classification analysis...')
+
+        if isinstance(self.seed, int):
+            np.random.seed(self.seed)
 
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")

@@ -55,6 +55,8 @@ from simdeep.config import PATH_TO_SAVE_MODEL
 from simdeep.config import DATA_SPLIT
 from simdeep.config import MODEL_THRES
 
+from multiprocessing import Pool
+
 from simdeep.deepmodel_base import DeepBase
 
 import simplejson
@@ -243,9 +245,6 @@ class SimDeepBoosting():
 
         self.log = {}
 
-        self.feature_train_array = None
-        self.matrix_full_array = None
-
         self.alternative_embedding = alternative_embedding
         self.kwargs_alternative_embedding = kwargs_alternative_embedding
 
@@ -262,6 +261,7 @@ class SimDeepBoosting():
         ##############################################
 
         self.test_fname_key = ''
+        self.matrix_with_cv_array = None
 
         autoencoder_parameters = {
             'epochs': self.epochs,
@@ -1001,11 +1001,19 @@ class SimDeepBoosting():
         index_dict = {sample: ids for ids, sample in enumerate(sample_ids)}
         index = [index_dict[sample] for sample in self.sample_ids_full]
 
-        self.feature_train_array = self._from_model_dataset(self.models[0], 'feature_train_array')
-        self.matrix_full_array = self._from_model_dataset(self.models[0], 'matrix_full_array')
+        self.matrix_with_cv_array = self._from_model_dataset(self.models[0], 'matrix_array')
 
-        for key in self.matrix_full_array:
-            self.matrix_full_array[key] = self.matrix_full_array[key][index]
+        matrix_cv_unormalized_array = self._from_model_dataset(
+            self.models[0],
+            'matrix_cv_unormalized_array')
+
+        for key in self.matrix_with_cv_array:
+            if len(matrix_cv_unormalized_array):
+                self.matrix_with_cv_array[key] = vstack(
+                    [self.matrix_with_cv_array[key],
+                     matrix_cv_unormalized_array[key]])
+
+            self.matrix_with_cv_array[key] = self.matrix_with_cv_array[key][index]
 
     def _get_probas_for_full_models(self):
         """
@@ -1415,11 +1423,12 @@ class SimDeepBoosting():
         if fname_key:
             self.project_name = '{0}_{1}'.format(self._project_name, fname_key)
 
-    def compute_survival_feature_scores_per_cluster(self, pval_thres=0.01):
+    def compute_survival_feature_scores_per_cluster(self, pval_thres=0.001):
         """
         """
         print('computing survival feature importance per cluster...')
-        mapf = map
+        pool = Pool(self.nb_threads)
+        mapf = pool.map
 
         if self.metadata_usage in ['all', 'new-features'] and \
            self.metadata_mat_full is not None:
@@ -1430,20 +1439,28 @@ class SimDeepBoosting():
         for label in set(self.full_labels):
             self.survival_feature_scores_per_cluster[label] = []
 
-        def generator(feature_list, matrix):
-            for i in range(len(feature_list)):
-                yield (feature_list[i],
+        feature_dict = self._from_model_dataset(self.models[0], 'feature_array')
+
+        def generator(feature_list, matrix, feature_index):
+            for feat in feature_list:
+                i = feature_index[feat[0]]
+                yield (feat,
                        np.asarray(matrix[i]).reshape(-1),
                        self.survival_full,
                        metadata_mat,
                        pval_thres)
 
-        for key in self.matrix_full_array:
-            for label in self.feature_scores_per_cluster:
-                feature_list = self.feature_scores_per_cluster[label]
-                matrix = self.matrix_full_array[key][:]
+        for key in self.matrix_with_cv_array:
+            feature_index = {feat: i for i, feat in enumerate(feature_dict[key])}
 
-                input_list = generator(feature_list, matrix.T)
+            for label in self.feature_scores_per_cluster:
+                matrix = self.matrix_with_cv_array[key][:]
+
+                feature_list =  self.feature_scores_per_cluster[label]
+                feature_list = [feat for feat in feature_list
+                                if feat[0] in feature_index]
+
+                input_list = generator(feature_list, matrix.T, feature_index)
 
                 features_scored = mapf(
                     _process_parallel_survival_feature_importance_per_cluster,
@@ -1458,7 +1475,7 @@ class SimDeepBoosting():
                     self.survival_feature_scores_per_cluster[label].sort(
                         key=lambda x: x[1])
 
-    def compute_feature_scores_per_cluster(self, pval_thres=0.01):
+    def compute_feature_scores_per_cluster(self, pval_thres=0.001):
         """
         """
         print('computing feature importance per cluster...')
@@ -1474,22 +1491,26 @@ class SimDeepBoosting():
             for i in range(len(feature_list)):
                 yield feature_list[i], matrix[i], labels, pval_thres
 
-        for key in self.matrix_full_array:
-            feature_list = self.feature_train_array[key][:]
-            matrix = self.matrix_full_array[key][:]
+        feature_dict = self._from_model_dataset(self.models[0], 'feature_array')
+
+        for key in self.matrix_with_cv_array:
+            matrix = self.matrix_with_cv_array[key][:]
             labels = self.full_labels[:]
 
-            input_list = generator(labels, feature_list, matrix.T)
+            input_list = generator(labels, feature_dict[key], matrix.T)
 
             features_scored = mapf(
                 _process_parallel_feature_importance_per_cluster, input_list)
-            features_scored = [feat for feat_list in features_scored for feat in feat_list]
+            features_scored = [feat for feat_list in features_scored
+                               for feat in feat_list]
 
             for label, feature, median_diff, pvalue in features_scored:
-                self.feature_scores_per_cluster[label].append((feature, median_diff, pvalue))
+                self.feature_scores_per_cluster[label].append((
+                    feature, median_diff, pvalue))
 
             for label in self.feature_scores_per_cluster:
-                self.feature_scores_per_cluster[label].sort(key=lambda x:x[1])
+                self.feature_scores_per_cluster[label].sort(
+                    key=lambda x: x[2])
 
     def write_feature_score_per_cluster(self):
         """
