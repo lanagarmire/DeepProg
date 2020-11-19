@@ -190,6 +190,7 @@ class SimDeepTuning(object):
             print("Exception when predicting test dataset {0}".format(
                 e))
             error += str(e)
+            test_pval = 1.0
         else:
             test_cindex = boosting.compute_c_indexes_for_test_dataset()
             test_consisentcy = np.mean(boosting \
