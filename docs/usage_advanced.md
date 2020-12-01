@@ -27,65 +27,6 @@ Note that these visualisation are not very efficient in that example dataset, si
 
 Hyperparameters can have a considerable influence on the accuracy of DeepProgs models. We set up the default hyperparameters to be used on a maximum of different datasets. However, specific datasets might require additional optimizations. Below, we are listing
 
-### Number of clusters
-
-The parameters `nb_clusters` is used to define the number of partitions to produce
-
-```python
-#Example
-boosting = SimDeepBoosting(
-    nb_clusters=3)
-boosting.fit()
-```
-
-### Clustering algorithm
-
-By default, DeepProg is using a gaussian mixture model from the scikit-learn library  to perform clustering. The hyperparameter of the model are customisable using the `mixture_params` parameter:
-
-```python
-# Default params from the config file:
-
-MIXTURE_PARAMS = {
-    'covariance_type': 'diag',
-    'max_iter': 1000,
-    'n_init': 100
-    }
-
-boosting = SimDeepBoosting(
-    mixture_params=MIXTURE_PARAMS,
-    nb_clusters=3,
-    cluster_method='mixture' # Default
-    )
-```
-
-In addition, two alternative clustering approaches are available `kmeans`, which refers to the scikit-learn KMeans class and `coxPH` which fits a L1 penalized multi-dimensional Cox-PH model and then dichotomize the samples into K groups using the  predicted suvival times. The L1 penalised Cox-PH model is fitted using scikit-survival `CoxnetSurvivalAnalysis`class for python3 so it cannot be computed when using python 2. Finally, external clustering class instances can be used as long as they have a `fit_predict` method returning an array of labels, and accepting a `nb_clusters` parameter.
-
-```python
-# External clustering class having fit_predict method
-from sklearn.cluster.hierarchical import AgglomerativeClustering
-
-boostingH = SimDeepBoosting(
-        nb_clusters=3,
-        cluster_method=AgglomerativeClustering # Default
-    )
-
-
-class DummyClustering:
-    self __init__(self, nb_clusters):
-        """ """
-        self.nb_clusters
-
-    def fit_predict(M):
-        """ """
-        import numpy as np
-        return np.random.randint(0, self.nb_clusters, M.shape[0])
-
-
-boostingDummy = SimDeepBoosting(
-        nb_clusters=3,
-        cluster_method=DummyClustering # Default
-    )
-```
 
 ### Normalisation
 
@@ -126,6 +67,130 @@ boosting = SimDeepBoosting(
 
 Finally, more alternative normalisations are proposed in the config file.
 
+### Number of clusters
+
+The parameters `nb_clusters` is used to define the number of partitions to produce
+
+```python
+#Example
+boosting = SimDeepBoosting(
+    nb_clusters=3)
+boosting.fit()
+```
+
+### Clustering algorithm
+
+By default, DeepProg is using a gaussian mixture model from the scikit-learn library  to perform clustering. The hyperparameter of the model are customisable using the `mixture_params` parameter:
+
+```python
+# Default params from the config file:
+
+MIXTURE_PARAMS = {
+    'covariance_type': 'diag',
+    'max_iter': 1000,
+    'n_init': 100
+    }
+
+boosting = SimDeepBoosting(
+    mixture_params=MIXTURE_PARAMS,
+    nb_clusters=3,
+    cluster_method='mixture' # Default
+    )
+```
+
+In addition to the gaussian mixture model, three alternative clustering approaches are available: a) `kmeans`, which refers to the scikit-learn KMeans class, b) `coxPH` which fits a L1 penalized multi-dimensional Cox-PH model and then dichotomize the samples into K groups using the  predicted suvival times, and c) `coxPHMixture` which fit a Mixture model on the predicted survival time from the L1 penalized Cox-PH model. The L1 penalised Cox-PH model is fitted using scikit-survival `CoxnetSurvivalAnalysis`class for python3 so it cannot be computed when using python 2. Finally, external clustering class instances can be used as long as they have a `fit_predict` method returning an array of labels, and accepting a `nb_clusters` parameter.
+
+```python
+# External clustering class having fit_predict method
+from sklearn.cluster.hierarchical import AgglomerativeClustering
+
+boostingH = SimDeepBoosting(
+        nb_clusters=3,
+        cluster_method=AgglomerativeClustering # Default
+    )
+
+
+class DummyClustering:
+    self __init__(self, nb_clusters):
+        """ """
+        self.nb_clusters
+
+    def fit_predict(M):
+        """ """
+        import numpy as np
+        return np.random.randint(0, self.nb_clusters, M.shape[0])
+
+
+boostingDummy = SimDeepBoosting(
+        nb_clusters=3,
+        cluster_method=DummyClustering # Default
+    )
+```
+
+### Embedding and survival features selection
+after  each omic matrix is normalised, DeepProg transforms each feature matrix using by default an autoencoder network as embedding algorithm and then select the transformed features linked to survival using univariate Cox-PH models. Alternatively, DeepProg can accept any external embedding algorithm having a `fit` and transform `method`, following the scikit-learn nomenclature. For instance, `PCA` and `fastICA` classes of the scikit-learn package can be used as replacement for the autoencoder.
+
+```python
+# Example using PCA as alternative embedding.
+
+
+from scklearn.decomposition import PCA
+
+
+boosting = SimDeepBoosting(
+        nb_clusters=3,
+        alternative_embedding=PCA,
+    )
+
+```
+
+Another example is the use of the MAUI multi-omic method instead of the autoencoder
+
+```python
+class MauiFitting():
+
+    def __init__(self, **kwargs):
+        """
+        """
+        self._kwargs = kwargs
+        self.model = Maui(**kwargs)
+
+
+    def fit(self, matrix):
+        """ """
+        self.model.fit({'cat': pd.DataFrame(matrix).T})
+
+    def transform(self, matrix):
+        """ """
+        res = self.model.transform({'cat': pd.DataFrame(matrix).T})
+
+        return np.asarray(res)
+
+    boosting = SimDeepBoosting(
+        nb_clusters=3,
+        alternative_embedding=MauiFitting,
+        ...
+    )
+
+```
+
+After the embedding step, DeepProg is computing by default the individual feature contribution toward survival using univariate Cox-PH model (`feature_selection_usage='individual'`). Alternatively, DeepProg can select features linked to survival using a l1-penalized multivariate Cox-PH model (`feature_selection_usage='individual'lasso'`). Finally if the option `feature_surv_analysis` is parsed as False, DeepProg will skip the survival feature selection step.
+
+```python
+# Example using l1-penalized Cox-PH for selecting new survival features.
+
+
+from scklearn.decomposition import PCA
+
+
+boosting = SimDeepBoosting(
+        nb_clusters=3,
+        feature_selection_usage='individual'lasso',
+        # feature_surv_analysis=False # Not using feature selection step
+        ...
+    )
+
+```
 
 ### Number of iterations and seed
 TO COMPLETE
