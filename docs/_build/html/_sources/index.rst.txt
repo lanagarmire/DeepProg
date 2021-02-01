@@ -14,6 +14,7 @@ Welcome to DeepProg's documentation!
    usage_ensemble.md
    usage_advanced.md
    case_study.md
+   usage_tuning.md
    LICENSE.rst
    ./api/simdeep.rst
 

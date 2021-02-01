@@ -95,10 +95,14 @@
 <li class="toctree-l3"><a class="reference internal" href="#normalisation">Normalisation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#clustering-algorithm">Clustering algorithm</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#embedding-and-survival-features-selection">Embedding and survival features selection</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#number-of-iterations-and-seed">Number of iterations and seed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#number-of-models-and-random-splitting-seed">Number of models and random splitting seed</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#save-load-models">Save / load models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#save-load-models">Save / load models</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#save-load-the-entire-model">Save /load the entire model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#save-load-models-from-precomputed-sample-labels">Save / load models from precomputed sample labels</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="case_study.html">Case study: Analyzing TCGA HCC dataset</a></li>
@@ -344,14 +348,21 @@ boosting.fit()
 </pre></div>
 </div>
 </div>
-<div class="section" id="number-of-iterations-and-seed">
-<h3>Number of iterations and seed<a class="headerlink" href="#number-of-iterations-and-seed" title="Permalink to this headline">¶</a></h3>
-<p>TO COMPLETE</p>
+<div class="section" id="number-of-models-and-random-splitting-seed">
+<h3>Number of models and random splitting seed<a class="headerlink" href="#number-of-models-and-random-splitting-seed" title="Permalink to this headline">¶</a></h3>
+<p>A DeepProg model is constructed using an ensemble of submodels following the <a class="reference external" href="https://en.wikipedia.org/wiki/Ensemble_learning#Bootstrap_aggregating_(bagging)">Bagging</a> methodology. Each sub-model is created from a random split of the input dataset. Three parameters control the creation of the random splits:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">-nb_it</span> <span class="pre">&lt;int&gt;</span></code> which defines the number of sub-models to create</p></li>
+<li><p>and <code class="docutils literal notranslate"><span class="pre">-split_n_fold</span> </code> which controls how the dataset will be splitted for each submodel. If <code class="docutils literal notranslate"><span class="pre">-split_n_fold=2</span></code>, the input dataset will be splitted in 2 using the <code class="docutils literal notranslate"><span class="pre">KFold</span></code> class instance from <a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.KFold.html">sciki-learn</a> and the training /test set size ratio will be 0.5. If  <code class="docutils literal notranslate"><span class="pre">-split_n_fold=3</span></code> the training /test set size ratio will be 3 / 2 and so on.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">The</span> <span class="pre">-seed</span></code> parameter ensures to obtain the same random splitting for <code class="docutils literal notranslate"><span class="pre">split_n_fold</span></code> and <code class="docutils literal notranslate"><span class="pre">nb_it</span></code> constant for different DeepProg instances. Different seed values can produce different performances since it creates different training datasets and is especially true when using low <code class="docutils literal notranslate"><span class="pre">nb_it</span></code> (below 50). Unfortunalley, using large <code class="docutils literal notranslate"><span class="pre">nb_it</span></code> such as 100 can be very computationally intensive, especially when tuning the models with other hyperparameters. However, tuning the model with small <code class="docutils literal notranslate"><span class="pre">nb_it</span></code> is also OK to achieve good to optimal performances (see next section).</p></li>
+</ul>
 </div>
 </div>
 <div class="section" id="save-load-models">
 <h2>Save / load models<a class="headerlink" href="#save-load-models" title="Permalink to this headline">¶</a></h2>
-<p>Two mechanisms exist to save and load dataset.
+<div class="section" id="save-load-the-entire-model">
+<h3>Save /load the entire model<a class="headerlink" href="#save-load-the-entire-model" title="Permalink to this headline">¶</a></h3>
+<p>Despite dealing with very voluminous data files, Two mechanisms exist to save and load dataset.
 First the models can be entirely saved and loaded using <code class="docutils literal notranslate"><span class="pre">dill</span></code> (pickle like) libraries.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">simdeep.simdeep_utils</span> <span class="kn">import</span> <span class="n">save_model</span>
 <span class="kn">from</span> <span class="nn">simdeep.simdeep_utils</span> <span class="kn">import</span> <span class="n">load_model</span>
@@ -368,6 +379,9 @@ First the models can be entirely saved and loaded using <code class="docutils li
 </pre></div>
 </div>
 <p>See an example of saving/loading model in the example file: <code class="docutils literal notranslate"><span class="pre">load_and_save_models.py</span></code></p>
+</div>
+<div class="section" id="save-load-models-from-precomputed-sample-labels">
+<h3>Save / load models from precomputed sample labels<a class="headerlink" href="#save-load-models-from-precomputed-sample-labels" title="Permalink to this headline">¶</a></h3>
 <p>However, this mechanism presents a huge drawback since the models saved can be very large (all the hyperparameters/matrices… etc… are saved). Also, the equivalent dependencies and DL libraries need to be installed in both the machine computing the models and the machine used to load them which can lead to various errors.</p>
 <p>A second solution is to save only the labels inferred for each submodel instance. These label files can then be loaded into a new DeepProg instance that will be used as reference for building the classifier.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span>
@@ -393,6 +407,7 @@ First the models can be entirely saved and loaded using <code class="docutils li
 
 <span class="n">boostingNew</span><span class="o">.</span><span class="n">predict_labels_on_full_dataset</span><span class="p">()</span>
 </pre></div>
+</div>
 </div>
 </div>
 </div>

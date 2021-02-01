@@ -192,12 +192,16 @@ boosting = SimDeepBoosting(
 
 ```
 
-### Number of iterations and seed
-TO COMPLETE
+### Number of models and random splitting seed
+A DeepProg model is constructed using an ensemble of submodels following the [Bagging](https://en.wikipedia.org/wiki/Ensemble_learning#Bootstrap_aggregating_(bagging)) methodology. Each sub-model is created from a random split of the input dataset. Three parameters control the creation of the random splits:
+* `-nb_it <int>` which defines the number of sub-models to create
+* and `-split_n_fold ` which controls how the dataset will be splitted for each submodel. If `-split_n_fold=2`, the input dataset will be splitted in 2 using the `KFold` class instance from [sciki-learn](https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.KFold.html) and the training /test set size ratio will be 0.5. If  `-split_n_fold=3` the training /test set size ratio will be 3 / 2 and so on.
+* `The -seed` parameter ensures to obtain the same random splitting for `split_n_fold` and `nb_it` constant for different DeepProg instances. Different seed values can produce different performances since it creates different training datasets and is especially true when using low `nb_it` (below 50). Unfortunalley, using large `nb_it` such as 100 can be very computationally intensive, especially when tuning the models with other hyperparameters. However, tuning the model with small `nb_it` is also OK to achieve good to optimal performances (see next section).
 
 ## Save / load models
 
-Two mechanisms exist to save and load dataset.
+### Save /load the entire model
+Despite dealing with very voluminous data files, Two mechanisms exist to save and load dataset.
 First the models can be entirely saved and loaded using `dill` (pickle like) libraries.
 
 ```python
@@ -217,6 +221,8 @@ boosting.predict_labels_on_full_dataset()
 ```
 
 See an example of saving/loading model in the example file: `load_and_save_models.py`
+
+### Save / load models from precomputed sample labels
 
 However, this mechanism presents a huge drawback since the models saved can be very large (all the hyperparameters/matrices... etc... are saved). Also, the equivalent dependencies and DL libraries need to be installed in both the machine computing the models and the machine used to load them which can lead to various errors.
 
