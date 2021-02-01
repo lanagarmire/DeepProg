@@ -1,38 +1,42 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" />
   
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
   <title>simdeep.survival_utils &mdash; DeepProg  documentation</title>
   
 
   
-  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+
   
   
 
   
-  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../../_static/jquery.js"></script>
-        <script type="text/javascript" src="../../_static/underscore.js"></script>
-        <script type="text/javascript" src="../../_static/doctools.js"></script>
-        <script type="text/javascript" src="../../_static/language_data.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
     
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
     
-
-  
-  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
 </head>
@@ -71,6 +75,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -91,6 +96,7 @@
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -125,11 +131,13 @@
 
 
 
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../../index.html">Docs</a> &raquo;</li>
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
         
           <li><a href="../index.html">Module code</a> &raquo;</li>
         
@@ -153,6 +161,8 @@
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">re</span>
 
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
 <span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">PATH_DATA</span>
 <span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">SURVIVAL_FLAG</span>
 <span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">SEPARATOR</span>
@@ -167,7 +177,12 @@
 
 <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">rankdata</span>
 
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">hstack</span>
+
 <span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">pairwise_distances</span>
+
+<span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">LabelBinarizer</span>
+<span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">RobustScaler</span>
 
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
 
@@ -362,6 +377,56 @@
 
     <span class="k">return</span> <span class="n">survival</span></div>
 
+
+<div class="viewcode-block" id="translate_index"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.survival_utils.translate_index">[docs]</a><span class="k">def</span> <span class="nf">translate_index</span><span class="p">(</span><span class="n">original_ids</span><span class="p">,</span> <span class="n">new_ids</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
+    <span class="n">index1d</span> <span class="o">=</span> <span class="p">{</span><span class="n">ids</span><span class="p">:</span> <span class="n">pos</span> <span class="k">for</span> <span class="n">pos</span><span class="p">,</span> <span class="n">ids</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">original_ids</span><span class="p">)}</span>
+
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="n">index1d</span><span class="p">[</span><span class="n">sample</span><span class="p">]</span> <span class="k">for</span> <span class="n">sample</span> <span class="ow">in</span> <span class="n">new_ids</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="return_intersection_indexes"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.survival_utils.return_intersection_indexes">[docs]</a><span class="k">def</span> <span class="nf">return_intersection_indexes</span><span class="p">(</span><span class="n">ids_1</span><span class="p">,</span> <span class="n">ids_2</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
+    <span class="n">index1d</span> <span class="o">=</span> <span class="p">{</span><span class="n">ids</span><span class="p">:</span> <span class="n">pos</span> <span class="k">for</span> <span class="n">pos</span><span class="p">,</span> <span class="n">ids</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">ids_1</span><span class="p">)}</span>
+    <span class="n">index2d</span> <span class="o">=</span> <span class="p">{</span><span class="n">ids</span><span class="p">:</span> <span class="n">pos</span> <span class="k">for</span> <span class="n">pos</span><span class="p">,</span> <span class="n">ids</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">ids_2</span><span class="p">)}</span>
+
+    <span class="n">inter</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">ids_1</span><span class="p">)</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">ids_2</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">inter</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span><span class="p">(</span><span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Error! No common sample index between: </span><span class="si">{0}</span><span class="s2">... and </span><span class="si">{1}</span><span class="s2">...&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">ids_1</span><span class="p">[:</span><span class="mi">2</span><span class="p">],</span> <span class="n">ids_2</span><span class="p">[:</span><span class="mi">2</span><span class="p">])))</span>
+
+    <span class="n">index1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="n">index1d</span><span class="p">[</span><span class="n">sample</span><span class="p">]</span> <span class="k">for</span> <span class="n">sample</span> <span class="ow">in</span> <span class="n">inter</span><span class="p">])</span>
+    <span class="n">index2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="n">index2d</span><span class="p">[</span><span class="n">sample</span><span class="p">]</span> <span class="k">for</span> <span class="n">sample</span> <span class="ow">in</span> <span class="n">inter</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">index1</span><span class="p">,</span> <span class="n">index2</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">inter</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="convert_metadata_frame_to_matrix"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.survival_utils.convert_metadata_frame_to_matrix">[docs]</a><span class="k">def</span> <span class="nf">convert_metadata_frame_to_matrix</span><span class="p">(</span><span class="n">frame</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
+    <span class="n">lbl</span> <span class="o">=</span> <span class="n">LabelBinarizer</span><span class="p">()</span>
+
+    <span class="n">normed_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">frame</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="n">keys</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">frame</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">frame</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;object&#39;</span> <span class="ow">or</span> <span class="nb">str</span><span class="p">(</span><span class="n">frame</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;string&#39;</span><span class="p">:</span>
+            <span class="n">matrix</span> <span class="o">=</span> <span class="n">lbl</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">frame</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;string&#39;</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">lbl</span><span class="o">.</span><span class="n">y_type_</span> <span class="o">==</span> <span class="s2">&quot;binary&quot;</span><span class="p">:</span>
+                <span class="n">keys</span> <span class="o">+=</span> <span class="nb">list</span><span class="p">([</span><span class="s2">&quot;</span><span class="si">{0}</span><span class="s2">_</span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">lbl</span><span class="o">.</span><span class="n">classes_</span><span class="p">[</span><span class="n">lbl</span><span class="o">.</span><span class="n">pos_label</span><span class="p">])])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">keys</span> <span class="o">+=</span> <span class="p">[</span><span class="s2">&quot;</span><span class="si">{0}</span><span class="s2">_</span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">lbl</span><span class="o">.</span><span class="n">classes_</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">rbs</span> <span class="o">=</span> <span class="n">RobustScaler</span><span class="p">()</span>
+            <span class="n">matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">frame</span><span class="p">[</span><span class="n">key</span><span class="p">])</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">frame</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">))</span>
+            <span class="n">matrix</span> <span class="o">=</span> <span class="n">rbs</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">matrix</span><span class="p">)</span>
+            <span class="n">keys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+
+        <span class="n">normed_matrix</span> <span class="o">=</span> <span class="n">hstack</span><span class="p">([</span><span class="n">normed_matrix</span><span class="p">,</span> <span class="n">matrix</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">normed_matrix</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">keys</span><span class="p">)</span></div>
+
+
 <div class="viewcode-block" id="load_data_from_tsv"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.survival_utils.load_data_from_tsv">[docs]</a><span class="k">def</span> <span class="nf">load_data_from_tsv</span><span class="p">(</span><span class="n">use_transpose</span><span class="o">=</span><span class="n">USE_INPUT_TRANSPOSE</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -369,6 +434,7 @@
         <span class="k">return</span> <span class="n">_load_data_from_tsv_transposee</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">_load_data_from_tsv</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
 
 <span class="k">def</span> <span class="nf">_load_data_from_tsv</span><span class="p">(</span>
         <span class="n">f_name</span><span class="p">,</span>
@@ -383,7 +449,7 @@
     <span class="k">if</span> <span class="n">f_name</span> <span class="ow">in</span> <span class="n">SEPARATOR</span><span class="p">:</span>
         <span class="n">sep</span> <span class="o">=</span> <span class="n">SEPARATOR</span><span class="p">[</span><span class="n">f_name</span><span class="p">]</span>
 
-    <span class="n">f_tsv</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">path_data</span> <span class="o">+</span> <span class="n">f_name</span><span class="p">)</span>
+    <span class="n">f_tsv</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{0}</span><span class="s2">/</span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">path_data</span><span class="p">,</span> <span class="n">f_name</span><span class="p">))</span>
     <span class="n">header</span> <span class="o">=</span> <span class="n">f_tsv</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="n">sep</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">sep</span><span class="p">)</span>
 
     <span class="n">feature_ids</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;</span><span class="si">{0}</span><span class="s1">_</span><span class="si">{1}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">f_short</span><span class="p">,</span> <span class="n">head</span><span class="p">)</span>
@@ -509,8 +575,12 @@
 <span class="k">def</span> <span class="nf">_process_parallel_coxph</span><span class="p">(</span><span class="n">inp</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">node_id</span><span class="p">,</span> <span class="n">activity</span><span class="p">,</span> <span class="n">isdead</span><span class="p">,</span> <span class="n">nbdays</span><span class="p">,</span> <span class="n">seed</span> <span class="o">=</span> <span class="n">inp</span>
-    <span class="n">pvalue</span> <span class="o">=</span> <span class="n">coxph</span><span class="p">(</span><span class="n">activity</span><span class="p">,</span> <span class="n">isdead</span><span class="p">,</span> <span class="n">nbdays</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">)</span>
+    <span class="n">node_id</span><span class="p">,</span> <span class="n">activity</span><span class="p">,</span> <span class="n">isdead</span><span class="p">,</span> <span class="n">nbdays</span><span class="p">,</span> <span class="n">seed</span><span class="p">,</span> <span class="n">metadata_mat</span> <span class="o">=</span> <span class="n">inp</span>
+    <span class="n">pvalue</span> <span class="o">=</span> <span class="n">coxph</span><span class="p">(</span><span class="n">activity</span><span class="p">,</span>
+                   <span class="n">isdead</span><span class="p">,</span>
+                   <span class="n">nbdays</span><span class="p">,</span>
+                   <span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">,</span>
+                   <span class="n">metadata_mat</span><span class="o">=</span><span class="n">metadata_mat</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">node_id</span><span class="p">,</span> <span class="n">pvalue</span>
 
@@ -547,7 +617,7 @@
     <span class="n">arrays</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
     <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
 
-    <span class="n">feature</span><span class="p">,</span> <span class="n">array</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="n">inp</span>
+    <span class="n">feature</span><span class="p">,</span> <span class="n">array</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">pval_thres</span> <span class="o">=</span> <span class="n">inp</span>
 
     <span class="k">for</span> <span class="n">label</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">labels</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">array</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)):</span>
         <span class="n">arrays</span><span class="p">[</span><span class="n">label</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
@@ -560,10 +630,28 @@
         <span class="n">score</span><span class="p">,</span> <span class="n">pvalue</span> <span class="o">=</span> <span class="n">ranksums</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">array_comp</span><span class="p">)</span>
         <span class="n">median_diff</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">array</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">array_comp</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">pvalue</span> <span class="o">&lt;</span> <span class="mf">0.001</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">pvalue</span> <span class="o">&lt;</span> <span class="n">pval_thres</span><span class="p">:</span>
             <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">cluster</span><span class="p">,</span> <span class="n">feature</span><span class="p">,</span> <span class="n">median_diff</span><span class="p">,</span> <span class="n">pvalue</span><span class="p">))</span>
 
     <span class="k">return</span> <span class="n">results</span>
+
+
+<span class="k">def</span> <span class="nf">_process_parallel_survival_feature_importance_per_cluster</span><span class="p">(</span><span class="n">inp</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">feature</span><span class="p">,</span> <span class="n">array</span><span class="p">,</span> <span class="n">survival</span><span class="p">,</span> <span class="n">metadata_mat</span><span class="p">,</span> <span class="n">pval_thres</span> <span class="o">=</span> <span class="n">inp</span>
+    <span class="n">nbdays</span><span class="p">,</span> <span class="n">isdead</span> <span class="o">=</span> <span class="n">survival</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+
+    <span class="n">pvalue</span> <span class="o">=</span> <span class="n">coxph</span><span class="p">(</span>
+        <span class="n">array</span><span class="p">,</span>
+        <span class="n">isdead</span><span class="p">,</span>
+        <span class="n">nbdays</span><span class="p">,</span>
+        <span class="n">metadata_mat</span><span class="o">=</span><span class="n">metadata_mat</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">pvalue</span><span class="p">)</span> <span class="ow">and</span> <span class="n">pvalue</span> <span class="o">&lt;</span> <span class="n">pval_thres</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">feature</span><span class="p">,</span> <span class="n">pvalue</span><span class="p">)</span>
+    <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
 
 <div class="viewcode-block" id="save_matrix"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.survival_utils.save_matrix">[docs]</a><span class="k">def</span> <span class="nf">save_matrix</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="n">feature_array</span><span class="p">,</span> <span class="n">sample_array</span><span class="p">,</span>
                 <span class="n">path_folder</span><span class="p">,</span> <span class="n">project_name</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">):</span>
@@ -590,20 +678,25 @@
            
           </div>
           <footer>
-  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2019, Olivier Poirion
+        &#169; Copyright 2019, Olivier Poirion.
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
-
         </div>
       </div>
 
@@ -611,7 +704,6 @@
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

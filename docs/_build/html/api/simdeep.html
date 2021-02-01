@@ -1,38 +1,42 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" />
   
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
   <title>simdeep package &mdash; DeepProg  documentation</title>
   
 
   
-  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
   
   
 
   
-  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../_static/jquery.js"></script>
-        <script type="text/javascript" src="../_static/underscore.js"></script>
-        <script type="text/javascript" src="../_static/doctools.js"></script>
-        <script type="text/javascript" src="../_static/language_data.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
     
-
-  
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="prev" title="License" href="../LICENSE.html" /> 
@@ -72,6 +76,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -93,11 +98,11 @@
 <li class="toctree-l2"><a class="reference internal" href="#module-simdeep.deepmodel_base">simdeep.deepmodel_base module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-simdeep.extract_data">simdeep.extract_data module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-simdeep.plot_utils">simdeep.plot_utils module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#simdeep-simdeep-analysis-module">simdeep.simdeep_analysis module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#simdeep-simdeep-boosting-module">simdeep.simdeep_boosting module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#simdeep-simdeep-distributed-module">simdeep.simdeep_distributed module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#simdeep-simdeep-multiple-dataset-module">simdeep.simdeep_multiple_dataset module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#simdeep-simdeep-utils-module">simdeep.simdeep_utils module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-simdeep.simdeep_analysis">simdeep.simdeep_analysis module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-simdeep.simdeep_boosting">simdeep.simdeep_boosting module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-simdeep.simdeep_distributed">simdeep.simdeep_distributed module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-simdeep.simdeep_multiple_dataset">simdeep.simdeep_multiple_dataset module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-simdeep.simdeep_utils">simdeep.simdeep_utils module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-simdeep.survival_utils">simdeep.survival_utils module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-simdeep">Module contents</a></li>
 </ul>
@@ -107,6 +112,7 @@
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -141,18 +147,20 @@
 
 
 
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../index.html">Docs</a> &raquo;</li>
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
         
       <li>simdeep package</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
-            
+          
             <a href="../_sources/api/simdeep.rst.txt" rel="nofollow"> View page source</a>
           
         
@@ -176,261 +184,287 @@
 </div>
 <div class="section" id="module-simdeep.coxph_from_r">
 <span id="simdeep-coxph-from-r-module"></span><h2>simdeep.coxph_from_r module<a class="headerlink" href="#module-simdeep.coxph_from_r" title="Permalink to this headline">¶</a></h2>
-<dl class="function">
+<dl class="py function">
 <dt id="simdeep.coxph_from_r.c_index">
-<code class="descclassname">simdeep.coxph_from_r.</code><code class="descname">c_index</code><span class="sig-paren">(</span><em>values</em>, <em>isdead</em>, <em>nbdays</em>, <em>values_test</em>, <em>isdead_test</em>, <em>nbdays_test</em>, <em>isfactor=False</em>, <em>use_r_packages=False</em>, <em>seed=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/coxph_from_r.html#c_index"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.coxph_from_r.c_index" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">simdeep.coxph_from_r.</code><code class="sig-name descname">c_index</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">values</span></em>, <em class="sig-param"><span class="n">isdead</span></em>, <em class="sig-param"><span class="n">nbdays</span></em>, <em class="sig-param"><span class="n">values_test</span></em>, <em class="sig-param"><span class="n">isdead_test</span></em>, <em class="sig-param"><span class="n">nbdays_test</span></em>, <em class="sig-param"><span class="n">isfactor</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">use_r_packages</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">seed</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/coxph_from_r.html#c_index"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.coxph_from_r.c_index" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="simdeep.coxph_from_r.c_index_from_python">
-<code class="descclassname">simdeep.coxph_from_r.</code><code class="descname">c_index_from_python</code><span class="sig-paren">(</span><em>values</em>, <em>isdead</em>, <em>nbdays</em>, <em>values_test</em>, <em>isdead_test</em>, <em>nbdays_test</em>, <em>isfactor=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/coxph_from_r.html#c_index_from_python"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.coxph_from_r.c_index_from_python" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">simdeep.coxph_from_r.</code><code class="sig-name descname">c_index_from_python</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">values</span></em>, <em class="sig-param"><span class="n">isdead</span></em>, <em class="sig-param"><span class="n">nbdays</span></em>, <em class="sig-param"><span class="n">values_test</span></em>, <em class="sig-param"><span class="n">isdead_test</span></em>, <em class="sig-param"><span class="n">nbdays_test</span></em>, <em class="sig-param"><span class="n">isfactor</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/coxph_from_r.html#c_index_from_python"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.coxph_from_r.c_index_from_python" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="simdeep.coxph_from_r.c_index_from_r">
-<code class="descclassname">simdeep.coxph_from_r.</code><code class="descname">c_index_from_r</code><span class="sig-paren">(</span><em>values</em>, <em>isdead</em>, <em>nbdays</em>, <em>values_test</em>, <em>isdead_test</em>, <em>nbdays_test</em>, <em>isfactor=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/coxph_from_r.html#c_index_from_r"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.coxph_from_r.c_index_from_r" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">simdeep.coxph_from_r.</code><code class="sig-name descname">c_index_from_r</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">values</span></em>, <em class="sig-param"><span class="n">isdead</span></em>, <em class="sig-param"><span class="n">nbdays</span></em>, <em class="sig-param"><span class="n">values_test</span></em>, <em class="sig-param"><span class="n">isdead_test</span></em>, <em class="sig-param"><span class="n">nbdays_test</span></em>, <em class="sig-param"><span class="n">isfactor</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/coxph_from_r.html#c_index_from_r"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.coxph_from_r.c_index_from_r" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="simdeep.coxph_from_r.c_index_multiple">
-<code class="descclassname">simdeep.coxph_from_r.</code><code class="descname">c_index_multiple</code><span class="sig-paren">(</span><em>values</em>, <em>isdead</em>, <em>nbdays</em>, <em>values_test</em>, <em>isdead_test</em>, <em>nbdays_test</em>, <em>isfactor=False</em>, <em>use_r_packages=False</em>, <em>seed=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/coxph_from_r.html#c_index_multiple"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.coxph_from_r.c_index_multiple" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">simdeep.coxph_from_r.</code><code class="sig-name descname">c_index_multiple</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">values</span></em>, <em class="sig-param"><span class="n">isdead</span></em>, <em class="sig-param"><span class="n">nbdays</span></em>, <em class="sig-param"><span class="n">values_test</span></em>, <em class="sig-param"><span class="n">isdead_test</span></em>, <em class="sig-param"><span class="n">nbdays_test</span></em>, <em class="sig-param"><span class="n">isfactor</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">use_r_packages</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">seed</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/coxph_from_r.html#c_index_multiple"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.coxph_from_r.c_index_multiple" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="simdeep.coxph_from_r.c_index_multiple_from_python">
-<code class="descclassname">simdeep.coxph_from_r.</code><code class="descname">c_index_multiple_from_python</code><span class="sig-paren">(</span><em>matrix</em>, <em>isdead</em>, <em>nbdays</em>, <em>matrix_test</em>, <em>isdead_test</em>, <em>nbdays_test</em>, <em>isfactor=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/coxph_from_r.html#c_index_multiple_from_python"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.coxph_from_r.c_index_multiple_from_python" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">simdeep.coxph_from_r.</code><code class="sig-name descname">c_index_multiple_from_python</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">matrix</span></em>, <em class="sig-param"><span class="n">isdead</span></em>, <em class="sig-param"><span class="n">nbdays</span></em>, <em class="sig-param"><span class="n">matrix_test</span></em>, <em class="sig-param"><span class="n">isdead_test</span></em>, <em class="sig-param"><span class="n">nbdays_test</span></em>, <em class="sig-param"><span class="n">isfactor</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/coxph_from_r.html#c_index_multiple_from_python"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.coxph_from_r.c_index_multiple_from_python" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="simdeep.coxph_from_r.c_index_multiple_from_r">
-<code class="descclassname">simdeep.coxph_from_r.</code><code class="descname">c_index_multiple_from_r</code><span class="sig-paren">(</span><em>matrix</em>, <em>isdead</em>, <em>nbdays</em>, <em>matrix_test</em>, <em>isdead_test</em>, <em>nbdays_test</em>, <em>lambda_val=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/coxph_from_r.html#c_index_multiple_from_r"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.coxph_from_r.c_index_multiple_from_r" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">simdeep.coxph_from_r.</code><code class="sig-name descname">c_index_multiple_from_r</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">matrix</span></em>, <em class="sig-param"><span class="n">isdead</span></em>, <em class="sig-param"><span class="n">nbdays</span></em>, <em class="sig-param"><span class="n">matrix_test</span></em>, <em class="sig-param"><span class="n">isdead_test</span></em>, <em class="sig-param"><span class="n">nbdays_test</span></em>, <em class="sig-param"><span class="n">lambda_val</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/coxph_from_r.html#c_index_multiple_from_r"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.coxph_from_r.c_index_multiple_from_r" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="simdeep.coxph_from_r.convert_to_rmatrix">
-<code class="descclassname">simdeep.coxph_from_r.</code><code class="descname">convert_to_rmatrix</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/coxph_from_r.html#convert_to_rmatrix"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.coxph_from_r.convert_to_rmatrix" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">simdeep.coxph_from_r.</code><code class="sig-name descname">convert_to_rmatrix</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/coxph_from_r.html#convert_to_rmatrix"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.coxph_from_r.convert_to_rmatrix" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="simdeep.coxph_from_r.coxph">
-<code class="descclassname">simdeep.coxph_from_r.</code><code class="descname">coxph</code><span class="sig-paren">(</span><em>values</em>, <em>isdead</em>, <em>nbdays</em>, <em>do_KM_plot=False</em>, <em>png_path='./'</em>, <em>dichotomize_afterward=False</em>, <em>fig_name='KM_plot.png'</em>, <em>isfactor=False</em>, <em>use_r_packages=False</em>, <em>seed=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/coxph_from_r.html#coxph"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.coxph_from_r.coxph" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">simdeep.coxph_from_r.</code><code class="sig-name descname">coxph</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">values</span></em>, <em class="sig-param"><span class="n">isdead</span></em>, <em class="sig-param"><span class="n">nbdays</span></em>, <em class="sig-param"><span class="n">do_KM_plot</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">metadata_mat</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">png_path</span><span class="o">=</span><span class="default_value">'./'</span></em>, <em class="sig-param"><span class="n">dichotomize_afterward</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">fig_name</span><span class="o">=</span><span class="default_value">'KM_plot.png'</span></em>, <em class="sig-param"><span class="n">isfactor</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">use_r_packages</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">seed</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/coxph_from_r.html#coxph"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.coxph_from_r.coxph" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="simdeep.coxph_from_r.coxph_from_python">
-<code class="descclassname">simdeep.coxph_from_r.</code><code class="descname">coxph_from_python</code><span class="sig-paren">(</span><em>values</em>, <em>isdead</em>, <em>nbdays</em>, <em>do_KM_plot=False</em>, <em>png_path='./'</em>, <em>dichotomize_afterward=False</em>, <em>fig_name='KM_plot.png'</em>, <em>isfactor=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/coxph_from_r.html#coxph_from_python"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.coxph_from_r.coxph_from_python" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">simdeep.coxph_from_r.</code><code class="sig-name descname">coxph_from_python</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">values</span></em>, <em class="sig-param"><span class="n">isdead</span></em>, <em class="sig-param"><span class="n">nbdays</span></em>, <em class="sig-param"><span class="n">do_KM_plot</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">png_path</span><span class="o">=</span><span class="default_value">'./'</span></em>, <em class="sig-param"><span class="n">metadata_mat</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">dichotomize_afterward</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">fig_name</span><span class="o">=</span><span class="default_value">'KM_plot.pdf'</span></em>, <em class="sig-param"><span class="n">penalizer</span><span class="o">=</span><span class="default_value">0.01</span></em>, <em class="sig-param"><span class="n">l1_ratio</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">isfactor</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/coxph_from_r.html#coxph_from_python"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.coxph_from_r.coxph_from_python" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="simdeep.coxph_from_r.coxph_from_r">
-<code class="descclassname">simdeep.coxph_from_r.</code><code class="descname">coxph_from_r</code><span class="sig-paren">(</span><em>values</em>, <em>isdead</em>, <em>nbdays</em>, <em>do_KM_plot=False</em>, <em>png_path='./'</em>, <em>dichotomize_afterward=False</em>, <em>fig_name='KM_plot.png'</em>, <em>isfactor=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/coxph_from_r.html#coxph_from_r"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.coxph_from_r.coxph_from_r" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="docutils">
-<dt>input:</dt>
-<dd><table class="first last docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">values:</th><td class="field-body">array    values of activities</td>
-</tr>
-<tr class="field-even field"><th class="field-name">isdead:</th><td class="field-body">array &lt;binary&gt;    Event occured int boolean: 0/1</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">nbdays:</th><td class="field-body">array &lt;int&gt;</td>
-</tr>
-</tbody>
-</table>
+<code class="sig-prename descclassname">simdeep.coxph_from_r.</code><code class="sig-name descname">coxph_from_r</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">values</span></em>, <em class="sig-param"><span class="n">isdead</span></em>, <em class="sig-param"><span class="n">nbdays</span></em>, <em class="sig-param"><span class="n">do_KM_plot</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">metadata_mat</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">png_path</span><span class="o">=</span><span class="default_value">'./'</span></em>, <em class="sig-param"><span class="n">dichotomize_afterward</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">fig_name</span><span class="o">=</span><span class="default_value">'KM_plot.png'</span></em>, <em class="sig-param"><span class="n">isfactor</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/coxph_from_r.html#coxph_from_r"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.coxph_from_r.coxph_from_r" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>input:</dt><dd><dl class="field-list simple">
+<dt class="field-odd">values</dt>
+<dd class="field-odd"><p>array    values of activities</p>
 </dd>
-<dt>return:</dt>
-<dd>pvalues from wald test</dd>
+<dt class="field-even">isdead</dt>
+<dd class="field-even"><p>array &lt;binary&gt;    Event occured int boolean: 0/1</p>
+</dd>
+<dt class="field-odd">nbdays</dt>
+<dd class="field-odd"><p>array &lt;int&gt;</p>
+</dd>
+</dl>
+</dd>
+<dt>return:</dt><dd><p>pvalues from wald test</p>
+</dd>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="simdeep.coxph_from_r.main">
-<code class="descclassname">simdeep.coxph_from_r.</code><code class="descname">main</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/coxph_from_r.html#main"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.coxph_from_r.main" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">simdeep.coxph_from_r.</code><code class="sig-name descname">main</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/coxph_from_r.html#main"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.coxph_from_r.main" title="Permalink to this definition">¶</a></dt>
 <dd><p>DEBUG</p>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="simdeep.coxph_from_r.predict_with_coxph_glmnet">
-<code class="descclassname">simdeep.coxph_from_r.</code><code class="descname">predict_with_coxph_glmnet</code><span class="sig-paren">(</span><em>matrix</em>, <em>isdead</em>, <em>nbdays</em>, <em>matrix_test</em>, <em>alpha=0.5</em>, <em>lambda_val=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/coxph_from_r.html#predict_with_coxph_glmnet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.coxph_from_r.predict_with_coxph_glmnet" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">simdeep.coxph_from_r.</code><code class="sig-name descname">predict_with_coxph_glmnet</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">matrix</span></em>, <em class="sig-param"><span class="n">isdead</span></em>, <em class="sig-param"><span class="n">nbdays</span></em>, <em class="sig-param"><span class="n">matrix_test</span></em>, <em class="sig-param"><span class="n">alpha</span><span class="o">=</span><span class="default_value">0.5</span></em>, <em class="sig-param"><span class="n">lambda_val</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/coxph_from_r.html#predict_with_coxph_glmnet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.coxph_from_r.predict_with_coxph_glmnet" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="simdeep.coxph_from_r.surv_mean">
-<code class="descclassname">simdeep.coxph_from_r.</code><code class="descname">surv_mean</code><span class="sig-paren">(</span><em>isdead</em>, <em>nbdays</em>, <em>use_r_packages=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/coxph_from_r.html#surv_mean"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.coxph_from_r.surv_mean" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">simdeep.coxph_from_r.</code><code class="sig-name descname">surv_mean</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">isdead</span></em>, <em class="sig-param"><span class="n">nbdays</span></em>, <em class="sig-param"><span class="n">use_r_packages</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/coxph_from_r.html#surv_mean"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.coxph_from_r.surv_mean" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="simdeep.coxph_from_r.surv_mean_from_python">
-<code class="descclassname">simdeep.coxph_from_r.</code><code class="descname">surv_mean_from_python</code><span class="sig-paren">(</span><em>isdead</em>, <em>nbdays</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/coxph_from_r.html#surv_mean_from_python"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.coxph_from_r.surv_mean_from_python" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">simdeep.coxph_from_r.</code><code class="sig-name descname">surv_mean_from_python</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">isdead</span></em>, <em class="sig-param"><span class="n">nbdays</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/coxph_from_r.html#surv_mean_from_python"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.coxph_from_r.surv_mean_from_python" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="simdeep.coxph_from_r.surv_mean_from_r">
-<code class="descclassname">simdeep.coxph_from_r.</code><code class="descname">surv_mean_from_r</code><span class="sig-paren">(</span><em>isdead</em>, <em>nbdays</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/coxph_from_r.html#surv_mean_from_r"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.coxph_from_r.surv_mean_from_r" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">simdeep.coxph_from_r.</code><code class="sig-name descname">surv_mean_from_r</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">isdead</span></em>, <em class="sig-param"><span class="n">nbdays</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/coxph_from_r.html#surv_mean_from_r"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.coxph_from_r.surv_mean_from_r" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="simdeep.coxph_from_r.surv_median">
-<code class="descclassname">simdeep.coxph_from_r.</code><code class="descname">surv_median</code><span class="sig-paren">(</span><em>isdead</em>, <em>nbdays</em>, <em>use_r_packages=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/coxph_from_r.html#surv_median"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.coxph_from_r.surv_median" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">simdeep.coxph_from_r.</code><code class="sig-name descname">surv_median</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">isdead</span></em>, <em class="sig-param"><span class="n">nbdays</span></em>, <em class="sig-param"><span class="n">use_r_packages</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/coxph_from_r.html#surv_median"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.coxph_from_r.surv_median" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="simdeep.coxph_from_r.surv_median_from_python">
-<code class="descclassname">simdeep.coxph_from_r.</code><code class="descname">surv_median_from_python</code><span class="sig-paren">(</span><em>isdead</em>, <em>nbdays</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/coxph_from_r.html#surv_median_from_python"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.coxph_from_r.surv_median_from_python" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">simdeep.coxph_from_r.</code><code class="sig-name descname">surv_median_from_python</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">isdead</span></em>, <em class="sig-param"><span class="n">nbdays</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/coxph_from_r.html#surv_median_from_python"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.coxph_from_r.surv_median_from_python" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="simdeep.coxph_from_r.surv_median_from_r">
-<code class="descclassname">simdeep.coxph_from_r.</code><code class="descname">surv_median_from_r</code><span class="sig-paren">(</span><em>isdead</em>, <em>nbdays</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/coxph_from_r.html#surv_median_from_r"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.coxph_from_r.surv_median_from_r" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">simdeep.coxph_from_r.</code><code class="sig-name descname">surv_median_from_r</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">isdead</span></em>, <em class="sig-param"><span class="n">nbdays</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/coxph_from_r.html#surv_median_from_r"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.coxph_from_r.surv_median_from_r" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </div>
 <div class="section" id="module-simdeep.deepmodel_base">
 <span id="simdeep-deepmodel-base-module"></span><h2>simdeep.deepmodel_base module<a class="headerlink" href="#module-simdeep.deepmodel_base" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
+<dl class="py class">
 <dt id="simdeep.deepmodel_base.DeepBase">
-<em class="property">class </em><code class="descclassname">simdeep.deepmodel_base.</code><code class="descname">DeepBase</code><span class="sig-paren">(</span><em>dataset=None</em>, <em>verbose=True</em>, <em>epochs=10</em>, <em>level_dims_in=()</em>, <em>level_dims_out=()</em>, <em>new_dim=100</em>, <em>loss='binary_crossentropy'</em>, <em>optimizer='adam'</em>, <em>act_reg=False</em>, <em>w_reg=False</em>, <em>dropout=0.5</em>, <em>data_split=None</em>, <em>activation='tanh'</em>, <em>seed=2020</em>, <em>alternative_embedding=None</em>, <em>path_to_save_model='./'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/deepmodel_base.html#DeepBase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.deepmodel_base.DeepBase" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
-<dl class="method">
+<em class="property">class </em><code class="sig-prename descclassname">simdeep.deepmodel_base.</code><code class="sig-name descname">DeepBase</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dataset</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">epochs</span><span class="o">=</span><span class="default_value">10</span></em>, <em class="sig-param"><span class="n">level_dims_in</span><span class="o">=</span><span class="default_value">()</span></em>, <em class="sig-param"><span class="n">level_dims_out</span><span class="o">=</span><span class="default_value">()</span></em>, <em class="sig-param"><span class="n">new_dim</span><span class="o">=</span><span class="default_value">100</span></em>, <em class="sig-param"><span class="n">loss</span><span class="o">=</span><span class="default_value">'binary_crossentropy'</span></em>, <em class="sig-param"><span class="n">optimizer</span><span class="o">=</span><span class="default_value">'adam'</span></em>, <em class="sig-param"><span class="n">act_reg</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">w_reg</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">dropout</span><span class="o">=</span><span class="default_value">0.5</span></em>, <em class="sig-param"><span class="n">data_split</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">activation</span><span class="o">=</span><span class="default_value">'tanh'</span></em>, <em class="sig-param"><span class="n">seed</span><span class="o">=</span><span class="default_value">2020</span></em>, <em class="sig-param"><span class="n">alternative_embedding</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">kwargs_alternative_embedding</span><span class="o">=</span><span class="default_value">{}</span></em>, <em class="sig-param"><span class="n">path_to_save_model</span><span class="o">=</span><span class="default_value">'./'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/deepmodel_base.html#DeepBase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.deepmodel_base.DeepBase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dl class="py method">
 <dt id="simdeep.deepmodel_base.DeepBase.compile_models">
-<code class="descname">compile_models</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/deepmodel_base.html#DeepBase.compile_models"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.deepmodel_base.DeepBase.compile_models" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">compile_models</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/deepmodel_base.html#DeepBase.compile_models"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.deepmodel_base.DeepBase.compile_models" title="Permalink to this definition">¶</a></dt>
 <dd><p>define the optimizer and the loss function
 compile the model and ready to fit the data!</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="simdeep.deepmodel_base.DeepBase.construct_autoencoders">
-<code class="descname">construct_autoencoders</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/deepmodel_base.html#DeepBase.construct_autoencoders"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.deepmodel_base.DeepBase.construct_autoencoders" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">construct_autoencoders</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/deepmodel_base.html#DeepBase.construct_autoencoders"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.deepmodel_base.DeepBase.construct_autoencoders" title="Permalink to this definition">¶</a></dt>
 <dd><p>main class to create the autoencoder</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="simdeep.deepmodel_base.DeepBase.construct_supervized_network">
-<code class="descname">construct_supervized_network</code><span class="sig-paren">(</span><em>objective</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/deepmodel_base.html#DeepBase.construct_supervized_network"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.deepmodel_base.DeepBase.construct_supervized_network" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">construct_supervized_network</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">objective</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/deepmodel_base.html#DeepBase.construct_supervized_network"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.deepmodel_base.DeepBase.construct_supervized_network" title="Permalink to this definition">¶</a></dt>
 <dd><p>main class to create the autoencoder</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="simdeep.deepmodel_base.DeepBase.create_autoencoders">
-<code class="descname">create_autoencoders</code><span class="sig-paren">(</span><em>matrix_out=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/deepmodel_base.html#DeepBase.create_autoencoders"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.deepmodel_base.DeepBase.create_autoencoders" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">create_autoencoders</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">matrix_out</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/deepmodel_base.html#DeepBase.create_autoencoders"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.deepmodel_base.DeepBase.create_autoencoders" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="method">
+<dl class="py method">
+<dt id="simdeep.deepmodel_base.DeepBase.embedding_predict">
+<code class="sig-name descname">embedding_predict</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">key</span></em>, <em class="sig-param"><span class="n">matrix</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/deepmodel_base.html#DeepBase.embedding_predict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.deepmodel_base.DeepBase.embedding_predict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Predict the output value using the matrix as input and
+the fitted embedding model from self.alternative_embedding_array</p>
+</dd></dl>
+
+<dl class="py method">
 <dt id="simdeep.deepmodel_base.DeepBase.encoder_input_shape">
-<code class="descname">encoder_input_shape</code><span class="sig-paren">(</span><em>key</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/deepmodel_base.html#DeepBase.encoder_input_shape"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.deepmodel_base.DeepBase.encoder_input_shape" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">encoder_input_shape</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">key</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/deepmodel_base.html#DeepBase.encoder_input_shape"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.deepmodel_base.DeepBase.encoder_input_shape" title="Permalink to this definition">¶</a></dt>
 <dd><p>Predict the output value using the matrix as input for the encoder from key</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="simdeep.deepmodel_base.DeepBase.encoder_predict">
-<code class="descname">encoder_predict</code><span class="sig-paren">(</span><em>key</em>, <em>matrix</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/deepmodel_base.html#DeepBase.encoder_predict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.deepmodel_base.DeepBase.encoder_predict" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">encoder_predict</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">key</span></em>, <em class="sig-param"><span class="n">matrix</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/deepmodel_base.html#DeepBase.encoder_predict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.deepmodel_base.DeepBase.encoder_predict" title="Permalink to this definition">¶</a></dt>
 <dd><p>Predict the output value using the matrix as input for the encoder from key</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
+<dt id="simdeep.deepmodel_base.DeepBase.fit_alternative_embedding">
+<code class="sig-name descname">fit_alternative_embedding</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/deepmodel_base.html#DeepBase.fit_alternative_embedding"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.deepmodel_base.DeepBase.fit_alternative_embedding" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
 <dt id="simdeep.deepmodel_base.DeepBase.fit_autoencoders">
-<code class="descname">fit_autoencoders</code><span class="sig-paren">(</span><em>objective=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/deepmodel_base.html#DeepBase.fit_autoencoders"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.deepmodel_base.DeepBase.fit_autoencoders" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">fit_autoencoders</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">objective</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/deepmodel_base.html#DeepBase.fit_autoencoders"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.deepmodel_base.DeepBase.fit_autoencoders" title="Permalink to this definition">¶</a></dt>
 <dd><p>fit the autoencoder using the training matrix</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="simdeep.deepmodel_base.DeepBase.load_encoders">
-<code class="descname">load_encoders</code><span class="sig-paren">(</span><em>fname='encoder.h5'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/deepmodel_base.html#DeepBase.load_encoders"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.deepmodel_base.DeepBase.load_encoders" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">load_encoders</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">fname</span><span class="o">=</span><span class="default_value">'encoder.h5'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/deepmodel_base.html#DeepBase.load_encoders"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.deepmodel_base.DeepBase.load_encoders" title="Permalink to this definition">¶</a></dt>
 <dd><p>Load a keras model from the self.path_to_save_model directory
 :fname: str    the name of the file to load</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="simdeep.deepmodel_base.DeepBase.load_test_dataset">
-<code class="descname">load_test_dataset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/deepmodel_base.html#DeepBase.load_test_dataset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.deepmodel_base.DeepBase.load_test_dataset" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">load_test_dataset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/deepmodel_base.html#DeepBase.load_test_dataset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.deepmodel_base.DeepBase.load_test_dataset" title="Permalink to this definition">¶</a></dt>
 <dd><p>load test dataset and test surival</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="simdeep.deepmodel_base.DeepBase.load_training_dataset">
-<code class="descname">load_training_dataset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/deepmodel_base.html#DeepBase.load_training_dataset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.deepmodel_base.DeepBase.load_training_dataset" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">load_training_dataset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/deepmodel_base.html#DeepBase.load_training_dataset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.deepmodel_base.DeepBase.load_training_dataset" title="Permalink to this definition">¶</a></dt>
 <dd><p>load training dataset and surival</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="simdeep.deepmodel_base.DeepBase.save_encoders">
-<code class="descname">save_encoders</code><span class="sig-paren">(</span><em>fname='encoder.h5'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/deepmodel_base.html#DeepBase.save_encoders"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.deepmodel_base.DeepBase.save_encoders" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">save_encoders</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">fname</span><span class="o">=</span><span class="default_value">'encoder.h5'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/deepmodel_base.html#DeepBase.save_encoders"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.deepmodel_base.DeepBase.save_encoders" title="Permalink to this definition">¶</a></dt>
 <dd><p>Save a keras model in the self.path_to_save_model directory
 :fname: str    the name of the file to save the model</p>
 </dd></dl>
 
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="simdeep.deepmodel_base.main">
-<code class="descclassname">simdeep.deepmodel_base.</code><code class="descname">main</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/deepmodel_base.html#main"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.deepmodel_base.main" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">simdeep.deepmodel_base.</code><code class="sig-name descname">main</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/deepmodel_base.html#main"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.deepmodel_base.main" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </div>
 <div class="section" id="module-simdeep.extract_data">
 <span id="simdeep-extract-data-module"></span><h2>simdeep.extract_data module<a class="headerlink" href="#module-simdeep.extract_data" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
+<dl class="py class">
 <dt id="simdeep.extract_data.LoadData">
-<em class="property">class </em><code class="descclassname">simdeep.extract_data.</code><code class="descname">LoadData</code><span class="sig-paren">(</span><em>path_data='/home/oliver/code/SimDeep/simdeep/../examples/data/'</em>, <em>training_tsv={'GE': 'rna_dummy.tsv'</em>, <em>'METH': 'meth_dummy.tsv'</em>, <em>'MIR': 'mir_dummy.tsv'}</em>, <em>survival_tsv='survival_dummy.tsv'</em>, <em>test_tsv={'MIR': 'mir_test_dummy.tsv'}</em>, <em>survival_tsv_test='survival_test_dummy.tsv'</em>, <em>cross_validation_instance=KFold(n_splits=5</em>, <em>random_state=1</em>, <em>shuffle=True)</em>, <em>test_fold=0</em>, <em>stack_multi_omic=False</em>, <em>fill_unkown_feature_with_0=True</em>, <em>normalization={'NB_FEATURES_TO_KEEP': 100</em>, <em>'TRAIN_CORR_RANK_NORM': True</em>, <em>'TRAIN_CORR_REDUCTION': True</em>, <em>'TRAIN_MAD_SCALE': False</em>, <em>'TRAIN_MIN_MAX': False</em>, <em>'TRAIN_NORM_SCALE': False</em>, <em>'TRAIN_QUANTILE_TRANSFORM': False</em>, <em>'TRAIN_RANK_NORM': True</em>, <em>'TRAIN_ROBUST_SCALE': False</em>, <em>'TRAIN_ROBUST_SCALE_TWO_WAY': False}</em>, <em>survival_flag={'event': 'recurrence'</em>, <em>'patient_id': 'barcode'</em>, <em>'survival': 'days'}</em>, <em>_autoencoder_parameters={}</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/extract_data.html#LoadData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.extract_data.LoadData" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="method">
+<em class="property">class </em><code class="sig-prename descclassname">simdeep.extract_data.</code><code class="sig-name descname">LoadData</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path_data</span><span class="o">=</span><span class="default_value">'/home/oliver/code/SimDeep/simdeep/../examples/data/'</span></em>, <em class="sig-param"><span class="n">training_tsv</span><span class="o">=</span><span class="default_value">{'GE': 'rna_dummy.tsv', 'METH': 'meth_dummy.tsv', 'MIR': 'mir_dummy.tsv'}</span></em>, <em class="sig-param"><span class="n">survival_tsv</span><span class="o">=</span><span class="default_value">'survival_dummy.tsv'</span></em>, <em class="sig-param"><span class="n">metadata_tsv</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">metadata_test_tsv</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">test_tsv</span><span class="o">=</span><span class="default_value">{'MIR': 'mir_test_dummy.tsv'}</span></em>, <em class="sig-param"><span class="n">survival_tsv_test</span><span class="o">=</span><span class="default_value">'survival_test_dummy.tsv'</span></em>, <em class="sig-param"><span class="n">cross_validation_instance</span><span class="o">=</span><span class="default_value">KFold(n_splits=5, random_state=1, shuffle=True)</span></em>, <em class="sig-param"><span class="n">test_fold</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">stack_multi_omic</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">fill_unkown_feature_with_0</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">normalization</span><span class="o">=</span><span class="default_value">{'NB_FEATURES_TO_KEEP': 100, 'TRAIN_CORR_RANK_NORM': True, 'TRAIN_CORR_REDUCTION': True, 'TRAIN_MAD_SCALE': False, 'TRAIN_MIN_MAX': False, 'TRAIN_NORM_SCALE': False, 'TRAIN_QUANTILE_TRANSFORM': False, 'TRAIN_RANK_NORM': True, 'TRAIN_ROBUST_SCALE': False, 'TRAIN_ROBUST_SCALE_TWO_WAY': False}</span></em>, <em class="sig-param"><span class="n">survival_flag</span><span class="o">=</span><span class="default_value">{'event': 'recurrence', 'patient_id': 'barcode', 'survival': 'days'}</span></em>, <em class="sig-param"><span class="n">subset_training_with_meta</span><span class="o">=</span><span class="default_value">{}</span></em>, <em class="sig-param"><span class="n">_autoencoder_parameters</span><span class="o">=</span><span class="default_value">{}</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/extract_data.html#LoadData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.extract_data.LoadData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dl class="py method">
 <dt id="simdeep.extract_data.LoadData.create_a_cv_split">
-<code class="descname">create_a_cv_split</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/extract_data.html#LoadData.create_a_cv_split"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.extract_data.LoadData.create_a_cv_split" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">create_a_cv_split</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/extract_data.html#LoadData.create_a_cv_split"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.extract_data.LoadData.create_a_cv_split" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="simdeep.extract_data.LoadData.load_array">
-<code class="descname">load_array</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/extract_data.html#LoadData.load_array"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.extract_data.LoadData.load_array" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">load_array</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/extract_data.html#LoadData.load_array"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.extract_data.LoadData.load_array" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="simdeep.extract_data.LoadData.load_matrix_full">
-<code class="descname">load_matrix_full</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/extract_data.html#LoadData.load_matrix_full"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.extract_data.LoadData.load_matrix_full" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">load_matrix_full</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/extract_data.html#LoadData.load_matrix_full"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.extract_data.LoadData.load_matrix_full" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="simdeep.extract_data.LoadData.load_matrix_test">
-<code class="descname">load_matrix_test</code><span class="sig-paren">(</span><em>normalization=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/extract_data.html#LoadData.load_matrix_test"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.extract_data.LoadData.load_matrix_test" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">load_matrix_test</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">normalization</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/extract_data.html#LoadData.load_matrix_test"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.extract_data.LoadData.load_matrix_test" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="simdeep.extract_data.LoadData.load_matrix_test_fold">
-<code class="descname">load_matrix_test_fold</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/extract_data.html#LoadData.load_matrix_test_fold"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.extract_data.LoadData.load_matrix_test_fold" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">load_matrix_test_fold</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/extract_data.html#LoadData.load_matrix_test_fold"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.extract_data.LoadData.load_matrix_test_fold" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="method">
+<dl class="py method">
+<dt id="simdeep.extract_data.LoadData.load_meta_data">
+<code class="sig-name descname">load_meta_data</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">sep</span><span class="o">=</span><span class="default_value">'\t'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/extract_data.html#LoadData.load_meta_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.extract_data.LoadData.load_meta_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="simdeep.extract_data.LoadData.load_meta_data_test">
+<code class="sig-name descname">load_meta_data_test</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">metadata_file</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">sep</span><span class="o">=</span><span class="default_value">'\t'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/extract_data.html#LoadData.load_meta_data_test"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.extract_data.LoadData.load_meta_data_test" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
 <dt id="simdeep.extract_data.LoadData.load_new_test_dataset">
-<code class="descname">load_new_test_dataset</code><span class="sig-paren">(</span><em>tsv_dict</em>, <em>path_survival_file=None</em>, <em>survival_flag=None</em>, <em>normalization=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/extract_data.html#LoadData.load_new_test_dataset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.extract_data.LoadData.load_new_test_dataset" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">load_new_test_dataset</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">tsv_dict</span></em>, <em class="sig-param"><span class="n">path_survival_file</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">survival_flag</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">normalization</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">metadata_file</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/extract_data.html#LoadData.load_new_test_dataset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.extract_data.LoadData.load_new_test_dataset" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="simdeep.extract_data.LoadData.load_survival">
-<code class="descname">load_survival</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/extract_data.html#LoadData.load_survival"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.extract_data.LoadData.load_survival" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">load_survival</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/extract_data.html#LoadData.load_survival"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.extract_data.LoadData.load_survival" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="simdeep.extract_data.LoadData.load_survival_test">
-<code class="descname">load_survival_test</code><span class="sig-paren">(</span><em>survival_flag=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/extract_data.html#LoadData.load_survival_test"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.extract_data.LoadData.load_survival_test" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">load_survival_test</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">survival_flag</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/extract_data.html#LoadData.load_survival_test"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.extract_data.LoadData.load_survival_test" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="simdeep.extract_data.LoadData.normalize_training_array">
-<code class="descname">normalize_training_array</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/extract_data.html#LoadData.normalize_training_array"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.extract_data.LoadData.normalize_training_array" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">normalize_training_array</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/extract_data.html#LoadData.normalize_training_array"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.extract_data.LoadData.normalize_training_array" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="simdeep.extract_data.LoadData.reorder_matrix_array">
-<code class="descname">reorder_matrix_array</code><span class="sig-paren">(</span><em>new_sample_ids</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/extract_data.html#LoadData.reorder_matrix_array"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.extract_data.LoadData.reorder_matrix_array" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">reorder_matrix_array</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">new_sample_ids</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/extract_data.html#LoadData.reorder_matrix_array"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.extract_data.LoadData.reorder_matrix_array" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="simdeep.extract_data.LoadData.save_ref_matrix">
-<code class="descname">save_ref_matrix</code><span class="sig-paren">(</span><em>path_folder</em>, <em>project_name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/extract_data.html#LoadData.save_ref_matrix"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.extract_data.LoadData.save_ref_matrix" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">save_ref_matrix</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path_folder</span></em>, <em class="sig-param"><span class="n">project_name</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/extract_data.html#LoadData.save_ref_matrix"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.extract_data.LoadData.save_ref_matrix" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="method">
+<dl class="py method">
+<dt id="simdeep.extract_data.LoadData.subset_training_sets">
+<code class="sig-name descname">subset_training_sets</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">change_cv</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/extract_data.html#LoadData.subset_training_sets"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.extract_data.LoadData.subset_training_sets" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
 <dt id="simdeep.extract_data.LoadData.transform_matrices">
-<code class="descname">transform_matrices</code><span class="sig-paren">(</span><em>matrix_ref</em>, <em>matrix</em>, <em>key</em>, <em>normalization=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/extract_data.html#LoadData.transform_matrices"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.extract_data.LoadData.transform_matrices" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">transform_matrices</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">matrix_ref</span></em>, <em class="sig-param"><span class="n">matrix</span></em>, <em class="sig-param"><span class="n">key</span></em>, <em class="sig-param"><span class="n">normalization</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/extract_data.html#LoadData.transform_matrices"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.extract_data.LoadData.transform_matrices" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -438,155 +472,735 @@ compile the model and ready to fit the data!</p>
 </div>
 <div class="section" id="module-simdeep.plot_utils">
 <span id="simdeep-plot-utils-module"></span><h2>simdeep.plot_utils module<a class="headerlink" href="#module-simdeep.plot_utils" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
+<dl class="py class">
 <dt id="simdeep.plot_utils.SampleHTML">
-<em class="property">class </em><code class="descclassname">simdeep.plot_utils.</code><code class="descname">SampleHTML</code><span class="sig-paren">(</span><em>name</em>, <em>label</em>, <em>proba</em>, <em>survival</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/plot_utils.html#SampleHTML"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.plot_utils.SampleHTML" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<em class="property">class </em><code class="sig-prename descclassname">simdeep.plot_utils.</code><code class="sig-name descname">SampleHTML</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">label</span></em>, <em class="sig-param"><span class="n">proba</span></em>, <em class="sig-param"><span class="n">survival</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/plot_utils.html#SampleHTML"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.plot_utils.SampleHTML" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+</dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="simdeep.plot_utils.make_color_dict">
-<code class="descclassname">simdeep.plot_utils.</code><code class="descname">make_color_dict</code><span class="sig-paren">(</span><em>id_list</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/plot_utils.html#make_color_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.plot_utils.make_color_dict" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">simdeep.plot_utils.</code><code class="sig-name descname">make_color_dict</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">id_list</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/plot_utils.html#make_color_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.plot_utils.make_color_dict" title="Permalink to this definition">¶</a></dt>
 <dd><p>According to an id_list define a color gradient
 return {id:color}</p>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="simdeep.plot_utils.make_color_dict_from_r">
-<code class="descclassname">simdeep.plot_utils.</code><code class="descname">make_color_dict_from_r</code><span class="sig-paren">(</span><em>labels</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/plot_utils.html#make_color_dict_from_r"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.plot_utils.make_color_dict_from_r" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">simdeep.plot_utils.</code><code class="sig-name descname">make_color_dict_from_r</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">labels</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/plot_utils.html#make_color_dict_from_r"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.plot_utils.make_color_dict_from_r" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="simdeep.plot_utils.make_color_list">
-<code class="descclassname">simdeep.plot_utils.</code><code class="descname">make_color_list</code><span class="sig-paren">(</span><em>id_list</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/plot_utils.html#make_color_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.plot_utils.make_color_list" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">simdeep.plot_utils.</code><code class="sig-name descname">make_color_list</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">id_list</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/plot_utils.html#make_color_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.plot_utils.make_color_list" title="Permalink to this definition">¶</a></dt>
 <dd><p>According to an id_list define a color gradient
 return {id:color}</p>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="simdeep.plot_utils.plot_kernel_plots">
-<code class="descclassname">simdeep.plot_utils.</code><code class="descname">plot_kernel_plots</code><span class="sig-paren">(</span><em>test_labels</em>, <em>test_labels_proba</em>, <em>labels</em>, <em>activities</em>, <em>activities_test</em>, <em>dataset</em>, <em>path_html</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/plot_utils.html#plot_kernel_plots"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.plot_utils.plot_kernel_plots" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">simdeep.plot_utils.</code><code class="sig-name descname">plot_kernel_plots</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">test_labels</span></em>, <em class="sig-param"><span class="n">test_labels_proba</span></em>, <em class="sig-param"><span class="n">labels</span></em>, <em class="sig-param"><span class="n">activities</span></em>, <em class="sig-param"><span class="n">activities_test</span></em>, <em class="sig-param"><span class="n">dataset</span></em>, <em class="sig-param"><span class="n">path_html</span></em>, <em class="sig-param"><span class="n">metadata_frame</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/plot_utils.html#plot_kernel_plots"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.plot_utils.plot_kernel_plots" title="Permalink to this definition">¶</a></dt>
 <dd><p>perform a html kernel plot</p>
 </dd></dl>
 
 </div>
-<div class="section" id="simdeep-simdeep-analysis-module">
-<h2>simdeep.simdeep_analysis module<a class="headerlink" href="#simdeep-simdeep-analysis-module" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-simdeep.simdeep_analysis">
+<span id="simdeep-simdeep-analysis-module"></span><h2>simdeep.simdeep_analysis module<a class="headerlink" href="#module-simdeep.simdeep_analysis" title="Permalink to this headline">¶</a></h2>
+<p>DeepProg class for one instance model</p>
+<dl class="py class">
+<dt id="simdeep.simdeep_analysis.SimDeep">
+<em class="property">class </em><code class="sig-prename descclassname">simdeep.simdeep_analysis.</code><code class="sig-name descname">SimDeep</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">nb_clusters</span><span class="o">=</span><span class="default_value">2</span></em>, <em class="sig-param"><span class="n">pvalue_thres</span><span class="o">=</span><span class="default_value">0.01</span></em>, <em class="sig-param"><span class="n">cindex_thres</span><span class="o">=</span><span class="default_value">0.65</span></em>, <em class="sig-param"><span class="n">use_autoencoders</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">feature_surv_analysis</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">cluster_method</span><span class="o">=</span><span class="default_value">'mixture'</span></em>, <em class="sig-param"><span class="n">cluster_eval_method</span><span class="o">=</span><span class="default_value">'silhouette'</span></em>, <em class="sig-param"><span class="n">classifier_type</span><span class="o">=</span><span class="default_value">'svm'</span></em>, <em class="sig-param"><span class="n">project_name</span><span class="o">=</span><span class="default_value">'test_dummy_dataset'</span></em>, <em class="sig-param"><span class="n">path_results</span><span class="o">=</span><span class="default_value">'./'</span></em>, <em class="sig-param"><span class="n">cluster_array</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">nb_selected_features</span><span class="o">=</span><span class="default_value">50</span></em>, <em class="sig-param"><span class="n">mixture_params</span><span class="o">=</span><span class="default_value">{'covariance_type': 'diag', 'max_iter': 1000, 'n_init': 100}</span></em>, <em class="sig-param"><span class="n">node_selection</span><span class="o">=</span><span class="default_value">'Cox-PH'</span></em>, <em class="sig-param"><span class="n">nb_threads_coxph</span><span class="o">=</span><span class="default_value">10</span></em>, <em class="sig-param"><span class="n">classification_method</span><span class="o">=</span><span class="default_value">'ALL_FEATURES'</span></em>, <em class="sig-param"><span class="n">load_existing_models</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">path_to_save_model</span><span class="o">=</span><span class="default_value">'./'</span></em>, <em class="sig-param"><span class="n">clustering_omics</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">metadata_usage</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">feature_selection_usage</span><span class="o">=</span><span class="default_value">'individual'</span></em>, <em class="sig-param"><span class="n">seed</span><span class="o">=</span><span class="default_value">2020</span></em>, <em class="sig-param"><span class="n">alternative_embedding</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">do_KM_plot</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">_isboosting</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">dataset</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">kwargs_alternative_embedding</span><span class="o">=</span><span class="default_value">{}</span></em>, <em class="sig-param"><span class="n">deep_model_additional_args</span><span class="o">=</span><span class="default_value">{}</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/simdeep_analysis.html#SimDeep"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.simdeep_analysis.SimDeep" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#simdeep.deepmodel_base.DeepBase" title="simdeep.deepmodel_base.DeepBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">simdeep.deepmodel_base.DeepBase</span></code></a></p>
+<p>Instanciate a new DeepProg instance.
+The default parameters are defined in the config.py file</p>
+<dl class="simple">
+<dt>Parameters:</dt><dd><dl class="field-list simple">
+<dt class="field-odd">dataset</dt>
+<dd class="field-odd"><p>ExtractData instance. Default None (create a new dataset using the config variable)</p>
+</dd>
+<dt class="field-even">nb_clusters</dt>
+<dd class="field-even"><p>Number of clusters to search (default NB_CLUSTERS)</p>
+</dd>
+<dt class="field-odd">pvalue_thres</dt>
+<dd class="field-odd"><p>Pvalue threshold to include a feature  (default PVALUE_THRESHOLD)</p>
+</dd>
+<dt class="field-even">clustering_omics</dt>
+<dd class="field-even"><p>Which omics to use for clustering. If empty, then all the available omics will be used</p>
+</dd>
+<dt class="field-odd">cindex_thres</dt>
+<dd class="field-odd"><p>C-index threshold to include a feature. This parameter is used only if <cite>node_selection</cite> is set to “C-index” (default CINDEX_THRESHOLD)</p>
+</dd>
+<dt class="field-even">cluster_method</dt>
+<dd class="field-even"><p>Cluster method to use. possible choice [‘mixture’, ‘kmeans’]. (default CLUSTER_METHOD)</p>
+</dd>
+<dt class="field-odd">cluster_eval_method</dt>
+<dd class="field-odd"><p>Cluster evaluation method to use in case the <cite>cluster_array</cite> parameter is a list of possible K. Possible choice [‘bic’, ‘silhouette’, ‘calinski’] (default CLUSTER_EVAL_METHOD)</p>
+</dd>
+<dt class="field-even">classifier_type</dt>
+<dd class="field-even"><p>Type of classifier to use. Possible choice [‘svm’, ‘clustering’]. If ‘clustering’ is selected, The predict method of the clustering algoritm is used  (default CLASSIFIER_TYPE)</p>
+</dd>
+<dt class="field-odd">project_name</dt>
+<dd class="field-odd"><p>Name of the project. This name will be used to save the output files and create the output folder (default PROJECT_NAME)</p>
+</dd>
+<dt class="field-even">path_results</dt>
+<dd class="field-even"><p>Result folder path used to save the output files (default PATH_RESULTS)</p>
+</dd>
+<dt class="field-odd">cluster_array</dt>
+<dd class="field-odd"><p>Array of possible number of clusters to try. If set, <cite>nb_clusters</cite> is ignored (default CLUSTER_ARRAY)</p>
+</dd>
+<dt class="field-even">nb_selected_features</dt>
+<dd class="field-even"><p>Number of selected features to construct classifiers (default NB_SELECTED_FEATURES)</p>
+</dd>
+<dt class="field-odd">mixture_params</dt>
+<dd class="field-odd"><p>Dictionary of parameters used to instanciate the Gaussian mixture algorithm (default MIXTURE_PARAMS)</p>
+</dd>
+<dt class="field-even">node_selection</dt>
+<dd class="field-even"><p>Mehtod to select new features. possible choice [‘Cox-PH’, ‘C-index’]. (default NODES_SELECTION)</p>
+</dd>
+<dt class="field-odd">nb_threads_coxph</dt>
+<dd class="field-odd"><p>Number of python processes to use to compute individual survival models in parallel (default NB_THREADS_COXPH)</p>
+</dd>
+<dt class="field-even">classification_method</dt>
+<dd class="field-even"><p>Possible choice  [‘ALL_FEATURES’, ‘SURVIVAL_FEATURES’]. If ‘SURVIVAL_FEATURES’ is selected, the classifiers are built using survival features  (default CLASSIFICATION_METHOD)</p>
+</dd>
+<dt class="field-odd">load_existing_models</dt>
+<dd class="field-odd"><p>(default LOAD_EXISTING_MODELS)</p>
+</dd>
+<dt class="field-even">path_to_save_model</dt>
+<dd class="field-even"><p>(default PATH_TO_SAVE_MODEL)</p>
+</dd>
+<dt class="field-odd">metadata_usage</dt>
+<dd class="field-odd"><p>Meta data usage with survival models (if metadata_tsv provided as argument to the dataset). Possible choice are [None, False, ‘labels’, ‘new-features’, ‘all’, True] (True is the same as all)</p>
+</dd>
+<dt class="field-even">feature_selection_usage</dt>
+<dd class="field-even"><p>selection method for survival features (‘individual’ or ‘lasso’)</p>
+</dd>
+<dt class="field-odd">alternative_embedding</dt>
+<dd class="field-odd"><p>alternative external embedding to use instead of builfing autoencoders (default None)</p>
+</dd>
+<dt class="field-even">kwargs_alternative_embedding</dt>
+<dd class="field-even"><p>parameters for external embedding fitting</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="simdeep.simdeep_analysis.SimDeep.compute_c_indexes_for_full_dataset">
+<code class="sig-name descname">compute_c_indexes_for_full_dataset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/simdeep_analysis.html#SimDeep.compute_c_indexes_for_full_dataset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.simdeep_analysis.SimDeep.compute_c_indexes_for_full_dataset" title="Permalink to this definition">¶</a></dt>
+<dd><p>return c-index using labels as predicat</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="simdeep.simdeep_analysis.SimDeep.compute_c_indexes_for_test_dataset">
+<code class="sig-name descname">compute_c_indexes_for_test_dataset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/simdeep_analysis.html#SimDeep.compute_c_indexes_for_test_dataset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.simdeep_analysis.SimDeep.compute_c_indexes_for_test_dataset" title="Permalink to this definition">¶</a></dt>
+<dd><p>return c-index using labels as predicat</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="simdeep.simdeep_analysis.SimDeep.compute_c_indexes_for_test_fold_dataset">
+<code class="sig-name descname">compute_c_indexes_for_test_fold_dataset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/simdeep_analysis.html#SimDeep.compute_c_indexes_for_test_fold_dataset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.simdeep_analysis.SimDeep.compute_c_indexes_for_test_fold_dataset" title="Permalink to this definition">¶</a></dt>
+<dd><p>return c-index using labels as predicat</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="simdeep.simdeep_analysis.SimDeep.compute_c_indexes_for_training_dataset">
+<code class="sig-name descname">compute_c_indexes_for_training_dataset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/simdeep_analysis.html#SimDeep.compute_c_indexes_for_training_dataset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.simdeep_analysis.SimDeep.compute_c_indexes_for_training_dataset" title="Permalink to this definition">¶</a></dt>
+<dd><p>return c-index using labels as predicat</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="simdeep.simdeep_analysis.SimDeep.compute_c_indexes_multiple_for_test_dataset">
+<code class="sig-name descname">compute_c_indexes_multiple_for_test_dataset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/simdeep_analysis.html#SimDeep.compute_c_indexes_multiple_for_test_dataset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.simdeep_analysis.SimDeep.compute_c_indexes_multiple_for_test_dataset" title="Permalink to this definition">¶</a></dt>
+<dd><p>return c-index using labels as predicat</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="simdeep.simdeep_analysis.SimDeep.compute_c_indexes_multiple_for_test_fold_dataset">
+<code class="sig-name descname">compute_c_indexes_multiple_for_test_fold_dataset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/simdeep_analysis.html#SimDeep.compute_c_indexes_multiple_for_test_fold_dataset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.simdeep_analysis.SimDeep.compute_c_indexes_multiple_for_test_fold_dataset" title="Permalink to this definition">¶</a></dt>
+<dd><p>return c-index using test-fold labels as predicat</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="simdeep.simdeep_analysis.SimDeep.compute_feature_scores">
+<code class="sig-name descname">compute_feature_scores</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">use_ref</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/simdeep_analysis.html#SimDeep.compute_feature_scores"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.simdeep_analysis.SimDeep.compute_feature_scores" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="simdeep.simdeep_analysis.SimDeep.compute_feature_scores_per_cluster">
+<code class="sig-name descname">compute_feature_scores_per_cluster</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">use_ref</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">pval_thres</span><span class="o">=</span><span class="default_value">0.01</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/simdeep_analysis.html#SimDeep.compute_feature_scores_per_cluster"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.simdeep_analysis.SimDeep.compute_feature_scores_per_cluster" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="simdeep.simdeep_analysis.SimDeep.evalutate_cluster_performance">
+<code class="sig-name descname">evalutate_cluster_performance</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/simdeep_analysis.html#SimDeep.evalutate_cluster_performance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.simdeep_analysis.SimDeep.evalutate_cluster_performance" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="simdeep.simdeep_analysis.SimDeep.fit">
+<code class="sig-name descname">fit</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/simdeep_analysis.html#SimDeep.fit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.simdeep_analysis.SimDeep.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>main function
+I) construct an autoencoder or fit alternative embedding
+II) predict nodes linked with survival (if active)
+and III) do clustering</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="simdeep.simdeep_analysis.SimDeep.fit_classification_model">
+<code class="sig-name descname">fit_classification_model</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/simdeep_analysis.html#SimDeep.fit_classification_model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.simdeep_analysis.SimDeep.fit_classification_model" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="simdeep.simdeep_analysis.SimDeep.fit_classification_test_model">
+<code class="sig-name descname">fit_classification_test_model</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/simdeep_analysis.html#SimDeep.fit_classification_test_model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.simdeep_analysis.SimDeep.fit_classification_test_model" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="simdeep.simdeep_analysis.SimDeep.fit_on_pretrained_label_file">
+<code class="sig-name descname">fit_on_pretrained_label_file</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">label_file</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/simdeep_analysis.html#SimDeep.fit_on_pretrained_label_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.simdeep_analysis.SimDeep.fit_on_pretrained_label_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>fit a deepprog simdeep model without training autoencoder but just using a ID-&gt;labels file to train a classifier</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="simdeep.simdeep_analysis.SimDeep.load_new_test_dataset">
+<code class="sig-name descname">load_new_test_dataset</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">tsv_dict</span></em>, <em class="sig-param"><span class="n">fname_key</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">path_survival_file</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">normalization</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">survival_flag</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">metadata_file</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/simdeep_analysis.html#SimDeep.load_new_test_dataset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.simdeep_analysis.SimDeep.load_new_test_dataset" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="simdeep.simdeep_analysis.SimDeep.look_for_prediction_nodes">
+<code class="sig-name descname">look_for_prediction_nodes</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">keys</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/simdeep_analysis.html#SimDeep.look_for_prediction_nodes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.simdeep_analysis.SimDeep.look_for_prediction_nodes" title="Permalink to this definition">¶</a></dt>
+<dd><p>detect nodes from the autoencoder that predict a
+high c-index scores using label from the retained test fold</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="simdeep.simdeep_analysis.SimDeep.look_for_survival_nodes">
+<code class="sig-name descname">look_for_survival_nodes</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">keys</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/simdeep_analysis.html#SimDeep.look_for_survival_nodes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.simdeep_analysis.SimDeep.look_for_survival_nodes" title="Permalink to this definition">¶</a></dt>
+<dd><p>detect nodes from the autoencoder significantly
+linked with survival through coxph regression</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="simdeep.simdeep_analysis.SimDeep.plot_kernel_for_test_sets">
+<code class="sig-name descname">plot_kernel_for_test_sets</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dataset</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">labels</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">labels_proba</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">test_labels</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">test_labels_proba</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">define_as_main_kernel</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">use_main_kernel</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">activities</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">activities_test</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">key</span><span class="o">=</span><span class="default_value">''</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/simdeep_analysis.html#SimDeep.plot_kernel_for_test_sets"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.simdeep_analysis.SimDeep.plot_kernel_for_test_sets" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="simdeep.simdeep_analysis.SimDeep.plot_supervised_kernel_for_test_sets">
+<code class="sig-name descname">plot_supervised_kernel_for_test_sets</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">labels</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">labels_proba</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">dataset</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">key</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">use_main_kernel</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">test_labels</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">test_labels_proba</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">define_as_main_kernel</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/simdeep_analysis.html#SimDeep.plot_supervised_kernel_for_test_sets"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.simdeep_analysis.SimDeep.plot_supervised_kernel_for_test_sets" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="simdeep.simdeep_analysis.SimDeep.predict_labels">
+<code class="sig-name descname">predict_labels</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/simdeep_analysis.html#SimDeep.predict_labels"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.simdeep_analysis.SimDeep.predict_labels" title="Permalink to this definition">¶</a></dt>
+<dd><p>predict labels from training set
+using K-Means algorithm on the node activities,
+using only nodes linked to survival</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="simdeep.simdeep_analysis.SimDeep.predict_labels_on_full_dataset">
+<code class="sig-name descname">predict_labels_on_full_dataset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/simdeep_analysis.html#SimDeep.predict_labels_on_full_dataset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.simdeep_analysis.SimDeep.predict_labels_on_full_dataset" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="simdeep.simdeep_analysis.SimDeep.predict_labels_on_test_dataset">
+<code class="sig-name descname">predict_labels_on_test_dataset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/simdeep_analysis.html#SimDeep.predict_labels_on_test_dataset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.simdeep_analysis.SimDeep.predict_labels_on_test_dataset" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="simdeep.simdeep_analysis.SimDeep.predict_labels_on_test_fold">
+<code class="sig-name descname">predict_labels_on_test_fold</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/simdeep_analysis.html#SimDeep.predict_labels_on_test_fold"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.simdeep_analysis.SimDeep.predict_labels_on_test_fold" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="simdeep.simdeep_analysis.SimDeep.predict_labels_using_external_labels">
+<code class="sig-name descname">predict_labels_using_external_labels</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">labels</span></em>, <em class="sig-param"><span class="n">labels_proba</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/simdeep_analysis.html#SimDeep.predict_labels_using_external_labels"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.simdeep_analysis.SimDeep.predict_labels_using_external_labels" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="simdeep.simdeep_analysis.SimDeep.predict_nodes_activities">
+<code class="sig-name descname">predict_nodes_activities</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">matrix_array</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/simdeep_analysis.html#SimDeep.predict_nodes_activities"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.simdeep_analysis.SimDeep.predict_nodes_activities" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="simdeep.simdeep_analysis.SimDeep.write_feature_score_per_cluster">
+<code class="sig-name descname">write_feature_score_per_cluster</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/simdeep_analysis.html#SimDeep.write_feature_score_per_cluster"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.simdeep_analysis.SimDeep.write_feature_score_per_cluster" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="simdeep.simdeep_analysis.SimDeep.write_feature_scores">
+<code class="sig-name descname">write_feature_scores</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/simdeep_analysis.html#SimDeep.write_feature_scores"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.simdeep_analysis.SimDeep.write_feature_scores" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 </div>
-<div class="section" id="simdeep-simdeep-boosting-module">
-<h2>simdeep.simdeep_boosting module<a class="headerlink" href="#simdeep-simdeep-boosting-module" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-simdeep.simdeep_boosting">
+<span id="simdeep-simdeep-boosting-module"></span><h2>simdeep.simdeep_boosting module<a class="headerlink" href="#module-simdeep.simdeep_boosting" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="simdeep.simdeep_boosting.SimDeepBoosting">
+<em class="property">class </em><code class="sig-prename descclassname">simdeep.simdeep_boosting.</code><code class="sig-name descname">SimDeepBoosting</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">nb_it</span><span class="o">=</span><span class="default_value">5</span></em>, <em class="sig-param"><span class="n">do_KM_plot</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">distribute</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">nb_threads</span><span class="o">=</span><span class="default_value">5</span></em>, <em class="sig-param"><span class="n">class_selection</span><span class="o">=</span><span class="default_value">'mean'</span></em>, <em class="sig-param"><span class="n">model_thres</span><span class="o">=</span><span class="default_value">0.05</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">seed</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">project_name</span><span class="o">=</span><span class="default_value">'test_dummy_dataset_boosting'</span></em>, <em class="sig-param"><span class="n">use_autoencoders</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">feature_surv_analysis</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">split_n_fold</span><span class="o">=</span><span class="default_value">5</span></em>, <em class="sig-param"><span class="n">path_results</span><span class="o">=</span><span class="default_value">'./'</span></em>, <em class="sig-param"><span class="n">nb_clusters</span><span class="o">=</span><span class="default_value">2</span></em>, <em class="sig-param"><span class="n">epochs</span><span class="o">=</span><span class="default_value">10</span></em>, <em class="sig-param"><span class="n">normalization</span><span class="o">=</span><span class="default_value">{'NB_FEATURES_TO_KEEP': 100, 'TRAIN_CORR_RANK_NORM': True, 'TRAIN_CORR_REDUCTION': True, 'TRAIN_MAD_SCALE': False, 'TRAIN_MIN_MAX': False, 'TRAIN_NORM_SCALE': False, 'TRAIN_QUANTILE_TRANSFORM': False, 'TRAIN_RANK_NORM': True, 'TRAIN_ROBUST_SCALE': False, 'TRAIN_ROBUST_SCALE_TWO_WAY': False}</span></em>, <em class="sig-param"><span class="n">nb_selected_features</span><span class="o">=</span><span class="default_value">50</span></em>, <em class="sig-param"><span class="n">cluster_method</span><span class="o">=</span><span class="default_value">'mixture'</span></em>, <em class="sig-param"><span class="n">pvalue_thres</span><span class="o">=</span><span class="default_value">0.01</span></em>, <em class="sig-param"><span class="n">classification_method</span><span class="o">=</span><span class="default_value">'ALL_FEATURES'</span></em>, <em class="sig-param"><span class="n">new_dim</span><span class="o">=</span><span class="default_value">100</span></em>, <em class="sig-param"><span class="n">training_tsv</span><span class="o">=</span><span class="default_value">{'GE': 'rna_dummy.tsv', 'METH': 'meth_dummy.tsv', 'MIR': 'mir_dummy.tsv'}</span></em>, <em class="sig-param"><span class="n">metadata_usage</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">survival_tsv</span><span class="o">=</span><span class="default_value">'survival_dummy.tsv'</span></em>, <em class="sig-param"><span class="n">metadata_tsv</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">subset_training_with_meta</span><span class="o">=</span><span class="default_value">{}</span></em>, <em class="sig-param"><span class="n">survival_flag</span><span class="o">=</span><span class="default_value">{'event': 'recurrence', 'patient_id': 'barcode', 'survival': 'days'}</span></em>, <em class="sig-param"><span class="n">path_data</span><span class="o">=</span><span class="default_value">'/home/oliver/code/SimDeep/simdeep/../examples/data/'</span></em>, <em class="sig-param"><span class="n">level_dims_in</span><span class="o">=</span><span class="default_value">()</span></em>, <em class="sig-param"><span class="n">level_dims_out</span><span class="o">=</span><span class="default_value">()</span></em>, <em class="sig-param"><span class="n">loss</span><span class="o">=</span><span class="default_value">'binary_crossentropy'</span></em>, <em class="sig-param"><span class="n">optimizer</span><span class="o">=</span><span class="default_value">'adam'</span></em>, <em class="sig-param"><span class="n">act_reg</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">w_reg</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">dropout</span><span class="o">=</span><span class="default_value">0.5</span></em>, <em class="sig-param"><span class="n">data_split</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">node_selection</span><span class="o">=</span><span class="default_value">'Cox-PH'</span></em>, <em class="sig-param"><span class="n">cindex_thres</span><span class="o">=</span><span class="default_value">0.65</span></em>, <em class="sig-param"><span class="n">activation</span><span class="o">=</span><span class="default_value">'tanh'</span></em>, <em class="sig-param"><span class="n">clustering_omics</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">path_to_save_model</span><span class="o">=</span><span class="default_value">'./'</span></em>, <em class="sig-param"><span class="n">feature_selection_usage</span><span class="o">=</span><span class="default_value">'individual'</span></em>, <em class="sig-param"><span class="n">alternative_embedding</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">kwargs_alternative_embedding</span><span class="o">=</span><span class="default_value">{}</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">additional_dataset_args</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/simdeep_boosting.html#SimDeepBoosting"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.simdeep_boosting.SimDeepBoosting" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Instanciate a new DeepProg Boosting instance.
+The default parameters are defined in the config.py file</p>
+<dl class="simple">
+<dt>Parameters:</dt><dd><dl class="field-list simple">
+<dt class="field-odd">nb_it</dt>
+<dd class="field-odd"><p>Number of models to construct</p>
+</dd>
+<dt class="field-even">do_KM_plot</dt>
+<dd class="field-even"><p>Plot Kaplan-Meier (default: True)</p>
+</dd>
+<dt class="field-odd">distribute</dt>
+<dd class="field-odd"><p>Distribute DeepProg using ray (default:  False)</p>
+</dd>
+<dt class="field-even">nb_threads</dt>
+<dd class="field-even"><p>Number of python threads to use to compute parallel Cox-PH</p>
+</dd>
+<dt class="field-odd">class_selection</dt>
+<dd class="field-odd"><p>Consensus score to agglomerate DeepProg Instance {‘mean’, ‘max’, ‘weighted_mean’, ‘weighted_max’} (default: ‘mean’)</p>
+</dd>
+<dt class="field-even">model_thres</dt>
+<dd class="field-even"><p>Cox-PH p-value threshold to reject a model for DeepProg Boosting module</p>
+</dd>
+<dt class="field-odd">verbose</dt>
+<dd class="field-odd"><p>Verobosity (Default: True)</p>
+</dd>
+<dt class="field-even">seed</dt>
+<dd class="field-even"><p>Seed defining the  random split of the training dataset (Default: None).</p>
+</dd>
+<dt class="field-odd">project_name</dt>
+<dd class="field-odd"><p>Project name used to save files</p>
+</dd>
+<dt class="field-even">use_autoencoders</dt>
+<dd class="field-even"><p>Use autoencoder steps to embed the data (default: True)</p>
+</dd>
+<dt class="field-odd">feature_surv_analysis</dt>
+<dd class="field-odd"><p>Use individual survival feature detection to filter out features (default: True)</p>
+</dd>
+<dt class="field-even">split_n_fold</dt>
+<dd class="field-even"><p>For each instance, the original dataset is split in folds and one fold is left</p>
+</dd>
+<dt class="field-odd">path_results</dt>
+<dd class="field-odd"><p>Path to create a result folder</p>
+</dd>
+<dt class="field-even">nb_clusters</dt>
+<dd class="field-even"><p>Number of clusters to use</p>
+</dd>
+<dt class="field-odd">epochs</dt>
+<dd class="field-odd"><p>Number of epochs</p>
+</dd>
+<dt class="field-even">normalization</dt>
+<dd class="field-even"><p>Normalisation procedure to use. See config.py file for details</p>
+</dd>
+<dt class="field-odd">nb_selected_features</dt>
+<dd class="field-odd"><p>Number of top features selected for classification</p>
+</dd>
+<dt class="field-even">cluster_method</dt>
+<dd class="field-even"><p>Clustering method. possible choice: [‘mixture’, ‘kmeans’, ‘coxPH’] or class instance having fit and fit_proba attributes</p>
+</dd>
+<dt class="field-odd">pvalue_thres</dt>
+<dd class="field-odd"><p>Threshold for survival significance to set a node as valid</p>
+</dd>
+<dt class="field-even">classification_method</dt>
+<dd class="field-even"><p>Possible choice: {‘ALL_FEATURES’, ‘SURVIVAL_FEATURES’} (default: ‘ALL_FEATURES’)</p>
+</dd>
+<dt class="field-odd">new_dim</dt>
+<dd class="field-odd"><p>Size of the new embedding</p>
+</dd>
+<dt class="field-even">training_tsv</dt>
+<dd class="field-even"><p>Input matrix files</p>
+</dd>
+<dt class="field-odd">survival_tsv</dt>
+<dd class="field-odd"><p>Input surival file</p>
+</dd>
+<dt class="field-even">survival_flag</dt>
+<dd class="field-even"><p>Survival flag to use</p>
+</dd>
+<dt class="field-odd">path_data</dt>
+<dd class="field-odd"><p>Path of the input file</p>
+</dd>
+<dt class="field-even">level_dims_in</dt>
+<dd class="field-even"><p>Autoencoder node layers before the middle layer (default: [])</p>
+</dd>
+<dt class="field-odd">level_dims_out</dt>
+<dd class="field-odd"><p>Autoencoder node layers after the middle layer (default: [])</p>
+</dd>
+<dt class="field-even">loss</dt>
+<dd class="field-even"><p>Loss function to minimize (default: ‘binary_crossentropy’)</p>
+</dd>
+<dt class="field-odd">optimizer</dt>
+<dd class="field-odd"><p>Optimizer (default: adam)</p>
+</dd>
+<dt class="field-even">act_reg</dt>
+<dd class="field-even"><p>L2 Regularization constant on the node activity (default: False)</p>
+</dd>
+<dt class="field-odd">w_reg</dt>
+<dd class="field-odd"><p>L1 Regularization constant on the weight (default: False)</p>
+</dd>
+<dt class="field-even">dropout</dt>
+<dd class="field-even"><p>Percentage of edges being dropout at each training iteration (None for no dropout) (default: 0.5)</p>
+</dd>
+<dt class="field-odd">data_split</dt>
+<dd class="field-odd"><p>Fraction of the dataset to be used as test set when building the autoencoder (default: None)</p>
+</dd>
+<dt class="field-even">node_selection</dt>
+<dd class="field-even"><p>possible choice: {‘Cox-PH’, ‘C-index’} (default: Cox-PH)</p>
+</dd>
+<dt class="field-odd">cindex_thres</dt>
+<dd class="field-odd"><p>Valid if ‘c-index’ is chosen (default: 0.65)</p>
+</dd>
+<dt class="field-even">activation</dt>
+<dd class="field-even"><p>Activation function (default: ‘tanh’)</p>
+</dd>
+<dt class="field-odd">clustering_omics</dt>
+<dd class="field-odd"><p>Which omics to use for clustering. If empty, then all the available omics will be used (default [] =&gt; all)</p>
+</dd>
+<dt class="field-even">path_to_save_model</dt>
+<dd class="field-even"><p>path to save the model</p>
+</dd>
+<dt class="field-odd">metadata_usage</dt>
+<dd class="field-odd"><p>Meta data usage with survival models (if metadata_tsv provided as argument to the dataset). Possible choice are [None, False, ‘labels’, ‘new-features’, ‘all’, True] (True is the same as all)</p>
+</dd>
+<dt class="field-even">subset_training_with_meta</dt>
+<dd class="field-even"><p>Use a metadata key-value dict {meta_key:value} to subset the training sets</p>
+</dd>
+<dt class="field-odd">alternative_embedding</dt>
+<dd class="field-odd"><p>alternative external embedding to use instead of building autoencoders (default None)</p>
+</dd>
+<dt class="field-even">kwargs_alternative_embedding</dt>
+<dd class="field-even"><p>parameters for external embedding fitting</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="simdeep.simdeep_boosting.SimDeepBoosting.collect_cindex_for_full_dataset">
+<code class="sig-name descname">collect_cindex_for_full_dataset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/simdeep_boosting.html#SimDeepBoosting.collect_cindex_for_full_dataset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.simdeep_boosting.SimDeepBoosting.collect_cindex_for_full_dataset" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="simdeep.simdeep_boosting.SimDeepBoosting.collect_cindex_for_test_dataset">
+<code class="sig-name descname">collect_cindex_for_test_dataset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/simdeep_boosting.html#SimDeepBoosting.collect_cindex_for_test_dataset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.simdeep_boosting.SimDeepBoosting.collect_cindex_for_test_dataset" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="simdeep.simdeep_boosting.SimDeepBoosting.collect_cindex_for_test_fold">
+<code class="sig-name descname">collect_cindex_for_test_fold</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/simdeep_boosting.html#SimDeepBoosting.collect_cindex_for_test_fold"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.simdeep_boosting.SimDeepBoosting.collect_cindex_for_test_fold" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="simdeep.simdeep_boosting.SimDeepBoosting.collect_cindex_for_training_dataset">
+<code class="sig-name descname">collect_cindex_for_training_dataset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/simdeep_boosting.html#SimDeepBoosting.collect_cindex_for_training_dataset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.simdeep_boosting.SimDeepBoosting.collect_cindex_for_training_dataset" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="simdeep.simdeep_boosting.SimDeepBoosting.collect_number_of_features_per_omic">
+<code class="sig-name descname">collect_number_of_features_per_omic</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/simdeep_boosting.html#SimDeepBoosting.collect_number_of_features_per_omic"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.simdeep_boosting.SimDeepBoosting.collect_number_of_features_per_omic" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="simdeep.simdeep_boosting.SimDeepBoosting.collect_pvalue_on_full_dataset">
+<code class="sig-name descname">collect_pvalue_on_full_dataset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/simdeep_boosting.html#SimDeepBoosting.collect_pvalue_on_full_dataset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.simdeep_boosting.SimDeepBoosting.collect_pvalue_on_full_dataset" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="simdeep.simdeep_boosting.SimDeepBoosting.collect_pvalue_on_test_dataset">
+<code class="sig-name descname">collect_pvalue_on_test_dataset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/simdeep_boosting.html#SimDeepBoosting.collect_pvalue_on_test_dataset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.simdeep_boosting.SimDeepBoosting.collect_pvalue_on_test_dataset" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="simdeep.simdeep_boosting.SimDeepBoosting.collect_pvalue_on_test_fold">
+<code class="sig-name descname">collect_pvalue_on_test_fold</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/simdeep_boosting.html#SimDeepBoosting.collect_pvalue_on_test_fold"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.simdeep_boosting.SimDeepBoosting.collect_pvalue_on_test_fold" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="simdeep.simdeep_boosting.SimDeepBoosting.collect_pvalue_on_training_dataset">
+<code class="sig-name descname">collect_pvalue_on_training_dataset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/simdeep_boosting.html#SimDeepBoosting.collect_pvalue_on_training_dataset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.simdeep_boosting.SimDeepBoosting.collect_pvalue_on_training_dataset" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="simdeep.simdeep_boosting.SimDeepBoosting.compute_c_indexes_for_full_dataset">
+<code class="sig-name descname">compute_c_indexes_for_full_dataset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/simdeep_boosting.html#SimDeepBoosting.compute_c_indexes_for_full_dataset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.simdeep_boosting.SimDeepBoosting.compute_c_indexes_for_full_dataset" title="Permalink to this definition">¶</a></dt>
+<dd><p>return c-index using labels as predicat</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="simdeep.simdeep_boosting.SimDeepBoosting.compute_c_indexes_for_test_dataset">
+<code class="sig-name descname">compute_c_indexes_for_test_dataset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/simdeep_boosting.html#SimDeepBoosting.compute_c_indexes_for_test_dataset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.simdeep_boosting.SimDeepBoosting.compute_c_indexes_for_test_dataset" title="Permalink to this definition">¶</a></dt>
+<dd><p>return c-index using labels as predicat</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="simdeep.simdeep_boosting.SimDeepBoosting.compute_c_indexes_multiple_for_test_dataset">
+<code class="sig-name descname">compute_c_indexes_multiple_for_test_dataset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/simdeep_boosting.html#SimDeepBoosting.compute_c_indexes_multiple_for_test_dataset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.simdeep_boosting.SimDeepBoosting.compute_c_indexes_multiple_for_test_dataset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Not Functionnal !</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="simdeep.simdeep_boosting.SimDeepBoosting.compute_clusters_consistency_for_full_labels">
+<code class="sig-name descname">compute_clusters_consistency_for_full_labels</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/simdeep_boosting.html#SimDeepBoosting.compute_clusters_consistency_for_full_labels"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.simdeep_boosting.SimDeepBoosting.compute_clusters_consistency_for_full_labels" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="simdeep.simdeep_boosting.SimDeepBoosting.compute_clusters_consistency_for_test_labels">
+<code class="sig-name descname">compute_clusters_consistency_for_test_labels</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/simdeep_boosting.html#SimDeepBoosting.compute_clusters_consistency_for_test_labels"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.simdeep_boosting.SimDeepBoosting.compute_clusters_consistency_for_test_labels" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="simdeep.simdeep_boosting.SimDeepBoosting.compute_feature_scores_per_cluster">
+<code class="sig-name descname">compute_feature_scores_per_cluster</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">pval_thres</span><span class="o">=</span><span class="default_value">0.001</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/simdeep_boosting.html#SimDeepBoosting.compute_feature_scores_per_cluster"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.simdeep_boosting.SimDeepBoosting.compute_feature_scores_per_cluster" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="simdeep.simdeep_boosting.SimDeepBoosting.compute_pvalue_for_merged_test_fold">
+<code class="sig-name descname">compute_pvalue_for_merged_test_fold</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/simdeep_boosting.html#SimDeepBoosting.compute_pvalue_for_merged_test_fold"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.simdeep_boosting.SimDeepBoosting.compute_pvalue_for_merged_test_fold" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="simdeep.simdeep_boosting.SimDeepBoosting.compute_survival_feature_scores_per_cluster">
+<code class="sig-name descname">compute_survival_feature_scores_per_cluster</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">pval_thres</span><span class="o">=</span><span class="default_value">0.001</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/simdeep_boosting.html#SimDeepBoosting.compute_survival_feature_scores_per_cluster"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.simdeep_boosting.SimDeepBoosting.compute_survival_feature_scores_per_cluster" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="simdeep.simdeep_boosting.SimDeepBoosting.evalutate_cluster_performance">
+<code class="sig-name descname">evalutate_cluster_performance</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/simdeep_boosting.html#SimDeepBoosting.evalutate_cluster_performance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.simdeep_boosting.SimDeepBoosting.evalutate_cluster_performance" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="simdeep.simdeep_boosting.SimDeepBoosting.fit">
+<code class="sig-name descname">fit</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">debug</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">pretrained_labels_files</span><span class="o">=</span><span class="default_value">[]</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/simdeep_boosting.html#SimDeepBoosting.fit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.simdeep_boosting.SimDeepBoosting.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>if pretrained_labels_files, is given, the models are constructed using these labels</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="simdeep.simdeep_boosting.SimDeepBoosting.fit_on_pretrained_label_file">
+<code class="sig-name descname">fit_on_pretrained_label_file</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">labels_files</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">labels_files_folder</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">file_name_regex</span><span class="o">=</span><span class="default_value">'*.tsv'</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">debug</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/simdeep_boosting.html#SimDeepBoosting.fit_on_pretrained_label_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.simdeep_boosting.SimDeepBoosting.fit_on_pretrained_label_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>fit a deepprog simdeep models without training autoencoders but using isntead  ID-&gt;labels files (one for each model instance)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="simdeep.simdeep_boosting.SimDeepBoosting.load_new_test_dataset">
+<code class="sig-name descname">load_new_test_dataset</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">tsv_dict</span></em>, <em class="sig-param"><span class="n">fname_key</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">path_survival_file</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">normalization</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">debug</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">survival_flag</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">metadata_file</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/simdeep_boosting.html#SimDeepBoosting.load_new_test_dataset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.simdeep_boosting.SimDeepBoosting.load_new_test_dataset" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="simdeep.simdeep_boosting.SimDeepBoosting.partial_fit">
+<code class="sig-name descname">partial_fit</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">debug</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/simdeep_boosting.html#SimDeepBoosting.partial_fit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.simdeep_boosting.SimDeepBoosting.partial_fit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="simdeep.simdeep_boosting.SimDeepBoosting.plot_supervised_kernel_for_test_sets">
+<code class="sig-name descname">plot_supervised_kernel_for_test_sets</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/simdeep_boosting.html#SimDeepBoosting.plot_supervised_kernel_for_test_sets"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.simdeep_boosting.SimDeepBoosting.plot_supervised_kernel_for_test_sets" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="simdeep.simdeep_boosting.SimDeepBoosting.plot_supervised_predicted_labels_for_test_sets">
+<code class="sig-name descname">plot_supervised_predicted_labels_for_test_sets</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">define_as_main_kernel</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">use_main_kernel</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/simdeep_boosting.html#SimDeepBoosting.plot_supervised_predicted_labels_for_test_sets"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.simdeep_boosting.SimDeepBoosting.plot_supervised_predicted_labels_for_test_sets" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="simdeep.simdeep_boosting.SimDeepBoosting.predict_labels_on_full_dataset">
+<code class="sig-name descname">predict_labels_on_full_dataset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/simdeep_boosting.html#SimDeepBoosting.predict_labels_on_full_dataset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.simdeep_boosting.SimDeepBoosting.predict_labels_on_full_dataset" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="simdeep.simdeep_boosting.SimDeepBoosting.predict_labels_on_test_dataset">
+<code class="sig-name descname">predict_labels_on_test_dataset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/simdeep_boosting.html#SimDeepBoosting.predict_labels_on_test_dataset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.simdeep_boosting.SimDeepBoosting.predict_labels_on_test_dataset" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="simdeep.simdeep_boosting.SimDeepBoosting.save_cv_models_classes">
+<code class="sig-name descname">save_cv_models_classes</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path_results</span><span class="o">=</span><span class="default_value">''</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/simdeep_boosting.html#SimDeepBoosting.save_cv_models_classes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.simdeep_boosting.SimDeepBoosting.save_cv_models_classes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="simdeep.simdeep_boosting.SimDeepBoosting.save_models_classes">
+<code class="sig-name descname">save_models_classes</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path_results</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">use_cv_labels</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">use_test_labels</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/simdeep_boosting.html#SimDeepBoosting.save_models_classes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.simdeep_boosting.SimDeepBoosting.save_models_classes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="simdeep.simdeep_boosting.SimDeepBoosting.save_test_models_classes">
+<code class="sig-name descname">save_test_models_classes</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path_results</span><span class="o">=</span><span class="default_value">''</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/simdeep_boosting.html#SimDeepBoosting.save_test_models_classes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.simdeep_boosting.SimDeepBoosting.save_test_models_classes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="simdeep.simdeep_boosting.SimDeepBoosting.write_feature_score_per_cluster">
+<code class="sig-name descname">write_feature_score_per_cluster</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/simdeep_boosting.html#SimDeepBoosting.write_feature_score_per_cluster"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.simdeep_boosting.SimDeepBoosting.write_feature_score_per_cluster" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="simdeep.simdeep_boosting.SimDeepBoosting.write_logs">
+<code class="sig-name descname">write_logs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/simdeep_boosting.html#SimDeepBoosting.write_logs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.simdeep_boosting.SimDeepBoosting.write_logs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 </div>
-<div class="section" id="simdeep-simdeep-distributed-module">
-<h2>simdeep.simdeep_distributed module<a class="headerlink" href="#simdeep-simdeep-distributed-module" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-simdeep.simdeep_distributed">
+<span id="simdeep-simdeep-distributed-module"></span><h2>simdeep.simdeep_distributed module<a class="headerlink" href="#module-simdeep.simdeep_distributed" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="simdeep-simdeep-multiple-dataset-module">
-<h2>simdeep.simdeep_multiple_dataset module<a class="headerlink" href="#simdeep-simdeep-multiple-dataset-module" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-simdeep.simdeep_multiple_dataset">
+<span id="simdeep-simdeep-multiple-dataset-module"></span><h2>simdeep.simdeep_multiple_dataset module<a class="headerlink" href="#module-simdeep.simdeep_multiple_dataset" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="simdeep.simdeep_multiple_dataset.SimDeepMultiple">
+<em class="property">class </em><code class="sig-prename descclassname">simdeep.simdeep_multiple_dataset.</code><code class="sig-name descname">SimDeepMultiple</code><a class="reference internal" href="../_modules/simdeep/simdeep_multiple_dataset.html#SimDeepMultiple"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.simdeep_multiple_dataset.SimDeepMultiple" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#simdeep.simdeep_analysis.SimDeep" title="simdeep.simdeep_analysis.SimDeep"><code class="xref py py-class docutils literal notranslate"><span class="pre">simdeep.simdeep_analysis.SimDeep</span></code></a></p>
+</dd></dl>
+
 </div>
-<div class="section" id="simdeep-simdeep-utils-module">
-<h2>simdeep.simdeep_utils module<a class="headerlink" href="#simdeep-simdeep-utils-module" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-simdeep.simdeep_utils">
+<span id="simdeep-simdeep-utils-module"></span><h2>simdeep.simdeep_utils module<a class="headerlink" href="#module-simdeep.simdeep_utils" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="simdeep.simdeep_utils.feature_selection_usage_type">
+<code class="sig-prename descclassname">simdeep.simdeep_utils.</code><code class="sig-name descname">feature_selection_usage_type</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/simdeep_utils.html#feature_selection_usage_type"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.simdeep_utils.feature_selection_usage_type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="simdeep.simdeep_utils.load_labels_file">
+<code class="sig-prename descclassname">simdeep.simdeep_utils.</code><code class="sig-name descname">load_labels_file</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path_labels</span></em>, <em class="sig-param"><span class="n">sep</span><span class="o">=</span><span class="default_value">'\t'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/simdeep_utils.html#load_labels_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.simdeep_utils.load_labels_file" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="simdeep.simdeep_utils.load_model">
+<code class="sig-prename descclassname">simdeep.simdeep_utils.</code><code class="sig-name descname">load_model</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">project_name</span></em>, <em class="sig-param"><span class="n">path_model</span><span class="o">=</span><span class="default_value">'./'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/simdeep_utils.html#load_model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.simdeep_utils.load_model" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="simdeep.simdeep_utils.metadata_usage_type">
+<code class="sig-prename descclassname">simdeep.simdeep_utils.</code><code class="sig-name descname">metadata_usage_type</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/simdeep_utils.html#metadata_usage_type"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.simdeep_utils.metadata_usage_type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="simdeep.simdeep_utils.save_model">
+<code class="sig-prename descclassname">simdeep.simdeep_utils.</code><code class="sig-name descname">save_model</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">boosting</span></em>, <em class="sig-param"><span class="n">path_to_save_model</span><span class="o">=</span><span class="default_value">'./'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/simdeep_utils.html#save_model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.simdeep_utils.save_model" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </div>
 <div class="section" id="module-simdeep.survival_utils">
 <span id="simdeep-survival-utils-module"></span><h2>simdeep.survival_utils module<a class="headerlink" href="#module-simdeep.survival_utils" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
+<dl class="py class">
 <dt id="simdeep.survival_utils.CorrelationReducer">
-<em class="property">class </em><code class="descclassname">simdeep.survival_utils.</code><code class="descname">CorrelationReducer</code><span class="sig-paren">(</span><em>distance='correlation'</em>, <em>threshold=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/survival_utils.html#CorrelationReducer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.survival_utils.CorrelationReducer" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="method">
+<em class="property">class </em><code class="sig-prename descclassname">simdeep.survival_utils.</code><code class="sig-name descname">CorrelationReducer</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">distance</span><span class="o">=</span><span class="default_value">'correlation'</span></em>, <em class="sig-param"><span class="n">threshold</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/survival_utils.html#CorrelationReducer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.survival_utils.CorrelationReducer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dl class="py method">
 <dt id="simdeep.survival_utils.CorrelationReducer.fit">
-<code class="descname">fit</code><span class="sig-paren">(</span><em>dataset</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/survival_utils.html#CorrelationReducer.fit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.survival_utils.CorrelationReducer.fit" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">fit</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dataset</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/survival_utils.html#CorrelationReducer.fit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.survival_utils.CorrelationReducer.fit" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="simdeep.survival_utils.CorrelationReducer.fit_transform">
-<code class="descname">fit_transform</code><span class="sig-paren">(</span><em>dataset</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/survival_utils.html#CorrelationReducer.fit_transform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.survival_utils.CorrelationReducer.fit_transform" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">fit_transform</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dataset</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/survival_utils.html#CorrelationReducer.fit_transform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.survival_utils.CorrelationReducer.fit_transform" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="simdeep.survival_utils.CorrelationReducer.transform">
-<code class="descname">transform</code><span class="sig-paren">(</span><em>dataset</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/survival_utils.html#CorrelationReducer.transform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.survival_utils.CorrelationReducer.transform" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">transform</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dataset</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/survival_utils.html#CorrelationReducer.transform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.survival_utils.CorrelationReducer.transform" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
-<dl class="class">
+<dl class="py class">
 <dt id="simdeep.survival_utils.MadScaler">
-<em class="property">class </em><code class="descclassname">simdeep.survival_utils.</code><code class="descname">MadScaler</code><a class="reference internal" href="../_modules/simdeep/survival_utils.html#MadScaler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.survival_utils.MadScaler" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="method">
+<em class="property">class </em><code class="sig-prename descclassname">simdeep.survival_utils.</code><code class="sig-name descname">MadScaler</code><a class="reference internal" href="../_modules/simdeep/survival_utils.html#MadScaler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.survival_utils.MadScaler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dl class="py method">
 <dt id="simdeep.survival_utils.MadScaler.fit_transform">
-<code class="descname">fit_transform</code><span class="sig-paren">(</span><em>X</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/survival_utils.html#MadScaler.fit_transform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.survival_utils.MadScaler.fit_transform" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">fit_transform</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/survival_utils.html#MadScaler.fit_transform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.survival_utils.MadScaler.fit_transform" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
-<dl class="class">
+<dl class="py class">
 <dt id="simdeep.survival_utils.RankCorrNorm">
-<em class="property">class </em><code class="descclassname">simdeep.survival_utils.</code><code class="descname">RankCorrNorm</code><span class="sig-paren">(</span><em>dataset</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/survival_utils.html#RankCorrNorm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.survival_utils.RankCorrNorm" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<em class="property">class </em><code class="sig-prename descclassname">simdeep.survival_utils.</code><code class="sig-name descname">RankCorrNorm</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dataset</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/survival_utils.html#RankCorrNorm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.survival_utils.RankCorrNorm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+</dd></dl>
 
-<dl class="class">
+<dl class="py class">
 <dt id="simdeep.survival_utils.RankNorm">
-<em class="property">class </em><code class="descclassname">simdeep.survival_utils.</code><code class="descname">RankNorm</code><a class="reference internal" href="../_modules/simdeep/survival_utils.html#RankNorm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.survival_utils.RankNorm" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="method">
+<em class="property">class </em><code class="sig-prename descclassname">simdeep.survival_utils.</code><code class="sig-name descname">RankNorm</code><a class="reference internal" href="../_modules/simdeep/survival_utils.html#RankNorm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.survival_utils.RankNorm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dl class="py method">
 <dt id="simdeep.survival_utils.RankNorm.fit_transform">
-<code class="descname">fit_transform</code><span class="sig-paren">(</span><em>X</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/survival_utils.html#RankNorm.fit_transform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.survival_utils.RankNorm.fit_transform" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">fit_transform</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/survival_utils.html#RankNorm.fit_transform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.survival_utils.RankNorm.fit_transform" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
-<dl class="class">
+<dl class="py class">
 <dt id="simdeep.survival_utils.SampleReducer">
-<em class="property">class </em><code class="descclassname">simdeep.survival_utils.</code><code class="descname">SampleReducer</code><span class="sig-paren">(</span><em>perc_sample_to_keep=0.9</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/survival_utils.html#SampleReducer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.survival_utils.SampleReducer" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="method">
+<em class="property">class </em><code class="sig-prename descclassname">simdeep.survival_utils.</code><code class="sig-name descname">SampleReducer</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">perc_sample_to_keep</span><span class="o">=</span><span class="default_value">0.9</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/survival_utils.html#SampleReducer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.survival_utils.SampleReducer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dl class="py method">
 <dt id="simdeep.survival_utils.SampleReducer.sample_to_keep">
-<code class="descname">sample_to_keep</code><span class="sig-paren">(</span><em>datasets</em>, <em>index=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/survival_utils.html#SampleReducer.sample_to_keep"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.survival_utils.SampleReducer.sample_to_keep" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">sample_to_keep</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">datasets</span></em>, <em class="sig-param"><span class="n">index</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/survival_utils.html#SampleReducer.sample_to_keep"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.survival_utils.SampleReducer.sample_to_keep" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
-<dl class="class">
+<dl class="py class">
 <dt id="simdeep.survival_utils.VarianceReducer">
-<em class="property">class </em><code class="descclassname">simdeep.survival_utils.</code><code class="descname">VarianceReducer</code><span class="sig-paren">(</span><em>nb_features=200</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/survival_utils.html#VarianceReducer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.survival_utils.VarianceReducer" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="method">
+<em class="property">class </em><code class="sig-prename descclassname">simdeep.survival_utils.</code><code class="sig-name descname">VarianceReducer</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">nb_features</span><span class="o">=</span><span class="default_value">200</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/survival_utils.html#VarianceReducer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.survival_utils.VarianceReducer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dl class="py method">
 <dt id="simdeep.survival_utils.VarianceReducer.fit">
-<code class="descname">fit</code><span class="sig-paren">(</span><em>dataset</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/survival_utils.html#VarianceReducer.fit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.survival_utils.VarianceReducer.fit" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">fit</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dataset</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/survival_utils.html#VarianceReducer.fit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.survival_utils.VarianceReducer.fit" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="simdeep.survival_utils.VarianceReducer.fit_transform">
-<code class="descname">fit_transform</code><span class="sig-paren">(</span><em>dataset</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/survival_utils.html#VarianceReducer.fit_transform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.survival_utils.VarianceReducer.fit_transform" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">fit_transform</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dataset</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/survival_utils.html#VarianceReducer.fit_transform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.survival_utils.VarianceReducer.fit_transform" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="simdeep.survival_utils.VarianceReducer.transform">
-<code class="descname">transform</code><span class="sig-paren">(</span><em>dataset</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/survival_utils.html#VarianceReducer.transform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.survival_utils.VarianceReducer.transform" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">transform</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dataset</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/survival_utils.html#VarianceReducer.transform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.survival_utils.VarianceReducer.transform" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
+<dt id="simdeep.survival_utils.convert_metadata_frame_to_matrix">
+<code class="sig-prename descclassname">simdeep.survival_utils.</code><code class="sig-name descname">convert_metadata_frame_to_matrix</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">frame</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/survival_utils.html#convert_metadata_frame_to_matrix"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.survival_utils.convert_metadata_frame_to_matrix" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
 <dt id="simdeep.survival_utils.load_data_from_tsv">
-<code class="descclassname">simdeep.survival_utils.</code><code class="descname">load_data_from_tsv</code><span class="sig-paren">(</span><em>use_transpose=False</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/survival_utils.html#load_data_from_tsv"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.survival_utils.load_data_from_tsv" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">simdeep.survival_utils.</code><code class="sig-name descname">load_data_from_tsv</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">use_transpose</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/survival_utils.html#load_data_from_tsv"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.survival_utils.load_data_from_tsv" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="simdeep.survival_utils.load_entrezID_to_ensg">
-<code class="descclassname">simdeep.survival_utils.</code><code class="descname">load_entrezID_to_ensg</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/survival_utils.html#load_entrezID_to_ensg"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.survival_utils.load_entrezID_to_ensg" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">simdeep.survival_utils.</code><code class="sig-name descname">load_entrezID_to_ensg</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/survival_utils.html#load_entrezID_to_ensg"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.survival_utils.load_entrezID_to_ensg" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="simdeep.survival_utils.load_survival_file">
-<code class="descclassname">simdeep.survival_utils.</code><code class="descname">load_survival_file</code><span class="sig-paren">(</span><em>f_name</em>, <em>path_data='/home/oliver/code/SimDeep/simdeep/../examples/data/'</em>, <em>sep='\t'</em>, <em>survival_flag={'event': 'recurrence'</em>, <em>'patient_id': 'barcode'</em>, <em>'survival': 'days'}</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/survival_utils.html#load_survival_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.survival_utils.load_survival_file" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">simdeep.survival_utils.</code><code class="sig-name descname">load_survival_file</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">f_name</span></em>, <em class="sig-param"><span class="n">path_data</span><span class="o">=</span><span class="default_value">'/home/oliver/code/SimDeep/simdeep/../examples/data/'</span></em>, <em class="sig-param"><span class="n">sep</span><span class="o">=</span><span class="default_value">'\t'</span></em>, <em class="sig-param"><span class="n">survival_flag</span><span class="o">=</span><span class="default_value">{'event': 'recurrence', 'patient_id': 'barcode', 'survival': 'days'}</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/survival_utils.html#load_survival_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.survival_utils.load_survival_file" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
+<dl class="py function">
+<dt id="simdeep.survival_utils.return_intersection_indexes">
+<code class="sig-prename descclassname">simdeep.survival_utils.</code><code class="sig-name descname">return_intersection_indexes</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ids_1</span></em>, <em class="sig-param"><span class="n">ids_2</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/survival_utils.html#return_intersection_indexes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.survival_utils.return_intersection_indexes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
 <dt id="simdeep.survival_utils.save_matrix">
-<code class="descclassname">simdeep.survival_utils.</code><code class="descname">save_matrix</code><span class="sig-paren">(</span><em>matrix</em>, <em>feature_array</em>, <em>sample_array</em>, <em>path_folder</em>, <em>project_name</em>, <em>key=''</em>, <em>sep='\t'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/survival_utils.html#save_matrix"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.survival_utils.save_matrix" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">simdeep.survival_utils.</code><code class="sig-name descname">save_matrix</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">matrix</span></em>, <em class="sig-param"><span class="n">feature_array</span></em>, <em class="sig-param"><span class="n">sample_array</span></em>, <em class="sig-param"><span class="n">path_folder</span></em>, <em class="sig-param"><span class="n">project_name</span></em>, <em class="sig-param"><span class="n">key</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">sep</span><span class="o">=</span><span class="default_value">'\t'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/survival_utils.html#save_matrix"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.survival_utils.save_matrix" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="simdeep.survival_utils.select_best_classif_params">
-<code class="descclassname">simdeep.survival_utils.</code><code class="descname">select_best_classif_params</code><span class="sig-paren">(</span><em>clf</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/survival_utils.html#select_best_classif_params"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.survival_utils.select_best_classif_params" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">simdeep.survival_utils.</code><code class="sig-name descname">select_best_classif_params</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">clf</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/survival_utils.html#select_best_classif_params"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.survival_utils.select_best_classif_params" title="Permalink to this definition">¶</a></dt>
 <dd><p>select best classifier parameters based uniquely
 on test errors</p>
 </dd></dl>
+
+<dl class="py function">
+<dt id="simdeep.survival_utils.translate_index">
+<code class="sig-prename descclassname">simdeep.survival_utils.</code><code class="sig-name descname">translate_index</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">original_ids</span></em>, <em class="sig-param"><span class="n">new_ids</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/simdeep/survival_utils.html#translate_index"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simdeep.survival_utils.translate_index" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 </div>
 <div class="section" id="module-simdeep">
@@ -599,27 +1213,28 @@ on test errors</p>
            
           </div>
           <footer>
-  
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-      
-        <a href="../LICENSE.html" class="btn btn-neutral float-left" title="License" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+        <a href="../LICENSE.html" class="btn btn-neutral float-left" title="License" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2019, Olivier Poirion
+        &#169; Copyright 2019, Olivier Poirion.
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
-
         </div>
       </div>
 
@@ -627,7 +1242,6 @@ on test errors</p>
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

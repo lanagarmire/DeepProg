@@ -1,38 +1,42 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" />
   
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
   <title>simdeep.simdeep_boosting &mdash; DeepProg  documentation</title>
   
 
   
-  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+
   
   
 
   
-  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../../_static/jquery.js"></script>
-        <script type="text/javascript" src="../../_static/underscore.js"></script>
-        <script type="text/javascript" src="../../_static/doctools.js"></script>
-        <script type="text/javascript" src="../../_static/language_data.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
     
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
     
-
-  
-  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
 </head>
@@ -71,6 +75,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -91,6 +96,7 @@
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -125,11 +131,13 @@
 
 
 
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../../index.html">Docs</a> &raquo;</li>
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
         
           <li><a href="../index.html">Module code</a> &raquo;</li>
         
@@ -149,78 +157,89 @@
            <div itemprop="articleBody">
             
   <h1>Source code for simdeep.simdeep_boosting</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">simdeep.simdeep_analysis</span> <span class="k">import</span> <span class="n">SimDeep</span>
-<span class="kn">from</span> <span class="nn">simdeep.extract_data</span> <span class="k">import</span> <span class="n">LoadData</span>
+<span></span><span class="kn">from</span> <span class="nn">simdeep.simdeep_analysis</span> <span class="kn">import</span> <span class="n">SimDeep</span>
+<span class="kn">from</span> <span class="nn">simdeep.extract_data</span> <span class="kn">import</span> <span class="n">LoadData</span>
 
-<span class="kn">from</span> <span class="nn">simdeep.coxph_from_r</span> <span class="k">import</span> <span class="n">coxph</span>
-<span class="kn">from</span> <span class="nn">simdeep.coxph_from_r</span> <span class="k">import</span> <span class="n">c_index</span>
-<span class="kn">from</span> <span class="nn">simdeep.coxph_from_r</span> <span class="k">import</span> <span class="n">c_index_multiple</span>
-<span class="kn">from</span> <span class="nn">simdeep.coxph_from_r</span> <span class="k">import</span> <span class="n">NALogicalType</span>
+<span class="kn">from</span> <span class="nn">simdeep.coxph_from_r</span> <span class="kn">import</span> <span class="n">coxph</span>
+<span class="kn">from</span> <span class="nn">simdeep.coxph_from_r</span> <span class="kn">import</span> <span class="n">c_index</span>
+<span class="kn">from</span> <span class="nn">simdeep.coxph_from_r</span> <span class="kn">import</span> <span class="n">c_index_multiple</span>
+<span class="kn">from</span> <span class="nn">simdeep.coxph_from_r</span> <span class="kn">import</span> <span class="n">NALogicalType</span>
 
-<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="k">import</span> <span class="n">KFold</span>
+<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">KFold</span>
 <span class="c1"># from sklearn.preprocessing import OneHotEncoder</span>
 
-<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">Counter</span>
-<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">defaultdict</span>
-<span class="kn">from</span> <span class="nn">itertools</span> <span class="k">import</span> <span class="n">combinations</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">Counter</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">combinations</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
-<span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">gmean</span>
-<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="k">import</span> <span class="n">adjusted_rand_score</span>
+<span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">gmean</span>
+<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">adjusted_rand_score</span>
 
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">PROJECT_NAME</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">PATH_RESULTS</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">NB_THREADS</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">NB_ITER</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">NB_FOLDS</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">CLASS_SELECTION</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">NB_CLUSTERS</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">NORMALIZATION</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">EPOCHS</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">NEW_DIM</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">NB_SELECTED_FEATURES</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">PVALUE_THRESHOLD</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">CLUSTER_METHOD</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">CLASSIFICATION_METHOD</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">TRAINING_TSV</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">SURVIVAL_TSV</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">PATH_DATA</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">SURVIVAL_FLAG</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">NODES_SELECTION</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">CINDEX_THRESHOLD</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">USE_AUTOENCODERS</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">FEATURE_SURV_ANALYSIS</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">CLUSTERING_OMICS</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">PROJECT_NAME</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">PATH_RESULTS</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">NB_THREADS</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">NB_ITER</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">NB_FOLDS</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">CLASS_SELECTION</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">NB_CLUSTERS</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">NORMALIZATION</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">EPOCHS</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">NEW_DIM</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">NB_SELECTED_FEATURES</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">PVALUE_THRESHOLD</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">CLUSTER_METHOD</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">CLASSIFICATION_METHOD</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">TRAINING_TSV</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">SURVIVAL_TSV</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">PATH_DATA</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">SURVIVAL_FLAG</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">NODES_SELECTION</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">CINDEX_THRESHOLD</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">USE_AUTOENCODERS</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">FEATURE_SURV_ANALYSIS</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">CLUSTERING_OMICS</span>
 
 <span class="c1"># Parameter for autoencoder</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">LEVEL_DIMS_IN</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">LEVEL_DIMS_OUT</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">LOSS</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">OPTIMIZER</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">ACT_REG</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">W_REG</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">DROPOUT</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">ACTIVATION</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">PATH_TO_SAVE_MODEL</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">DATA_SPLIT</span>
-<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="k">import</span> <span class="n">MODEL_THRES</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">LEVEL_DIMS_IN</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">LEVEL_DIMS_OUT</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">LOSS</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">OPTIMIZER</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">ACT_REG</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">W_REG</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">DROPOUT</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">ACTIVATION</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">PATH_TO_SAVE_MODEL</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">DATA_SPLIT</span>
+<span class="kn">from</span> <span class="nn">simdeep.config</span> <span class="kn">import</span> <span class="n">MODEL_THRES</span>
 
-<span class="kn">from</span> <span class="nn">simdeep.deepmodel_base</span> <span class="k">import</span> <span class="n">DeepBase</span>
+<span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="kn">import</span> <span class="n">Pool</span>
+
+<span class="kn">from</span> <span class="nn">simdeep.deepmodel_base</span> <span class="kn">import</span> <span class="n">DeepBase</span>
 
 <span class="kn">import</span> <span class="nn">simplejson</span>
 
-<span class="kn">from</span> <span class="nn">distutils.dir_util</span> <span class="k">import</span> <span class="n">mkpath</span>
+<span class="kn">from</span> <span class="nn">distutils.dir_util</span> <span class="kn">import</span> <span class="n">mkpath</span>
 
-<span class="kn">from</span> <span class="nn">os.path</span> <span class="k">import</span> <span class="n">isdir</span>
+<span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">isdir</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">mkdir</span>
+
+<span class="kn">from</span> <span class="nn">glob</span> <span class="kn">import</span> <span class="n">glob</span>
 
 <span class="kn">import</span> <span class="nn">gc</span>
 
-<span class="kn">from</span> <span class="nn">time</span> <span class="k">import</span> <span class="n">time</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">time</span>
 
-<span class="kn">from</span> <span class="nn">numpy</span> <span class="k">import</span> <span class="n">hstack</span>
-<span class="kn">from</span> <span class="nn">simdeep.survival_utils</span> <span class="k">import</span> \
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">hstack</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">vstack</span>
+
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+<span class="kn">from</span> <span class="nn">simdeep.survival_utils</span> <span class="kn">import</span> \
     <span class="n">_process_parallel_feature_importance_per_cluster</span>
+<span class="kn">from</span> <span class="nn">simdeep.survival_utils</span> <span class="kn">import</span> \
+    <span class="n">_process_parallel_survival_feature_importance_per_cluster</span>
 
 
 
@@ -268,8 +287,12 @@
 <span class="sd">            :activation: Activation function (default: &#39;tanh&#39;)</span>
 <span class="sd">            :clustering_omics: Which omics to use for clustering. If empty, then all the available omics will be used (default [] =&gt; all)</span>
 <span class="sd">            :path_to_save_model: path to save the model</span>
+<span class="sd">            :metadata_usage: Meta data usage with survival models (if metadata_tsv provided as argument to the dataset). Possible choice are [None, False, &#39;labels&#39;, &#39;new-features&#39;, &#39;all&#39;, True] (True is the same as all)</span>
+<span class="sd">            :subset_training_with_meta: Use a metadata key-value dict {meta_key:value} to subset the training sets</span>
+<span class="sd">            :alternative_embedding: alternative external embedding to use instead of building autoencoders (default None)</span>
+<span class="sd">            :kwargs_alternative_embedding: parameters for external embedding fitting</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                  <span class="n">nb_it</span><span class="o">=</span><span class="n">NB_ITER</span><span class="p">,</span>
                  <span class="n">do_KM_plot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                  <span class="n">distribute</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
@@ -292,7 +315,10 @@
                  <span class="n">classification_method</span><span class="o">=</span><span class="n">CLASSIFICATION_METHOD</span><span class="p">,</span>
                  <span class="n">new_dim</span><span class="o">=</span><span class="n">NEW_DIM</span><span class="p">,</span>
                  <span class="n">training_tsv</span><span class="o">=</span><span class="n">TRAINING_TSV</span><span class="p">,</span>
+                 <span class="n">metadata_usage</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">survival_tsv</span><span class="o">=</span><span class="n">SURVIVAL_TSV</span><span class="p">,</span>
+                 <span class="n">metadata_tsv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">subset_training_with_meta</span><span class="o">=</span><span class="p">{},</span>
                  <span class="n">survival_flag</span><span class="o">=</span><span class="n">SURVIVAL_FLAG</span><span class="p">,</span>
                  <span class="n">path_data</span><span class="o">=</span><span class="n">PATH_DATA</span><span class="p">,</span>
                  <span class="n">level_dims_in</span><span class="o">=</span><span class="n">LEVEL_DIMS_IN</span><span class="p">,</span>
@@ -308,6 +334,9 @@
                  <span class="n">activation</span><span class="o">=</span><span class="n">ACTIVATION</span><span class="p">,</span>
                  <span class="n">clustering_omics</span><span class="o">=</span><span class="n">CLUSTERING_OMICS</span><span class="p">,</span>
                  <span class="n">path_to_save_model</span><span class="o">=</span><span class="n">PATH_TO_SAVE_MODEL</span><span class="p">,</span>
+                 <span class="n">feature_selection_usage</span><span class="o">=</span><span class="s1">&#39;individual&#39;</span><span class="p">,</span>
+                 <span class="n">alternative_embedding</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">kwargs_alternative_embedding</span><span class="o">=</span><span class="p">{},</span>
                  <span class="o">**</span><span class="n">additional_dataset_args</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
         <span class="k">assert</span><span class="p">(</span><span class="n">class_selection</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;max&#39;</span><span class="p">,</span> <span class="s1">&#39;mean&#39;</span><span class="p">,</span> <span class="s1">&#39;weighted_mean&#39;</span><span class="p">,</span> <span class="s1">&#39;weighted_max&#39;</span><span class="p">])</span>
@@ -331,6 +360,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">cindex_thres</span> <span class="o">=</span> <span class="n">cindex_thres</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">node_selection</span> <span class="o">=</span> <span class="n">node_selection</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">clustering_omics</span> <span class="o">=</span> <span class="n">clustering_omics</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metadata_tsv</span> <span class="o">=</span> <span class="n">metadata_tsv</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metadata_usage</span> <span class="o">=</span> <span class="n">metadata_usage</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">feature_selection_usage</span> <span class="o">=</span> <span class="n">feature_selection_usage</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">subset_training_with_meta</span> <span class="o">=</span> <span class="n">subset_training_with_meta</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">metadata_mat_full</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">cluster_method</span> <span class="o">=</span> <span class="n">cluster_method</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">use_autoencoders</span> <span class="o">=</span> <span class="n">use_autoencoders</span>
@@ -363,11 +398,14 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">survival_full</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sample_ids_full</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">feature_scores_per_cluster</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">survival_feature_scores_per_cluster</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pretrained_fit</span> <span class="o">=</span> <span class="kc">False</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">log</span> <span class="o">=</span> <span class="p">{}</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">feature_train_array</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">matrix_full_array</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">alternative_embedding</span> <span class="o">=</span> <span class="n">alternative_embedding</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kwargs_alternative_embedding</span> <span class="o">=</span> <span class="n">kwargs_alternative_embedding</span>
 
         <span class="c1">######## deepprog instance parameters ########</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">nb_clusters</span> <span class="o">=</span> <span class="n">nb_clusters</span>
@@ -382,6 +420,7 @@
         <span class="c1">##############################################</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">test_fname_key</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">matrix_with_cv_array</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="n">autoencoder_parameters</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s1">&#39;epochs&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">epochs</span><span class="p">,</span>
@@ -414,16 +453,21 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">[</span><span class="s1">&#39;nb clusters&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nb_clusters</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">[</span><span class="s1">&#39;success&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">[</span><span class="s1">&#39;survival_tsv&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">survival_tsv</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">[</span><span class="s1">&#39;metadata_tsv&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata_tsv</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">[</span><span class="s1">&#39;subset_training_with_meta&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">subset_training_with_meta</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">[</span><span class="s1">&#39;training_tsv&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">training_tsv</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">[</span><span class="s1">&#39;path_data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">path_data</span>
 
         <span class="n">additional_dataset_args</span><span class="p">[</span><span class="s1">&#39;survival_tsv&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">survival_tsv</span>
+        <span class="n">additional_dataset_args</span><span class="p">[</span><span class="s1">&#39;metadata_tsv&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata_tsv</span>
+        <span class="n">additional_dataset_args</span><span class="p">[</span><span class="s1">&#39;subset_training_with_meta&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">subset_training_with_meta</span>
         <span class="n">additional_dataset_args</span><span class="p">[</span><span class="s1">&#39;training_tsv&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">training_tsv</span>
         <span class="n">additional_dataset_args</span><span class="p">[</span><span class="s1">&#39;path_data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">path_data</span>
         <span class="n">additional_dataset_args</span><span class="p">[</span><span class="s1">&#39;survival_flag&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">survival_flag</span>
 
         <span class="k">if</span> <span class="s1">&#39;fill_unkown_feature_with_0&#39;</span> <span class="ow">in</span> <span class="n">additional_dataset_args</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">[</span><span class="s1">&#39;fill_unkown_feature_with_0&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">additional_dataset_args</span><span class="p">[</span><span class="s1">&#39;fill_unkown_feature_with_0&#39;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">[</span><span class="s1">&#39;fill_unkown_feature_with_0&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">additional_dataset_args</span><span class="p">[</span>
+                <span class="s1">&#39;fill_unkown_feature_with_0&#39;</span><span class="p">]</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">ray</span> <span class="o">=</span> <span class="kc">None</span>
 
@@ -438,6 +482,8 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">:</span>
             <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">seed</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10000000</span><span class="p">)</span>
 
         <span class="n">max_seed</span> <span class="o">=</span> <span class="mi">1000</span>
         <span class="n">min_seed</span> <span class="o">=</span> <span class="mi">0</span>
@@ -468,7 +514,7 @@
 
             <span class="bp">self</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">:</span>
@@ -543,21 +589,60 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_fit</span><span class="p">(</span><span class="n">debug</span><span class="o">=</span><span class="n">debug</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="SimDeepBoosting.fit"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.simdeep_boosting.SimDeepBoosting.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="SimDeepBoosting.fit_on_pretrained_label_file"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.simdeep_boosting.SimDeepBoosting.fit_on_pretrained_label_file">[docs]</a>    <span class="k">def</span> <span class="nf">fit_on_pretrained_label_file</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">labels_files</span><span class="o">=</span><span class="p">[],</span>
+            <span class="n">labels_files_folder</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+            <span class="n">file_name_regex</span><span class="o">=</span><span class="s2">&quot;*.tsv&quot;</span><span class="p">,</span>
+            <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        fit a deepprog simdeep models without training autoencoders but using isntead  ID-&gt;labels files (one for each model instance)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribute</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_fit_distributed</span><span class="p">()</span>
+        <span class="k">assert</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">((</span><span class="n">labels_files</span><span class="p">),</span> <span class="nb">list</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">labels_files</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">labels_files_folder</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                <span class="s1">&#39;## Error with fit_on_pretrained_label_file: &#39;</span> \
+                <span class="s1">&#39; either labels_files or labels_files_folder should be non empty&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">labels_files</span><span class="p">:</span>
+            <span class="n">labels_files</span> <span class="o">=</span> <span class="n">glob</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{0}</span><span class="s1">/</span><span class="si">{1}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">labels_files_folder</span><span class="p">,</span>
+                                                 <span class="n">file_name_regex</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">labels_files</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;## Error: labels_files empty&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
+            <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>
+            <span class="n">debug</span><span class="o">=</span><span class="n">debug</span><span class="p">,</span>
+            <span class="n">pretrained_labels_files</span><span class="o">=</span><span class="n">labels_files</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="SimDeepBoosting.fit"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.simdeep_boosting.SimDeepBoosting.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">pretrained_labels_files</span><span class="o">=</span><span class="p">[]):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        if pretrained_labels_files, is given, the models are constructed using these labels</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">pretrained_labels_files</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_pretrained_fit</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_fit</span><span class="p">(</span><span class="n">debug</span><span class="o">=</span><span class="n">debug</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_pretrained_fit</span> <span class="o">=</span> <span class="kc">False</span>
 
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribute</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_fit_distributed</span><span class="p">(</span>
+                <span class="n">pretrained_labels_files</span><span class="o">=</span><span class="n">pretrained_labels_files</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_fit</span><span class="p">(</span>
+                <span class="n">debug</span><span class="o">=</span><span class="n">debug</span><span class="p">,</span>
+                <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>
+                <span class="n">pretrained_labels_files</span><span class="o">=</span><span class="n">pretrained_labels_files</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">_fit_distributed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_fit_distributed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pretrained_labels_files</span><span class="o">=</span><span class="p">[]):</span>
         <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;fit models...&#39;</span><span class="p">)</span>
         <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
 
-        <span class="kn">from</span> <span class="nn">simdeep.simdeep_distributed</span> <span class="k">import</span> <span class="n">SimDeepDistributed</span>
+        <span class="kn">from</span> <span class="nn">simdeep.simdeep_distributed</span> <span class="kn">import</span> <span class="n">SimDeepDistributed</span>
         <span class="kn">import</span> <span class="nn">ray</span>
         <span class="k">assert</span><span class="p">(</span><span class="n">ray</span><span class="o">.</span><span class="n">is_initialized</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ray</span> <span class="o">=</span> <span class="n">ray</span>
@@ -580,11 +665,32 @@
                 <span class="n">project_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">project_name</span><span class="p">,</span>
                 <span class="n">classification_method</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">classification_method</span><span class="p">,</span>
                 <span class="n">cindex_thres</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cindex_thres</span><span class="p">,</span>
+                <span class="n">alternative_embedding</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">alternative_embedding</span><span class="p">,</span>
+                <span class="n">kwargs_alternative_embedding</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kwargs_alternative_embedding</span><span class="p">,</span>
                 <span class="n">node_selection</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">node_selection</span><span class="p">,</span>
+                <span class="n">metadata_usage</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata_usage</span><span class="p">,</span>
+                <span class="n">feature_selection_usage</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">feature_selection_usage</span><span class="p">,</span>
                 <span class="n">deep_model_additional_args</span><span class="o">=</span><span class="n">dataset</span><span class="o">.</span><span class="n">_autoencoder_parameters</span><span class="p">)</span>
                            <span class="k">for</span> <span class="n">dataset</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">datasets</span><span class="p">]</span>
 
-            <span class="n">results</span> <span class="o">=</span> <span class="n">ray</span><span class="o">.</span><span class="n">get</span><span class="p">([</span><span class="n">model</span><span class="o">.</span><span class="n">_partial_fit_model_pool</span><span class="o">.</span><span class="n">remote</span><span class="p">()</span> <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">pretrained_labels_files</span><span class="p">:</span>
+                <span class="n">nb_files</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">pretrained_labels_files</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">nb_files</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">):</span>
+                    <span class="nb">print</span><span class="p">(</span>
+                        <span class="s1">&#39;Number of pretrained label files&#39;</span> \
+                        <span class="s1">&#39; inferior to number of instance</span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                            <span class="n">nb_files</span><span class="p">))</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">models</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[:</span><span class="n">nb_files</span><span class="p">]</span>
+
+                <span class="n">results</span> <span class="o">=</span> <span class="n">ray</span><span class="o">.</span><span class="n">get</span><span class="p">([</span>
+                    <span class="n">model</span><span class="o">.</span><span class="n">_partial_fit_model_with_pretrained_pool</span><span class="o">.</span><span class="n">remote</span><span class="p">(</span>
+                        <span class="n">labels</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">model</span><span class="p">,</span> <span class="n">labels</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">,</span>
+                                             <span class="n">pretrained_labels_files</span><span class="p">)])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">results</span> <span class="o">=</span> <span class="n">ray</span><span class="o">.</span><span class="n">get</span><span class="p">([</span>
+                    <span class="n">model</span><span class="o">.</span><span class="n">_partial_fit_model_pool</span><span class="o">.</span><span class="n">remote</span><span class="p">()</span>
+                    <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">])</span>
 
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Results: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">results</span><span class="p">))</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">models</span> <span class="o">=</span> <span class="p">[</span><span class="n">model</span> <span class="k">for</span> <span class="n">model</span><span class="p">,</span> <span class="n">is_fitted</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">,</span> <span class="n">results</span><span class="p">)</span> <span class="k">if</span> <span class="n">is_fitted</span><span class="p">]</span>
@@ -607,8 +713,10 @@
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">class_selection</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;weighted_mean&#39;</span><span class="p">,</span> <span class="s1">&#39;weighted_max&#39;</span><span class="p">]:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">collect_cindex_for_test_fold</span><span class="p">()</span>
 
-    <span class="k">def</span> <span class="nf">_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">pretrained_labels_files</span><span class="o">=</span><span class="p">[]):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        if pretrained_labels_files, is given, the models are constructed using these labels</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;fit models...&#39;</span><span class="p">)</span>
         <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
 
@@ -629,11 +737,28 @@
                 <span class="n">project_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">project_name</span><span class="p">,</span>
                 <span class="n">cindex_thres</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cindex_thres</span><span class="p">,</span>
                 <span class="n">node_selection</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">node_selection</span><span class="p">,</span>
+                <span class="n">metadata_usage</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata_usage</span><span class="p">,</span>
+                <span class="n">feature_selection_usage</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">feature_selection_usage</span><span class="p">,</span>
+                <span class="n">alternative_embedding</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">alternative_embedding</span><span class="p">,</span>
+                <span class="n">kwargs_alternative_embedding</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kwargs_alternative_embedding</span><span class="p">,</span>
                 <span class="n">classification_method</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">classification_method</span><span class="p">,</span>
                 <span class="n">deep_model_additional_args</span><span class="o">=</span><span class="n">dataset</span><span class="o">.</span><span class="n">_autoencoder_parameters</span><span class="p">)</span>
                            <span class="k">for</span> <span class="n">dataset</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">datasets</span><span class="p">]</span>
 
-            <span class="n">results</span> <span class="o">=</span> <span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">_partial_fit_model_pool</span><span class="p">()</span> <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">pretrained_labels_files</span><span class="p">:</span>
+                <span class="n">nb_files</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">pretrained_labels_files</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">nb_files</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">):</span>
+                    <span class="nb">print</span><span class="p">(</span>
+                        <span class="s1">&#39;Number of pretrained label files&#39;</span> \
+                        <span class="s1">&#39; inferior to number of instance</span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="n">nb_files</span><span class="p">))</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">models</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[:</span><span class="n">nb_files</span><span class="p">]</span>
+
+                <span class="n">results</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="n">model</span><span class="o">.</span><span class="n">_partial_fit_model_with_pretrained_pool</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">model</span><span class="p">,</span> <span class="n">labels</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">,</span> <span class="n">pretrained_labels_files</span><span class="p">)]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">results</span> <span class="o">=</span> <span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">_partial_fit_model_pool</span><span class="p">()</span> <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">]</span>
 
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Results: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">results</span><span class="p">))</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">models</span> <span class="o">=</span> <span class="p">[</span><span class="n">model</span> <span class="k">for</span> <span class="n">model</span><span class="p">,</span> <span class="n">is_fitted</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">,</span> <span class="n">results</span><span class="p">)</span> <span class="k">if</span> <span class="n">is_fitted</span><span class="p">]</span>
@@ -660,16 +785,24 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;predict labels on test datasets...&#39;</span><span class="p">)</span>
-        <span class="n">test_labels_proba</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_from_models_attr</span><span class="p">(</span><span class="s1">&#39;test_labels_proba&#39;</span><span class="p">))</span>
+        <span class="n">test_labels_proba</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_from_models_attr</span><span class="p">(</span>
+            <span class="s1">&#39;test_labels_proba&#39;</span><span class="p">))</span>
 
-        <span class="n">res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_do_class_selection</span><span class="p">(</span><span class="n">test_labels_proba</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cindex_test_folds</span><span class="p">)</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_do_class_selection</span><span class="p">(</span>
+            <span class="n">test_labels_proba</span><span class="p">,</span>
+            <span class="n">weights</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cindex_test_folds</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">test_labels</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_labels_proba</span> <span class="o">=</span> <span class="n">res</span>
 
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;#### report of assigned cluster:&#39;</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">Counter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">test_labels</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;#### Report of assigned cluster for TEST dataset </span><span class="si">{0}</span><span class="s1">:&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">test_fname_key</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">Counter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">test_labels</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;class: </span><span class="si">{0}</span><span class="s1">, number of samples :</span><span class="si">{1}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
 
         <span class="n">nbdays</span><span class="p">,</span> <span class="n">isdead</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_from_model_dataset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s2">&quot;survival_test&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">nbdays</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+
         <span class="n">pvalue</span><span class="p">,</span> <span class="n">pvalue_proba</span><span class="p">,</span> <span class="n">pvalue_cat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_test_coxph</span><span class="p">(</span>
             <span class="s1">&#39;KM_plot_boosting_test&#39;</span><span class="p">,</span>
             <span class="n">nbdays</span><span class="p">,</span> <span class="n">isdead</span><span class="p">,</span>
@@ -698,19 +831,42 @@
 
         <span class="n">isdead_cv</span><span class="p">,</span> <span class="n">nbdays_cv</span><span class="p">,</span> <span class="n">labels_cv</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[]</span>
 
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata_usage</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="s1">&#39;labels&#39;</span><span class="p">]</span> <span class="ow">and</span> \
+           <span class="bp">self</span><span class="o">.</span><span class="n">metadata_tsv</span><span class="p">:</span>
+            <span class="n">metadata_mat</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">metadata_mat</span> <span class="o">=</span> <span class="kc">None</span>
+
         <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">:</span>
             <span class="n">survival_cv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_from_model_dataset</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;survival_cv&#39;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">survival_cv</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;No survival dataset for CV fold returning&#39;</span><span class="p">)</span>
+                <span class="k">return</span>
+
             <span class="n">nbdays</span><span class="p">,</span> <span class="n">isdead</span> <span class="o">=</span> <span class="n">survival_cv</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
             <span class="n">nbdays_cv</span> <span class="o">+=</span> <span class="n">nbdays</span>
             <span class="n">isdead_cv</span> <span class="o">+=</span> <span class="n">isdead</span>
             <span class="n">labels_cv</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_from_model_attr</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s2">&quot;cv_labels&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="n">metadata_mat</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">meta2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_from_model_dataset</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;metadata_mat_cv&#39;</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">metadata_mat</span><span class="p">):</span>
+                    <span class="n">metadata_mat</span> <span class="o">=</span> <span class="n">meta2</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">metadata_mat</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">metadata_mat</span><span class="p">,</span> <span class="n">meta2</span><span class="p">])</span>
+
+                <span class="n">metadata_mat</span> <span class="o">=</span> <span class="n">metadata_mat</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 
         <span class="n">pvalue</span> <span class="o">=</span> <span class="n">coxph</span><span class="p">(</span>
             <span class="n">labels_cv</span><span class="p">,</span> <span class="n">isdead_cv</span><span class="p">,</span> <span class="n">nbdays_cv</span><span class="p">,</span>
             <span class="n">isfactor</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
             <span class="n">do_KM_plot</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">do_KM_plot</span><span class="p">,</span>
             <span class="n">png_path</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">path_results</span><span class="p">,</span>
-            <span class="n">fig_name</span><span class="o">=</span><span class="s1">&#39;cv_analysis&#39;</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">)</span>
+            <span class="n">fig_name</span><span class="o">=</span><span class="s1">&#39;cv_analysis&#39;</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">,</span>
+            <span class="n">metadata_mat</span><span class="o">=</span><span class="n">metadata_mat</span>
+        <span class="p">)</span>
 
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Pvalue for test fold concatenated: </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pvalue</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">[</span><span class="s1">&#39;pvalue cv test&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pvalue</span>
@@ -909,13 +1065,15 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;predict labels on full datasets...&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_get_probas_for_full_models</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_reorder_survival_full</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_reorder_survival_full_and_metadata</span><span class="p">()</span>
 
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;#### report of assigned cluster:&#39;</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">Counter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">full_labels</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;#### Report of assigned cluster for the full training dataset:&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">Counter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">full_labels</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;class: </span><span class="si">{0}</span><span class="s1">, number of samples :</span><span class="si">{1}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
 
         <span class="n">nbdays</span><span class="p">,</span> <span class="n">isdead</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">survival_full</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+
+
         <span class="n">pvalue</span><span class="p">,</span> <span class="n">pvalue_proba</span><span class="p">,</span> <span class="n">pvalue_cat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_test_coxph</span><span class="p">(</span>
             <span class="s1">&#39;KM_plot_boosting_full&#39;</span><span class="p">,</span>
             <span class="n">nbdays</span><span class="p">,</span> <span class="n">isdead</span><span class="p">,</span>
@@ -976,7 +1134,7 @@
 
         <span class="k">return</span> <span class="n">scores</span></div>
 
-    <span class="k">def</span> <span class="nf">_reorder_survival_full</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_reorder_survival_full_and_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">survival_old</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_from_model_dataset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;survival_full&#39;</span><span class="p">)</span>
@@ -987,6 +1145,14 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">survival_full</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">surv_dict</span><span class="p">[</span><span class="n">sample</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
                                          <span class="k">for</span> <span class="n">sample</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_ids_full</span><span class="p">])</span>
 
+        <span class="n">metadata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_from_model_dataset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;metadata_mat_full&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">metadata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+
+            <span class="n">index_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">sample</span><span class="p">:</span> <span class="n">pos</span> <span class="k">for</span> <span class="n">pos</span><span class="p">,</span> <span class="n">sample</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">sample_ids</span><span class="p">)}</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="n">index_dict</span><span class="p">[</span><span class="n">sample</span><span class="p">]</span> <span class="k">for</span> <span class="n">sample</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_ids_full</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">metadata_mat_full</span> <span class="o">=</span> <span class="n">metadata</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">T</span>
+
     <span class="k">def</span> <span class="nf">_reorder_matrix_full</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -994,11 +1160,19 @@
         <span class="n">index_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">sample</span><span class="p">:</span> <span class="n">ids</span> <span class="k">for</span> <span class="n">ids</span><span class="p">,</span> <span class="n">sample</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">sample_ids</span><span class="p">)}</span>
         <span class="n">index</span> <span class="o">=</span> <span class="p">[</span><span class="n">index_dict</span><span class="p">[</span><span class="n">sample</span><span class="p">]</span> <span class="k">for</span> <span class="n">sample</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_ids_full</span><span class="p">]</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">feature_train_array</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_from_model_dataset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;feature_train_array&#39;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">matrix_full_array</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_from_model_dataset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;matrix_full_array&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">matrix_with_cv_array</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_from_model_dataset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;matrix_array&#39;</span><span class="p">)</span>
 
-        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">matrix_full_array</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">matrix_full_array</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">matrix_full_array</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">index</span><span class="p">]</span>
+        <span class="n">matrix_cv_unormalized_array</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_from_model_dataset</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="s1">&#39;matrix_cv_unormalized_array&#39;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">matrix_with_cv_array</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">matrix_cv_unormalized_array</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">matrix_with_cv_array</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">vstack</span><span class="p">(</span>
+                    <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">matrix_with_cv_array</span><span class="p">[</span><span class="n">key</span><span class="p">],</span>
+                     <span class="n">matrix_cv_unormalized_array</span><span class="p">[</span><span class="n">key</span><span class="p">]])</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">matrix_with_cv_array</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">matrix_with_cv_array</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">index</span><span class="p">]</span>
 
     <span class="k">def</span> <span class="nf">_get_probas_for_full_models</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -1025,7 +1199,7 @@
 
     <span class="k">def</span> <span class="nf">_compute_test_coxph</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fname_base</span><span class="p">,</span> <span class="n">nbdays</span><span class="p">,</span>
                             <span class="n">isdead</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">labels_proba</span><span class="p">,</span>
-                            <span class="n">project_name</span><span class="p">):</span>
+                            <span class="n">project_name</span><span class="p">,</span> <span class="n">metadata_mat</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
         <span class="n">pvalue</span> <span class="o">=</span> <span class="n">coxph</span><span class="p">(</span>
             <span class="n">labels</span><span class="p">,</span> <span class="n">isdead</span><span class="p">,</span> <span class="n">nbdays</span><span class="p">,</span>
@@ -1033,6 +1207,7 @@
             <span class="n">do_KM_plot</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">do_KM_plot</span><span class="p">,</span>
             <span class="n">png_path</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">path_results</span><span class="p">,</span>
             <span class="n">fig_name</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">{0}</span><span class="s1">_</span><span class="si">{1}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">project_name</span><span class="p">,</span> <span class="n">fname_base</span><span class="p">),</span>
+            <span class="n">metadata_mat</span><span class="o">=</span><span class="n">metadata_mat</span><span class="p">,</span>
             <span class="n">seed</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
@@ -1042,6 +1217,7 @@
             <span class="n">labels_proba</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
             <span class="n">isdead</span><span class="p">,</span> <span class="n">nbdays</span><span class="p">,</span>
             <span class="n">isfactor</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">metadata_mat</span><span class="o">=</span><span class="n">metadata_mat</span><span class="p">,</span>
             <span class="n">seed</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
@@ -1055,6 +1231,7 @@
             <span class="n">do_KM_plot</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">do_KM_plot</span><span class="p">,</span>
             <span class="n">png_path</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">path_results</span><span class="p">,</span>
             <span class="n">fig_name</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">{0}</span><span class="s1">_proba_</span><span class="si">{1}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">project_name</span><span class="p">,</span> <span class="n">fname_base</span><span class="p">),</span>
+            <span class="n">metadata_mat</span><span class="o">=</span><span class="n">metadata_mat</span><span class="p">,</span>
             <span class="n">seed</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
@@ -1202,7 +1379,7 @@
 <div class="viewcode-block" id="SimDeepBoosting.plot_supervised_kernel_for_test_sets"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.simdeep_boosting.SimDeepBoosting.plot_supervised_kernel_for_test_sets">[docs]</a>    <span class="k">def</span> <span class="nf">plot_supervised_kernel_for_test_sets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">from</span> <span class="nn">simdeep.plot_utils</span> <span class="k">import</span> <span class="n">plot_kernel_plots</span>
+        <span class="kn">from</span> <span class="nn">simdeep.plot_utils</span> <span class="kn">import</span> <span class="n">plot_kernel_plots</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;plotting survival features using autoencoder...&#39;</span><span class="p">)</span>
@@ -1309,10 +1486,12 @@
             <span class="n">cross_validation_instance</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
             <span class="n">training_tsv</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">training_tsv</span><span class="p">,</span>
             <span class="n">survival_tsv</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">survival_tsv</span><span class="p">,</span>
+            <span class="n">metadata_tsv</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata_tsv</span><span class="p">,</span>
             <span class="n">survival_flag</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">survival_flag</span><span class="p">,</span>
             <span class="n">path_data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">path_data</span><span class="p">,</span>
             <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-            <span class="n">normalization</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">test_normalization</span>
+            <span class="n">normalization</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">test_normalization</span><span class="p">,</span>
+            <span class="n">subset_training_with_meta</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">subset_training_with_meta</span>
         <span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
@@ -1320,9 +1499,12 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">load_array</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">load_survival</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">load_meta_data</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">subset_training_sets</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">reorder_matrix_array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_ids_full</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">create_a_cv_split</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">normalize_training_array</span><span class="p">()</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">load_new_test_dataset</span><span class="p">(</span>
             <span class="n">tsv_dict</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">test_tsv_dict</span><span class="p">,</span>
             <span class="n">path_survival_file</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">test_survival_file</span><span class="p">,</span>
@@ -1361,7 +1543,9 @@
                               <span class="n">normalization</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                               <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                               <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                              <span class="n">survival_flag</span><span class="o">=</span><span class="kc">None</span><span class="p">,):</span>
+                              <span class="n">survival_flag</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                              <span class="n">metadata_file</span><span class="o">=</span><span class="kc">None</span>
+                              <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">test_tsv_dict</span> <span class="o">=</span> <span class="n">tsv_dict</span>
@@ -1380,7 +1564,8 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">test_fname_key</span> <span class="o">=</span> <span class="n">fname_key</span>
 
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Loading new test dataset...&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Loading new test dataset </span><span class="si">{0}</span><span class="s2"> ...&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">test_fname_key</span><span class="p">))</span>
         <span class="n">t_start</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_from_models</span><span class="p">(</span><span class="s1">&#39;_predict_new_dataset&#39;</span><span class="p">,</span>
@@ -1388,14 +1573,68 @@
                           <span class="n">path_survival_file</span><span class="o">=</span><span class="n">path_survival_file</span><span class="p">,</span>
                           <span class="n">normalization</span><span class="o">=</span><span class="n">normalization</span><span class="p">,</span>
                           <span class="n">survival_flag</span><span class="o">=</span><span class="n">survival_flag</span><span class="p">,</span>
+                          <span class="n">metadata_file</span><span class="o">=</span><span class="n">metadata_file</span>
         <span class="p">)</span>
 
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Test dataset loaded in </span><span class="si">{0}</span><span class="s2"> s&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t_start</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Test dataset </span><span class="si">{1}</span><span class="s2"> loaded in </span><span class="si">{0}</span><span class="s2"> s&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t_start</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_fname_key</span><span class="p">))</span>
 
         <span class="k">if</span> <span class="n">fname_key</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">project_name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{0}</span><span class="s1">_</span><span class="si">{1}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_project_name</span><span class="p">,</span> <span class="n">fname_key</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="SimDeepBoosting.compute_feature_scores_per_cluster"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.simdeep_boosting.SimDeepBoosting.compute_feature_scores_per_cluster">[docs]</a>    <span class="k">def</span> <span class="nf">compute_feature_scores_per_cluster</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="SimDeepBoosting.compute_survival_feature_scores_per_cluster"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.simdeep_boosting.SimDeepBoosting.compute_survival_feature_scores_per_cluster">[docs]</a>    <span class="k">def</span> <span class="nf">compute_survival_feature_scores_per_cluster</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pval_thres</span><span class="o">=</span><span class="mf">0.001</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;computing survival feature importance per cluster...&#39;</span><span class="p">)</span>
+        <span class="n">pool</span> <span class="o">=</span> <span class="n">Pool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nb_threads</span><span class="p">)</span>
+        <span class="n">mapf</span> <span class="o">=</span> <span class="n">pool</span><span class="o">.</span><span class="n">map</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata_usage</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="s1">&#39;new-features&#39;</span><span class="p">]</span> <span class="ow">and</span> \
+           <span class="bp">self</span><span class="o">.</span><span class="n">metadata_mat_full</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">metadata_mat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata_mat_full</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">metadata_mat</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">full_labels</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">survival_feature_scores_per_cluster</span><span class="p">[</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">feature_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_from_model_dataset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;feature_array&#39;</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">generator</span><span class="p">(</span><span class="n">feature_list</span><span class="p">,</span> <span class="n">matrix</span><span class="p">,</span> <span class="n">feature_index</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">feat</span> <span class="ow">in</span> <span class="n">feature_list</span><span class="p">:</span>
+                <span class="n">i</span> <span class="o">=</span> <span class="n">feature_index</span><span class="p">[</span><span class="n">feat</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+                <span class="k">yield</span> <span class="p">(</span><span class="n">feat</span><span class="p">,</span>
+                       <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">matrix</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span>
+                       <span class="bp">self</span><span class="o">.</span><span class="n">survival_full</span><span class="p">,</span>
+                       <span class="n">metadata_mat</span><span class="p">,</span>
+                       <span class="n">pval_thres</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">matrix_with_cv_array</span><span class="p">:</span>
+            <span class="n">feature_index</span> <span class="o">=</span> <span class="p">{</span><span class="n">feat</span><span class="p">:</span> <span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">feat</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">feature_dict</span><span class="p">[</span><span class="n">key</span><span class="p">])}</span>
+
+            <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_scores_per_cluster</span><span class="p">:</span>
+                <span class="n">matrix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">matrix_with_cv_array</span><span class="p">[</span><span class="n">key</span><span class="p">][:]</span>
+
+                <span class="n">feature_list</span> <span class="o">=</span>  <span class="bp">self</span><span class="o">.</span><span class="n">feature_scores_per_cluster</span><span class="p">[</span><span class="n">label</span><span class="p">]</span>
+                <span class="n">feature_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">feat</span> <span class="k">for</span> <span class="n">feat</span> <span class="ow">in</span> <span class="n">feature_list</span>
+                                <span class="k">if</span> <span class="n">feat</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="n">feature_index</span><span class="p">]</span>
+
+                <span class="n">input_list</span> <span class="o">=</span> <span class="n">generator</span><span class="p">(</span><span class="n">feature_list</span><span class="p">,</span> <span class="n">matrix</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">feature_index</span><span class="p">)</span>
+
+                <span class="n">features_scored</span> <span class="o">=</span> <span class="n">mapf</span><span class="p">(</span>
+                    <span class="n">_process_parallel_survival_feature_importance_per_cluster</span><span class="p">,</span>
+                    <span class="n">input_list</span><span class="p">)</span>
+
+                <span class="k">for</span> <span class="n">feature</span><span class="p">,</span> <span class="n">pvalue</span> <span class="ow">in</span> <span class="n">features_scored</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">feature</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">survival_feature_scores_per_cluster</span><span class="p">[</span><span class="n">label</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                            <span class="p">(</span><span class="n">feature</span><span class="p">,</span> <span class="n">pvalue</span><span class="p">))</span>
+
+                <span class="k">if</span> <span class="n">label</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">survival_feature_scores_per_cluster</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">survival_feature_scores_per_cluster</span><span class="p">[</span><span class="n">label</span><span class="p">]</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span>
+                        <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="SimDeepBoosting.compute_feature_scores_per_cluster"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.simdeep_boosting.SimDeepBoosting.compute_feature_scores_per_cluster">[docs]</a>    <span class="k">def</span> <span class="nf">compute_feature_scores_per_cluster</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pval_thres</span><span class="o">=</span><span class="mf">0.001</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;computing feature importance per cluster...&#39;</span><span class="p">)</span>
@@ -1409,23 +1648,28 @@
 
         <span class="k">def</span> <span class="nf">generator</span><span class="p">(</span><span class="n">labels</span><span class="p">,</span> <span class="n">feature_list</span><span class="p">,</span> <span class="n">matrix</span><span class="p">):</span>
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">feature_list</span><span class="p">)):</span>
-                <span class="k">yield</span> <span class="n">feature_list</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">matrix</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">labels</span>
+                <span class="k">yield</span> <span class="n">feature_list</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">matrix</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">labels</span><span class="p">,</span> <span class="n">pval_thres</span>
 
-        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">matrix_full_array</span><span class="p">:</span>
-            <span class="n">feature_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_train_array</span><span class="p">[</span><span class="n">key</span><span class="p">][:]</span>
-            <span class="n">matrix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">matrix_full_array</span><span class="p">[</span><span class="n">key</span><span class="p">][:]</span>
+        <span class="n">feature_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_from_model_dataset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;feature_array&#39;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">matrix_with_cv_array</span><span class="p">:</span>
+            <span class="n">matrix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">matrix_with_cv_array</span><span class="p">[</span><span class="n">key</span><span class="p">][:]</span>
             <span class="n">labels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">full_labels</span><span class="p">[:]</span>
 
-            <span class="n">input_list</span> <span class="o">=</span> <span class="n">generator</span><span class="p">(</span><span class="n">labels</span><span class="p">,</span> <span class="n">feature_list</span><span class="p">,</span> <span class="n">matrix</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+            <span class="n">input_list</span> <span class="o">=</span> <span class="n">generator</span><span class="p">(</span><span class="n">labels</span><span class="p">,</span> <span class="n">feature_dict</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">matrix</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
 
-            <span class="n">features_scored</span> <span class="o">=</span> <span class="n">mapf</span><span class="p">(</span><span class="n">_process_parallel_feature_importance_per_cluster</span><span class="p">,</span> <span class="n">input_list</span><span class="p">)</span>
-            <span class="n">features_scored</span> <span class="o">=</span> <span class="p">[</span><span class="n">feat</span> <span class="k">for</span> <span class="n">feat_list</span> <span class="ow">in</span> <span class="n">features_scored</span> <span class="k">for</span> <span class="n">feat</span> <span class="ow">in</span> <span class="n">feat_list</span><span class="p">]</span>
+            <span class="n">features_scored</span> <span class="o">=</span> <span class="n">mapf</span><span class="p">(</span>
+                <span class="n">_process_parallel_feature_importance_per_cluster</span><span class="p">,</span> <span class="n">input_list</span><span class="p">)</span>
+            <span class="n">features_scored</span> <span class="o">=</span> <span class="p">[</span><span class="n">feat</span> <span class="k">for</span> <span class="n">feat_list</span> <span class="ow">in</span> <span class="n">features_scored</span>
+                               <span class="k">for</span> <span class="n">feat</span> <span class="ow">in</span> <span class="n">feat_list</span><span class="p">]</span>
 
             <span class="k">for</span> <span class="n">label</span><span class="p">,</span> <span class="n">feature</span><span class="p">,</span> <span class="n">median_diff</span><span class="p">,</span> <span class="n">pvalue</span> <span class="ow">in</span> <span class="n">features_scored</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">feature_scores_per_cluster</span><span class="p">[</span><span class="n">label</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">feature</span><span class="p">,</span> <span class="n">median_diff</span><span class="p">,</span> <span class="n">pvalue</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">feature_scores_per_cluster</span><span class="p">[</span><span class="n">label</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">((</span>
+                    <span class="n">feature</span><span class="p">,</span> <span class="n">median_diff</span><span class="p">,</span> <span class="n">pvalue</span><span class="p">))</span>
 
             <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_scores_per_cluster</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">feature_scores_per_cluster</span><span class="p">[</span><span class="n">label</span><span class="p">]</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span></div>
+                <span class="bp">self</span><span class="o">.</span><span class="n">feature_scores_per_cluster</span><span class="p">[</span><span class="n">label</span><span class="p">]</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span>
+                    <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span></div>
 
 <div class="viewcode-block" id="SimDeepBoosting.write_feature_score_per_cluster"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.simdeep_boosting.SimDeepBoosting.write_feature_score_per_cluster">[docs]</a>    <span class="k">def</span> <span class="nf">write_feature_score_per_cluster</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -1437,8 +1681,10 @@
 
         <span class="n">f_file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">f_file_name</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
         <span class="n">f_anti_file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">f_anti_name</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+        <span class="n">f_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;#label</span><span class="se">\t</span><span class="s1">feature</span><span class="se">\t</span><span class="s1">median difference</span><span class="se">\t</span><span class="s1">p-value</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">f_anti_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;#label</span><span class="se">\t</span><span class="s1">feature</span><span class="se">\t</span><span class="s1">median difference</span><span class="se">\t</span><span class="s1">p-value</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
 
-        <span class="n">f_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;cluster id;feature;median diff;p-value</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">f_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;cluster id</span><span class="se">\t</span><span class="s1">feature</span><span class="se">\t</span><span class="s1">median diff</span><span class="se">\t</span><span class="s1">Wilcoxon p-value</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
 
         <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_scores_per_cluster</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">feature</span><span class="p">,</span> <span class="n">median_diff</span><span class="p">,</span> <span class="n">pvalue</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_scores_per_cluster</span><span class="p">[</span><span class="n">label</span><span class="p">]:</span>
@@ -1447,14 +1693,36 @@
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">f_to_write</span> <span class="o">=</span> <span class="n">f_anti_file</span>
 
-                <span class="n">f_to_write</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{0}</span><span class="s1">;</span><span class="si">{1}</span><span class="s1">;</span><span class="si">{2}</span><span class="s1">;</span><span class="si">{3}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">feature</span><span class="p">,</span> <span class="n">median_diff</span><span class="p">,</span> <span class="n">pvalue</span><span class="p">))</span>
+                <span class="n">f_to_write</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{0}</span><span class="se">\t</span><span class="si">{1}</span><span class="se">\t</span><span class="si">{2}</span><span class="se">\t</span><span class="si">{3}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">label</span><span class="p">,</span> <span class="n">feature</span><span class="p">,</span> <span class="n">median_diff</span><span class="p">,</span> <span class="n">pvalue</span><span class="p">))</span>
 
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{0}</span><span class="s1"> written&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">f_file_name</span><span class="p">))</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{0}</span><span class="s1"> written&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">f_anti_name</span><span class="p">))</span></div>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{0}</span><span class="s1"> written&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">f_anti_name</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">survival_feature_scores_per_cluster</span><span class="p">:</span>
+            <span class="n">f_file_name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{0}</span><span class="s1">/</span><span class="si">{1}</span><span class="s1">_survival_features_scores_per_clusters.tsv&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">path_results</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project_name</span><span class="p">)</span>
+            <span class="n">f_to_write</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">f_file_name</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+            <span class="n">f_to_write</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+                <span class="s1">&#39;#label</span><span class="se">\t</span><span class="s1">feature</span><span class="se">\t</span><span class="s1">median difference</span><span class="se">\t</span><span class="s1">cluster logrank p-value</span><span class="se">\t</span><span class="s1">CoxPH Log-rank p-value</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">survival_feature_scores_per_cluster</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">feature</span><span class="p">,</span> <span class="n">pvalue</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">survival_feature_scores_per_cluster</span><span class="p">[</span><span class="n">label</span><span class="p">]:</span>
+                    <span class="n">f_to_write</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{0}</span><span class="se">\t</span><span class="si">{1}</span><span class="se">\t</span><span class="si">{2}</span><span class="se">\t</span><span class="si">{3}</span><span class="se">\t</span><span class="si">{4}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="n">label</span><span class="p">,</span> <span class="n">feature</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">feature</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">feature</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">pvalue</span><span class="p">))</span>
+
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{0}</span><span class="s1"> written&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">f_file_name</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No survival features detected. File: </span><span class="si">{0}</span><span class="s2"> not writtten&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">f_file_name</span><span class="p">))</span></div>
 
 <div class="viewcode-block" id="SimDeepBoosting.evalutate_cluster_performance"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.simdeep_boosting.SimDeepBoosting.evalutate_cluster_performance">[docs]</a>    <span class="k">def</span> <span class="nf">evalutate_cluster_performance</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pretrained_fit</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;model is fitted on pretrained labels&#39;</span> \
+                  <span class="s1">&#39; Cannot evaluate cluster performance&#39;</span><span class="p">)</span>
+            <span class="k">return</span>
+
         <span class="n">bic_scores</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_from_model_attr</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;bic_score&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">])</span>
 
         <span class="k">if</span> <span class="n">bic_scores</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -1484,6 +1752,76 @@
 
         <span class="k">return</span> <span class="n">bic</span><span class="p">,</span> <span class="n">silhouette</span><span class="p">,</span> <span class="n">calinski</span></div>
 
+<div class="viewcode-block" id="SimDeepBoosting.save_cv_models_classes"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.simdeep_boosting.SimDeepBoosting.save_cv_models_classes">[docs]</a>    <span class="k">def</span> <span class="nf">save_cv_models_classes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path_results</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">save_models_classes</span><span class="p">(</span><span class="n">path_results</span><span class="o">=</span><span class="n">path_results</span><span class="p">,</span>
+                                 <span class="n">use_cv_labels</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="SimDeepBoosting.save_test_models_classes"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.simdeep_boosting.SimDeepBoosting.save_test_models_classes">[docs]</a>    <span class="k">def</span> <span class="nf">save_test_models_classes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path_results</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">save_models_classes</span><span class="p">(</span><span class="n">path_results</span><span class="o">=</span><span class="n">path_results</span><span class="p">,</span>
+                                 <span class="n">use_test_labels</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="SimDeepBoosting.save_models_classes"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.simdeep_boosting.SimDeepBoosting.save_models_classes">[docs]</a>    <span class="k">def</span> <span class="nf">save_models_classes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path_results</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+                            <span class="n">use_cv_labels</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                            <span class="n">use_test_labels</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">path_results</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">use_test_labels</span><span class="p">:</span>
+                <span class="n">path_results</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{0}</span><span class="s1">/saved_models_test_classes&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">path_results</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">use_cv_labels</span><span class="p">:</span>
+                <span class="n">path_results</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{0}</span><span class="s1">/saved_models_cv_classes&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">path_results</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">path_results</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{0}</span><span class="s1">/saved_models_classes&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">path_results</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">isdir</span><span class="p">(</span><span class="n">path_results</span><span class="p">):</span>
+            <span class="n">mkdir</span><span class="p">(</span><span class="n">path_results</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">model</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">use_test_labels</span><span class="p">:</span>
+                <span class="n">labels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_from_model_attr</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;test_labels&#39;</span><span class="p">)</span>
+                <span class="n">labels_proba</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_from_model_attr</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;test_labels_proba&#39;</span><span class="p">)</span>
+                <span class="n">sample_ids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_from_model_dataset</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;sample_ids_test&#39;</span><span class="p">)</span>
+                <span class="n">survival</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_from_model_dataset</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;survival_test&#39;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">use_cv_labels</span><span class="p">:</span>
+                <span class="n">labels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_from_model_attr</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;cv_labels&#39;</span><span class="p">)</span>
+                <span class="n">labels_proba</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_from_model_attr</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;cv_labels_proba&#39;</span><span class="p">)</span>
+                <span class="n">sample_ids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_from_model_dataset</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;sample_ids_cv&#39;</span><span class="p">)</span>
+                <span class="n">survival</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_from_model_dataset</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;survival_cv&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">labels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_from_model_attr</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;labels&#39;</span><span class="p">)</span>
+                <span class="n">labels_proba</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_from_model_attr</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;labels_proba&#39;</span><span class="p">)</span>
+                <span class="n">sample_ids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_from_model_dataset</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;sample_ids&#39;</span><span class="p">)</span>
+                <span class="n">survival</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_from_model_dataset</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;survival&#39;</span><span class="p">)</span>
+
+            <span class="n">seed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_from_model_attr</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;seed&#39;</span><span class="p">)</span>
+
+            <span class="n">nbdays</span><span class="p">,</span> <span class="n">isdead</span> <span class="o">=</span> <span class="n">survival</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">seed</span><span class="p">:</span>
+                <span class="n">seed</span> <span class="o">=</span> <span class="n">i</span>
+
+            <span class="n">path_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{0}</span><span class="s1">/model_instance_</span><span class="si">{1}</span><span class="s1">.tsv&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">path_results</span><span class="p">,</span> <span class="n">seed</span><span class="p">)</span>
+
+            <span class="n">labels_proba</span> <span class="o">=</span> <span class="n">labels_proba</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_from_model</span><span class="p">(</span>
+                <span class="n">model</span><span class="p">,</span> <span class="s1">&#39;_write_labels&#39;</span><span class="p">,</span>
+                <span class="n">sample_ids</span><span class="p">,</span>
+                <span class="n">labels</span><span class="p">,</span>
+                <span class="n">path_file</span><span class="o">=</span><span class="n">path_file</span><span class="p">,</span>
+                <span class="n">labels_proba</span><span class="o">=</span><span class="n">labels_proba</span><span class="p">,</span>
+                <span class="n">nbdays</span><span class="o">=</span><span class="n">nbdays</span><span class="p">,</span> <span class="n">isdead</span><span class="o">=</span><span class="n">isdead</span><span class="p">)</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;individual model labels saved at: </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">path_results</span><span class="p">))</span></div>
+
     <span class="k">def</span> <span class="nf">_convert_logs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1492,6 +1830,10 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
             <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">NALogicalType</span><span class="p">):</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
 
 <div class="viewcode-block" id="SimDeepBoosting.write_logs"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.simdeep_boosting.SimDeepBoosting.write_logs">[docs]</a>    <span class="k">def</span> <span class="nf">write_logs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -1603,20 +1945,25 @@
            
           </div>
           <footer>
-  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2019, Olivier Poirion
+        &#169; Copyright 2019, Olivier Poirion.
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
-
         </div>
       </div>
 
@@ -1624,7 +1971,6 @@
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

@@ -1,38 +1,42 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" />
   
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
   <title>simdeep.extract_data &mdash; DeepProg  documentation</title>
   
 
   
-  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+
   
   
 
   
-  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../../_static/jquery.js"></script>
-        <script type="text/javascript" src="../../_static/underscore.js"></script>
-        <script type="text/javascript" src="../../_static/doctools.js"></script>
-        <script type="text/javascript" src="../../_static/language_data.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
     
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
     
-
-  
-  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
 </head>
@@ -71,6 +75,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -91,6 +96,7 @@
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -125,11 +131,13 @@
 
 
 
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../../index.html">Docs</a> &raquo;</li>
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
         
           <li><a href="../index.html">Module code</a> &raquo;</li>
         
@@ -175,19 +183,26 @@
 
 <span class="kn">from</span> <span class="nn">simdeep.survival_utils</span> <span class="kn">import</span> <span class="n">load_data_from_tsv</span>
 <span class="kn">from</span> <span class="nn">simdeep.survival_utils</span> <span class="kn">import</span> <span class="n">load_survival_file</span>
+<span class="kn">from</span> <span class="nn">simdeep.survival_utils</span> <span class="kn">import</span> <span class="n">return_intersection_indexes</span>
+<span class="kn">from</span> <span class="nn">simdeep.survival_utils</span> <span class="kn">import</span> <span class="n">translate_index</span>
 <span class="kn">from</span> <span class="nn">simdeep.survival_utils</span> <span class="kn">import</span> <span class="n">MadScaler</span>
 <span class="kn">from</span> <span class="nn">simdeep.survival_utils</span> <span class="kn">import</span> <span class="n">RankNorm</span>
 <span class="kn">from</span> <span class="nn">simdeep.survival_utils</span> <span class="kn">import</span> <span class="n">CorrelationReducer</span>
 <span class="kn">from</span> <span class="nn">simdeep.survival_utils</span> <span class="kn">import</span> <span class="n">VarianceReducer</span>
 <span class="kn">from</span> <span class="nn">simdeep.survival_utils</span> <span class="kn">import</span> <span class="n">SampleReducer</span>
+<span class="kn">from</span> <span class="nn">simdeep.survival_utils</span> <span class="kn">import</span> <span class="n">convert_metadata_frame_to_matrix</span>
 
 <span class="kn">from</span> <span class="nn">simdeep.survival_utils</span> <span class="kn">import</span> <span class="n">save_matrix</span>
 
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
 
+<span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">isfile</span>
+
 <span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">time</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
 <span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">hstack</span>
 <span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">vstack</span>
@@ -208,6 +223,8 @@
             <span class="n">path_data</span><span class="o">=</span><span class="n">PATH_DATA</span><span class="p">,</span>
             <span class="n">training_tsv</span><span class="o">=</span><span class="n">TRAINING_TSV</span><span class="p">,</span>
             <span class="n">survival_tsv</span><span class="o">=</span><span class="n">SURVIVAL_TSV</span><span class="p">,</span>
+            <span class="n">metadata_tsv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">metadata_test_tsv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
             <span class="n">test_tsv</span><span class="o">=</span><span class="n">TEST_TSV</span><span class="p">,</span>
             <span class="n">survival_tsv_test</span><span class="o">=</span><span class="n">SURVIVAL_TSV_TEST</span><span class="p">,</span>
             <span class="n">cross_validation_instance</span><span class="o">=</span><span class="n">CROSS_VALIDATION_INSTANCE</span><span class="p">,</span>
@@ -216,6 +233,7 @@
             <span class="n">fill_unkown_feature_with_0</span><span class="o">=</span><span class="n">FILL_UNKOWN_FEATURE_WITH_0</span><span class="p">,</span>
             <span class="n">normalization</span><span class="o">=</span><span class="n">NORMALIZATION</span><span class="p">,</span>
             <span class="n">survival_flag</span><span class="o">=</span><span class="n">SURVIVAL_FLAG</span><span class="p">,</span>
+            <span class="n">subset_training_with_meta</span><span class="o">=</span><span class="p">{},</span>
             <span class="n">_autoencoder_parameters</span><span class="o">=</span><span class="p">{},</span>
             <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">):</span>
@@ -229,6 +247,8 @@
 <span class="sd">                              of the training set</span>
 <span class="sd">        :survival_tsv_test: str    name of the tsv file containing the survival data</span>
 <span class="sd">                                   of the test set</span>
+<span class="sd">        :metadata_tsv: str         name of the file containing metadata</span>
+<span class="sd">        :metadata_test_tsv: str         name of the file containing metadata of the test set</span>
 <span class="sd">        :tsv_test: str    name of the file containing the test dataset</span>
 <span class="sd">        :data_type_test: str    name of the data type of the test set</span>
 <span class="sd">                                must match a key existing in training_tsv</span>
@@ -238,11 +258,13 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">do_stack_multi_omic</span> <span class="o">=</span> <span class="n">stack_multi_omic</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">path_data</span> <span class="o">=</span> <span class="n">path_data</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">survival_tsv</span> <span class="o">=</span> <span class="n">survival_tsv</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metadata_tsv</span> <span class="o">=</span> <span class="n">metadata_tsv</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">training_tsv</span> <span class="o">=</span> <span class="n">training_tsv</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fill_unkown_feature_with_0</span> <span class="o">=</span> <span class="n">fill_unkown_feature_with_0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">survival_flag</span> <span class="o">=</span> <span class="n">survival_flag</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">feature_array</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">matrix_array</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">subset_training_with_meta</span> <span class="o">=</span> <span class="n">subset_training_with_meta</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">test_tsv</span> <span class="o">=</span> <span class="n">test_tsv</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">matrix_train_array</span> <span class="o">=</span> <span class="p">{}</span>
@@ -252,6 +274,7 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">survival</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">survival_tsv_test</span> <span class="o">=</span> <span class="n">survival_tsv_test</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metadata_test_tsv</span> <span class="o">=</span> <span class="n">metadata_test_tsv</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">matrix_full_array</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sample_ids_full</span> <span class="o">=</span> <span class="p">[]</span>
@@ -262,6 +285,7 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">sample_ids_cv</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">matrix_cv_array</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">matrix_cv_unormalized_array</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">survival_cv</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_cv_loaded</span> <span class="o">=</span> <span class="kc">False</span>
@@ -272,6 +296,16 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">feature_ref_index</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">feature_train_array</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">feature_train_index</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">metadata_frame_full</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metadata_frame_cv</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metadata_frame_test</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metadata_frame</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">metadata_mat_full</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metadata_mat_cv</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metadata_mat_test</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metadata_mat</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">survival_test</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sample_ids_test</span> <span class="o">=</span> <span class="kc">None</span>
@@ -339,6 +373,8 @@
                 <span class="n">matrix_ref</span><span class="p">,</span> <span class="n">matrix_test</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span>
             <span class="p">)</span>
 
+            <span class="bp">self</span><span class="o">.</span><span class="n">matrix_cv_unormalized_array</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> \
+                <span class="bp">self</span><span class="o">.</span><span class="n">matrix_cv_array</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">matrix_cv_array</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">matrix_test</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_stack_multiomics</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">matrix_cv_array</span><span class="p">)</span>
@@ -415,10 +451,151 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_stack_multiomics</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">matrix_ref_array</span><span class="p">,</span>
                                <span class="bp">self</span><span class="o">.</span><span class="n">feature_ref_array</span><span class="p">)</span></div>
 
+<div class="viewcode-block" id="LoadData.load_meta_data_test"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.extract_data.LoadData.load_meta_data_test">[docs]</a>    <span class="k">def</span> <span class="nf">load_meta_data_test</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metadata_file</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">metadata_file</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">metadata_test_tsv</span> <span class="o">=</span> <span class="n">metadata_file</span>
+
+        <span class="k">if</span> <span class="n">isfile</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{0}</span><span class="s2">/</span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata_test_tsv</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">metadata_test_tsv</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{0}</span><span class="s2">/</span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">path_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata_test_tsv</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata_test_tsv</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="n">frame</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata_test_tsv</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="n">sep</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="n">diff</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_ids_test</span><span class="p">)</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">frame</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">diff</span><span class="p">:</span>
+            <span class="k">raise</span><span class="p">(</span><span class="ne">Exception</span><span class="p">(</span>
+                <span class="s2">&quot;Error! samples from the tes dataset not present in metadata: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="nb">list</span><span class="p">(</span><span class="n">diff</span><span class="p">)[:</span><span class="mi">5</span><span class="p">])))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">metadata_frame_test</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_ids_test</span><span class="p">]</span><span class="o">.</span><span class="n">T</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metadata_mat_test</span> <span class="o">=</span> <span class="n">convert_metadata_frame_to_matrix</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">metadata_frame_test</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="LoadData.load_meta_data"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.extract_data.LoadData.load_meta_data">[docs]</a>    <span class="k">def</span> <span class="nf">load_meta_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">isfile</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{0}</span><span class="s2">/</span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata_tsv</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">metadata_tsv</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{0}</span><span class="s2">/</span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">path_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata_tsv</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata_tsv</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="n">frame</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata_tsv</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="n">sep</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="c1">## FULL ##</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_ids_full</span><span class="p">:</span>
+            <span class="n">diff</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_ids_full</span><span class="p">)</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">frame</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">diff</span><span class="p">:</span>
+                <span class="k">raise</span><span class="p">(</span><span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Error! sample not present in metadata: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="nb">list</span><span class="p">(</span><span class="n">diff</span><span class="p">)[:</span><span class="mi">5</span><span class="p">])))</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">metadata_frame_full</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_ids_full</span><span class="p">]</span><span class="o">.</span><span class="n">T</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">metadata_mat_full</span> <span class="o">=</span> <span class="n">convert_metadata_frame_to_matrix</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">metadata_frame_full</span><span class="p">)</span>
+
+        <span class="c1">## CV ##</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_ids_cv</span><span class="p">):</span>
+            <span class="n">diff</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_ids_cv</span><span class="p">)</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">frame</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">diff</span><span class="p">:</span>
+                <span class="k">raise</span><span class="p">(</span><span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Error! sample not present in metadata: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="nb">list</span><span class="p">(</span><span class="n">diff</span><span class="p">)[:</span><span class="mi">5</span><span class="p">])))</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">metadata_frame_cv</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_ids_cv</span><span class="p">]</span><span class="o">.</span><span class="n">T</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">metadata_mat_cv</span> <span class="o">=</span> <span class="n">convert_metadata_frame_to_matrix</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">metadata_frame_cv</span><span class="p">)</span>
+
+        <span class="c1">## ALL ##</span>
+        <span class="n">diff</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_ids</span><span class="p">)</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">frame</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">diff</span><span class="p">:</span>
+            <span class="k">raise</span><span class="p">(</span><span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Error! sample not present in metadata: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="nb">list</span><span class="p">(</span><span class="n">diff</span><span class="p">)[:</span><span class="mi">5</span><span class="p">])))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">metadata_frame</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_ids</span><span class="p">]</span><span class="o">.</span><span class="n">T</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metadata_mat</span> <span class="o">=</span> <span class="n">convert_metadata_frame_to_matrix</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">metadata_frame</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="LoadData.subset_training_sets"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.extract_data.LoadData.subset_training_sets">[docs]</a>    <span class="k">def</span> <span class="nf">subset_training_sets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">change_cv</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">subset_training_with_meta</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Not subsetting training dataset.&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata_frame</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No metadata parsed. Not subsetting training sets&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="n">samples_subset</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="n">samples_subset_cv</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">values</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">subset_training_with_meta</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="n">values</span> <span class="o">=</span> <span class="p">[</span><span class="n">values</span><span class="p">]</span>
+
+            <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">values</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata_frame</span><span class="p">:</span>
+                    <span class="k">raise</span><span class="p">(</span><span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Subbseting keys does&#39;nt not exists in the metadata </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="n">key</span><span class="p">)))</span>
+
+                <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata_frame</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata_frame</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">==</span> <span class="n">value</span><span class="p">]</span><span class="o">.</span><span class="n">index</span>
+
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata_frame_cv</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">index_cv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata_frame_cv</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata_frame_cv</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">==</span> <span class="n">value</span><span class="p">]</span><span class="o">.</span><span class="n">index</span>
+                    <span class="n">samples_subset_cv</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">index_cv</span><span class="p">)</span>
+
+                <span class="n">samples_subset</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+
+        <span class="n">new_index</span> <span class="o">=</span> <span class="n">translate_index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_ids</span><span class="p">,</span> <span class="n">samples_subset</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">matrix_train_array</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">matrix_train_array</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">matrix_train_array</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">new_index</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">matrix_ref_array</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">matrix_ref_array</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">matrix_ref_array</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">new_index</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">matrix_array</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">matrix_array</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">matrix_array</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">new_index</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">survival</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">survival</span><span class="p">[</span><span class="n">new_index</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">metadata_frame</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata_frame</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">samples_subset</span><span class="p">)]</span><span class="o">.</span><span class="n">T</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metadata_mat</span> <span class="o">=</span> <span class="n">convert_metadata_frame_to_matrix</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">metadata_frame</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">sample_ids</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">samples_subset</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">survival_cv</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">new_index_cv</span> <span class="o">=</span> <span class="n">translate_index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_ids_cv</span><span class="p">,</span>
+                                           <span class="n">samples_subset_cv</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">matrix_cv_array</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">matrix_cv_array</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">matrix_cv_array</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">new_index_cv</span><span class="p">]</span>
+
+                <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">matrix_cv_unormalized_array</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">matrix_cv_unormalized_array</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">matrix_cv_unormalized_array</span><span class="p">[</span>
+                        <span class="n">key</span><span class="p">][</span><span class="n">new_index_cv</span><span class="p">]</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">metadata_frame_cv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata_frame_cv</span><span class="o">.</span><span class="n">T</span><span class="p">[</span>
+                <span class="nb">list</span><span class="p">(</span><span class="n">samples_subset_cv</span><span class="p">)]</span><span class="o">.</span><span class="n">T</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">metadata_mat_cv</span> <span class="o">=</span> <span class="n">convert_metadata_frame_to_matrix</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">metadata_frame_cv</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">sample_ids_cv</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">samples_subset_cv</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">survival_cv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">survival_cv</span><span class="p">[</span><span class="n">new_index_cv</span><span class="p">]</span></div>
+
 <div class="viewcode-block" id="LoadData.load_new_test_dataset"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.extract_data.LoadData.load_new_test_dataset">[docs]</a>    <span class="k">def</span> <span class="nf">load_new_test_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tsv_dict</span><span class="p">,</span>
                               <span class="n">path_survival_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                               <span class="n">survival_flag</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                              <span class="n">normalization</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+                              <span class="n">normalization</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                              <span class="n">metadata_file</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">normalization</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -434,6 +611,10 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">survival_test</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sample_ids_test</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">metadata_frame_test</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metadata_mat_test</span> <span class="o">=</span> <span class="kc">None</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">survival_tsv_test</span> <span class="o">=</span> <span class="n">path_survival_file</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">matrix_test_array</span> <span class="o">=</span> <span class="p">{}</span>
@@ -443,7 +624,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">feature_ref_index</span> <span class="o">=</span> <span class="p">{}</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">load_matrix_test</span><span class="p">(</span><span class="n">normalization</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">load_survival_test</span><span class="p">(</span><span class="n">survival_flag</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">load_survival_test</span><span class="p">(</span><span class="n">survival_flag</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">load_meta_data_test</span><span class="p">(</span><span class="n">metadata_file</span><span class="o">=</span><span class="n">metadata_file</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">_create_ref_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
@@ -492,11 +674,18 @@
                 <span class="n">f_name</span><span class="o">=</span><span class="n">f_name</span><span class="p">,</span>
                 <span class="n">key</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
                 <span class="n">path_data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">path_data</span><span class="p">)</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="k">assert</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_ids</span> <span class="o">==</span> <span class="n">sample_ids</span><span class="p">)</span>
-            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Assertion error: </span><span class="si">{0}</span><span class="s1"> when loading&#39;</span>\
-                                <span class="s1">&#39; the sample from the training set!&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_ids</span> <span class="o">!=</span> <span class="n">sample_ids</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;#### Different patient ID for </span><span class="si">{0}</span><span class="s1"> matrix ####&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+
+                <span class="n">index1</span><span class="p">,</span> <span class="n">index2</span><span class="p">,</span> <span class="n">sample_ids</span> <span class="o">=</span> <span class="n">return_intersection_indexes</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">sample_ids</span><span class="p">,</span> <span class="n">sample_ids</span><span class="p">)</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">sample_ids</span> <span class="o">=</span> <span class="n">sample_ids</span>
+                <span class="n">matrix</span> <span class="o">=</span> <span class="n">matrix</span><span class="p">[</span><span class="n">index2</span><span class="p">]</span>
+
+                <span class="k">for</span> <span class="n">data2</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">matrix_array</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">matrix_array</span><span class="p">[</span><span class="n">data2</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">matrix_array</span><span class="p">[</span><span class="n">data2</span><span class="p">][</span><span class="n">index1</span><span class="p">]</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">feature_array</span><span class="p">[</span><span class="n">data</span><span class="p">]</span> <span class="o">=</span> <span class="n">feature_ids</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">matrix_array</span><span class="p">[</span><span class="n">data</span><span class="p">]</span> <span class="o">=</span> <span class="n">matrix</span>
@@ -545,7 +734,13 @@
             <span class="k">return</span>
 
         <span class="n">cv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cross_validation_instance</span>
-        <span class="n">train</span><span class="p">,</span> <span class="n">test</span> <span class="o">=</span> <span class="p">[(</span><span class="n">tn</span><span class="p">,</span> <span class="n">tt</span><span class="p">)</span> <span class="k">for</span> <span class="n">tn</span><span class="p">,</span> <span class="n">tt</span> <span class="ow">in</span> <span class="n">cv</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_ids</span><span class="p">)][</span><span class="bp">self</span><span class="o">.</span><span class="n">test_fold</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cross_validation_instance</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+            <span class="n">train</span><span class="p">,</span> <span class="n">test</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cross_validation_instance</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">train</span><span class="p">,</span> <span class="n">test</span> <span class="o">=</span> <span class="p">[(</span><span class="n">tn</span><span class="p">,</span> <span class="n">tt</span><span class="p">)</span>
+                           <span class="k">for</span> <span class="n">tn</span><span class="p">,</span> <span class="n">tt</span> <span class="ow">in</span>
+                           <span class="n">cv</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_ids</span><span class="p">)][</span><span class="bp">self</span><span class="o">.</span><span class="n">test_fold</span><span class="p">]</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalization</span><span class="p">[</span><span class="s1">&#39;PERC_SAMPLE_TO_KEEP&#39;</span><span class="p">]:</span>
             <span class="n">sample_reducer</span> <span class="o">=</span> <span class="n">SampleReducer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">normalization</span><span class="p">[</span><span class="s1">&#39;PERC_SAMPLE_TO_KEEP&#39;</span><span class="p">])</span>
@@ -561,6 +756,18 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">survival_cv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">survival</span><span class="o">.</span><span class="n">copy</span><span class="p">()[</span><span class="n">test</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">survival</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">survival</span><span class="p">[</span><span class="n">train</span><span class="p">]</span>
 
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata_frame</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># cv</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">metadata_frame_cv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata_frame</span><span class="o">.</span><span class="n">T</span><span class="p">[</span>
+                <span class="nb">list</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_ids</span><span class="p">)[</span><span class="n">test</span><span class="p">])]</span><span class="o">.</span><span class="n">T</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">metadata_mat_cv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata_mat</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="n">test</span><span class="p">]</span><span class="o">.</span><span class="n">T</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">metadata_mat_cv</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">test</span><span class="p">))</span>
+            <span class="c1"># train</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">metadata_frame</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata_frame</span><span class="o">.</span><span class="n">T</span><span class="p">[</span>
+                <span class="nb">list</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_ids</span><span class="p">)[</span><span class="n">train</span><span class="p">])]</span><span class="o">.</span><span class="n">T</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">metadata_mat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata_mat</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="n">train</span><span class="p">]</span><span class="o">.</span><span class="n">T</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">metadata_mat</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">train</span><span class="p">))</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">sample_ids_cv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_ids</span><span class="p">)[</span><span class="n">test</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sample_ids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_ids</span><span class="p">)[</span><span class="n">train</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span></div>
 
@@ -574,6 +781,8 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">matrix_full_array</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">matrix_train_array</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">sample_ids_full</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_ids</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">survival_full</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">survival</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">metadata_frame_full</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata_frame</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">metadata_mat_full</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata_mat</span>
             <span class="k">return</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cv_loaded</span><span class="p">:</span>
@@ -585,6 +794,13 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">sample_ids_full</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_ids</span><span class="p">[:]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_ids_cv</span><span class="p">[:]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">survival_full</span> <span class="o">=</span> <span class="n">vstack</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">survival</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">survival_cv</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata_frame</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">metadata_frame_full</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata_frame</span><span class="p">,</span>
+                                                  <span class="bp">self</span><span class="o">.</span><span class="n">metadata_frame_cv</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">metadata_mat_full</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata_mat</span><span class="p">,</span>
+                                                  <span class="bp">self</span><span class="o">.</span><span class="n">metadata_mat_cv</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">metadata_mat_full</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_ids_full</span><span class="p">))</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_full_loaded</span> <span class="o">=</span> <span class="kc">True</span></div>
 
@@ -891,20 +1107,25 @@
            
           </div>
           <footer>
-  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2019, Olivier Poirion
+        &#169; Copyright 2019, Olivier Poirion.
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
-
         </div>
       </div>
 
@@ -912,7 +1133,6 @@
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {
