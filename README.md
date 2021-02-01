@@ -6,7 +6,7 @@ The omic data used in the original study are RNA-Seq, MiR and Methylation. Howev
 The current package contains the omic data used in the study and a copy of the model computed. However, it is very easy to recreate a new model from scratch using any combination of omic data.
 The omic data and the survival files should be in tsv (Tabular Separated Values) format and examples are provided. The deep-learning framework uses Keras, which is a embedding of Theano / tensorflow/ CNTK.
 
-A more complete documentation with API description is also temporarly available at [http://opoirion.fr/DeepProg/](http://opoirion.fr:8100)
+A more complete documentation with API description is also temporarly available at [http://opoirion.fr/DeepProg/](http://opoirion.fr/DeepProg/)
 
 
 ## Requirements
