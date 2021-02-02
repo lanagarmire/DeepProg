@@ -19,6 +19,12 @@ Welcome to DeepProg's documentation!
    ./api/simdeep.rst
 
 
+Introduction
+------------
+
+This package allows to combine multi-omics data for individual samples together with survival. Using autoencoders (default) or any alternative embedding methods, the pipeline creates new set of features and identifies those linked with survival. In a second time, the samples are clustered with different possible strategies to obtain robust subtypes linked to survival. The robustness of the obtained subtypes can then be tested externally on one or multiple validation datasets and/or the *out-of-bags* samples.  The omic data used in the original study are RNA-Seq, MiR and Methylation. However, this approach can be extended to any combination of omic data. The current package contains the omic data used in the study and a copy of the model computed. However, it is easy to recreate a new model from scratch using any combination of omic data.
+The omic data and the survival files should be in tsv (Tabular Separated Values) format and examples are provided. The deep-learning framework to produce the autoencoders uses Keras with either Theano / tensorflow/ CNTK as background.
+
 Access
 ------
 
@@ -34,7 +40,9 @@ Support
 -------
 
 If you are having issues, please let us know.
-You can reach us using the following email address: o.poirion@gmail.com
+You can reach us using the following email address:
+Olivier Poirion, Ph.D.
+o.poirion@gmail.com
 
 Citation
 --------
