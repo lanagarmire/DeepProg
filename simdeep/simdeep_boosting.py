@@ -1001,8 +1001,8 @@ class SimDeepBoosting():
         index_dict = {sample: ids for ids, sample in enumerate(sample_ids)}
         index = [index_dict[sample] for sample in self.sample_ids_full]
 
-        self.matrix_with_cv_array = self._from_model_dataset(self.models[0], 'matrix_array')
-
+        self.matrix_with_cv_array = self._from_model_dataset(
+            self.models[0], 'matrix_array').copy()
         matrix_cv_unormalized_array = self._from_model_dataset(
             self.models[0],
             'matrix_cv_unormalized_array')
@@ -1479,9 +1479,7 @@ class SimDeepBoosting():
         """
         """
         print('computing feature importance per cluster...')
-
         self._reorder_matrix_full()
-
         mapf = map
 
         for label in set(self.full_labels):
