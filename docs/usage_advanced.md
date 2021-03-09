@@ -198,6 +198,58 @@ A DeepProg model is constructed using an ensemble of submodels following the [Ba
 * and `-split_n_fold ` which controls how the dataset will be splitted for each submodel. If `-split_n_fold=2`, the input dataset will be splitted in 2 using the `KFold` class instance from [sciki-learn](https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.KFold.html) and the training /test set size ratio will be 0.5. If  `-split_n_fold=3` the training /test set size ratio will be 3 / 2 and so on.
 * `The -seed` parameter ensures to obtain the same random splitting for `split_n_fold` and `nb_it` constant for different DeepProg instances. Different seed values can produce different performances since it creates different training datasets and is especially true when using low `nb_it` (below 50). Unfortunalley, using large `nb_it` such as 100 can be very computationally intensive, especially when tuning the models with other hyperparameters. However, tuning the model with small `nb_it` is also OK to achieve good to optimal performances (see next section).
 
+## Usage of metadata associated with patients
+
+DeepProg can accept an additional metadata file characterizing the individual sample (patient). These metdata can optionally be used as covariates when constructing the DeepProg models or inferring the features associated with each inferred subtypes. The metadata file should be a samples x features table with the first line as header with variable name and the first column the sample IDs. Also, the metadata file can be used to filter a subset of samples.
+
+```bash
+# See the example metadata table from the file: examples/data/metadata_dummy.tsv:
+
+head examples/data/metadata_dummy.tsv
+
+barcode sex     stage
+sample_test_0   M       I
+sample_test_1   M       I
+sample_test_2   M       I
+sample_test_3   M       I
+sample_test_4   M       I
+sample_test_5   M       I
+```
+
+Each of the column features containing only numeric values will be scaled using the sklearn `RobustScaler` method. Each of the column having string values will be one-hot encoded using all the possible values of the given feature and stacked together.
+
+The metadata file and the metadata usage should be configured at the instantiation of a new `DeepProg` instance.
+
+```python
+    # metadata file
+    OPTIONAL_METADATA = 'examples/data/metadata_dummy.tsv'
+    # dictionary used to filter samples based on their metadata values
+    # Multiple fields can be used
+    SUBSET_TRAINING_WITH_META = {'stage': ['I', 'II', 'III']}
+
+    boosting = SimDeepBoosting(
+        survival_tsv=SURVIVAL_TSV,
+        training_tsv=TRAINING_TSV,
+        metadata_tsv=OPTIONAL_METADATA,
+        metadata_usage='all',
+        subset_training_with_meta=SUBSET_TRAINING_WITH_META,
+        ...
+        )
+```
+
+`metadata_usage` can have different values:
+* `None` or `False`: the metadata will not be used for constructing DeepProg models or computing significant features
+* `'"labels"'`: The metadata matrix will only be used as covariates when inferring the survival models from the infered clustering labels.
+* `"new-features"`: The metadata matrix will only be used as covariates when computing the survival models to infer new features linked to survival
+* `"test-labels"`: The metadata matrix will only be used as covariates when inferring the survival models from the labels obtained for the test datasets
+* `"all"`, `True`: use the metadata matrix for all the usages described above.
+
+## Computing cluster-specific feature signatures
+
+Once a DeepProg model is fitted, two functions can be used to infer the features signature of each subtype:
+* `compute_feature_scores_per_cluster`: Perform a mann-Withney test between the expression of each feature within and without the subtype
+* `compute_survival_feature_scores_per_cluster`: This function computes the Log-rank p-value after fitting an individual Cox-PH model for each of the significant features inferred by `compute_feature_scores_per_cluster`.
+
 ## Save / load models
 
 ### Save /load the entire model

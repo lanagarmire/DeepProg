@@ -1423,14 +1423,16 @@ class SimDeepBoosting():
         if fname_key:
             self.project_name = '{0}_{1}'.format(self._project_name, fname_key)
 
-    def compute_survival_feature_scores_per_cluster(self, pval_thres=0.001):
+    def compute_survival_feature_scores_per_cluster(self,
+                                                    pval_thres=0.001,
+                                                    use_meta=False):
         """
         """
         print('computing survival feature importance per cluster...')
         pool = Pool(self.nb_threads)
         mapf = pool.map
 
-        if self.metadata_usage in ['all', 'new-features'] and \
+        if (self.metadata_usage in ['all', 'new-features'] or use_meta) and \
            self.metadata_mat_full is not None:
             metadata_mat = self.metadata_mat_full
         else:
