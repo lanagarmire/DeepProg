@@ -98,6 +98,8 @@
 <li class="toctree-l3"><a class="reference internal" href="#number-of-models-and-random-splitting-seed">Number of models and random splitting seed</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#usage-of-metadata-associated-with-patients">Usage of metadata associated with patients</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#computing-cluster-specific-feature-signatures">Computing cluster-specific feature signatures</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#save-load-models">Save / load models</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#save-load-the-entire-model">Save /load the entire model</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#save-load-models-from-precomputed-sample-labels">Save / load models from precomputed sample labels</a></li>
@@ -106,6 +108,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="case_study.html">Case study: Analyzing TCGA HCC dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage_tuning.html">Tutorial: Tuning DeepProg</a></li>
 <li class="toctree-l1"><a class="reference internal" href="LICENSE.html">License</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/simdeep.html">simdeep package</a></li>
 </ul>
@@ -357,6 +360,57 @@ boosting.fit()
 <li><p><code class="docutils literal notranslate"><span class="pre">The</span> <span class="pre">-seed</span></code> parameter ensures to obtain the same random splitting for <code class="docutils literal notranslate"><span class="pre">split_n_fold</span></code> and <code class="docutils literal notranslate"><span class="pre">nb_it</span></code> constant for different DeepProg instances. Different seed values can produce different performances since it creates different training datasets and is especially true when using low <code class="docutils literal notranslate"><span class="pre">nb_it</span></code> (below 50). Unfortunalley, using large <code class="docutils literal notranslate"><span class="pre">nb_it</span></code> such as 100 can be very computationally intensive, especially when tuning the models with other hyperparameters. However, tuning the model with small <code class="docutils literal notranslate"><span class="pre">nb_it</span></code> is also OK to achieve good to optimal performances (see next section).</p></li>
 </ul>
 </div>
+</div>
+<div class="section" id="usage-of-metadata-associated-with-patients">
+<h2>Usage of metadata associated with patients<a class="headerlink" href="#usage-of-metadata-associated-with-patients" title="Permalink to this headline">¶</a></h2>
+<p>DeepProg can accept an additional metadata file characterizing the individual sample (patient). These metdata can optionally be used as covariates when constructing the DeepProg models or inferring the features associated with each inferred subtypes. The metadata file should be a samples x features table with the first line as header with variable name and the first column the sample IDs. Also, the metadata file can be used to filter a subset of samples.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># See the example metadata table from the file: examples/data/metadata_dummy.tsv:</span>
+
+head examples/data/metadata_dummy.tsv
+
+barcode sex     stage
+sample_test_0   M       I
+sample_test_1   M       I
+sample_test_2   M       I
+sample_test_3   M       I
+sample_test_4   M       I
+sample_test_5   M       I
+</pre></div>
+</div>
+<p>Each of the column features containing only numeric values will be scaled using the sklearn <code class="docutils literal notranslate"><span class="pre">RobustScaler</span></code> method. Each of the column having string values will be one-hot encoded using all the possible values of the given feature and stacked together.</p>
+<p>The metadata file and the metadata usage should be configured at the instantiation of a new <code class="docutils literal notranslate"><span class="pre">DeepProg</span></code> instance.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>    <span class="c1"># metadata file</span>
+    <span class="n">OPTIONAL_METADATA</span> <span class="o">=</span> <span class="s1">&#39;examples/data/metadata_dummy.tsv&#39;</span>
+    <span class="c1"># dictionary used to filter samples based on their metadata values</span>
+    <span class="c1"># Multiple fields can be used</span>
+    <span class="n">SUBSET_TRAINING_WITH_META</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;stage&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;I&#39;</span><span class="p">,</span> <span class="s1">&#39;II&#39;</span><span class="p">,</span> <span class="s1">&#39;III&#39;</span><span class="p">]}</span>
+
+    <span class="n">boosting</span> <span class="o">=</span> <span class="n">SimDeepBoosting</span><span class="p">(</span>
+        <span class="n">survival_tsv</span><span class="o">=</span><span class="n">SURVIVAL_TSV</span><span class="p">,</span>
+        <span class="n">training_tsv</span><span class="o">=</span><span class="n">TRAINING_TSV</span><span class="p">,</span>
+        <span class="n">metadata_tsv</span><span class="o">=</span><span class="n">OPTIONAL_METADATA</span><span class="p">,</span>
+        <span class="n">metadata_usage</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span>
+        <span class="n">subset_training_with_meta</span><span class="o">=</span><span class="n">SUBSET_TRAINING_WITH_META</span><span class="p">,</span>
+        <span class="o">...</span>
+        <span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">metadata_usage</span></code> can have different values:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">None</span></code> or <code class="docutils literal notranslate"><span class="pre">False</span></code>: the metadata will not be used for constructing DeepProg models or computing significant features</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'&quot;labels&quot;'</span></code>: The metadata matrix will only be used as covariates when inferring the survival models from the infered clustering labels.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;new-features&quot;</span></code>: The metadata matrix will only be used as covariates when computing the survival models to infer new features linked to survival</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;test-labels&quot;</span></code>: The metadata matrix will only be used as covariates when inferring the survival models from the labels obtained for the test datasets</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;all&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">True</span></code>: use the metadata matrix for all the usages described above.</p></li>
+</ul>
+</div>
+<div class="section" id="computing-cluster-specific-feature-signatures">
+<h2>Computing cluster-specific feature signatures<a class="headerlink" href="#computing-cluster-specific-feature-signatures" title="Permalink to this headline">¶</a></h2>
+<p>Once a DeepProg model is fitted, two functions can be used to infer the features signature of each subtype:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">compute_feature_scores_per_cluster</span></code>: Perform a mann-Withney test between the expression of each feature within and without the subtype</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">compute_survival_feature_scores_per_cluster</span></code>: This function computes the Log-rank p-value after fitting an individual Cox-PH model for each of the significant features inferred by <code class="docutils literal notranslate"><span class="pre">compute_feature_scores_per_cluster</span></code>.</p></li>
+</ul>
 </div>
 <div class="section" id="save-load-models">
 <h2>Save / load models<a class="headerlink" href="#save-load-models" title="Permalink to this headline">¶</a></h2>

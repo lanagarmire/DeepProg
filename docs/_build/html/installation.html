@@ -88,13 +88,13 @@
               <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#requirements">Requirements</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#tested-versions">Tested versions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#tested-python-package-versions">Tested python package versions</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#installation-local">installation (local)</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#deep-learning-packages-installation">Deep-Learning packages installation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#support-for-cntk-tensorflow">Support for CNTK / tensorflow</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#r-installation-optional">R installation (Optional)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#r-installation-depreciated">R installation (Depreciated)</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#distributed-computation">Distributed computation</a></li>
@@ -111,6 +111,7 @@
 <li class="toctree-l1"><a class="reference internal" href="usage_ensemble.html">Tutorial: Ensemble of DeepProg model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="usage_advanced.html">Tutorial: Advanced usage of DeepProg model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="case_study.html">Case study: Analyzing TCGA HCC dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage_tuning.html">Tutorial: Tuning DeepProg</a></li>
 <li class="toctree-l1"><a class="reference internal" href="LICENSE.html">License</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/simdeep.html">simdeep package</a></li>
 </ul>
@@ -199,19 +200,19 @@
 <li><p>(For hyperparameter tuning) scikit-optimize</p></li>
 </ul>
 </div>
-<div class="section" id="tested-versions">
-<h2>Tested versions<a class="headerlink" href="#tested-versions" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="tested-python-package-versions">
+<h2>Tested python package versions<a class="headerlink" href="#tested-python-package-versions" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li><p>python: 2.7.15, 3.6.6</p></li>
-<li><p>R: 3.5.0</p></li>
-<li><p>Numpy: 1.16.5</p></li>
-<li><p>Scipy: 1.2.2</p></li>
-<li><p>scikit-learn: 0.20.3</p></li>
-<li><p>keras: 2.3.1</p></li>
-<li><p>tensorflow: 1.14.0</p></li>
-<li><p>theano: 1.0.2</p></li>
-<li><p>rpy2: <strong>2.8.6</strong></p></li>
+<li><p>tensorflow == 2.4.1</p></li>
+<li><p>keras == 2.4.3</p></li>
+<li><p>ray == 0.8.4</p></li>
+<li><p>scikit-learn == 0.23.2</p></li>
+<li><p>scikit-survival == 0.14.0</p></li>
+<li><p>lifelines == 0.25.5</p></li>
+<li><p>scikit-optimize == 0.8.1</p></li>
+<li><p>mpld3 == 0.5.1</p></li>
 </ul>
+<p>Since ray and tensorflow are rapidly evolving libraries, newest versions might unfortunatly break DeepProg’s API. To avoid any dependencies issues, we recommand working inside a Python 3 <a class="reference external" href="https://docs.python.org/3/tutorial/venv.html">virtual environement</a> (<code class="docutils literal notranslate"><span class="pre">virtualenv</span></code>) and install the tested packages.</p>
 <div class="section" id="installation-local">
 <h3>installation (local)<a class="headerlink" href="#installation-local" title="Permalink to this headline">¶</a></h3>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># The downloading can take few minutes due to the size of th git project</span>
@@ -227,6 +228,9 @@ pip3 install -r requirements_pip3.txt --user
 <span class="c1"># DeepProg is working also with python2/pip2 however there is no support for scikit-survival in python2</span>
 pip2 install -r requirements.txt --user
 pip2 install -r requirements_distributed.txt --user
+
+<span class="c1"># to install the tested python library versions</span>
+pip install -r requirements_tested.txt
 </pre></div>
 </div>
 </div>
@@ -252,8 +256,8 @@ pip install keras --user
 <span class="p">}</span>
 </pre></div>
 </div>
-<div class="section" id="r-installation-optional">
-<h3>R installation (Optional)<a class="headerlink" href="#r-installation-optional" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="r-installation-depreciated">
+<h3>R installation (Depreciated)<a class="headerlink" href="#r-installation-depreciated" title="Permalink to this headline">¶</a></h3>
 <p>In his first implementation, DeepProg used the R survival toolkits to fit the survival functions. Thse functions have been replaced with the python toolkits lifelines and scikit-survival for more convenience and avoid any compatibility issue.</p>
 <ul class="simple">
 <li><p>R</p></li>

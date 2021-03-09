@@ -15,17 +15,17 @@ Here we describe how to install the DeepProg package. We assume that the install
 * (For distributed computing) ray (ray >= 0.8.4) framework
 * (For hyperparameter tuning) scikit-optimize
 
-## Tested versions
-* python: 2.7.15, 3.6.6
-* R: 3.5.0
-* Numpy: 1.16.5
-* Scipy: 1.2.2
-* scikit-learn: 0.20.3
-* keras: 2.3.1
-* tensorflow: 1.14.0
-* theano: 1.0.2
-* rpy2: **2.8.6**
+## Tested python package versions
+* tensorflow == 2.4.1
+* keras == 2.4.3
+* ray == 0.8.4
+* scikit-learn == 0.23.2
+* scikit-survival == 0.14.0
+* lifelines == 0.25.5
+* scikit-optimize == 0.8.1
+* mpld3 == 0.5.1
 
+Since ray and tensorflow are rapidly evolving libraries, newest versions might unfortunatly break DeepProg's API. To avoid any dependencies issues, we recommand working inside a Python 3 [virtual environement](https://docs.python.org/3/tutorial/venv.html) (`virtualenv`) and install the tested packages.
 
 ### installation (local)
 
@@ -43,6 +43,9 @@ pip3 install -r requirements_pip3.txt --user
 # DeepProg is working also with python2/pip2 however there is no support for scikit-survival in python2
 pip2 install -r requirements.txt --user
 pip2 install -r requirements_distributed.txt --user
+
+# to install the tested python library versions
+pip install -r requirements_tested.txt
 ```
 
 ## Deep-Learning packages installation
@@ -69,7 +72,7 @@ The default configuration file: ` ~/.keras/keras.json` looks like this:
 }
 ```
 
-### R installation (Optional)
+### R installation (Depreciated)
 
 In his first implementation, DeepProg used the R survival toolkits to fit the survival functions. Thse functions have been replaced with the python toolkits lifelines and scikit-survival for more convenience and avoid any compatibility issue.
 

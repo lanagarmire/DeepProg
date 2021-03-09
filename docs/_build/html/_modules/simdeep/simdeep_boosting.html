@@ -1161,8 +1161,8 @@
         <span class="n">index_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">sample</span><span class="p">:</span> <span class="n">ids</span> <span class="k">for</span> <span class="n">ids</span><span class="p">,</span> <span class="n">sample</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">sample_ids</span><span class="p">)}</span>
         <span class="n">index</span> <span class="o">=</span> <span class="p">[</span><span class="n">index_dict</span><span class="p">[</span><span class="n">sample</span><span class="p">]</span> <span class="k">for</span> <span class="n">sample</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_ids_full</span><span class="p">]</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">matrix_with_cv_array</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_from_model_dataset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;matrix_array&#39;</span><span class="p">)</span>
-
+        <span class="bp">self</span><span class="o">.</span><span class="n">matrix_with_cv_array</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_from_model_dataset</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;matrix_array&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         <span class="n">matrix_cv_unormalized_array</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_from_model_dataset</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
             <span class="s1">&#39;matrix_cv_unormalized_array&#39;</span><span class="p">)</span>
@@ -1583,14 +1583,16 @@
         <span class="k">if</span> <span class="n">fname_key</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">project_name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{0}</span><span class="s1">_</span><span class="si">{1}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_project_name</span><span class="p">,</span> <span class="n">fname_key</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="SimDeepBoosting.compute_survival_feature_scores_per_cluster"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.simdeep_boosting.SimDeepBoosting.compute_survival_feature_scores_per_cluster">[docs]</a>    <span class="k">def</span> <span class="nf">compute_survival_feature_scores_per_cluster</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pval_thres</span><span class="o">=</span><span class="mf">0.001</span><span class="p">):</span>
+<div class="viewcode-block" id="SimDeepBoosting.compute_survival_feature_scores_per_cluster"><a class="viewcode-back" href="../../api/simdeep.html#simdeep.simdeep_boosting.SimDeepBoosting.compute_survival_feature_scores_per_cluster">[docs]</a>    <span class="k">def</span> <span class="nf">compute_survival_feature_scores_per_cluster</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                                                    <span class="n">pval_thres</span><span class="o">=</span><span class="mf">0.001</span><span class="p">,</span>
+                                                    <span class="n">use_meta</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;computing survival feature importance per cluster...&#39;</span><span class="p">)</span>
         <span class="n">pool</span> <span class="o">=</span> <span class="n">Pool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nb_threads</span><span class="p">)</span>
         <span class="n">mapf</span> <span class="o">=</span> <span class="n">pool</span><span class="o">.</span><span class="n">map</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata_usage</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="s1">&#39;new-features&#39;</span><span class="p">]</span> <span class="ow">and</span> \
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata_usage</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="s1">&#39;new-features&#39;</span><span class="p">]</span> <span class="ow">or</span> <span class="n">use_meta</span><span class="p">)</span> <span class="ow">and</span> \
            <span class="bp">self</span><span class="o">.</span><span class="n">metadata_mat_full</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">metadata_mat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata_mat_full</span>
         <span class="k">else</span><span class="p">:</span>
@@ -1639,9 +1641,7 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;computing feature importance per cluster...&#39;</span><span class="p">)</span>
-
         <span class="bp">self</span><span class="o">.</span><span class="n">_reorder_matrix_full</span><span class="p">()</span>
-
         <span class="n">mapf</span> <span class="o">=</span> <span class="nb">map</span>
 
         <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">full_labels</span><span class="p">):</span>
