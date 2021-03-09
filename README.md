@@ -33,22 +33,38 @@ pip3 install theano
 nano ~/.keras/keras.json
 ```
 
-### R installation (Optional)
+## Tested python package versions
+* tensorflow == 2.4.1
+* keras == 2.4.3
+* ray == 0.8.4
+* scikit-learn == 0.23.2
+* scikit-survival == 0.14.0
+* lifelines == 0.25.5
+* scikit-optimize == 0.8.1
+* mpld3 == 0.5.1
 
-In his first implementation, DeepProg used the R survival toolkits to fit the survival functions. Thse functions have been replaced with the python toolkits lifelines and scikit-survival for more convenience and avoid any compatibility issue.
+Since ray and tensorflow are rapidly evolving libraries, newest versions might unfortunatly break DeepProg's API. To avoid any dependencies issues, we recommand working inside a Python 3 [virtual environement](https://docs.python.org/3/tutorial/venv.html) (`virtualenv`) and install the tested packages.
 
-* R
-* the R "survival" package installed.
-* rpy2 2.8.6 (for python2 rpy2 can be install with: pip install rpy2==2.8.6, for python3 pip3 install rpy2==2.8.6). It seems that newer version of rpy2 might not work due to a bug (not tested)
+### installation (local)
 
+```bash
+# The downloading can take few minutes due to the size of th git project
+git clone https://github.com/lanagarmire/DeepProg.git
+cd SimDeep
+# The installation should only take a short amount of time
+pip3 install -e . -r requirements.txt --user
+# To intall the distributed frameworks
+pip3 install -r requirements_distributed.txt --user
+# Installing scikit-survival (python3 only)
+pip3 install -r requirements_pip3.txt --user
 
-```R
-install.package("survival")
-install.package("glmnet")
-source("https://bioconductor.org/biocLite.R")
-biocLite("survcomp")
+# DeepProg is working also with python2/pip2 however there is no support for scikit-survival in python2
+pip2 install -r requirements.txt --user
+pip2 install -r requirements_distributed.txt --user
+
+# to install the tested python library versions
+pip install -r requirements_tested.txt
 ```
-
 
 ### Support for CNTK / tensorflow
 * We originally used Keras with theano as backend plateform. However, [Tensorflow](https://www.tensorflow.org/) or [CNTK](https://docs.microsoft.com/en-us/cognitive-toolkit/) are more recent DL framework that can be faster or more stable than theano. Because keras supports these 3 backends, it is possible to use them as alternative to theano. To change backend, please configure the `$HOME/.keras/keras.json` file. (See official instruction [here](https://keras.io/backend/)).
@@ -72,28 +88,18 @@ The default configuration file looks like this:
 * To visualise test sets projected into the multi-omic survival space, it is required to install `mpld3` module: `pip install mpld3`
 * Note that the pip version of mpld3 installed on my computer presented a [bug](https://github.com/mpld3/mpld3/issues/434): `TypeError: array([1.]) is not JSON serializable `. However, the [newest](https://github.com/mpld3/mpld3) version of the mpld3 available from the github solved this issue. It is therefore recommended to install the newest version to avoid this issue.
 
-### installation (local)
-
-```bash
-# The downloading can take few minutes due to the size of th git project
-git clone https://github.com/lanagarmire/DeepProg.git
-cd SimDeep
-# The installation should only take a short amount of time
-pip3 install -e . -r requirements.txt --user
-# To intall the distributed frameworks
-pip3 install -r requirements_distributed.txt --user
-pip3 install -r requirements_pip3.txt --user
-
-# DeepProg is working also with python2/pip2 however there is no support for scikit-survival in python2
-pip2 install -r requirements.txt --user
-pip2 install -r requirements_distributed.txt --user
-```
-
 ## Usage
 * test if simdeep is functional (all the software are correctly installed):
 
 ```bash
   python3 test/test_simdeep.py -v #
+
+  # Individual examples
+  python3 python examples/example_with_dummy_data.py
+  python3 python examples/example_with_dummy_data_distributed.py
+  python3 python examples/example_with_precomputed_labels.py
+  python3 python examples/example_hyperparameters_tuning.py
+  python3 python examples/example_hyperparameters_tuning_with_test_dataset.py
   ```
 
 * All the default parameters are defined in the config file: `./simdeep/config.py` but can be passed dynamically. Three types of parameters must be defined:

@@ -122,11 +122,11 @@ def test_instance():
     #              "mix_score",
     #     }
 
-    ray.init()
+    ray.init(num_cpus=8)
     tuning.fit(
         metric='log_test_fold_pvalue',
         num_samples=8,
-        max_concurrent=4,
+        max_concurrent=2,
         distribute_deepprog=True,
         # iterations is usefull to take into account the DL parameter fitting variations
         iterations=1)
