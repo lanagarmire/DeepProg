@@ -23,6 +23,8 @@ setup(name='garmire_simdeep',
           'tensorflow',
           'keras',
           'simplejson',
-          'lifelines'
+          'lifelines',
+          'dill',
+          'colour'
       ],
       )
