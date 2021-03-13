@@ -25,6 +25,7 @@ setup(name='garmire_simdeep',
           'simplejson',
           'lifelines',
           'dill',
-          'colour'
+          'colour',
+          'seaborn'
       ],
       )
