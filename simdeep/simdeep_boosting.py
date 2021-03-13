@@ -212,6 +212,9 @@ class SimDeepBoosting():
         self.use_autoencoders = use_autoencoders
         self.feature_surv_analysis = feature_surv_analysis
 
+        if self.feature_selection_usage is None:
+            self.feature_surv_analysis = False
+
         self.encoder_for_kde_plot_dict = {}
         self.kde_survival_node_ids = {}
         self.kde_train_matrices = {}

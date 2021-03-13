@@ -71,10 +71,11 @@ def metadata_usage_type(value):
 def feature_selection_usage_type(value):
     """ """
     if value not in {'individual',
-                     'lasso'}:
+                     'lasso',
+                     None}:
         raise Exception(
             "feature_selection_usage_type: {0} should be from the following choices:" \
-            " ['individual', 'lasso']" \
+            " ['individual', 'lasso', None]" \
             .format(value))
 
     return value

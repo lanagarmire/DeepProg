@@ -149,7 +149,6 @@ class SimDeep(DeepBase):
         self.pvalue_thres = pvalue_thres
         self.cindex_thres = cindex_thres
         self.use_autoencoders = use_autoencoders
-        self.feature_surv_analysis = feature_surv_analysis
         self.classifier_grid = GridSearchCV(CLASSIFIER(), HYPER_PARAMETERS, cv=5)
         self.cluster_array = cluster_array
         self.path_results = path_results
@@ -157,6 +156,11 @@ class SimDeep(DeepBase):
         self.metadata_usage = metadata_usage_type(metadata_usage)
         self.feature_selection_usage = feature_selection_usage_type(
             feature_selection_usage)
+
+        self.feature_surv_analysis = feature_surv_analysis
+
+        if self.feature_selection_usage is None:
+            self.feature_surv_analysis = False
 
         self.alternative_embedding = alternative_embedding
         self.kwargs_alternative_embedding = kwargs_alternative_embedding
