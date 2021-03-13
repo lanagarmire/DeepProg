@@ -5,4 +5,4 @@ scikit-learn == 0.23.2
 scikit-survival == 0.14.0
 lifelines == 0.25.5
 scikit-optimize == 0.8.1
-mpld3 == 0.5.1
+mpld3 == 0.5.2

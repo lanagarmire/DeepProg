@@ -26,6 +26,7 @@ setup(name='garmire_simdeep',
           'lifelines',
           'dill',
           'colour',
-          'seaborn'
+          'seaborn',
+          'mpld3'
       ],
       )
