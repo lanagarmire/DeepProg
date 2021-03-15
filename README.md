@@ -8,6 +8,14 @@ The omic data and the survival files should be in tsv (Tabular Separated Values)
 
 A more complete documentation with API description is also available at [https://deepprog-garmires-lab.readthedocs.io/en/latest/index.html/](https://deepprog-garmires-lab.readthedocs.io/en/latest/index.html)
 
+### Documentation section
+* [Installation](https://deepprog-garmires-lab.readthedocs.io/en/latest/installation.html)
+* [Tutorial: Simple DeepProg model](https://deepprog-garmires-lab.readthedocs.io/en/latest/usage.html)
+* [Tutorial: Ensemble of DeepProg model](https://deepprog-garmires-lab.readthedocs.io/en/latest/usage_ensemble.html)
+* [Tutorial: Advanced usage of DeepProg model](https://deepprog-garmires-lab.readthedocs.io/en/latest/usage_advanced.html)
+* [Case study: Analyzing TCGA HCC dataset](https://deepprog-garmires-lab.readthedocs.io/en/latest/case_study.html)
+* [Tutorial: Tuning DeepProg](https://deepprog-garmires-lab.readthedocs.io/en/latest/usage_tuning.html)
+
 
 ## Requirements
 * Python 2 or 3 (Python3 is recommended)
