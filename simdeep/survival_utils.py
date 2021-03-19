@@ -201,8 +201,12 @@ def load_survival_file(f_name,
             try:
                 assert(field in first_line)
             except Exception:
-                raise Exception("{0} not in {1}".format(
-                    field, first_line))
+                raise Exception("""#### Exception with survival file {fil} header (first line): "{header}". Header does not contain the field {field} for survival flag dictionary: {sflag}. Please define new survival flags using the survival_flag variable """.format(
+                    header=first_line,
+                    field=field,
+                    fil=filename,
+                    sflag=survival_flag,
+                    ))
 
         patient_id = first_line.index(survival_flag['patient_id'])
         surv_id = first_line.index(survival_flag['survival'])
