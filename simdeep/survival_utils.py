@@ -201,7 +201,7 @@ def load_survival_file(f_name,
             try:
                 assert(field in first_line)
             except Exception:
-                raise Exception("""#### Exception with survival file {fil} header (first line): "{header}". Header does not contain the field {field} for survival flag dictionary: {sflag}. Please define new survival flags using the survival_flag variable """.format(
+                raise Exception("""#### Exception with survival file {fil} header (first line): "{header}". Header does not contain the field "{field}". Please define new survival flags  using the `survival_flag` variable. Current non-valid survival_flag: {sflag}. Needs variables in header: `{header}` defined as values for the key: "patient_id" => ID of the patient, "survival" => time of the study, "event" => event after survival time """.format(
                     header=first_line,
                     field=field,
                     fil=filename,
