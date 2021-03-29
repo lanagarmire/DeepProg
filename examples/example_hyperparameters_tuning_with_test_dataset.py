@@ -59,7 +59,7 @@ def test_instance():
         clustering_omics=['RNA'], # Only cluster on RNA
     )
 
-    ray.init()
+    ray.init(webui_host='0.0.0.0')
 
     # Possible metrics for test set: {
     #         "log_test_pval",

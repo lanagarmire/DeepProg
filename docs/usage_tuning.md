@@ -51,7 +51,7 @@ The SimDeepTuning module requires the use of the `ray` and `tune` python modules
 
 ```python
 
-ray.init()
+ray.init(webui_host='0.0.0.0', )
 
 ```
 

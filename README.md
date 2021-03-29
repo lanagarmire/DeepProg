@@ -278,7 +278,7 @@ The configuration of the nodes / clusters, or local CPUs to be used needs to be 
 ```python
 # Instanciate a ray object that will create multiple workers
 import ray
-ray.init(num_cpus=3)
+ray.init(webui_host='0.0.0.0', num_cpus=3)
 # More options can be used (e.g. remote clusters, AWS, memory,...etc...)
 # ray can be used locally to maximize the use of CPUs on the local machine
 # See ray API: https://ray.readthedocs.io/en/latest/index.html
@@ -326,7 +326,7 @@ tuning = SimDeepTuning(
     path_results=PATH_DATA,
 )
 
-ray.init()
+ray.init(webui_host='0.0.0.0')
 
 
 tuning.fit(

@@ -58,7 +58,7 @@ def main():
         'event': 'event'}
 
     import ray
-    ray.init(num_cpus=3)
+    ray.init(webui_host='0.0.0.0', num_cpus=3)
 
     normalization = {
         'NB_FEATURES_TO_KEEP': 100, # variance selection features. 0 is all the feature

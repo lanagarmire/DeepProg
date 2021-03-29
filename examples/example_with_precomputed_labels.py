@@ -34,7 +34,7 @@ def test_instance():
 
     # Import distributed modules
     import ray
-    ray.init(num_cpus=3)
+    ray.init(webui_host='0.0.0.0', num_cpus=3)
 
     boosting = SimDeepBoosting(
         nb_threads=nb_threads,
