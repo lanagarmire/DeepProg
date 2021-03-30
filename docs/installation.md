@@ -85,8 +85,8 @@ In his first implementation, DeepProg used the R survival toolkits to fit the su
 
 
 ```R
-install.package("survival")
-install.package("glmnet")
+install.packages("survival")
+install.packages("glmnet")
 source("https://bioconductor.org/biocLite.R")
 biocLite("survcomp")
 ```

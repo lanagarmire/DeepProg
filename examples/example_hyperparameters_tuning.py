@@ -78,8 +78,13 @@ def test_instance():
     args_to_optimize = {
         'seed': [100, 200, 300, 400],
         # 'nb_clusters': [2, 5],
-        'cluster_method': ['mixture', 'coxPH',
-                           AgglomerativeClustering],
+        'cluster_method': [
+            'mixture', # Gaussian mixture
+            'coxPHM', # coxPH fitting and dichotomization
+            'coxPHMixture', # coxPH fitting and gaussian mixture on the predicted time (1D)
+            AgglomerativeClustering # scikit-learn hierarchical clustering
+        ],
+
         'normalization': ['default', 'alternative']
         # 'use_autoencoders': (True, False),
         # 'class_selection': ('mean', 'max'),
