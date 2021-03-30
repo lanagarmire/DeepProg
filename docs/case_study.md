@@ -74,7 +74,7 @@ Now we define a ray instance to distribute the fitting of the submodels
 ```python
 
 import ray
-ray.init(num_cpus=3)
+ray.init(webui_host='0.0.0.0', num_cpus=3)
 ```
 
 ## Model fitting
