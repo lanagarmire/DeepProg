@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-VERSION = '2.5.1'
+VERSION = '2.6.0'
 
 setup(name='garmire_simdeep',
       version=VERSION,
@@ -25,6 +25,8 @@ setup(name='garmire_simdeep',
           'simplejson',
           'lifelines',
           'dill',
-          'colour'
+          'colour',
+          'seaborn',
+          'mpld3'
       ],
       )

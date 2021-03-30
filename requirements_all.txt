@@ -1,0 +1,4 @@
+-e .
+scikit-survival >= 0.11
+ray >= 0.8.4
+scikit-optimize >= 0.7.4
