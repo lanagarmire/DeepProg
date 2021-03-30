@@ -69,7 +69,7 @@ def test_instance():
     # feature_surv_analysis = True
     #########################################################
 
-    # ray.init(webui_host='0.0.0.0', num_cpus=3)
+    # ray.init(num_cpus=3)
 
     # AgglomerativeClustering is an external class that can be used as
     # a clustering algorithm since it has a fit_predict method
@@ -122,7 +122,7 @@ def test_instance():
     #              "mix_score",
     #     }
 
-    ray.init(webui_host='0.0.0.0', num_cpus=8)
+    ray.init(num_cpus=8)
     tuning.fit(
         metric='log_test_fold_pvalue',
         num_samples=8,

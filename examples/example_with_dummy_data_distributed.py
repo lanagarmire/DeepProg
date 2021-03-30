@@ -25,7 +25,7 @@ def test_instance():
 
     # Import cluster scheduler
     import ray
-    ray.init(webui_host='0.0.0.0', num_cpus=3)
+    ray.init(num_cpus=3)
     # More options can be used (e.g. remote clusters, AWS, memory,...etc...)
     # ray can be used locally to maximize the use of CPUs on the local machine
     # See ray API: https://ray.readthedocs.io/en/latest/index.html
