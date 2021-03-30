@@ -73,7 +73,7 @@ def test_instance():
 
     # AgglomerativeClustering is an external class that can be used as
     # a clustering algorithm since it has a fit_predict method
-    from sklearn.cluster.hierarchical import AgglomerativeClustering
+    from sklearn.cluster import AgglomerativeClustering
 
     args_to_optimize = {
         'seed': [100, 200, 300, 400],

@@ -27,6 +27,7 @@ setup(name='garmire_simdeep',
           'dill',
           'colour',
           'seaborn',
-          'mpld3'
+          'mpld3',
+          'tabulate'
       ],
       )
