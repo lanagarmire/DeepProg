@@ -13,6 +13,7 @@ A more complete documentation with API description is also available at [https:/
 * [Tutorial: Simple DeepProg model](https://deepprog-garmires-lab.readthedocs.io/en/latest/usage.html)
 * [Tutorial: Ensemble of DeepProg model](https://deepprog-garmires-lab.readthedocs.io/en/latest/usage_ensemble.html)
 * [Tutorial: Advanced usage of DeepProg model](https://deepprog-garmires-lab.readthedocs.io/en/latest/usage_advanced.html)
+* [Tutorial: use DeepProg from the docker image](https://deepprog-garmires-lab.readthedocs.io/en/latest/usage_ith_docker.html)
 * [Case study: Analyzing TCGA HCC dataset](https://deepprog-garmires-lab.readthedocs.io/en/latest/case_study.html)
 * [Tutorial: Tuning DeepProg](https://deepprog-garmires-lab.readthedocs.io/en/latest/usage_tuning.html)
 
@@ -98,6 +99,10 @@ The default configuration file looks like this:
 ### Visualisation module (Experimental)
 * To visualise test sets projected into the multi-omic survival space, it is required to install `mpld3` module: `pip install mpld3`
 * Note that the pip version of mpld3 installed on my computer presented a [bug](https://github.com/mpld3/mpld3/issues/434): `TypeError: array([1.]) is not JSON serializable `. However, the [newest](https://github.com/mpld3/mpld3) version of the mpld3 available from the github solved this issue. It is therefore recommended to install the newest version to avoid this issue.
+
+
+### Installation with docker
+We have created a docker image (`opoirion/deepprog_docker:v1`) with all the dependencies already installed. For the docker instruction, please refer to the docker tutorial (see above).
 
 ## Usage
 * test if simdeep is functional (all the software are correctly installed):

@@ -13,6 +13,7 @@ Welcome to DeepProg's documentation!
    usage.md
    usage_ensemble.md
    usage_advanced.md
+   usage_with_docker.md
    case_study.md
    usage_tuning.md
    LICENSE.rst

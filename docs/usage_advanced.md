@@ -174,7 +174,7 @@ class MauiFitting():
 
 ```
 
-After the embedding step, DeepProg is computing by default the individual feature contribution toward survival using univariate Cox-PH model (`feature_selection_usage='individual'`). Alternatively, DeepProg can select features linked to survival using a l1-penalized multivariate Cox-PH model (`feature_selection_usage='individual'lasso'`). Finally if the option `feature_surv_analysis` is parsed as False, DeepProg will skip the survival feature selection step.
+After the embedding step, DeepProg is computing by default the individual feature contribution toward survival using univariate Cox-PH model (`feature_selection_usage='individual'`). Alternatively, DeepProg can select features linked to survival using a l1-penalized multivariate Cox-PH model (`feature_selection_usage={'individual', 'lasso'}`). Finally if the option `feature_surv_analysis` is parsed as False, DeepProg will skip the survival feature selection step.
 
 ```python
 # Example using l1-penalized Cox-PH for selecting new survival features.
