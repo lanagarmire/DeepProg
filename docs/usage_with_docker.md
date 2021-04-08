@@ -70,16 +70,20 @@ def main():
 
     #Downloaded matrix files
     TRAINING_TSV = {
-        'RNA': rna_mapped_STAD.tsv',
-        'METH': meth_mapped_STAD.tsv',
-        'MIR': mir_mapped_STAD.tsv'
+        'RNA': 'rna_mapped_STAD.tsv',
+        'METH': 'meth_mapped_STAD.tsv',
+        'MIR': 'mir_mapped_STAD.tsv'
         }
 
     #survival file
     SURVIVAL_TSV = 'surv_mapped_STAD.tsv'
+    
+    # survival flag
+    survival_flag = {'patient_id': ‘SampleID', 'survival': ‘time’,'event': ‘event’}
 
     # output folder name
     OUTPUT_NAME = 'STAD_docker'
+    PROJECT_NAME = 'STAD_docker'
 
     # Import ray, the library that will distribute our model computation accros different nodes
     import ray
@@ -93,6 +97,7 @@ def main():
     SEED = 3
     # Number of DeepProg submodels to create
     nb_it = 10
+    EPOCHS = 10
 
     boosting = SimDeepBoosting(
         nb_it=nb_it,
