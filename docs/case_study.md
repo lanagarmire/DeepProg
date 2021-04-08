@@ -21,6 +21,10 @@ from simdeep.simdeep_boosting import SimDeepBoosting
 from simdeep.config import PATH_THIS_FILE
 
 from collections import OrderedDict
+from os.path import isfile
+
+# specify your data path
+#path_data = 
 
 assert(isfile(path_data + "meth.tsv"))
 assert(isfile(path_data + "rna.tsv"))
