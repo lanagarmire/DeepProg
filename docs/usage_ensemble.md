@@ -168,8 +168,8 @@ We can load an evaluate a second test dataset
 ```python
 boosting.load_new_test_dataset(
     {'MIR': 'mir_dummy.tsv'}, # OMIC file of the test set. It doesnt have to be the same as for training
-    'survival_dummy.tsv', # Survival file of the test set
     'TEST_DATA_2', # Name of the test test to be used
+    'survival_dummy.tsv', # Survival file of the test set
 )
 
 # Predict the labels on the test dataset
