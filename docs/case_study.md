@@ -126,8 +126,8 @@ Now we might want to project the training samples using only the RNA-Seq layer
 ```python
 boosting.load_new_test_dataset(
     {'RNA': 'rna.tsv'},
-    survival_tsv,
     'test_RNA_only',
+    survival_tsv,
 )
 
 boosting.predict_labels_on_test_dataset()
