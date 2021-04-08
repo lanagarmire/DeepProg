@@ -173,8 +173,8 @@ from simdeep.config import SURVIVAL_TSV_TEST
 
 simDeep.load_new_test_dataset(
     TEST_TSV,
-    fname_key='dummy'
-    SURVIVAL_TSV_TEST, # [OPTIONAL] test survival file useful to compute accuracy of test dataset
+    fname_key='dummy',
+    path_survival_file=SURVIVAL_TSV_TEST, # [OPTIONAL] test survival file useful to compute accuracy of test dataset
 
     )
 
