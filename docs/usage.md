@@ -133,7 +133,7 @@ PATH_RESULTS = "./TEST_DUMMY/"
 simDeep = SimDeep(
         dataset=dataset,
         path_results=PATH_RESULTS,
-        path_to_save_modelPATH_RESULTS, # This result path can be used to save the autoencoder
+        path_to_save_model=PATH_RESULTS, # This result path can be used to save the autoencoder
         )
 
 simDeep.load_training_dataset() # load the training dataset
