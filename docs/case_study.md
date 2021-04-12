@@ -14,7 +14,8 @@ data
 └── survival.tsv
 ```
 
-go to that folder and extract these files using `gzip -d *.gz`. Now, go back to the main folder (**cd ../**), and we are ready to instanciate a DeepProg instance.
+Go to that folder (**cd ./data/**) and decompress these files using `gzip -d *.gz`. 
+Now, go back to the main folder (**cd ../**), and we are ready to instanciate a DeepProg instance.
 
 ```python
 from simdeep.simdeep_boosting import SimDeepBoosting
