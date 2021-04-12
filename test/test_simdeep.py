@@ -89,8 +89,8 @@ class TestPackage(unittest.TestCase):
 
         simdeep.load_new_test_dataset(
             {'RNA': 'rna_test_dummy.tsv'},
-            'survival_test_dummy.tsv',
-            'dummy')
+            'dummy',
+            'survival_test_dummy.tsv')
 
         simdeep.predict_labels_on_test_dataset()
 
@@ -145,8 +145,8 @@ class TestPackage(unittest.TestCase):
 
         boosting.load_new_test_dataset(
             {'RNA': 'rna_test_dummy.tsv'},
-            'survival_test_dummy.tsv',
             'dummy',
+            'survival_test_dummy.tsv',
             normalization={'TRAIN_NORM_SCALE':True},
         )
 
