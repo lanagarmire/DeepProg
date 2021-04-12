@@ -24,11 +24,11 @@ from collections import OrderedDict
 from os.path import isfile
 
 # specify your data path
-#path_data = 
+path_data = ‘./data/’
 
-assert(isfile(path_data + "meth.tsv"))
-assert(isfile(path_data + "rna.tsv"))
-assert(isfile(path_data + "mir.tsv"))
+assert(isfile(path_data + "/meth.tsv"))
+assert(isfile(path_data + "/rna.tsv"))
+assert(isfile(path_data + "/mir.tsv"))
 
 tsv_files = OrderedDict([
     ('MIR', 'mir.tsv'),
