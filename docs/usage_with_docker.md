@@ -53,7 +53,8 @@ wget http://ns102669.ip-147-135-37.us/DeepProg/matrices/STAD/surv_mapped_STAD.ts
 3. Go to `local_code` and open a text editor to create the following script named `processing_STAD.py`
 
 ```python
-"""script: processing_STAD.py """
+### script: processing_STAD.py
+
 # Import DeepProg class
 from simdeep.simdeep_boosting import SimDeepBoosting
 
