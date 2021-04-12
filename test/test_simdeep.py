@@ -94,7 +94,7 @@ class TestPackage(unittest.TestCase):
 
         simdeep.predict_labels_on_test_dataset()
 
-        path_fig = '{0}/{1}/{1}_dummy_KM_plot_boosting_test.png'.format(PATH_DATA, PROJECT_NAME)
+        path_fig = '{0}/{1}/{1}_dummy_KM_plot_boosting_test.pdf'.format(PATH_DATA, PROJECT_NAME)
 
         print('#### asserting file: {0} exists'.format(path_fig))
         self.assertTrue(isfile(path_fig))
