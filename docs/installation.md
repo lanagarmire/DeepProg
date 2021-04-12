@@ -33,22 +33,22 @@ Since ray and tensorflow are rapidly evolving libraries, newest versions might u
 # The downloading can take few minutes due to the size of th git project
 git clone https://github.com/lanagarmire/DeepProg.git
 cd SimDeep
-# Basic installation
+# Basic installation (under python3/pip3)
 pip3 install -e . -r requirements.txt
 # To intall the distributed frameworks
 pip3 install -r requirements_distributed.txt
 # Installing scikit-survival (python3 only)
 pip3 install -r requirements_pip3.txt
-
-# DeepProg is working also with python2/pip2 however there is no support for scikit-survival in python2
-pip2 install -r requirements.txt
-pip2 install -r requirements_distributed.txt
-
 # to install the tested python library versions
 pip install -r requirements_tested.txt
-
 # Install ALL required dependencies
 pip install -r requirements_all.txt
+
+
+# **Ignore this if you are working under python3**
+# python 3 is highly preferred, but DeepProg working with python2/pip2, however there is no support for scikit-survival in python2
+pip2 install -r requirements.txt
+pip2 install -r requirements_distributed.txt
 ```
 
 ## Deep-Learning packages installation
