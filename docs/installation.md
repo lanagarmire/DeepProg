@@ -116,7 +116,7 @@ pip install -e . --user
 * Note that the pip version of mpld3 installed on my computer presented a [bug](https://github.com/mpld3/mpld3/issues/434): `TypeError: array([1.]) is not JSON serializable `. However, the [newest](https://github.com/mpld3/mpld3) version of the mpld3 available from the github solved this issue. It is therefore recommended to install the newest version to avoid this issue.
 
 ## Usage
-* test if simdeep is functional (all the software are correctly installed):
+* test if simdeep is functional (all the software are correctly installed): go to main folder (./DeepProg/) and run the following
 
 ```bash
   python3 test/test_simdeep.py -v #
