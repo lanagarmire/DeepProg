@@ -32,7 +32,7 @@ Since ray and tensorflow are rapidly evolving libraries, newest versions might u
 ```bash
 # The downloading can take few minutes due to the size of th git project
 git clone https://github.com/lanagarmire/DeepProg.git
-cd SimDeep
+cd DeepProg
 # The installation should only take a short amount of time
 pip3 install -e . -r requirements.txt --user
 # To intall the distributed frameworks
@@ -84,8 +84,9 @@ In his first implementation, DeepProg used the R survival toolkits to fit the su
 ```R
 install.package("survival")
 install.package("glmnet")
-source("https://bioconductor.org/biocLite.R")
-biocLite("survcomp")
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+BiocManager::install("survcomp")
 ```
 
 

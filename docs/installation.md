@@ -32,7 +32,7 @@ Since ray and tensorflow are rapidly evolving libraries, newest versions might u
 ```bash
 # The downloading can take few minutes due to the size of th git project
 git clone https://github.com/lanagarmire/DeepProg.git
-cd SimDeep
+cd DeepProg
 # Basic installation (under python3/pip3)
 pip3 install -e . -r requirements.txt
 # To intall the distributed frameworks

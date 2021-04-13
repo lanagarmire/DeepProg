@@ -34,8 +34,9 @@ nano ~/.keras/keras.json
 ```R
 install.package("survival")
 install.package("glmnet")
-source("https://bioconductor.org/biocLite.R")
-biocLite("survcomp")
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+BiocManager::install("survcomp")
 ```
 
 
@@ -65,7 +66,7 @@ The default configuration file looks like this:
 
 ```bash
 git clone https://github.com/lanagarmire/SimDeep.git
-cd SimDeep
+cd DeepProg
 pip install -r requirements.txt --user
 ```
 

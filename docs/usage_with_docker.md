@@ -12,7 +12,7 @@ docker pull opoirion/deepprog_docker:v1
 The version of the package installed correspond to the versions described in the `requirements_tested.txt`. Thus, they are NOT the most up to date python packages, especially regarding the `ray` installed package (installed version is 0.8.4). Since ray is used to configure the nodes, memories, CPUs when distributing DeepProg in a cluster, the API to use might differ with the most up-to-date ray API.
 
 ## Usage
-the docker cntainer needs to have access to three folders:
+the docker container needs to have access to three folders:
 1. the input folder containing the matrices and the survival data
 2. the output folder where will be generated the output file
 3. the folder containing the DeepProg python code to launch
@@ -78,7 +78,7 @@ def main():
 
     #survival file
     SURVIVAL_TSV = 'surv_mapped_STAD.tsv'
-    
+
     # survival flag
     survival_flag = {'patient_id': ‘SampleID', 'survival': ‘time’,'event': ‘event’}
 

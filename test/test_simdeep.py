@@ -79,7 +79,7 @@ class TestPackage(unittest.TestCase):
 
         simdeep = SimDeep(dataset=dataset,
                           project_name=PROJECT_NAME,
-                          path_results=PATH_DATA,
+                          path_results="{0}/{1}".format(PATH_DATA, PROJECT_NAME),
                           deep_model_additional_args=deep_model_additional_args,
         )
         simdeep.load_training_dataset()
@@ -88,13 +88,13 @@ class TestPackage(unittest.TestCase):
         simdeep.predict_labels_on_test_fold()
 
         simdeep.load_new_test_dataset(
-            {'RNA': 'rna_test_dummy.tsv'},
-            'dummy',
-            'survival_test_dummy.tsv')
+            tsv_dict={'RNA': 'rna_test_dummy.tsv'},
+            fname_key='dummy',
+            path_survival_file='survival_test_dummy.tsv')
 
         simdeep.predict_labels_on_test_dataset()
 
-        path_fig = '{0}/{1}/{1}_dummy_KM_plot_boosting_test.pdf'.format(PATH_DATA, PROJECT_NAME)
+        path_fig = '{0}/{1}/{1}_dummy_KM_plot_test.pdf'.format(PATH_DATA, PROJECT_NAME)
 
         print('#### asserting file: {0} exists'.format(path_fig))
         self.assertTrue(isfile(path_fig))
@@ -144,9 +144,9 @@ class TestPackage(unittest.TestCase):
         boosting.collect_cindex_for_full_dataset()
 
         boosting.load_new_test_dataset(
-            {'RNA': 'rna_test_dummy.tsv'},
-            'dummy',
-            'survival_test_dummy.tsv',
+            tsv_dict={'RNA': 'rna_test_dummy.tsv'},
+            fname_key='dummy',
+            path_survival_file='survival_test_dummy.tsv',
             normalization={'TRAIN_NORM_SCALE':True},
         )
 

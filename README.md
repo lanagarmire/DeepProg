@@ -59,7 +59,7 @@ Since ray and tensorflow are rapidly evolving libraries, newest versions might u
 ```bash
 # The downloading can take few minutes due to the size of th git project
 git clone https://github.com/lanagarmire/DeepProg.git
-cd SimDeep
+cd DeepProg
 # Basic installation
 pip3 install -e . -r requirements.txt
 # To intall the distributed frameworks
@@ -108,7 +108,7 @@ We have created a docker image (`opoirion/deepprog_docker:v1`) with all the depe
 * test if simdeep is functional (all the software are correctly installed):
 
 ```bash
-  python3 test/test_simdeep.py -v #
+  python3 test/test_simdeep.py -v
 
   # Individual examples
   python3 python examples/example_with_dummy_data.py
