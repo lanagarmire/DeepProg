@@ -80,7 +80,7 @@ def main():
     SURVIVAL_TSV = 'surv_mapped_STAD.tsv'
 
     # survival flag
-    survival_flag = {'patient_id': ‘SampleID', 'survival': ‘time’,'event': ‘event’}
+    survival_flag = {'patient_id': 'SampleID', 'survival': 'time','event': 'event'}
 
     # output folder name
     OUTPUT_NAME = 'STAD_docker'
