@@ -43,6 +43,7 @@ nano ~/.keras/keras.json
 ```
 
 ## Tested python package versions
+# Python 3.8
 * tensorflow == 2.4.1
 * keras == 2.4.3
 * ray == 0.8.4
@@ -60,6 +61,12 @@ Since ray and tensorflow are rapidly evolving libraries, newest versions might u
 # The downloading can take few minutes due to the size of th git project
 git clone https://github.com/lanagarmire/DeepProg.git
 cd DeepProg
+
+# (RECOMMENDED) to install the tested python library versions
+pip install -r requirements_tested.txt
+
+##Alternative installations
+
 # Basic installation
 pip3 install -e . -r requirements.txt
 # To intall the distributed frameworks
@@ -71,10 +78,7 @@ pip3 install -r requirements_pip3.txt
 pip2 install -r requirements.txt
 pip2 install -r requirements_distributed.txt
 
-# to install the tested python library versions
-pip install -r requirements_tested.txt
-
-# Install ALL required dependencies
+# Install ALL required dependencies with the most up to date packages
 pip install -r requirements_all.txt
 ```
 

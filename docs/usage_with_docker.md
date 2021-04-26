@@ -1,23 +1,27 @@
 # Tutorial: use DeepProg from the docker image
 
-We created a docker image with deepprog python dependencies installed. The docker image (`opoirion/deepprog_docker:v1`) can be downloaded using `docker pull` and used to analyse a multi-omic dataset.
+We created a docker image with deepprog python dependencies installed. The docker image (`opoirion/deepprog_docker:v1`) can be downloaded using `docker pull` and used to analyse a multi-omic dataset. Alternatively, DeepProg image can be installed using the Singularity container engine.
 
-## Installation with docker
-Docker needs to be installed first
+## Installation with docker or harmony
+Docker or [Singularity](https://sylabs.io/guides/3.0/user-guide/installation.html) needs to be installed first.
 
 ```bash
+# Using docker
 docker pull opoirion/deepprog_docker:v1
+
+# Using Singularity
+singularity pull docker://opoirion/deepprog_docker:v1
+# After singularity finishing pulling he image,  A SIF image (deeprog_docker_v1.sif) should have been created within the local folder
 ```
 
 The version of the package installed correspond to the versions described in the `requirements_tested.txt`. Thus, they are NOT the most up to date python packages, especially regarding the `ray` installed package (installed version is 0.8.4). Since ray is used to configure the nodes, memories, CPUs when distributing DeepProg in a cluster, the API to use might differ with the most up-to-date ray API.
 
-## Usage
+## Usage (Docker)
 the docker container needs to have access to three folders:
 1. the input folder containing the matrices and the survival data
 2. the output folder where will be generated the output file
 3. the folder containing the DeepProg python code to launch
 
-Then, the DeepProg docker can be invoked using the following command
 
 ```bash
  docker run \
@@ -29,7 +33,6 @@ Then, the DeepProg docker can be invoked using the following command
       deepprog_docker \ # name of the DeepProg docker image to invoke
       python3.8 /code/<NAME OF THE PYTHON SCRIPT FILE>
 ```
-
 
 ## Example
 1. Create three folders for input, output, and scripts
@@ -59,8 +62,8 @@ wget http://ns102669.ip-147-135-37.us/DeepProg/matrices/STAD/surv_mapped_STAD.ts
 from simdeep.simdeep_boosting import SimDeepBoosting
 
 # Defining global variables for input and output paths the mounted folder from the docker image
-PATH_DATA = '/input/' # virtual folder
-PATH_RESULTS = '/output/' # virtual folder
+PATH_DATA = '/input/' # virtual folder. If using Singularity, This  should be the existing path on the machine
+PATH_RESULTS = '/output/' # virtual folder If using Singularity, This  should be the existing path on the machine
 
 
 # Defining a main function
@@ -172,5 +175,20 @@ drwxr-xr-x 2 root root 4.0K Mar 30 07:37 saved_models_classes
 drwxr-xr-x 2 root root 4.0K Mar 30 07:37 saved_models_cv_classes
 
 ```
+
+## Usage (Singularity)
+
+Contrary to Docker, Singularity does not require to mount a specific volume for data sharing and
+
+Then, the DeepProg docker can be invoked using the following command
+
+```bash
+ singularity run \
+      deepprog_docker_v1.sif \ # Path toward the downlaoded Singularity SIF image
+      python3.8 <PYTHON SCRIPT>
+```
+
+If we want to use the example script `processing_STAD.py` described above with singularity, we just need to replace `PATH_DATA` and `PATH_RESULTS` with the paths on the machine.
+
 
 6. the same methodology should be followed for adding more analyses, such as predicting a test dataset, embedding, or perform a hyperparameter tuning. Also, a better description of DeepProg different options is available in the other section of this tutorial
