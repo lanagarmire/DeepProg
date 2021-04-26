@@ -43,7 +43,7 @@ nano ~/.keras/keras.json
 ```
 
 ## Tested python package versions
-# Python 3.8
+Python 3.8 (tested for Linux and OSX. For Windows Visual C++ is required and LongPathsEnabled shoud be set to 1 in windows registry)
 * tensorflow == 2.4.1
 * keras == 2.4.3
 * ray == 0.8.4
