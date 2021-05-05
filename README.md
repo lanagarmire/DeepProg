@@ -63,7 +63,7 @@ git clone https://github.com/lanagarmire/DeepProg.git
 cd DeepProg
 
 # (RECOMMENDED) to install the tested python library versions
-pip install -r requirements_tested.txt
+pip install -e . -r requirements_tested.txt
 
 ##Alternative installations
 
@@ -75,11 +75,11 @@ pip3 install -r requirements_distributed.txt
 pip3 install -r requirements_pip3.txt
 
 # DeepProg is working also with python2/pip2 however there is no support for scikit-survival in python2
-pip2 install -r requirements.txt
-pip2 install -r requirements_distributed.txt
+pip2 install -e . -r requirements.txt
+pip2 install -e . -r requirements_distributed.txt
 
 # Install ALL required dependencies with the most up to date packages
-pip install -r requirements_all.txt
+pip install -e . -r requirements_all.txt
 ```
 
 ### Support for CNTK / tensorflow
@@ -106,7 +106,7 @@ The default configuration file looks like this:
 
 
 ### Installation with docker
-We have created a docker image (`opoirion/deepprog_docker:v1`) with all the dependencies already installed. For the docker instruction, please refer to the docker tutorial (see above).
+We have created a docker image (`opoirion/deepprog_docker:v1`) with all the dependencies already installed. For the docker instruction, please refer to the docker [tutorial](https://deepprog-garmires-lab.readthedocs.io/en/latest/usage_with_docker.html) (see above).
 
 ## Usage
 * test if simdeep is functional (all the software are correctly installed):

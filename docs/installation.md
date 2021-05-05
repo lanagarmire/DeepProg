@@ -36,16 +36,16 @@ git clone https://github.com/lanagarmire/DeepProg.git
 cd DeepProg
 
 # (RECOMMENDED) to install the tested python library versions
-pip install -r requirements_tested.txt
+pip install -e . -r requirements_tested.txt
 
 # Basic installation (under python3/pip3)
 pip3 install -e . -r requirements.txt
 # To intall the distributed frameworks
-pip3 install -r requirements_distributed.txt
+pip3 install -e . -r requirements_distributed.txt
 # Installing scikit-survival (python3 only)
-pip3 install -r requirements_pip3.txt
+pip3 install -e . -r requirements_pip3.txt
 # Install ALL required dependencies with the most up to date packages
-pip install -r requirements_all.txt
+pip install -e . -r requirements_all.txt
 
 
 # **Ignore this if you are working under python3**
