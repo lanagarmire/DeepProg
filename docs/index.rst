@@ -48,6 +48,12 @@ You can reach us using the following email address:
 Olivier Poirion, Ph.D.
 o.poirion@gmail.com
 
+
+Data availability
+-----------------
+
+The matrices and the survival data used to compute the models are available here [http://ns102669.ip-147-135-37.us/DeepProg/matrices/](http://ns102669.ip-147-135-37.us/DeepProg/matrices/)
+
 Citation
 --------
 
