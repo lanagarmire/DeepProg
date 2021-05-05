@@ -20,7 +20,7 @@ A more complete documentation with API description is also available at [https:/
 
 ## Requirements
 * Python 2 or 3 (Python3 is recommended)
-* Either theano, tensorflow or CNTK (theano is recommended)
+* Either theano, tensorflow or CNTK (tensorflow is recommended)
 * [theano](http://deeplearning.net/software/theano/install.html) (the used version for the manuscript was 0.8.2)
 * [tensorflow](https://www.tensorflow.org/) as a more robust alternative to theano
 * [cntk](https://github.com/microsoft/CNTK) CNTK is anoter DL library that can present some advantages compared to tensorflow or theano. See [https://docs.microsoft.com/en-us/cognitive-toolkit/](https://docs.microsoft.com/en-us/cognitive-toolkit/)
@@ -81,8 +81,12 @@ pip2 install -e . -r requirements_distributed.txt
 pip install -e . -r requirements_all.txt
 ```
 
+### Installation with docker
+We have created a docker image (`opoirion/deepprog_docker:v1`) with all the dependencies already installed. For the docker (and singularity) instruction, please refer to the docker [tutorial](https://deepprog-garmires-lab.readthedocs.io/en/latest/usage_with_docker.html) (see above).
+
+
 ### Support for CNTK / tensorflow
-* We originally used Keras with theano as backend plateform. However, [Tensorflow](https://www.tensorflow.org/) or [CNTK](https://docs.microsoft.com/en-us/cognitive-toolkit/) are more recent DL framework that can be faster or more stable than theano. Because keras supports these 3 backends, it is possible to use them as alternative to theano. To change backend, please configure the `$HOME/.keras/keras.json` file. (See official instruction [here](https://keras.io/backend/)).
+* We originally used Keras with theano as backend plateform. However, [Tensorflow](https://www.tensorflow.org/) (currently used as default) or [CNTK](https://docs.microsoft.com/en-us/cognitive-toolkit/) are more recent DL framework that can be faster or more stable than theano. Because keras supports these 3 backends, it is possible to use them as alternative to theano. To change backend, please configure the `$HOME/.keras/keras.json` file. (See official instruction [here](https://keras.io/backend/)).
 
 The default configuration file looks like this:
 
@@ -103,9 +107,6 @@ The default configuration file looks like this:
 * To visualise test sets projected into the multi-omic survival space, it is required to install `mpld3` module: `pip install mpld3`
 * Note that the pip version of mpld3 installed on my computer presented a [bug](https://github.com/mpld3/mpld3/issues/434): `TypeError: array([1.]) is not JSON serializable `. However, the [newest](https://github.com/mpld3/mpld3) version of the mpld3 available from the github solved this issue. It is therefore recommended to install the newest version to avoid this issue.
 
-
-### Installation with docker
-We have created a docker image (`opoirion/deepprog_docker:v1`) with all the dependencies already installed. For the docker (and singularity) instruction, please refer to the docker [tutorial](https://deepprog-garmires-lab.readthedocs.io/en/latest/usage_with_docker.html) (see above).
 
 ## Usage
 * test if simdeep is functional (all the software are correctly installed):

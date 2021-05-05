@@ -1,10 +1,10 @@
 # Installation
 
-Here we describe how to install the DeepProg package. We assume that the installation will be done locally, using the `--user` flag from pip. Alternatively, the package can be installed using a virtual environment or globally with sudo. Both python2.7 or python3.6 (or higher) can be used. We only tested the installation on a linux environment but it should also work on a OSX environment.
+Here we describe how to install the DeepProg package. We assume that the installation will be done locally, using the `--user` flag from pip. Alternatively, the package can be installed using a virtual environment or globally with sudo. Both python2.7 or python3.6 (or higher) can be used. We tested the installation on a linux, OSX and Windows environment.
 
 ## Requirements
 * Python 2 or 3 (Python3 is recommended)
-* Either theano, tensorflow or CNTK (theano is recommended)
+* Either theano, tensorflow or CNTK (tensorflow is recommended)
 * [theano](http://deeplearning.net/software/theano/install.html) (the used version for the manuscript was 0.8.2)
 * [tensorflow](https://www.tensorflow.org/) as a more robust alternative to theano
 * [cntk](https://github.com/microsoft/CNTK) CNTK is anoter DL library that can present some advantages compared to tensorflow or theano. See [https://docs.microsoft.com/en-us/cognitive-toolkit/](https://docs.microsoft.com/en-us/cognitive-toolkit/)
@@ -54,6 +54,9 @@ pip2 install -e . -r requirements.txt
 pip2 install -e . -r requirements_distributed.txt
 ```
 
+### Installation with docker
+We have created a docker image (`opoirion/deepprog_docker:v1`) with all the dependencies already installed. For the docker (and singularity) instruction, please refer to the docker [tutorial](https://deepprog-garmires-lab.readthedocs.io/en/latest/usage_with_docker.html).
+
 ## Alternative deep-Learning packages installation
 
 The required python packages can be installed using pip:
@@ -65,7 +68,7 @@ pip install keras --user
 ```
 
 ## Alternative support for CNTK / theano / tensorflow
-We originally used Keras with theano as backend plateform. However, [Tensorflow](https://www.tensorflow.org/) (currently the defaut background DL framework) or [CNTK](https://docs.microsoft.com/en-us/cognitive-toolkit/) are more recent DL framework that can be faster or more stable than theano. Because keras supports these 3 backends, it is possible to use them as alternative to theano. To install CNTK, please refer to the official [guidelines](https://docs.microsoft.com/en-us/cognitive-toolkit/setup-cntk-on-your-machine) . To change backend, please configure the `$HOME/.keras/keras.json` file. (See official instruction [here](https://keras.io/backend/)).
+We originally used Keras with theano as backend plateform. However, [Tensorflow](https://www.tensorflow.org/) (currently the defaut background DL framework) or [CNTK](https://docs.microsoft.com/en-us/cognitive-toolkit/) are more recent DL framework that can be faster or more stable than theano. Because keras supports these 3 backends, it is possible to use them as alternative. To install CNTK, please refer to the official [guidelines](https://docs.microsoft.com/en-us/cognitive-toolkit/setup-cntk-on-your-machine) . To change backend, please configure the `$HOME/.keras/keras.json` file. (See official instruction [here](https://keras.io/backend/)).
 
 The default configuration file: ` ~/.keras/keras.json` looks like this:
 
@@ -77,9 +80,6 @@ The default configuration file: ` ~/.keras/keras.json` looks like this:
     "backend": "tensorflow"
 }
 ```
-
-### Installation with docker
-We have created a docker image (`opoirion/deepprog_docker:v1`) with all the dependencies already installed. For the docker (and singularity) instruction, please refer to the docker [tutorial](https://deepprog-garmires-lab.readthedocs.io/en/latest/usage_with_docker.html).
 
 ### R installation (Depreciated)
 
