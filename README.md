@@ -439,6 +439,10 @@ The project is licensed under the PolyForm Perimeter License 1.0.0.
 
 (See https://polyformproject.org/licenses/)
 
+## Data avaibility
+
+The matrices and the survival data used to compute the models are available here [http://ns102669.ip-147-135-37.us/DeepProg/matrices/](http://ns102669.ip-147-135-37.us/DeepProg/matrices/)
+
 ## contact and credentials
 * Developer: Olivier Poirion (PhD)
 * contact: opoirion@hawaii.edu, o.poirion@gmail.com
