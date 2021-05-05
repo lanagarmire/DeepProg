@@ -17,13 +17,13 @@ Here we describe how to install the DeepProg package. We assume that the install
 
 ## Tested python package versions
 Python 3.8 (tested for Linux and OSX. For Windows Visual C++ is required and LongPathsEnabled shoud be set to 1 in windows registry)
-* tensorflow == 2.4.1
+* tensorflow == 2.4.1 (2.4.1 currently doesn't seem to work with python3.9)
 * keras == 2.4.3
 * ray == 0.8.4
 * scikit-learn == 0.23.2
-* scikit-survival == 0.14.0
+* scikit-survival == 0.14.0 (currently doesn't seem to work with python3.9)
 * lifelines == 0.25.5
-* scikit-optimize == 0.8.1
+* scikit-optimize == 0.8.1 (currently doesn't seem to work with python3.9)
 * mpld3 == 0.5.1
 
 Since ray and tensorflow are rapidly evolving libraries, newest versions might unfortunatly break DeepProg's API. To avoid any dependencies issues, we recommand working inside a Python 3 [virtual environement](https://docs.python.org/3/tutorial/venv.html) (`virtualenv`) and install the tested packages.
@@ -43,29 +43,29 @@ pip3 install -e . -r requirements.txt
 # To intall the distributed frameworks
 pip3 install -e . -r requirements_distributed.txt
 # Installing scikit-survival (python3 only)
-pip3 install -e . -r requirements_pip3.txt
+pip3 install -r requirements_pip3.txt
 # Install ALL required dependencies with the most up to date packages
 pip install -e . -r requirements_all.txt
 
 
 # **Ignore this if you are working under python3**
 # python 3 is highly preferred, but DeepProg working with python2/pip2, however there is no support for scikit-survival in python2
-pip2 install -r requirements.txt
-pip2 install -r requirements_distributed.txt
+pip2 install -e . -r requirements.txt
+pip2 install -e . -r requirements_distributed.txt
 ```
 
-## Deep-Learning packages installation
+## Alternative deep-Learning packages installation
 
 The required python packages can be installed using pip:
 
 ```bash
 pip install theano --user # Original backend used OR
-pip install tensorflow --user # Alternative backend for keras
+pip install tensorflow --user # Alternative backend for keras and default
 pip install keras --user
 ```
 
-## Support for CNTK / tensorflow
-We originally used Keras with theano as backend plateform. However, [Tensorflow](https://www.tensorflow.org/) or [CNTK](https://docs.microsoft.com/en-us/cognitive-toolkit/) are more recent DL framework that can be faster or more stable than theano. Because keras supports these 3 backends, it is possible to use them as alternative to theano. To install CNTK, please refer to the official [guidelines](https://docs.microsoft.com/en-us/cognitive-toolkit/setup-cntk-on-your-machine) . To change backend, please configure the `$HOME/.keras/keras.json` file. (See official instruction [here](https://keras.io/backend/)).
+## Alternative support for CNTK / theano / tensorflow
+We originally used Keras with theano as backend plateform. However, [Tensorflow](https://www.tensorflow.org/) (currently the defaut background DL framework) or [CNTK](https://docs.microsoft.com/en-us/cognitive-toolkit/) are more recent DL framework that can be faster or more stable than theano. Because keras supports these 3 backends, it is possible to use them as alternative to theano. To install CNTK, please refer to the official [guidelines](https://docs.microsoft.com/en-us/cognitive-toolkit/setup-cntk-on-your-machine) . To change backend, please configure the `$HOME/.keras/keras.json` file. (See official instruction [here](https://keras.io/backend/)).
 
 The default configuration file: ` ~/.keras/keras.json` looks like this:
 
@@ -77,6 +77,9 @@ The default configuration file: ` ~/.keras/keras.json` looks like this:
     "backend": "tensorflow"
 }
 ```
+
+### Installation with docker
+We have created a docker image (`opoirion/deepprog_docker:v1`) with all the dependencies already installed. For the docker (and singularity) instruction, please refer to the docker [tutorial](https://deepprog-garmires-lab.readthedocs.io/en/latest/usage_with_docker.html).
 
 ### R installation (Depreciated)
 

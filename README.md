@@ -44,15 +44,14 @@ nano ~/.keras/keras.json
 
 ## Tested python package versions
 Python 3.8 (tested for Linux and OSX. For Windows Visual C++ is required and LongPathsEnabled shoud be set to 1 in windows registry)
-* tensorflow == 2.4.1
+* tensorflow == 2.4.1 (2.4.1 currently doesn't seem to work with python3.9)
 * keras == 2.4.3
 * ray == 0.8.4
 * scikit-learn == 0.23.2
-* scikit-survival == 0.14.0
+* scikit-survival == 0.14.0 (currently doesn't seem to work with python3.9)
 * lifelines == 0.25.5
-* scikit-optimize == 0.8.1
+* scikit-optimize == 0.8.1 (currently doesn't seem to work with python3.9)
 * mpld3 == 0.5.1
-
 Since ray and tensorflow are rapidly evolving libraries, newest versions might unfortunatly break DeepProg's API. To avoid any dependencies issues, we recommand working inside a Python 3 [virtual environement](https://docs.python.org/3/tutorial/venv.html) (`virtualenv`) and install the tested packages.
 
 ### installation (local)
@@ -106,7 +105,7 @@ The default configuration file looks like this:
 
 
 ### Installation with docker
-We have created a docker image (`opoirion/deepprog_docker:v1`) with all the dependencies already installed. For the docker instruction, please refer to the docker [tutorial](https://deepprog-garmires-lab.readthedocs.io/en/latest/usage_with_docker.html) (see above).
+We have created a docker image (`opoirion/deepprog_docker:v1`) with all the dependencies already installed. For the docker (and singularity) instruction, please refer to the docker [tutorial](https://deepprog-garmires-lab.readthedocs.io/en/latest/usage_with_docker.html) (see above).
 
 ## Usage
 * test if simdeep is functional (all the software are correctly installed):
