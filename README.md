@@ -13,7 +13,7 @@ A more complete documentation with API description is also available at [https:/
 * [Tutorial: Simple DeepProg model](https://deepprog-garmires-lab.readthedocs.io/en/latest/usage.html)
 * [Tutorial: Ensemble of DeepProg model](https://deepprog-garmires-lab.readthedocs.io/en/latest/usage_ensemble.html)
 * [Tutorial: Advanced usage of DeepProg model](https://deepprog-garmires-lab.readthedocs.io/en/latest/usage_advanced.html)
-* [Tutorial: use DeepProg from the docker image](https://deepprog-garmires-lab.readthedocs.io/en/latest/usage_ith_docker.html)
+* [Tutorial: use DeepProg from the docker image](https://deepprog-garmires-lab.readthedocs.io/en/latest/usage_with_docker.html)
 * [Case study: Analyzing TCGA HCC dataset](https://deepprog-garmires-lab.readthedocs.io/en/latest/case_study.html)
 * [Tutorial: Tuning DeepProg](https://deepprog-garmires-lab.readthedocs.io/en/latest/usage_tuning.html)
 
