@@ -28,7 +28,7 @@ from sklearn.cluster.hierarchical import AgglomerativeClustering
 args_to_optimize = {
     'seed': [100, 200, 300, 400],
     'nb_clusters': [2, 3, 4, 5],
-    'cluster_method': ['mixture', 'coxPH',
+    'cluster_method': ['mixture', 'coxPH', 'coxPHMixture',
                        AgglomerativeClustering],
     'use_autoencoders': (True, False),
     'class_selection': ('mean', 'max'),
@@ -72,7 +72,7 @@ DeepProg can be tuned using different objective metrics:
 tuning.fit(
     # We will use the holdout samples Cox-PH pvalue as objective
     metric='log_test_fold_pvalue',
-    num_samples=25,
+    num_samples=35,
     # Experiment run concurently using ray as dispatcher
     max_concurrent=2,
     # In addition, each deeprog model will be distributed
