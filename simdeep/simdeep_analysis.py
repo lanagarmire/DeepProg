@@ -1353,7 +1353,7 @@ class SimDeep(DeepBase):
                            isdead,
                            nbdays,
                            self.seed,
-                           metadata_mat)
+                           metadata_mat, self.use_r_packages)
 
                           for node_id, activity in enumerate(activities.T))
 
@@ -1397,7 +1397,7 @@ class SimDeep(DeepBase):
 
         input_list = iter((node_id,
                            activities_train.T[node_id], isdead, nbdays,
-                           activities_cv.T[node_id], isdead_cv, nbdays_cv)
+                           activities_cv.T[node_id], isdead_cv, nbdays_cv, self.use_r_packages)
                            for node_id in range(activities_train.shape[1]))
 
         score_list = map(_process_parallel_cindex, input_list)

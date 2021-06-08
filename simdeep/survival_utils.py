@@ -420,12 +420,13 @@ def load_entrezID_to_ensg():
 def _process_parallel_coxph(inp):
     """
     """
-    node_id, activity, isdead, nbdays, seed, metadata_mat = inp
+    node_id, activity, isdead, nbdays, seed, metadata_mat, use_r_packages = inp
     pvalue = coxph(activity,
                    isdead,
                    nbdays,
                    seed=seed,
-                   metadata_mat=metadata_mat)
+                   metadata_mat=metadata_mat,
+                   use_r_packages=use_r_packages)
 
     return node_id, pvalue
 
@@ -434,10 +435,12 @@ def _process_parallel_cindex(inp):
     """
     (node_id,
      act_ref, isdead_ref, nbdays_ref,
-     act_test, isdead_test, nbdays_test) = inp
+     act_test, isdead_test, nbdays_test, use_r_packages) = inp
 
     score = c_index(act_ref, isdead_ref, nbdays_ref,
-                    act_test, isdead_test, nbdays_test)
+                    act_test, isdead_test, nbdays_test,
+                    use_r_packages=use_r_packages
+                    )
 
     return node_id, score
 
@@ -485,14 +488,16 @@ def _process_parallel_survival_feature_importance_per_cluster(inp):
     """
     """
 
-    feature, array, survival, metadata_mat, pval_thres = inp
+    feature, array, survival, metadata_mat, pval_thres, use_r_packages = inp
     nbdays, isdead = survival.T.tolist()
 
     pvalue = coxph(
         array,
         isdead,
         nbdays,
-        metadata_mat=metadata_mat)
+        metadata_mat=metadata_mat,
+        use_r_packages=use_r_packages
+    )
 
     if not np.isnan(pvalue) and pvalue < pval_thres:
         return (feature, pvalue)

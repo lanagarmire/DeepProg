@@ -713,6 +713,7 @@ class SimDeepBoosting():
             do_KM_plot=self.do_KM_plot,
             png_path=self.path_results,
             fig_name='cv_analysis', seed=self.seed,
+            use_r_packages=self.use_r_packages,
             metadata_mat=metadata_mat
         )
 
@@ -1055,6 +1056,7 @@ class SimDeepBoosting():
             do_KM_plot=self.do_KM_plot,
             png_path=self.path_results,
             fig_name='{0}_{1}'.format(project_name, fname_base),
+            use_r_packages=self.use_r_packages,
             metadata_mat=metadata_mat,
             seed=self.seed)
 
@@ -1065,6 +1067,7 @@ class SimDeepBoosting():
             labels_proba.T[0],
             isdead, nbdays,
             isfactor=False,
+            use_r_packages=self.use_r_packages,
             metadata_mat=metadata_mat,
             seed=self.seed)
 
@@ -1078,6 +1081,7 @@ class SimDeepBoosting():
             isfactor=False,
             do_KM_plot=self.do_KM_plot,
             png_path=self.path_results,
+            use_r_packages=self.use_r_packages,
             fig_name='{0}_proba_{1}'.format(project_name, fname_base),
             metadata_mat=metadata_mat,
             seed=self.seed)
@@ -1121,14 +1125,17 @@ class SimDeepBoosting():
 
         cindex = c_index(self.full_labels, dead_full, days_full,
                          self.test_labels, dead_test, days_test,
+                         use_r_packages=self.use_r_packages,
                          seed=self.seed)
 
         cindex_cat = c_index(self.full_labels, dead_full, days_full,
                              labels_test_categorical, dead_test, days_test,
+                             use_r_packages=self.use_r_packages,
                              seed=self.seed)
 
         cindex_proba = c_index(self.full_labels_proba.T[0], dead_full, days_full,
                                self.test_labels_proba.T[0], dead_test, days_test,
+                               use_r_packages=self.use_r_packages,
                                seed=self.seed)
 
         if self.verbose:
@@ -1151,14 +1158,17 @@ class SimDeepBoosting():
 
         cindex = c_index(self.full_labels, dead_full, days_full,
                          self.full_labels, dead_full, days_full,
+                         use_r_packages=self.use_r_packages,
                          seed=self.seed)
 
         cindex_cat = c_index(labels_categorical, dead_full, days_full,
                              labels_categorical, dead_full, days_full,
+                             use_r_packages=self.use_r_packages,
                              seed=self.seed)
 
         cindex_proba = c_index(self.full_labels_proba.T[0], dead_full, days_full,
                                self.full_labels_proba.T[0], dead_full, days_full,
+                               use_r_packages=self.use_r_packages,
                                seed=self.seed)
 
         if self.verbose:
@@ -1457,7 +1467,8 @@ class SimDeepBoosting():
                        np.asarray(matrix[i]).reshape(-1),
                        self.survival_full,
                        metadata_mat,
-                       pval_thres)
+                       pval_thres,
+                       self.use_r_packages)
 
         for key in self.matrix_with_cv_array:
             feature_index = {feat: i for i, feat in enumerate(feature_dict[key])}
