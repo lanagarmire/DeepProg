@@ -284,13 +284,17 @@ def coxph_from_r(
 
             cox.environment['values'] = new_values
 
+        c_index_to_print = c_index_from_r(
+            values, isdead, nbdays, values, isdead, nbdays,
+            isfactor=isfactor
+        )
         surv = survival.survfit(cox)
         rob.r.png("{0}/{1}.png".format(png_path, fig_name.replace('.png', '')))
         rob.r.plot(surv,
                    col=rob.r("2:8"),
                    xlab="Days",
                    ylab="Probablity of survival",
-                   sub='pvalue: {0}'.format(pvalue_to_print),
+                   sub='pvalue: {0} cindex: {1}'.format(pvalue_to_print, c_index_to_print),
                    lwd=3,
                    mark_time=True
             )
