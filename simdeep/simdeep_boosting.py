@@ -507,6 +507,7 @@ class SimDeepBoosting():
                 cluster_method=self.cluster_method,
                 clustering_omics=self.clustering_omics,
                 use_autoencoders=self.use_autoencoders,
+                use_r_packages=self.use_r_packages,
                 feature_surv_analysis=self.feature_surv_analysis,
                 path_results=self.path_results,
                 project_name=self.project_name,
