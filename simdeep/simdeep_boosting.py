@@ -41,6 +41,7 @@ from simdeep.config import CINDEX_THRESHOLD
 from simdeep.config import USE_AUTOENCODERS
 from simdeep.config import FEATURE_SURV_ANALYSIS
 from simdeep.config import CLUSTERING_OMICS
+from simdeep.config import USE_R_PACKAGES_FOR_SURVIVAL
 
 # Parameter for autoencoder
 from simdeep.config import LEVEL_DIMS_IN
@@ -176,6 +177,7 @@ class SimDeepBoosting():
                  clustering_omics=CLUSTERING_OMICS,
                  path_to_save_model=PATH_TO_SAVE_MODEL,
                  feature_selection_usage='individual',
+                 use_r_packages=USE_R_PACKAGES_FOR_SURVIVAL,
                  alternative_embedding=None,
                  kwargs_alternative_embedding={},
                  **additional_dataset_args):
@@ -205,6 +207,7 @@ class SimDeepBoosting():
         self.metadata_usage = metadata_usage
         self.feature_selection_usage = feature_selection_usage
         self.subset_training_with_meta = subset_training_with_meta
+        self.use_r_packages = use_r_packages
 
         self.metadata_mat_full = None
 
@@ -582,6 +585,7 @@ class SimDeepBoosting():
                 cindex_thres=self.cindex_thres,
                 node_selection=self.node_selection,
                 metadata_usage=self.metadata_usage,
+                use_r_packages=self.use_r_packages,
                 feature_selection_usage=self.feature_selection_usage,
                 alternative_embedding=self.alternative_embedding,
                 kwargs_alternative_embedding=self.kwargs_alternative_embedding,

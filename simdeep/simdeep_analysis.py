@@ -34,6 +34,7 @@ from simdeep.config import CLASSIFIER
 from simdeep.config import HYPER_PARAMETERS
 from simdeep.config import PATH_TO_SAVE_MODEL
 from simdeep.config import CLUSTERING_OMICS
+from simdeep.config import USE_R_PACKAGES_FOR_SURVIVAL
 
 from simdeep.survival_utils import _process_parallel_coxph
 from simdeep.survival_utils import _process_parallel_cindex
@@ -134,6 +135,7 @@ class SimDeep(DeepBase):
                  clustering_omics=CLUSTERING_OMICS,
                  metadata_usage=None,
                  feature_selection_usage='individual',
+                 use_r_packages=USE_R_PACKAGES_FOR_SURVIVAL,
                  seed=SEED,
                  alternative_embedding=None,
                  do_KM_plot=True,
@@ -153,6 +155,7 @@ class SimDeep(DeepBase):
         self.cluster_array = cluster_array
         self.path_results = path_results
         self.clustering_omics = clustering_omics
+        self.use_r_packages = use_r_packages
         self.metadata_usage = metadata_usage_type(metadata_usage)
         self.feature_selection_usage = feature_selection_usage_type(
             feature_selection_usage)
@@ -385,10 +388,12 @@ class SimDeep(DeepBase):
                        do_KM_plot=self.do_KM_plot,
                        png_path=self.path_results,
                        seed=self.seed,
+                       use_r_packages=self.use_r_packages,
                        fig_name='{0}_KM_plot_training_dataset'.format(self.project_name))
 
         pvalue_proba = coxph(self.labels_proba.T[0], isdead, nbdays,
                              seed=self.seed,
+                             use_r_packages=self.use_r_packages,
                              isfactor=False)
 
         if not self._isboosting:
@@ -583,6 +588,7 @@ class SimDeep(DeepBase):
             do_KM_plot=self.do_KM_plot,
             png_path=self.path_results,
             seed=self.seed,
+            use_r_packages=self.use_r_packages,
             metadata_mat=metadata_mat,
             fig_name='{0}_{1}'.format(self.project_name, fname_base))
 
@@ -596,6 +602,7 @@ class SimDeep(DeepBase):
             do_KM_plot=False,
             png_path=self.path_results,
             seed=self.seed,
+            use_r_packages=self.use_r_packages,
             metadata_mat=metadata_mat,
             fig_name='{0}_{1}_proba'.format(self.project_name, fname_base))
 
@@ -946,12 +953,14 @@ class SimDeep(DeepBase):
                        do_KM_plot=self.do_KM_plot,
                        png_path=self.path_results,
                        seed=self.seed,
+                       use_r_packages=self.use_r_packages,
                        metadata_mat=metadata_mat,
                        fig_name='{0}_KM_plot_training_dataset'.format(self.project_name))
 
         pvalue_proba = coxph(self.labels_proba.T[0],
                              isdead, nbdays,
                              seed=self.seed,
+                             use_r_packages=self.use_r_packages,
                              metadata_mat=metadata_mat,
                              isfactor=False)
 
@@ -1419,6 +1428,7 @@ class SimDeep(DeepBase):
         try:
             cindex = c_index(self.labels, dead, days,
                              self.full_labels, dead_full, days_full,
+                             use_r_packages=self.use_r_packages,
                              seed=self.seed,)
         except Exception as e:
             print('Exception while computing the c-index: {0}'.format(e))
@@ -1438,6 +1448,7 @@ class SimDeep(DeepBase):
         try:
             cindex = c_index(self.labels, dead, days,
                              self.labels, dead, days,
+                             use_r_packages=self.use_r_packages,
                              seed=self.seed,)
         except Exception as e:
             print('Exception while computing the c-index: {0}'.format(e))
@@ -1458,6 +1469,7 @@ class SimDeep(DeepBase):
         try:
             cindex = c_index(self.labels, dead, days,
                              self.test_labels, dead_test, days_test,
+                             use_r_packages=self.use_r_packages,
                              seed=self.seed,)
         except Exception as e:
             print('Exception while computing the c-index: {0}'.format(e))
@@ -1478,6 +1490,7 @@ class SimDeep(DeepBase):
         try:
             cindex =  c_index(self.labels, dead, days,
                               self.cv_labels, dead_cv, days_cv,
+                              use_r_packages=self.use_r_packages,
                               seed=self.seed,)
         except Exception as e:
             print('Exception while computing the c-index: {0}'.format(e))

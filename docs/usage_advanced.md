@@ -250,6 +250,35 @@ Once a DeepProg model is fitted, two functions can be used to infer the features
 * `compute_feature_scores_per_cluster`: Perform a mann-Withney test between the expression of each feature within and without the subtype
 * `compute_survival_feature_scores_per_cluster`: This function computes the Log-rank p-value after fitting an individual Cox-PH model for each of the significant features inferred by `compute_feature_scores_per_cluster`.
 
+### R installation (Alternative to Python lifelines)
+
+In his first implementation, DeepProg used the R survival toolkits to fit the survival functions (cox-PH models) and compute the concordance indexes. These functions have been replaced with the python toolkits lifelines and scikit-survival for more convenience and avoid any compatibility issue. However, differences exists regarding the computation of the c-indexes using either python or R libraries. To use the original R functions, it is necessary to install the following R libraries.
+
+* R
+* the R "survival" package installed.
+* rpy2 3.4.4 (for python2 rpy2 can be install with: pip install rpy2==2.8.6, for python3 pip3 install rpy2==2.8.6).
+
+
+```R
+install.packages("survival")
+install.packages("glmnet")
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+BiocManager::install("survcomp")
+```
+
+Then, when instantiating a `SimDeep` or a `SimDeepBoosting` object, the option `use_r_packages` needs to be set to `True`.
+
+```python
+    boosting = SimDeepBoosting(
+    ...
+        use_r_packages=True,
+    ...
+)
+```
+
+
+
 ## Save / load models
 
 ### Save /load the entire model

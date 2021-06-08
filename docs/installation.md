@@ -81,13 +81,13 @@ The default configuration file: ` ~/.keras/keras.json` looks like this:
 }
 ```
 
-### R installation (Depreciated)
+### R installation (Alternative to Python lifelines)
 
-In his first implementation, DeepProg used the R survival toolkits to fit the survival functions. Thse functions have been replaced with the python toolkits lifelines and scikit-survival for more convenience and avoid any compatibility issue.
+In his first implementation, DeepProg used the R survival toolkits to fit the survival functions (cox-PH models) and compute the concordance indexes. These functions have been replaced with the python toolkits lifelines and scikit-survival for more convenience and avoid any compatibility issue. However, differences exists regarding the computation of the c-indexes using either python or R libraries. To use the original R functions, it is necessary to install the following R libraries.
 
 * R
 * the R "survival" package installed.
-* rpy2 2.8.6 (for python2 rpy2 can be install with: pip install rpy2==2.8.6, for python3 pip3 install rpy2==2.8.6). It seems that newer version of rpy2 might not work due to a bug (not tested)
+* rpy2 3.4.4 (for python2 rpy2 can be install with: pip install rpy2==2.8.6, for python3 pip3 install rpy2==2.8.6).
 
 
 ```R
@@ -98,10 +98,8 @@ if (!requireNamespace("BiocManager", quietly = TRUE))
 BiocManager::install("survcomp")
 ```
 
+Then, when instantiating a `SimDeep` or a `SimDeepBoosting` object, the option `use_r_packages` needs to be set to `True`.
 
-## Distributed computation
-It is possible to use the python ray framework [https://github.com/ray-project/ray](https://github.com/ray-project/ray) to control the parallel computation of the multiple models. To use this framework, it is required to install it: `pip install ray --user`.
-Alternatively, it is also possible to create the model one by one without the need of the ray framework
 
 ## Visualisation module (Experimental)
 To visualise test sets projected into the multi-omic survival space, it is required to install `mpld3` module.

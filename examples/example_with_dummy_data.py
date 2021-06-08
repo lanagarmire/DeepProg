@@ -53,6 +53,7 @@ def test_instance():
         path_data=PATH_DATA,
         project_name=PROJECT_NAME,
         path_results=PATH_DATA,
+        use_r_packages=False, # to use R functions from the survival and survcomp packages
         epochs=EPOCHS,
         seed=SEED,
         # normalization=norm,

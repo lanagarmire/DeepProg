@@ -23,6 +23,7 @@ from simdeep.config import PATH_TO_SAVE_MODEL
 from simdeep.config import USE_AUTOENCODERS
 from simdeep.config import FEATURE_SURV_ANALYSIS
 from simdeep.config import CLUSTERING_OMICS
+from simdeep.config import USE_R_PACKAGES_FOR_SURVIVAL
 
 
 @ray.remote
@@ -50,6 +51,7 @@ class SimDeepDistributed(SimDeep):
             path_to_save_model=PATH_TO_SAVE_MODEL,
             metadata_usage=None,
             feature_selection_usage='individual',
+            use_r_packages=USE_R_PACKAGES_FOR_SURVIVAL,
             alternative_embedding=None,
             kwargs_alternative_embedding={},
             do_KM_plot=True,
@@ -86,6 +88,7 @@ class SimDeepDistributed(SimDeep):
             alternative_embedding=alternative_embedding,
             kwargs_alternative_embedding=kwargs_alternative_embedding,
             verbose=verbose,
+            use_r_packages=use_r_packages,
             _isboosting=_isboosting,
             dataset=dataset,
             deep_model_additional_args=deep_model_additional_args)

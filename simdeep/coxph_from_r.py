@@ -25,7 +25,7 @@ glmnet = None
 NALogicalType = type(None)
 
 
-if USE_R_PACKAGES_FOR_SURVIVAL:
+try:
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
 
@@ -39,10 +39,9 @@ if USE_R_PACKAGES_FOR_SURVIVAL:
         survcomp = importr('survcomp')
         glmnet = importr('glmnet')
 
-        try:
-            from rpy2.rinterface import NALogicalType
-        except Exception:
-            from rpy2.rinterface_lib.na_values import NALogicalType
+except Exception as e:
+    print("#### trying to load optional R packages: {0}".format(e))
+    pass
 
 
 import numpy as np
@@ -56,7 +55,10 @@ def main():
     values = [0, 1, 1, 0 , 1, 2, 0, 1, 0, 0]
     np.random.seed(2016)
 
-    pvalue = coxph_from_python(values, isdead, nbdays, do_KM_plot=True)
+    pvalue = coxph_from_python(
+        values, isdead, nbdays, isfactor=True, do_KM_plot=True)
+    print('pvalue from python:', pvalue)
+
     cindex = c_index_from_python(
         values, isdead, nbdays, values, isdead, nbdays)
 
@@ -83,6 +85,7 @@ def main():
         nbdays)
 
     print('c index:', cindex)
+
     matrix = np.random.random((10, 5))
     matrix_test = np.random.random((10, 5))
 
@@ -245,7 +248,7 @@ def coxph_from_r(
 
     if isfactor:
         # values_str = 'factor({0})'.format(values_str)
-        values = StrVector(values)
+        values = StrVector([v for v in map(str, values)])
     else:
         values = FloatVector(values)
 
@@ -265,6 +268,7 @@ def coxph_from_r(
 
     pvalue = rob.r.summary(res)[-5][2]
     # color = ['green', 'blue', 'red']
+
     pvalue_to_print = pvalue
 
     if do_KM_plot:
@@ -453,12 +457,12 @@ def c_index_from_r(values,
     nbdays = FloatVector(nbdays)
     nbdays_test = FloatVector(nbdays_test)
 
-    values = FloatVector(values)
-    values_test = FloatVector(values_test)
-
     if isfactor:
-        values = StrVector(values)
-        values_test = StrVector(values_test)
+        values = StrVector([v for v in map(str, values)])
+        values_test = StrVector([v for v in map(str, values_test)])
+    else:
+        values = FloatVector(values)
+        values_test = FloatVector(values_test)
 
     cox = Formula('Surv(nbdays, isdead) ~ values')
 
@@ -467,6 +471,7 @@ def c_index_from_r(values,
     cox.environment['values'] = values
 
     res = survival.coxph(cox)
+
     frame = rob.r('data.frame')
     predict = rob.r.predict(res, frame(values=values_test))
     concordance_index = rob.r('concordance.index')
@@ -493,7 +498,8 @@ def c_index_multiple_from_r(
         matrix_test,
         isdead_test,
         nbdays_test,
-        lambda_val=None):
+        lambda_val=None,
+        isfactor=False):
     """
     """
     rob.r('set.seed(2016)')

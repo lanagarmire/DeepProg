@@ -434,6 +434,27 @@ examples
 └── load_3_omics_model.py
 ```
 
+### R installation (Alternative to Python lifelines)
+
+In his first implementation, DeepProg used the R survival toolkits to fit the survival functions (cox-PH models) and compute the concordance indexes. These functions have been replaced with the python toolkits lifelines and scikit-survival for more convenience and avoid any compatibility issue. However, differences exists regarding the computation of the c-indexes using either python or R libraries. To use the original R functions, it is necessary to install the following R libraries.
+
+* R
+* the R "survival" package installed.
+* rpy2 3.4.4 (for python2 rpy2 can be install with: pip install rpy2==2.8.6, for python3 pip3 install rpy2==2.8.6).
+
+
+```R
+install.packages("survival")
+install.packages("glmnet")
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+BiocManager::install("survcomp")
+```
+
+Then, when instantiating a `SimDeep` or a `SimDeepBoosting` object, the option `use_r_packages` needs to be set to `True`.
+
+
+
 ## License
 
 The project is licensed under the PolyForm Perimeter License 1.0.0.

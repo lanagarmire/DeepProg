@@ -40,6 +40,7 @@ def test_instance():
         project_name=PROJECT_NAME,
         path_results=PATH_DATA,
         metadata_tsv=OPTIONAL_METADATA, # optional
+        use_r_packages=False, # to use R functions from the survival and survcomp packages
         metadata_usage='all',
         epochs=EPOCHS,
         distribute=True, # Option to use ray cluster scheduler
