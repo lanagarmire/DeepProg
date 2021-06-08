@@ -250,7 +250,7 @@ Once a DeepProg model is fitted, two functions can be used to infer the features
 * `compute_feature_scores_per_cluster`: Perform a mann-Withney test between the expression of each feature within and without the subtype
 * `compute_survival_feature_scores_per_cluster`: This function computes the Log-rank p-value after fitting an individual Cox-PH model for each of the significant features inferred by `compute_feature_scores_per_cluster`.
 
-### R installation (Alternative to Python lifelines)
+## R installation (Alternative to Python lifelines)
 
 In his first implementation, DeepProg used the R survival toolkits to fit the survival functions (cox-PH models) and compute the concordance indexes. These functions have been replaced with the python toolkits lifelines and scikit-survival for more convenience and avoid any compatibility issue. However, differences exists regarding the computation of the c-indexes using either python or R libraries. To use the original R functions, it is necessary to install the following R libraries.
 
