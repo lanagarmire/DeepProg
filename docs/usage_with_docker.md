@@ -16,6 +16,18 @@ singularity pull docker://opoirion/deepprog_docker:v1
 
 The version of the package installed correspond to the versions described in the `requirements_tested.txt`. Thus, they are NOT the most up to date python packages, especially regarding the `ray` installed package (installed version is 0.8.4). Since ray is used to configure the nodes, memories, CPUs when distributing DeepProg in a cluster, the API to use might differ with the most up-to-date ray API.
 
+## Alternative Image with R libraries
+
+We also created a docker image containing R and the survival R dependencies (`survival`, `survcomp`, and `glmnet`) installed. This image can be used with the option `use_r_packages=True`. However, this version is signficantly larger (1.3GiG) to install.
+
+```bash
+# Using alternative docker image with R libraries installed
+docker pull opoirion/deepprog_docker:RVersion1
+
+# Using Singularity
+singularity pull docker://opoirion/deepprog_docker:RVersion1
+```
+
 ## Usage (Docker)
 the docker container needs to have access to three folders:
 1. the input folder containing the matrices and the survival data
