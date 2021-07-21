@@ -4,3 +4,6 @@
 build/*
 dist/*
 examples/data/TestProject*/*
+.DS_Store
+examples/.DS_Store
+examples/data/.DS_Store
