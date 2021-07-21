@@ -461,6 +461,10 @@ The project is licensed under the PolyForm Perimeter License 1.0.0.
 
 (See https://polyformproject.org/licenses/)
 
+## Citation
+
+This package refers to our study published in Genome Biology: [Multi-omics-based pan-cancer prognosis prediction using an ensemble of deep-learning and machine-learning models](https://genomemedicine.biomedcentral.com/articles/10.1186/s13073-021-00930-x)
+
 ## Data avaibility
 
 The matrices and the survival data used to compute the models are available here [https://doi.org/10.6084/m9.figshare.14832813.v1](https://doi.org/10.6084/m9.figshare.14832813.v1)
