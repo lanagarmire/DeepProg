@@ -14,7 +14,7 @@ data
 └── survival.tsv
 ```
 
-Go to that folder (**cd ./data/**) and decompress these files using `gzip -d *.gz`. 
+Go to that folder (**cd ./data/**) and decompress these files using `gzip -d *.gz`.
 Now, go back to the main folder (**cd ../**), and we are ready to instanciate a DeepProg instance.
 
 ```python

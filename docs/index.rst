@@ -52,12 +52,12 @@ o.poirion@gmail.com
 Data availability
 -----------------
 
-The matrices and the survival data used to compute the models are available here: http://ns102669.ip-147-135-37.us/DeepProg/matrices/
+The matrices and the survival data used to compute the models are available here: https://genomemedicine.biomedcentral.com/articles/10.1186/s13073-021-00930-x/
 
 Citation
 --------
 
-This package refers to our preprint paper: Multi-omics-based pan-cancer prognosis prediction using an ensemble of deep-learning and machine-learning models, https://www.medrxiv.org/content/10.1101/19010082v1
+This package refers to our study published in Genome Biology: Multi-omics-based pan-cancer prognosis prediction using an ensemble of deep-learning and machine-learning models, https://genomemedicine.biomedcentral.com/articles/10.1186/s13073-021-00930-x
 
 License
 -------

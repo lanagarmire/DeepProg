@@ -31,7 +31,7 @@ NB_THREADS_COXPH = 10
 STACK_MULTI_OMIC = False
 
 #### Boosting values
-NB_ITER = 5 # boosting iteration
+NB_ITER = 10 # boosting iteration
 NB_THREADS= 5 # number of simdeep instance launched in parallel
 NB_FOLDS = 5 # for each instance, the original dataset is split in folds and one fold is left
 CLASS_SELECTION = 'mean' # mean or max: the method used to select the final class, according to class probas

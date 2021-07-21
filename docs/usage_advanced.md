@@ -127,6 +127,19 @@ boostingDummy = SimDeepBoosting(
     )
 ```
 
+### Choice of specific OMIC for clustering
+
+Not all the OMIC type needs to be used for clustering (Although they are by default). The option `clustering_omics` controls which omics are used for clustering if not all. However, all the input OMICS will be used to classify new samples using the intersecting features across all the omics.
+
+```python
+boosting = SimDeepBoosting(
+    ...
+    clustering_omics=['RNA', 'MIR'], # Only 'RNA' and 'MIR' will be used for clustering the samples
+    ...
+    )
+
+```
+
 ### Embedding and survival features selection
 after  each omic matrix is normalised, DeepProg transforms each feature matrix using by default an autoencoder network as embedding algorithm and then select the transformed features linked to survival using univariate Cox-PH models. Alternatively, DeepProg can accept any external embedding algorithm having a `fit` and transform `method`, following the scikit-learn nomenclature. For instance, `PCA` and `fastICA` classes of the scikit-learn package can be used as replacement for the autoencoder.
 
