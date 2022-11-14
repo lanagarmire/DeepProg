@@ -207,7 +207,7 @@ simDeep.fit() # fit the model
 from simdeep.config import TEST_TSV
 from simdeep.config import SURVIVAL_TSV_TEST
 
-simDeep.load_new_test_dataset(TEST_TSV, SURVIVAL_TSV_TEST, fname_key='dummy')
+simDeep.load_new_test_dataset(TEST_TSV, fname_key='dummy', path_survival_file=SURVIVAL_TSV_TEST)
 
 # The test set is a dummy rna expression (generated randomly)
 print(simDeep.dataset.test_tsv) # Defined in the config file
@@ -218,7 +218,7 @@ simDeep.predict_labels_on_test_dataset() # Perform the classification analysis a
 print(simDeep.test_labels)
 print(simDeep.test_labels_proba)
 
-simDeep.save_encoder('dummy_encoder.h5')
+simDeep.save_encoders('dummy_encoder.h5')
 
 ```
 ## Creating a DeepProg model using an ensemble of submodels
