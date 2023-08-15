@@ -1,3 +1,4 @@
+import warnings
 from simdeep.simdeep_analysis import SimDeep
 from simdeep.extract_data import LoadData
 
@@ -470,19 +471,21 @@ class SimDeepBoosting():
         """
         if pretrained_labels_files, is given, the models are constructed using these labels
         """
-        if pretrained_labels_files:
-            self._pretrained_fit = True
-        else:
-            self._pretrained_fit = False
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            if pretrained_labels_files:
+                self._pretrained_fit = True
+            else:
+                self._pretrained_fit = False
 
-        if self.distribute:
-            self._fit_distributed(
-                pretrained_labels_files=pretrained_labels_files)
-        else:
-            self._fit(
-                debug=debug,
-                verbose=verbose,
-                pretrained_labels_files=pretrained_labels_files)
+            if self.distribute:
+                self._fit_distributed(
+                    pretrained_labels_files=pretrained_labels_files)
+            else:
+                self._fit(
+                    debug=debug,
+                    verbose=verbose,
+                    pretrained_labels_files=pretrained_labels_files)
 
     def _fit_distributed(self, pretrained_labels_files=[]):
         """ """
@@ -727,21 +730,22 @@ class SimDeepBoosting():
         """
         """
         print('predict labels on test fold datasets...')
-
         pvalues, pvalues_proba = [], []
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
 
-        for model in self.models:
-            pvalues.append(self._from_model_attr(model, 'cp_pvalue'))
-            pvalues_proba.append(self._from_model_attr(model, 'cp_pvalue_proba'))
+            for model in self.models:
+                pvalues.append(self._from_model_attr(model, 'cp_pvalue'))
+                pvalues_proba.append(self._from_model_attr(model, 'cp_pvalue_proba'))
 
-        pvalue_gmean, pvalue_proba_gmean = gmean(pvalues), gmean(pvalues_proba)
+            pvalue_gmean, pvalue_proba_gmean = gmean(pvalues), gmean(pvalues_proba)
 
-        if self.verbose:
-            print('geo mean pvalues: {0} geo mean pvalues probas: {1}'.format(
-                pvalue_gmean, pvalue_proba_gmean))
+            if self.verbose:
+                print('geo mean pvalues: {0} geo mean pvalues probas: {1}'.format(
+                    pvalue_gmean, pvalue_proba_gmean))
 
-        self.log['pvalue geo mean test fold'] = pvalue_gmean
-        self.log['pvalue proba geo mean test fold'] = pvalue_proba_gmean
+            self.log['pvalue geo mean test fold'] = pvalue_gmean
+            self.log['pvalue proba geo mean test fold'] = pvalue_proba_gmean
 
         return pvalues, pvalues_proba
 
@@ -750,19 +754,21 @@ class SimDeepBoosting():
         """
         print('predict labels on training datasets...')
         pvalues, pvalues_proba = [], []
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
 
-        for model in self.models:
-            pvalues.append(self._from_model_attr(model, 'train_pvalue'))
-            pvalues_proba.append(self._from_model_attr(model, 'train_pvalue_proba'))
+            for model in self.models:
+                pvalues.append(self._from_model_attr(model, 'train_pvalue'))
+                pvalues_proba.append(self._from_model_attr(model, 'train_pvalue_proba'))
 
-        pvalue_gmean, pvalue_proba_gmean = gmean(pvalues), gmean(pvalues_proba)
+            pvalue_gmean, pvalue_proba_gmean = gmean(pvalues), gmean(pvalues_proba)
 
-        if self.verbose:
-            print('training geo mean pvalues: {0} geo mean pvalues probas: {1}'.format(
-                pvalue_gmean, pvalue_proba_gmean))
+            if self.verbose:
+                print('training geo mean pvalues: {0} geo mean pvalues probas: {1}'.format(
+                    pvalue_gmean, pvalue_proba_gmean))
 
-        self.log['pvalue geo mean train'] = pvalue_gmean
-        self.log['pvalue proba geo mean train'] = pvalue_proba_gmean
+            self.log['pvalue geo mean train'] = pvalue_gmean
+            self.log['pvalue proba geo mean train'] = pvalue_proba_gmean
 
         return pvalues, pvalues_proba
 
@@ -1426,14 +1432,15 @@ class SimDeepBoosting():
         print("Loading new test dataset {0} ...".format(
             self.test_fname_key))
         t_start = time()
-
-        self._from_models('_predict_new_dataset',
-                          tsv_dict=tsv_dict,
-                          path_survival_file=path_survival_file,
-                          normalization=normalization,
-                          survival_flag=survival_flag,
-                          metadata_file=metadata_file
-        )
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            self._from_models('_predict_new_dataset',
+                              tsv_dict=tsv_dict,
+                              path_survival_file=path_survival_file,
+                              normalization=normalization,
+                              survival_flag=survival_flag,
+                              metadata_file=metadata_file
+            )
 
         print("Test dataset {1} loaded in {0} s".format(
             time() - t_start, self.test_fname_key))
