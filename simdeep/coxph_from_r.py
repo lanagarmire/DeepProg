@@ -157,9 +157,9 @@ def coxph_from_python(
             return np.nan
 
     pvalue = cph.log_likelihood_ratio_test().p_value
-    cindex = cph.concordance_index_
 
     if do_KM_plot:
+        cindex = cph.concordance_index_
         fig, ax = plt.subplots(figsize=(10, 10))
 
         kaplan = KaplanMeierFitter()
