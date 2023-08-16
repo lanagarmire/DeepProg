@@ -838,7 +838,9 @@ class SimDeepBoosting():
         """
         self.cindex_test_folds = []
 
-        self._from_models('predict_labels_on_test_fold')
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            self._from_models('predict_labels_on_test_fold')
         try:
             cindexes = self._from_models('compute_c_indexes_for_test_fold_dataset')
         except Exception as e:
@@ -863,8 +865,9 @@ class SimDeepBoosting():
     def collect_cindex_for_full_dataset(self):
         """
         """
-        self._from_models('predict_labels_on_test_fold')
-
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            self._from_models('predict_labels_on_test_fold')
         try:
             cindexes_list = self._from_models('compute_c_indexes_for_full_dataset')
         except Exception as e:
@@ -1126,9 +1129,11 @@ class SimDeepBoosting():
 
         labels_test_categorical = self._labels_proba_to_labels(self.test_labels_proba)
 
-        if isinstance(days_test, np.matrix):
-            days_test = np.asarray(days_test)[0]
-            dead_test = np.asarray(dead_test)[0]
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            if isinstance(days_test, np.matrix):
+                days_test = np.asarray(days_test)[0]
+                dead_test = np.asarray(dead_test)[0]
 
         cindex = c_index(self.full_labels, dead_full, days_full,
                          self.test_labels, dead_test, days_test,
@@ -1696,7 +1701,9 @@ class SimDeepBoosting():
             if isinstance(self.log[key], np.float32):
                 self.log[key] = float(self.log[key])
             elif isinstance(self.log[key], NALogicalType):
-                self.log[key] = np.nan
+                self.log[key] = None
+            elif pd.isna(self.log[key]):
+                self.log[key] = None
             try:
                 str(self.log[key])
             except Exception:

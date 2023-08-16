@@ -1144,9 +1144,11 @@ class SimDeep(DeepBase):
         activities_train = hstack([self.activities_pred_array[key]
                                    for key in self.dataset.matrix_ref_array])
 
-        cindex = c_index_multiple(activities_train, dead, days,
-                                  activities_test, dead_test, days_test,
-                                  seed=self.seed,)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            cindex = c_index_multiple(activities_train, dead, days,
+                                      activities_test, dead_test, days_test,
+                                      seed=self.seed,)
 
         if self.verbose:
             print('c-index multiple for test dataset:{0}'.format(cindex))
@@ -1177,9 +1179,12 @@ class SimDeep(DeepBase):
                 activities_cv[key] = self.dataset.matrix_cv_array[key]
 
         activities_cv = hstack(activities_cv.values())
-        cindex = c_index_multiple(self.activities_for_pred_train, dead, days,
-                                  activities_cv, dead_cv, days_cv,
-                                  seed=self.seed,)
+
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            cindex = c_index_multiple(self.activities_for_pred_train, dead, days,
+                                      activities_cv, dead_cv, days_cv,
+                                      seed=self.seed,)
 
         if self.verbose:
             print('c-index multiple for test fold dataset:{0}'.format(cindex))
@@ -1426,10 +1431,12 @@ class SimDeep(DeepBase):
         days_full, dead_full = np.asarray(self.dataset.survival_full).T
 
         try:
-            cindex = c_index(self.labels, dead, days,
-                             self.full_labels, dead_full, days_full,
-                             use_r_packages=self.use_r_packages,
-                             seed=self.seed,)
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+                cindex = c_index(self.labels, dead, days,
+                                 self.full_labels, dead_full, days_full,
+                                 use_r_packages=self.use_r_packages,
+                                 seed=self.seed,)
         except Exception as e:
             print('Exception while computing the c-index: {0}'.format(e))
             cindex = np.nan
@@ -1446,10 +1453,12 @@ class SimDeep(DeepBase):
         days, dead = np.asarray(self.dataset.survival).T
 
         try:
-            cindex = c_index(self.labels, dead, days,
-                             self.labels, dead, days,
-                             use_r_packages=self.use_r_packages,
-                             seed=self.seed,)
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+                cindex = c_index(self.labels, dead, days,
+                                 self.labels, dead, days,
+                                 use_r_packages=self.use_r_packages,
+                                 seed=self.seed,)
         except Exception as e:
             print('Exception while computing the c-index: {0}'.format(e))
             cindex = np.nan
@@ -1467,10 +1476,12 @@ class SimDeep(DeepBase):
         days_test, dead_test = np.asarray(self.dataset.survival_test).T
 
         try:
-            cindex = c_index(self.labels, dead, days,
-                             self.test_labels, dead_test, days_test,
-                             use_r_packages=self.use_r_packages,
-                             seed=self.seed,)
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+                cindex = c_index(self.labels, dead, days,
+                                 self.test_labels, dead_test, days_test,
+                                 use_r_packages=self.use_r_packages,
+                                 seed=self.seed,)
         except Exception as e:
             print('Exception while computing the c-index: {0}'.format(e))
             cindex = np.nan
@@ -1484,20 +1495,22 @@ class SimDeep(DeepBase):
         """
         return c-index using labels as predicat
         """
-        days, dead = np.asarray(self.dataset.survival).T
-        days_cv, dead_cv= np.asarray(self.dataset.survival_cv).T
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            days, dead = np.asarray(self.dataset.survival).T
+            days_cv, dead_cv= np.asarray(self.dataset.survival_cv).T
 
-        try:
-            cindex =  c_index(self.labels, dead, days,
-                              self.cv_labels, dead_cv, days_cv,
-                              use_r_packages=self.use_r_packages,
-                              seed=self.seed,)
-        except Exception as e:
-            print('Exception while computing the c-index: {0}'.format(e))
-            cindex = np.nan
+            try:
+                cindex =  c_index(self.labels, dead, days,
+                                  self.cv_labels, dead_cv, days_cv,
+                                  use_r_packages=self.use_r_packages,
+                                  seed=self.seed,)
+            except Exception as e:
+                print('Exception while computing the c-index: {0}'.format(e))
+                cindex = np.nan
 
-        if self.verbose:
-            print('c-index for test fold dataset:{0}'.format(cindex))
+            if self.verbose:
+                print('c-index for test fold dataset:{0}'.format(cindex))
 
         return cindex
 
