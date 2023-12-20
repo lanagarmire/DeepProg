@@ -64,7 +64,7 @@ cd DeepProg
 # install with conda
 conda env create -n deepprog -f ./environment.yml python=3.8
 conda activate deepprog
-pip install -e .
+pip install -e . -r requirements_tested.txt
 
 # (RECOMMENDED) to install the tested python library versions
 pip install -e . -r requirements_tested.txt
